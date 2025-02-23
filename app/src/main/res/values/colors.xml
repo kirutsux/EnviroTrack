@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Brand Colors -->
+    <color name="primary">#2C3E50</color> <!-- Dark Blue-Grey -->
+    <color name="primary_container">#34495E</color> <!-- Slightly lighter primary -->
+    <color name="secondary">#5D6D7E</color> <!-- Muted Grey-Blue -->
+    <color name="secondary_container">#85929E</color> <!-- Lighter version of secondary -->
+    <color name="accent">#2980B9</color> <!-- Bright Blue for Highlights -->
+
+    <!-- Backgrounds -->
+    <color name="background_light">#e0dada</color> <!-- Soft Light Grey -->
+    <color name="background_dark">#34495E</color> <!-- Darker Theme Background -->
+
+    <!-- Buttons & Text -->
+    <color name="button_primary">#FFFFFF</color> <!-- White Buttons -->
+    <color name="button_secondary">#2C3E50</color> <!-- Dark Blue-Grey -->
+    <color name="button_outline">#FFFFFF</color> <!-- White Border for Outlined Button -->
+    <color name="text_primary">#000000</color> <!-- Black Text -->
+    <color name="text_secondary">#5D6D7E</color> <!-- Greyish Text -->
+    <color name="text_highlight">#2980B9</color> <!-- Blue for Highlights -->
+
+    <!-- Shadows & Borders -->
+    <color name="shadow">#B0BEC5</color> <!-- Soft Grey Shadow -->
+    <color name="divider">#D0D3D4</color> <!-- Light Grey Divider -->
+</resources>

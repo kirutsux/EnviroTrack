@@ -1,0 +1,41 @@
+<resources>
+    <!-- Primary Button Style -->
+    <style name="PrimaryButton">
+        <item name="android:background">@drawable/rounded_button</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- Outlined Button Style -->
+    <style name="OutlinedButton">
+        <item name="android:background">@drawable/outlined_button</item>
+        <item name="android:textColor">@color/primary_container</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- Input Field -->
+    <style name="InputField">
+        <item name="android:background">@drawable/input_field</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <!-- Google Button -->
+    <style name="GoogleButton">
+        <item name="android:background">@drawable/google_button</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:drawablePadding">12dp</item>
+    </style>
+    <style name="OtpBox">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/otp_box</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:inputType">number</item>
+        <item name="android:maxLength">1</item>
+    </style>
+</resources>

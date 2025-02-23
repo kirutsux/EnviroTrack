@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:padding="24dp">
+
+    <!-- Back Button -->
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/backbtn"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Verify Code"
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="48dp" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter your 6-digit verification code"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_below="@id/title"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp" />
+
+    <!-- OTP Input Fields -->
+    <LinearLayout
+        android:id="@+id/otpContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/subtitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/otp1"
+            android:layout_margin="5dp"
+            style="@style/OtpBox" />
+        <EditText
+            android:id="@+id/otp2"
+            android:layout_margin="5dp"
+            style="@style/OtpBox" />
+        <EditText
+            android:id="@+id/otp3"
+            android:layout_margin="5dp"
+            style="@style/OtpBox" />
+        <EditText
+            android:id="@+id/otp4"
+            android:layout_margin="5dp"
+            style="@style/OtpBox" />
+        <EditText
+            android:id="@+id/otp5"
+            android:layout_margin="5dp"
+            style="@style/OtpBox" />
+        <EditText
+            android:id="@+id/otp6"
+            android:layout_margin="5dp"
+            style="@style/OtpBox" />
+    </LinearLayout>
+
+    <!-- Verify Code Button -->
+    <Button
+        android:id="@+id/btnVerify"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Verify Code"
+        android:textColor="@color/button_primary"
+        android:backgroundTint="@color/primary"
+        android:padding="12dp"
+        android:layout_below="@id/otpContainer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp" />
+
+    <!-- Resend Code -->
+    <TextView
+        android:id="@+id/tvResend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Didn't receive the code? Resend"
+        android:textColor="@color/text_highlight"
+        android:textSize="14sp"
+        android:layout_below="@id/btnVerify"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp" />
+</RelativeLayout>

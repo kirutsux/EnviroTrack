@@ -1,0 +1,28 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base Theme (Day & Night Mode) -->
+    <style name="Base.Theme.CapstoneEnviroTrack" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary App Colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorTertiary">@color/accent</item>
+
+        <!-- Background & Surface -->
+        <item name="android:windowBackground">@color/background_light</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+
+        <!-- Text Colors -->
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+
+        <!-- Button Styles -->
+        <item name="colorButtonNormal">@color/button_primary</item>
+    </style>
+
+    <!-- App Theme -->
+    <style name="Theme.CapstoneEnviroTrack" parent="Base.Theme.CapstoneEnviroTrack" />
+</resources>
