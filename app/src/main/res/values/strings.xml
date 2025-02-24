@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">CapstoneEnviroTrack</string>
+    <string name="self_monitoring_report_smr_management">Self-Monitoring Report (SMR) Management</string>
+    <string name="certificate_of_non_coverage_cnc_management">Certificate of Non-Coverage (CNC) Management</string>
+    <string name="recent">Recent</string>
+    <string name="welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time">Welcome! Monitor document reviews efficiently and process compliance submissions on time.</string>
+    <string name="search">Search</string>
+    <string name="home">Home</string>
+    <string name="online_permitting_and_monitoring_system">Online Permitting and Monitoring</string>
+    <string name="company_registration">Company Registration</string>
+    <string name="pco_accreditation">PCO Accreditation</string>
 </resources>

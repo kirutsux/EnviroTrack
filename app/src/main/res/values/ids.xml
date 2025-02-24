@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="app_title" type="id" />
+    <item name="notification_icon" type="id" />
+    <item name="greeting_message" type="id" />
+    <item name="welcome_message" type="id" />
+    <item name="recent_label" type="id" />
+    <item name="recent_icon_1" type="id" />
+    <item name="recent_item_1" type="id" />
+    <item name="recent_icon_2" type="id" />
+    <item name="recent_item_2" type="id" />
+    <item name="nav_home" type="id" />
+    <item name="nav_task" type="id" />
+    <item name="nav_providers" type="id" />
+    <item name="nav_chats" type="id" />
+    <item name="nav_profile" type="id" />
+</resources>
