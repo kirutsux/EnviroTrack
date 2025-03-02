@@ -24,18 +24,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Notification"
-            android:exported="false" />
-        <activity
-            android:name=".Verification"
-            android:exported="false" />
-        <activity
-            android:name=".LogIn"
-            android:exported="false" />
-        <activity
-            android:name=".Registration"
-            android:exported="false" />
+
         <activity
             android:name=".WelcomePage"
             android:exported="false" />
