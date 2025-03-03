@@ -8,13 +8,13 @@ import android.widget.ListView
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
 
-class EMB_CNC : Fragment() {
 
+class EMB_SMR : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.emb_cnc, container, false)
+        return inflater.inflate(R.layout.emb_smr, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -1,32 +1,38 @@
 package com.ecocp.capstoneenvirotrack.emb
 
-import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
 
-class EMB_Dashboard : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.emb_dashboard)
+class EMB_Dashboard : Fragment() {
 
-        // Apply window insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        return inflater.inflate(R.layout.emb_dashboard, container, false)
+    }
 
-        // Handle click for CNC_icon to navigate to CNCActivity
-        val cncIcon = findViewById<LinearLayout>(R.id.CNC_icon)
-        cncIcon.setOnClickListener {
-            val intent = Intent(this, EMB_CNC::class.java)
-            startActivity(intent)
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Set up fragment navigation for each icon
+        view.findViewById<LinearLayout>(R.id.CNC_icon).setOnClickListener { replaceFragment(EMB_CNC()) }
+        view.findViewById<LinearLayout>(R.id.SMR_icon).setOnClickListener { replaceFragment(EMB_SMR()) }
+        view.findViewById<LinearLayout>(R.id.OPMS_icon).setOnClickListener { replaceFragment(EMB_OPMS()) }
+        view.findViewById<LinearLayout>(R.id.HMS_icon).setOnClickListener { replaceFragment(EMB_HMS()) }
+        view.findViewById<LinearLayout>(R.id.CRS_icon).setOnClickListener { replaceFragment(EMB_CRS()) }
+        view.findViewById<LinearLayout>(R.id.PCO_icon).setOnClickListener { replaceFragment(EMB_PCO()) }
+    }
+
+    // Function to replace fragments
+    private fun replaceFragment(fragment: Fragment) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }
