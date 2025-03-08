@@ -6,24 +6,39 @@
 
     <!-- Brand Colors -->
     <color name="primary">#2C3E50</color> <!-- Dark Blue-Grey -->
-    <color name="primary_container">#34495E</color> <!-- Slightly lighter primary -->
+    <color name="primary_variant">#34495E</color> <!-- Slightly lighter primary -->
     <color name="secondary">#5D6D7E</color> <!-- Muted Grey-Blue -->
-    <color name="secondary_container">#85929E</color> <!-- Lighter version of secondary -->
+    <color name="secondary_variant">#85929E</color> <!-- Lighter version of secondary -->
     <color name="accent">#2980B9</color> <!-- Bright Blue for Highlights -->
 
     <!-- Backgrounds -->
     <color name="background_light">#e0dada</color> <!-- Soft Light Grey -->
     <color name="background_dark">#34495E</color> <!-- Darker Theme Background -->
+    <color name="background_default">#F4F4F4</color>
 
-    <!-- Buttons & Text -->
-    <color name="button_primary">#FFFFFF</color> <!-- White Buttons -->
-    <color name="button_secondary">#2C3E50</color> <!-- Dark Blue-Grey -->
-    <color name="button_outline">#FFFFFF</color> <!-- White Border for Outlined Button -->
-    <color name="text_primary">#000000</color> <!-- Black Text -->
-    <color name="text_secondary">#5D6D7E</color> <!-- Greyish Text -->
-    <color name="text_highlight">#2980B9</color> <!-- Blue for Highlights -->
+    <!-- Card Colors -->
+    <color name="card_background">#5A6D85</color>
+    <color name="card_text">#FFFFFF</color>
 
-    <!-- Shadows & Borders -->
-    <color name="shadow">#B0BEC5</color> <!-- Soft Grey Shadow -->
-    <color name="divider">#D0D3D4</color> <!-- Light Grey Divider -->
+    <!-- Header -->
+    <color name="header_background">#0F172A</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#333333</color>
+    <color name="text_secondary">#5D6D7E</color>
+    <color name="text_highlight">#04B8D8</color>
+
+    <!-- Buttons -->
+    <color name="button_primary">#2C3E50</color>
+    <color name="button_secondary">#FFFFFF</color>
+    <color name="button_outline">#FFFFFF</color>
+    <color name="button_text">#FFFFFF</color>
+
+    <!-- Progress & Dividers -->
+    <color name="progress_bar">#4CAF50</color>
+    <color name="divider">#D0D3D4</color>
+    <color name="shadow">#B0BEC5</color>
+
+    <!-- Highlights -->
+    <color name="highlight">#1E90FF</color>
 </resources>
