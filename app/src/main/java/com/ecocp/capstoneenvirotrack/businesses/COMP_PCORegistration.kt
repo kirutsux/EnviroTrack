@@ -7,7 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.ecocp.capstoneenvirotrack.R
 
-class COMP_Registration : AppCompatActivity() {
+class COMP_PCORegistration : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
