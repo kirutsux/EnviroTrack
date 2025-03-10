@@ -14,7 +14,7 @@
     <!-- Backgrounds -->
     <color name="background_light">#e0dada</color> <!-- Soft Light Grey -->
     <color name="background_dark">#34495E</color> <!-- Darker Theme Background -->
-    <color name="background_default">#F4F4F4</color>
+    <color name="background_default">#A8DADC</color> <!-- Updated to match registration background -->
 
     <!-- Card Colors -->
     <color name="card_background">#5A6D85</color>
@@ -29,7 +29,7 @@
     <color name="text_highlight">#04B8D8</color>
 
     <!-- Buttons -->
-    <color name="button_primary">#2C3E50</color>
+    <color name="button_primary">#3949AB</color> <!-- Deep Blue for Register Button -->
     <color name="button_secondary">#FFFFFF</color>
     <color name="button_outline">#FFFFFF</color>
     <color name="button_text">#FFFFFF</color>
@@ -41,4 +41,8 @@
 
     <!-- Highlights -->
     <color name="highlight">#1E90FF</color>
+
+    <!-- Input Fields -->
+    <color name="input_field_background">#E8F5E9</color> <!-- Light Greenish -->
+    <color name="input_field_border">#85929E</color> <!-- Grey Border -->
 </resources>
