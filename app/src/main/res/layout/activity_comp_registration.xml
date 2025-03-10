@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="PCO Online Registration"
-            android:textSize="24sp"
+            android:textSize="33sp"
             android:textStyle="bold"
             android:gravity="center"
             android:paddingTop="16dp"
@@ -161,22 +161,27 @@
             android:background="@drawable/rounded_button"
             android:textColor="@android:color/white"
             android:layout_marginTop="24dp"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
 
-        <!-- Login Link -->
         <TextView
-            android:id="@+id/loginLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
+            android:text="Already have an account? "
+            android:textSize="20sp"
+            android:textColor="@color/primary"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:text="Already have an account? Login Here"
-            android:textColorLink="@android:color/holo_blue_dark"
-            android:autoLink="all"
-            android:clickable="true"
-            android:focusable="true" />
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/tvLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Login Here"
+            android:textSize="18sp"
+            android:textColor="@color/highlight"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"/>
 
 
     </LinearLayout>

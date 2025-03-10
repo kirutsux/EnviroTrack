@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Welcome to"
+            android:text="Welcome To"
             android:textColor="@color/text_primary"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:text="AN ONLINE COMPLIANCE PLATFORM"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="18sp"
             android:layout_marginTop="5dp"/>
     </LinearLayout>
 
@@ -67,7 +67,7 @@
             android:id="@+id/btnLogin"
             android:layout_width="250dp"
             android:layout_height="50dp"
-            android:backgroundTint="@color/button_primary"
+            android:backgroundTint="@color/background_dark"
             android:text="Login"
             android:textSize="18sp"
             android:textColor="@color/button_secondary"
@@ -80,7 +80,7 @@
             android:backgroundTint="@color/button_secondary"
             android:text="Register"
             android:textSize="18sp"
-            android:textColor="@color/button_primary"
+            android:textColor="@color/black"
             android:layout_marginTop="10dp"
             android:elevation="5dp"/>
     </LinearLayout>

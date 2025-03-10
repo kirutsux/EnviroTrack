@@ -3,70 +3,85 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LogInFragment">
+    tools:context=".LogInFragment"
+    android:background="@drawable/try2">
+
+    <!-- Semi-transparent container for login form -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/background_light"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
-
+        android:padding="24dp"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent">
 
         <!-- Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Let’s sign you in."
-            android:textSize="26sp"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
-            android:layout_marginTop="25dp"/>
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome back!"
             android:textSize="16sp"
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/card_background"
             android:layout_marginBottom="24dp"/>
 
         <!-- Input Fields -->
         <EditText
-            style="@style/PrimaryButton"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Username or Email"/>
+            android:hint="Username or Email"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:elevation="4dp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="12dp"/>
 
         <EditText
-            style="@style/PrimaryButton"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="Password"
             android:inputType="textPassword"
-            android:layout_marginTop="12dp"/>
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:elevation="4dp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="16dp"/>
 
         <!-- Sign In Button -->
         <Button
-            style="@style/PrimaryButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="Sign In"
-            android:layout_marginTop="16dp"/>
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/black"
+            android:elevation="4dp"
+            android:layout_marginBottom="12dp"/>
 
         <!-- Google Sign In -->
         <Button
-            style="@style/GoogleButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="Continue with Google"
-            android:layout_marginTop="12dp"/>
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/darker_gray"
+            android:elevation="4dp"
+            android:layout_marginBottom="16dp"/>
 
         <!-- Sign Up Link -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Don’t have an account?"
-            android:textColor="@color/text_secondary"
-            android:layout_marginTop="16dp"/>
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:layout_gravity="center"/>
     </LinearLayout>
 </FrameLayout>
