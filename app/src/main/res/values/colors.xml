@@ -15,6 +15,8 @@
     <color name="background_light">#e0dada</color> <!-- Soft Light Grey -->
     <color name="background_dark">#34495E</color> <!-- Darker Theme Background -->
     <color name="background_default">#F4F4F4</color>
+    <color name="primary_container">#FFFFFF</color>
+    <color name="secondary_container">#FFFFFF</color>
 
     <!-- Card Colors -->
     <color name="card_background">#5A6D85</color>
@@ -33,6 +35,7 @@
     <color name="button_secondary">#FFFFFF</color>
     <color name="button_outline">#FFFFFF</color>
     <color name="button_text">#FFFFFF</color>
+    <color name="button_background">#FFFFFF</color>
 
     <!-- Progress & Dividers -->
     <color name="progress_bar">#4CAF50</color>

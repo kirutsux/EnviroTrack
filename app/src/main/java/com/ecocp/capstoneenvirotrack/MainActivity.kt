@@ -10,9 +10,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Load EMB_Dashboard Fragment on Startup
+
         if (savedInstanceState == null) {
-            replaceFragment(EMB_Dashboard())
+            replaceFragment(RegistrationFragment())
         }
     }
 
