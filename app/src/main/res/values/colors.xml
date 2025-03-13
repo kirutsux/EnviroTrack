@@ -45,4 +45,8 @@
     <!-- Input Fields -->
     <color name="input_field_background">#E8F5E9</color> <!-- Light Greenish -->
     <color name="input_field_border">#85929E</color> <!-- Grey Border -->
+
+    <color name="primary_container">#FFBB86FC</color>
+    <color name="secondary_container">#FF6200EE</color>
+
 </resources>
