@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".serviceprovider.SP_RegistrationFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/sp_bg_gradient"
+        android:padding="16dp">
+
+        <!-- Back Button -->
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/backbtn"
+            android:contentDescription="Back"
+            android:padding="4dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Register"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_gravity="center"/>
+
+        <!-- Subtitle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Your Account"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Input Fields -->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Username:"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:textColorHint="@color/text_secondary"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Password:"
+            android:inputType="textPassword"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Confirm Password:"
+            android:inputType="textPassword"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Email Address:"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Business Name:"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Business Address:"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Contact Number:"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerServiceCategory"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:spinnerMode="dropdown"
+            android:entries="@array/service_categories" />
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Business Permit Number:"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- File Uploads -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload Business Permit:"
+            android:layout_marginTop="12dp"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Choose File"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload Any Accreditation Documents:"
+            android:layout_marginTop="12dp"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Choose File"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Sign Up & Google Sign Up -->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Sign up"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Continue with Google"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Login Redirect -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Already have an account? "
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/tvLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Login Here"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

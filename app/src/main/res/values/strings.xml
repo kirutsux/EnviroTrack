@@ -11,4 +11,26 @@
     <string name="pco_accreditation">PCO Accreditation</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Service Categories -->
+    <string-array name="service_categories">
+        <!-- Waste Disposal Services -->
+        <item>Waste Disposal Services</item>
+        <item>Hazardous Waste Collection</item>
+        <item>Non-Hazardous Waste Disposal</item>
+
+        <!-- Water Quality Services -->
+        <item>Water Testing &amp; Analysis</item>
+        <item>Wastewater Treatment</item>
+        <item>Drinking Water Purification</item>
+        <item>Industrial Water Treatment</item>
+
+        <!-- Air Quality & Pollution Control -->
+        <item>Air Emission Monitoring</item>
+        <item>Odor Control Solutions</item>
+        <item>Industrial Air Filtration</item>
+
+        <!-- Energy & Sustainability Services -->
+        <item>Renewable Energy Consulting</item>
+        <item>Carbon Footprint Reduction</item>
+    </string-array>
 </resources>
