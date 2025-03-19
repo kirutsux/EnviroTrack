@@ -37,6 +37,7 @@ android {
 }
 
 dependencies {
+    val nav_version = "2.8.9"
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -46,6 +47,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.navigation:navigation-fragment:$nav_version")
+    implementation("androidx.navigation:navigation-ui:$nav_version")
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
 
     // Firebase BOM (Ensures compatibility)
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
