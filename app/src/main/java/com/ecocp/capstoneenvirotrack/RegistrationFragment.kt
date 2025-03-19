@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack
 
+import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -73,7 +73,6 @@ class RegistrationFragment : Fragment() {
             requireActivity().findNavController(R.id.nav_host_fragment).popBackStack()
         }
 
-
         // Handle Email Sign-Up button click
         btnSignUp.setOnClickListener {
             val email = etEmail.text.toString().trim()
@@ -115,7 +114,7 @@ class RegistrationFragment : Fragment() {
                             )
                             firestore.collection("Users").document(userId).set(userMap)
                                 .addOnSuccessListener {
-                                    Toast.makeText(requireContext(), "Registration Successful!", Toast.LENGTH_SHORT).show()
+                                    showSuccessDialog()
                                 }
                                 .addOnFailureListener { e ->
                                     Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -140,5 +139,20 @@ class RegistrationFragment : Fragment() {
             toggleIcon.setImageResource(R.drawable.ic_visibility_off) // Change to "eye closed" icon
         }
         editText.setSelection(editText.text.length) // Keep cursor at the end
+    }
+
+    // ✅ Show Dialog After Successful Registration
+    private fun showSuccessDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Registration Successful!")
+            .setMessage("Your account has been created successfully.")
+            .setPositiveButton("OK") { _, _ ->
+                // Navigate to SelectUserType screen
+                val intent = Intent(requireContext(), SelectUserType::class.java)
+                startActivity(intent)
+                requireActivity().finish() // Close current activity
+            }
+            .setCancelable(false) // Prevent dialog dismissal by clicking outside
+            .show()
     }
 }

@@ -13,9 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CapstoneEnviroTrack"
         tools:targetApi="31">
-
         <activity
-            android:name=".MainActivity"
+            android:name=".SelectUserType"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,15 +22,19 @@
             </intent-filter>
         </activity>
 
+        <!-- Main Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true" /> <!-- Service Provider Dashboard -->
+        <activity
+            android:name=".serviceprovider.ServiceProvider_Dashboard"
+            android:exported="false" /> <!-- Welcome Page -->
         <activity
             android:name=".WelcomePage"
-            android:exported="false" />
-
-        <!-- Navigation Component Fragments -->
+            android:exported="false" /> <!-- PCO Registration -->
         <activity
             android:name=".businesses.COMP_PCORegistration"
             android:exported="false" />
-
     </application>
 
 </manifest>
