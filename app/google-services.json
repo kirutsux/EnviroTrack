@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "191944189574",
+    "firebase_url": "https://envirotrack-c3270-default-rtdb.firebaseio.com",
+    "project_id": "envirotrack-c3270",
+    "storage_bucket": "envirotrack-c3270.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191944189574:android:596739b3fc4e0094561307",
+        "android_client_info": {
+          "package_name": "com.ecocp.capstoneenvirotrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "191944189574-hbtag9qvcdlhsqlq5m2gi8pafti4pvj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDz3LRG05xTaTjxfmPveSJrp82V4V4sx8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "191944189574-hbtag9qvcdlhsqlq5m2gi8pafti4pvj2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

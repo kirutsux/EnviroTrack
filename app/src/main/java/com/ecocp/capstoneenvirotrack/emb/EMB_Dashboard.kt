@@ -31,7 +31,7 @@ class EMB_Dashboard : Fragment() {
     // Function to replace fragments
     private fun replaceFragment(fragment: Fragment) {
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
+            .replace(R.id.nav_host_fragment, fragment)
             .addToBackStack(null)
             .commit()
     }

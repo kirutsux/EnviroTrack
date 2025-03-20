@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/loginFragment">
+
+    <!-- Login Fragment -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.ecocp.capstoneenvirotrack.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_log_in">
+
+        <action
+            android:id="@+id/action_loginFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
+
+        <!-- ✅ ADD THIS: Navigation to EMB Dashboard -->
+        <action
+            android:id="@+id/action_loginFragment_to_EMB_Dashboard"
+            app:destination="@id/EMB_Dashboard" />
+    </fragment>
+
+    <!-- Registration Fragment -->
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.RegistrationFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_registration">
+
+        <action
+            android:id="@+id/action_registrationFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <!-- ✅ ADD THIS: EMB Dashboard Fragment -->
+    <fragment
+        android:id="@+id/EMB_Dashboard"
+        android:name="com.ecocp.capstoneenvirotrack.emb.EMB_Dashboard"
+        android:label="EMB Dashboard"
+        tools:layout="@layout/emb_dashboard" />
+
+</navigation>
