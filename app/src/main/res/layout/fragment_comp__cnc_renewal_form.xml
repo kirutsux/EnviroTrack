@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".businesses.COMP_CNCRenewalForm">
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/header_background"
+                android:text="CNC Renewal Form"
+                android:textAlignment="center"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:padding="16dp"
+                android:layout_marginBottom="24dp" />
+
+            <!-- CNC Details -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
+
+                <!-- CNC Certificate Number -->
+                <TextView android:text="CNC Certificate Number"
+                    style="@style/FormLabel"/>
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/input_field"
+                    android:hint=""
+                    android:inputType="text" />
+
+                <!-- Original Issuance Date -->
+                <TextView android:text="Original Issuance Date"
+                    style="@style/FormLabel"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/input_field"
+                        android:hint=""
+                        android:focusable="false"/>
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_calendar"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Pick Date"/>
+                </LinearLayout>
+
+                <!-- Current Expiration Date -->
+                <TextView android:text="Current Expiration Date"
+                    style="@style/FormLabel"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/input_field"
+                        android:hint=""
+                        android:focusable="false"/>
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_calendar"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Pick Date"/>
+                </LinearLayout>
+
+                <!-- Previous Renewal Date -->
+                <TextView android:text="Previous Renewal Date"
+                    style="@style/FormLabel"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/input_field"
+                        android:hint=""
+                        android:focusable="false"/>
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_calendar"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Pick Date"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Company Info -->
+            <TextView android:text="Company Name" style="@style/FormLabel"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Auto-filled from registration, editable if necessary"
+                android:background="@drawable/input_field"
+                android:inputType="text"/>
+
+            <TextView android:text="Business Address" style="@style/FormLabel"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field"
+                android:inputType="text"/>
+
+            <TextView android:text="Industry Type" style="@style/FormLabel"/>
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field" />
+
+            <TextView android:text="Contact Person" style="@style/FormLabel"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field"
+                android:inputType="textPersonName"/>
+
+            <TextView android:text="Contact Email" style="@style/FormLabel"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field"
+                android:inputType="textEmailAddress"/>
+
+            <TextView android:text="Contact Phone Number" style="@style/FormLabel"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field"
+                android:inputType="phone"/>
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="space_between"
+                android:layout_marginTop="24dp">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Save Draft"
+                    android:backgroundTint="@color/gray" />
+
+                <Space android:layout_width="16dp" android:layout_height="wrap_content"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Submit Renewal"
+                    android:backgroundTint="@color/button_primary"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+
+</FrameLayout>
