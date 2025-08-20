@@ -22,6 +22,7 @@
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textSize">16sp</item>
     </style>
+
     <!-- Google Button -->
     <style name="GoogleButton">
         <item name="android:background">@drawable/google_button</item>
@@ -29,6 +30,8 @@
         <item name="android:textSize">18sp</item>
         <item name="android:drawablePadding">12dp</item>
     </style>
+
+    <!-- OTP Box -->
     <style name="OtpBox">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
@@ -38,10 +41,18 @@
         <item name="android:inputType">number</item>
         <item name="android:maxLength">1</item>
     </style>
+
+    <!-- Form Label -->
     <style name="FormLabel">
         <item name="android:textStyle">bold</item>
         <item name="android:layout_marginTop">12dp</item>
         <item name="android:layout_marginBottom">4dp</item>
         <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Compact Primary Button (Custom Style) -->
+    <style name="CompactPrimaryButton" parent="@style/PrimaryButton">
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">6dp</item>
     </style>
 </resources>

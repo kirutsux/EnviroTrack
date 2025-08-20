@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".businesses.COMP_PendingComplSubmission"
-    android:background="@color/white">
+    android:background="@color/white"
+    tools:context=".businesses.COMP_PendingComplSubmission">
 
-    <!-- Header -->
     <LinearLayout
         android:id="@+id/header"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/header_background"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/menuIcon"
@@ -27,13 +29,12 @@
         <ImageView
             android:id="@+id/logoImage"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/logoss"
             android:contentDescription="EnviroTrack Logo"
             android:scaleType="fitCenter"
             android:layout_gravity="center_vertical" />
-
 
         <ImageView
             android:id="@+id/notificationIcon"
@@ -45,74 +46,76 @@
             app:tint="@color/white" />
     </LinearLayout>
 
-
-    <!-- Content Scrollable Area -->
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="72dp"
-        android:padding="16dp">
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:layout_height="wrap_content">
 
-            <!-- Status Header -->
             <TextView
+                android:id="@+id/status_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/progress_bar"
                 android:text="Pending Compliance Submission"
                 android:textStyle="bold"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:gravity="center"
-                android:padding="12dp"
+                android:padding="10dp"
                 android:textColor="@color/white"
-                android:layout_marginBottom="24dp" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginBottom="16dp" />
 
-            <!-- Gray Box Section -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/gray_box"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
+                android:padding="12dp"
                 android:background="@color/background_light"
-                android:elevation="4dp">
+                android:elevation="2dp"
+                app:layout_constraintTop_toBottomOf="@id/status_header"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
-                <!-- First Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="12dp">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Self-Monitoring\nReport for Q4 2024"
+                        android:text="Self-Monitoring\nReport for Q4 2025"
                         android:textSize="14sp"
                         android:textColor="@color/text_primary" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnUploadReport"
+                        style="@style/CompactPrimaryButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Upload File"
-                        android:backgroundTint="@color/card_background"
+                        app:backgroundTint="@color/card_background"
                         android:textColor="@color/card_text" />
                 </LinearLayout>
 
-                <!-- Second Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="12dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -122,61 +125,71 @@
                         android:textSize="14sp"
                         android:textColor="@color/text_primary" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnUploadWaste"
+                        style="@style/CompactPrimaryButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Upload File"
-                        android:backgroundTint="@color/card_background"
+                        app:backgroundTint="@color/card_background"
                         android:textColor="@color/card_text" />
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/divider"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_marginBottom="12dp" />
 
-                <!-- Deadline Info -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:background="@color/secondary_variant"
-                    android:padding="8dp">
+                    android:padding="6dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Due Saturday by 11:59pm\nSubmitting a file upload"
-                        android:textSize="13sp"
+                        android:text="Due Nov 15, 2025 by 11:59pm PST\nSubmitting a file upload"
+                        android:textSize="12sp"
                         android:textColor="@color/black"
                         android:gravity="center" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Available Nov 1 at 11:59pm - Nov 18 at 11:59pm"
-                        android:textSize="12sp"
+                        android:text="Available Nov 1, 2025 at 11:59pm PST - Nov 18, 2025 at 11:59pm PST"
+                        android:textSize="11sp"
                         android:textColor="@color/black"
                         android:gravity="center"
-                        android:layout_marginTop="4dp" />
+                        android:layout_marginTop="3dp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Submit Button -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmitCompliance"
+                style="@style/CompactPrimaryButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Submit Compliance"
+                app:backgroundTint="@color/button_primary"
                 android:textColor="@color/button_text"
-                android:backgroundTint="@color/button_primary"
-                android:elevation="8dp"
-                android:layout_marginTop="32dp"
-                android:layout_gravity="center" />
-        </LinearLayout>
+                android:elevation="4dp"
+                app:layout_constraintTop_toBottomOf="@id/gray_box"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="12dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/btnSubmitCompliance"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="12dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,222 +1,355 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:padding="16dp"
-    android:background="@color/white">
+    android:background="@color/background_light">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:paddingBottom="16dp">
 
         <!-- Header -->
         <TextView
+            android:id="@+id/header_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="CNC Renewal Form"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
+            android:textColor="@color/card_text"
             android:gravity="center"
             android:background="@color/header_background"
             android:padding="16dp"
+            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginBottom="24dp" />
 
         <!-- CNC Certificate Number -->
-        <TextView android:text="CNC Certificate Number"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="4dp"/>
-        <EditText
+        <TextView
+            android:id="@+id/label_cnc_number"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/input_field"
-            android:inputType="text" />
+            android:text="CNC Certificate Number"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/header_title" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cnc_number_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_cnc_number"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_cnc_number"
+                style="@style/InputField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter CNC Certificate Number"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Original Issuance Date -->
-        <TextView android:text="Original Issuance Date"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"/>
-        <RelativeLayout
+        <TextView
+            android:id="@+id/label_original_date"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/editOriginalDate"
+            android:layout_height="wrap_content"
+            android:text="Original Issuance Date"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/cnc_number_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/original_date_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_original_date"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary"
+            app:endIconDrawable="@drawable/ic_calendar"
+            app:endIconMode="custom"
+            app:endIconTint="@color/secondary"
+            app:endIconContentDescription="Select Original Issuance Date">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_original_date"
+                style="@style/InputField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/input_field"
+                android:hint="Select Original Issuance Date"
                 android:focusable="false"
-                android:paddingEnd="40dp"
-                android:inputType="none"/>
-            <ImageButton
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/ic_calendar"
-                android:background="@android:color/transparent"
-                android:contentDescription="Pick Date"/>
-        </RelativeLayout>
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Current Expiration Date -->
-        <TextView android:text="Current Expiration Date"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"/>
-        <RelativeLayout
+        <TextView
+            android:id="@+id/label_expiration_date"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/editExpirationDate"
+            android:layout_height="wrap_content"
+            android:text="Current Expiration Date"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/original_date_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/expiration_date_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_expiration_date"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary"
+            app:endIconDrawable="@drawable/ic_calendar"
+            app:endIconMode="custom"
+            app:endIconTint="@color/secondary"
+            app:endIconContentDescription="Select Expiration Date">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_expiration_date"
+                style="@style/InputField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/input_field"
+                android:hint="Select Current Expiration Date"
                 android:focusable="false"
-                android:paddingEnd="40dp"
-                android:inputType="none"/>
-            <ImageButton
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/ic_calendar"
-                android:background="@android:color/transparent"
-                android:contentDescription="Pick Date"/>
-        </RelativeLayout>
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Previous Renewal Date -->
-        <TextView android:text="Previous Renewal Date"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"/>
-        <RelativeLayout
+        <TextView
+            android:id="@+id/label_previous_date"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/editPreviousDate"
+            android:layout_height="wrap_content"
+            android:text="Previous Renewal Date"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/expiration_date_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/previous_date_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_previous_date"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary"
+            app:endIconDrawable="@drawable/ic_calendar"
+            app:endIconMode="custom"
+            app:endIconTint="@color/secondary"
+            app:endIconContentDescription="Select Previous Renewal Date">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_previous_date"
+                style="@style/InputField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/input_field"
+                android:hint="Select Previous Renewal Date"
                 android:focusable="false"
-                android:paddingEnd="40dp"
-                android:inputType="none"/>
-            <ImageButton
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/ic_calendar"
-                android:background="@android:color/transparent"
-                android:contentDescription="Pick Date"/>
-        </RelativeLayout>
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Divider -->
         <View
+            android:id="@+id/divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
+            android:background="@color/divider"
+            android:layout_marginVertical="24dp"
+            app:layout_constraintTop_toBottomOf="@id/previous_date_layout" />
 
         <!-- Company Name -->
-        <TextView android:text="Company Name"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"/>
-        <EditText
+        <TextView
+            android:id="@+id/label_company_name"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Auto-filled from registration, editable if necessary"
-            android:background="@drawable/input_field"
-            android:inputType="text" />
+            android:text="Company Name"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/divider" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/company_name_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_company_name"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_company_name"
+                style="@style/InputField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Auto-filled from registration, editable if necessary"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Business Address -->
-        <TextView android:text="Business Address"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"/>
-        <EditText
+        <TextView
+            android:id="@+id/label_business_address"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/input_field"
-            android:inputType="text" />
+            android:text="Business Address"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/company_name_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/business_address_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_business_address"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_business_address"
+                style="@style/InputField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Business Address"
+                android:inputType="textPostalAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Industry Type -->
-        <TextView android:text="Industry Type"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"/>
-        <Spinner
+        <TextView
+            android:id="@+id/label_industry_type"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/input_field" />
+            android:text="Industry Type"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/business_address_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/industry_type_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_industry_type"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary">
+            <Spinner
+                android:id="@+id/spinner_industry_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_field"
+                android:spinnerMode="dropdown"
+                android:padding="12dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Contact Person -->
-        <TextView android:text="Contact Person"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"/>
-        <EditText
+        <TextView
+            android:id="@+id/label_contact_person"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/input_field"
-            android:inputType="textPersonName" />
+            android:text="Contact Person"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/industry_type_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/contact_person_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_contact_person"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_contact_person"
+                style="@style/InputField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Contact Person"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Contact Email -->
-        <TextView android:text="Contact Email"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"/>
-        <EditText
+        <TextView
+            android:id="@+id/label_contact_email"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/input_field"
-            android:inputType="textEmailAddress" />
+            android:text="Contact Email"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/contact_person_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/contact_email_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_contact_email"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_contact_email"
+                style="@style/InputField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Contact Email"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Contact Phone Number -->
-        <TextView android:text="Contact Phone Number"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="12dp"/>
-        <EditText
+        <TextView
+            android:id="@+id/label_contact_phone"
+            style="@style/FormLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/input_field"
-            android:inputType="phone" />
+            android:text="Contact Phone Number"
+            android:textColor="@color/text_primary"
+            app:layout_constraintTop_toBottomOf="@id/contact_email_layout" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/contact_phone_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/label_contact_phone"
+            app:boxStrokeColor="@color/input_field_border"
+            app:hintTextColor="@color/text_secondary">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_contact_phone"
+                style="@style/InputField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Contact Phone Number"
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Action Buttons -->
         <LinearLayout
+            android:id="@+id/action_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="24dp"
-            android:gravity="center">
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/contact_phone_layout">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_save_draft"
+                style="@style/OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Save Draft"
-                android:backgroundTint="@color/gray" />
+                app:backgroundTint="@color/secondary"
+                android:layout_marginEnd="8dp" />
 
-            <Space
-                android:layout_width="16dp"
-                android:layout_height="wrap_content" />
-
-            <Button
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_submit_renewal"
+                style="@style/PrimaryButton"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Submit Renewal"
-                android:backgroundTint="@color/button_primary"
-                android:textColor="@android:color/white" />
+                app:backgroundTint="@color/button_primary"
+                android:layout_marginStart="8dp" />
         </LinearLayout>
-    </LinearLayout>
+
+        <!-- Dummy View to Ensure Scrolling with Full Constraints -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/action_buttons"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
