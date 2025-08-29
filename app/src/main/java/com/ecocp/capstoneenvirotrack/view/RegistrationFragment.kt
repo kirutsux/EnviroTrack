@@ -1,6 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.repository.UserRepository
@@ -87,7 +89,9 @@ class RegistrationFragment : Fragment() {
             googleSignInLauncher.launch(signInIntent)
         }
 
-        btnBack.setOnClickListener { findNavController().popBackStack() }
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         btnSignUp.setOnClickListener {
             viewModel.registerWithEmail(
@@ -118,34 +122,47 @@ class RegistrationFragment : Fragment() {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 
                 if (view != null && isAdded) {
-                    when {
-                        msg.startsWith("Verification code sent") -> {
-                            val action = RegistrationFragmentDirections.actionRegistrationFragmentToVerificationFragment(
-                                email = etEmail.text.toString().trim(),
-                                firstName = etFirstName.text.toString().trim(),
-                                lastName = etLastName.text.toString().trim(),
-                                password = etPassword.text.toString().trim(),
-                                phoneNumber = etPhoneNumber.text.toString().trim(),
-                                userType = spUserType.selectedItem?.toString() ?: ""
-                            )
-                            findNavController().navigate(action)
+                    try {
+                        val navController = try {
+                            findNavController()
+                        } catch (e: IllegalStateException) {
+                            Log.w("RegistrationFragment", "Fragment NavController failed, using activity fallback")
+                            requireActivity().findNavController(R.id.nav_host_fragment) // No change needed if ID is correct
                         }
-                        msg == "Google sign-in successful" -> {
-                            val fullName = state.googleUser?.displayName ?: ""
-                            val nameParts = fullName.split(" ", limit = 2)
-                            val firstName = nameParts.getOrNull(0) ?: ""
-                            val lastName = nameParts.getOrNull(1) ?: ""
-                            val action = RegistrationFragmentDirections.actionRegistrationFragmentToGoogleSignUpFragment(
-                                uid = state.googleUser?.uid ?: "",
-                                email = state.googleUser?.email ?: "",
-                                firstName = firstName,
-                                lastName = lastName,
-                                password = "",
-                                phoneNumber = "",
-                                userType = ""
-                            )
-                            findNavController().navigate(action)
+                        when {
+                            msg.startsWith("Verification code sent") -> {
+                                val action = RegistrationFragmentDirections.actionRegistrationFragmentToVerificationFragment(
+                                    email = etEmail.text.toString().trim(),
+                                    firstName = etFirstName.text.toString().trim(),
+                                    lastName = etLastName.text.toString().trim(),
+                                    password = etPassword.text.toString().trim(),
+                                    phoneNumber = etPhoneNumber.text.toString().trim(),
+                                    userType = spUserType.selectedItem?.toString() ?: ""
+                                )
+                                navController.navigate(action)
+                                Log.d("RegistrationFragment", "Navigated to VerificationFragment")
+                            }
+                            msg == "Google sign-in successful" -> {
+                                val fullName = state.googleUser?.displayName ?: ""
+                                val nameParts = fullName.split(" ", limit = 2)
+                                val firstName = nameParts.getOrNull(0) ?: ""
+                                val lastName = nameParts.getOrNull(1) ?: ""
+                                val action = RegistrationFragmentDirections.actionRegistrationFragmentToGoogleSignUpFragment(
+                                    uid = state.googleUser?.uid ?: "",
+                                    email = state.googleUser?.email ?: "",
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    password = "",
+                                    phoneNumber = "",
+                                    userType = ""
+                                )
+                                navController.navigate(action)
+                                Log.d("RegistrationFragment", "Navigated to GoogleSignUpFragment")
+                            }
                         }
+                    } catch (e: Exception) {
+                        Log.e("RegistrationFragment", "Navigation failed: ${e.message}", e)
+                        Toast.makeText(requireContext(), "Navigation failed, please try again", Toast.LENGTH_LONG).show()
                     }
                 }
             }

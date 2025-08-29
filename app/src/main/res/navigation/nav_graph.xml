@@ -11,16 +11,24 @@
         tools:layout="@layout/fragment_log_in">
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
+            app:destination="@id/registrationFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_loginFragment_to_embDashboard"
-            app:destination="@id/embDashboard" />
+            app:destination="@id/embDashboard"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_loginFragment_to_serviceProviderDashboard"
-            app:destination="@id/serviceProviderDashboard" />
+            app:destination="@id/serviceProviderDashboard"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_loginFragment_to_pcoDashboard"
-            app:destination="@id/pcoDashboard" />
+            app:destination="@id/pcoDashboard"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -29,7 +37,9 @@
         tools:layout="@layout/fragment_registration">
         <action
             android:id="@+id/action_registrationFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/registrationFragment"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_registrationFragment_to_verificationFragment"
             app:destination="@id/verificationFragment">
@@ -85,13 +95,19 @@
         tools:layout="@layout/fragment_verification">
         <action
             android:id="@+id/action_verificationFragment_to_embDashboard"
-            app:destination="@id/embDashboard" />
+            app:destination="@id/embDashboard"
+            app:popUpTo="@id/verificationFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_verificationFragment_to_serviceProviderDashboard"
-            app:destination="@id/serviceProviderDashboard" />
+            app:destination="@id/serviceProviderDashboard"
+            app:popUpTo="@id/verificationFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_verificationFragment_to_pcoDashboard"
-            app:destination="@id/pcoDashboard" />
+            app:destination="@id/pcoDashboard"
+            app:popUpTo="@id/verificationFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -100,7 +116,9 @@
         tools:layout="@layout/fragment_google_sign_up">
         <action
             android:id="@+id/action_googleSignUpFragment_to_embDashboard"
-            app:destination="@id/embDashboard" />
+            app:destination="@id/embDashboard"
+            app:popUpTo="@id/googleSignUpFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

@@ -27,17 +27,26 @@ class MainActivity : AppCompatActivity() {
         // Safely initialize NavHostFragment and NavController
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
             ?: run {
-                Log.e("MainActivity", "NavHostFragment not found, creating new instance")
-                NavHostFragment.create(R.navigation.nav_graph).also {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.nav_host_fragment, it)
-                        .commitNow()
+                Log.w("MainActivity", "NavHostFragment not found in layout with ID nav_host_fragment, creating new instance")
+                try {
+                    NavHostFragment.create(R.navigation.nav_graph).also { fragment ->
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.nav_host_fragment, fragment)
+                            .setPrimaryNavigationFragment(fragment)
+                            .commitNow()
+                    }
+                } catch (e: IllegalArgumentException) {
+                    Log.e("MainActivity", "Failed to create NavHostFragment: ${e.message}", e)
+                    Toast.makeText(this, "Navigation setup failed, please check configuration", Toast.LENGTH_LONG).show()
+                    return
                 }
             }
         navController = navHostFragment.navController
+        Log.d("MainActivity", "NavHostFragment found: ${navHostFragment != null}, NavController: $navController")
 
-        // Set up ActionBar with NavController
-        setupActionBarWithNavController(navController)
+        // Set up ActionBar with NavController and Toolbar
+        setupActionBarWithNavController(navController, findViewById(R.id.toolbar))
+        Log.d("MainActivity", "ActionBar set up with NavController and Toolbar")
 
         // Handle deep link for email authentication
         val intentData: Uri? = intent?.data
@@ -47,10 +56,8 @@ class MainActivity : AppCompatActivity() {
 
             if (auth.isSignInWithEmailLink(emailLink) && email != null) {
                 if (auth.currentUser != null) {
-                    // Link email to existing user
                     linkEmailToExistingUser(email, emailLink)
                 } else {
-                    // Sign in with email link
                     verifySignInLink(email, emailLink)
                 }
             }
@@ -65,9 +72,9 @@ class MainActivity : AppCompatActivity() {
                     Log.d("FirebaseAuth", "Successfully signed in with email link!")
                     Toast.makeText(this, "Sign-in successful!", Toast.LENGTH_SHORT).show()
 
-                    // Navigate to EMB_Dashboard
                     try {
                         navController.navigate(R.id.embDashboard)
+                        Log.d("Navigation", "Navigated to embDashboard")
                     } catch (e: IllegalStateException) {
                         Log.e("Navigation", "Failed to navigate to embDashboard", e)
                         Toast.makeText(this, "Navigation failed, please try again", Toast.LENGTH_SHORT).show()
@@ -95,9 +102,9 @@ class MainActivity : AppCompatActivity() {
                     Log.d("FirebaseAuth", "Successfully linked email authentication!")
                     Toast.makeText(this, "Email linked to account!", Toast.LENGTH_SHORT).show()
 
-                    // Navigate to EMB_Dashboard
                     try {
                         navController.navigate(R.id.embDashboard)
+                        Log.d("Navigation", "Navigated to embDashboard")
                     } catch (e: IllegalStateException) {
                         Log.e("Navigation", "Failed to navigate to embDashboard", e)
                         Toast.makeText(this, "Navigation failed, please try again", Toast.LENGTH_SHORT).show()

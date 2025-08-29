@@ -15,14 +15,20 @@
         android:theme="@style/Theme.CapstoneEnviroTrack"
         tools:targetApi="31">
 
+        <!-- Select User Type Activity -->
         <activity
             android:name=".model.SelectUserType"
             android:exported="true" />
 
-        <!-- Main Activity -->
+        <!-- Main Activity (Hosts Navigation Graph including VerificationFragment) -->
         <activity
             android:name=".view.MainActivity"
-            android:exported="true" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- Service Provider Dashboard -->
         <activity
