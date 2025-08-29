@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegistrationFragment">
+    tools:context=".view.RegistrationFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -99,6 +99,18 @@
             android:layout_marginTop="8dp"/>
 
         <EditText
+            android:id="@+id/etPhoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Phone Number"
+            android:inputType="phone"
+            android:background="@drawable/input_field"
+            android:padding="12dp"
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/black"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -109,43 +121,6 @@
             android:textColorHint="@color/text_secondary"
             android:textColor="@color/black"
             android:layout_marginTop="8dp"/>
-
-        <!-- Gender Selection -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gender"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:layout_marginTop="12dp"/>
-
-        <RadioGroup
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="4dp">
-
-            <RadioButton
-                android:id="@+id/rbMale"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Male"
-                android:background="@drawable/radio_button_selector"
-                android:padding="8dp"
-                android:textColor="@color/white"
-                android:button="@null"/>
-
-            <RadioButton
-                android:id="@+id/rbFemale"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Female"
-                android:background="@drawable/radio_button_selector"
-                android:padding="8dp"
-                android:textColor="@color/white"
-                android:button="@null"
-                android:layout_marginStart="8dp"/>
-        </RadioGroup>
 
         <!-- Sign Up Button -->
         <Button
