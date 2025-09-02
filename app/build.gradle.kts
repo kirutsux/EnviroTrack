@@ -37,18 +37,29 @@ android {
 }
 
 dependencies {
+    val nav_version = "2.8.9"
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.navigation:navigation-fragment:$nav_version")
+    implementation("androidx.navigation:navigation-ui:$nav_version")
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
+    implementation  ("de.hdodenhof:circleimageview:3.1.0")
+
+    // Firebase BOM (Ensures compatibility)
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+
+    // Firebase Auth & Firestore
+    implementation("com.google.firebase:firebase-auth-ktx")   // Firebase Auth
+    implementation("com.google.firebase:firebase-firestore-ktx") // Firestore (optional)
+
+    // Firebase Database (optional)
+    implementation("com.google.firebase:firebase-database-ktx")
 }
