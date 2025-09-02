@@ -51,6 +51,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:$nav_version")
     implementation("androidx.navigation:navigation-ui:$nav_version")
     implementation ("com.google.android.gms:play-services-auth:20.7.0")
+    implementation  ("de.hdodenhof:circleimageview:3.1.0")
 
     // Firebase BOM (Ensures compatibility)
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
