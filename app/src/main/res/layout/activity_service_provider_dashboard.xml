@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".serviceprovider.ServiceProvider_Dashboard">
+    tools:context=".view.serviceprovider.ServiceProvider_Dashboard">
 
     <!-- Top Navigation Bar -->
     <LinearLayout

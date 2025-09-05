@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/wavegreenish"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Complete Your Profile"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:shadowColor="@android:color/darker_gray"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        android:layout_gravity="center"/>
+
+    <!-- Subtitle -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter additional details to complete registration"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- User Type Selection -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Register As"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        android:layout_marginTop="12dp"/>
+
+    <Spinner
+        android:id="@+id/spUserType"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/input_field"
+        android:padding="12dp"
+        android:layout_marginTop="4dp"
+        android:prompt="@string/select_prompt"
+        android:entries="@array/register_as_options"/>
+
+    <!-- Phone Number -->
+    <EditText
+        android:id="@+id/etPhoneNumber"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="Phone Number"
+        android:inputType="phone"
+        android:background="@drawable/input_field"
+        android:padding="12dp"
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Password -->
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="Password (min 6 characters)"
+        android:inputType="textPassword"
+        android:background="@drawable/input_field"
+        android:padding="12dp"
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Submit Button -->
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Submit"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_button"
+        android:textColor="@color/white"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
