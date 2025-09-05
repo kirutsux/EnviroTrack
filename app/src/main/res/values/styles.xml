@@ -31,15 +31,15 @@
         <item name="android:drawablePadding">12dp</item>
     </style>
 
-    <!-- OTP Box -->
-    <style name="OtpBox">
+    <style name="OtpBox" parent="Widget.AppCompat.EditText">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
-        <item name="android:background">@drawable/otp_box</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">18sp</item>
         <item name="android:inputType">number</item>
         <item name="android:maxLength">1</item>
+        <item name="android:background">@drawable/otp_box_background</item>
+        <item name="android:textColor">@android:color/black</item> <!-- ✅ FIX: text black -->
+        <item name="android:textSize">18sp</item>
     </style>
 
     <!-- Form Label -->

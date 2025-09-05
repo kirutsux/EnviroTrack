@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@drawable/wavegreenish"
     android:padding="16dp"
-    tools:context=".RegistrationFragment">
+    tools:context=".view.RegistrationFragment">
 
     <!-- Back Button -->
     <ImageView
@@ -57,159 +57,65 @@
         android:layout_height="50dp"
         android:background="@drawable/input_field"
         android:padding="12dp"
-        android:layout_marginTop="4dp"
-        android:prompt="@string/select_prompt"
-        android:entries="@array/register_as_options"/>
+        android:layout_marginTop="4dp"/>
 
-    <!-- Email Input -->
-    <LinearLayout
+    <!-- Input Fields -->
+    <EditText
+        android:id="@+id/etEmail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="50dp"
+        android:hint="Enter Your Email"
+        android:layout_marginTop="10dp"
         android:background="@drawable/input_field"
         android:padding="12dp"
-        android:layout_marginTop="10dp">
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"/>
 
-        <EditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Your Email"
-            android:textColorHint="@color/text_secondary"
-            android:textColor="@color/black"
-            android:background="@null"/>
-    </LinearLayout>
-
-    <!-- First Name Input -->
-    <LinearLayout
+    <EditText
+        android:id="@+id/etFirstName"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="50dp"
+        android:hint="First Name"
         android:background="@drawable/input_field"
         android:padding="12dp"
-        android:layout_marginTop="8dp">
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"/>
 
-        <EditText
-            android:id="@+id/etFirstName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="First Name"
-            android:textColorHint="@color/text_secondary"
-            android:textColor="@color/black"
-            android:background="@null"/>
-    </LinearLayout>
-
-    <!-- Last Name Input -->
-    <LinearLayout
+    <EditText
+        android:id="@+id/etLastName"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="50dp"
+        android:hint="Last Name"
         android:background="@drawable/input_field"
         android:padding="12dp"
-        android:layout_marginTop="8dp">
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"/>
 
-        <EditText
-            android:id="@+id/etLastName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Last Name"
-            android:textColorHint="@color/text_secondary"
-            android:textColor="@color/black"
-            android:background="@null"/>
-    </LinearLayout>
-
-    <!-- Password Input & Toggle -->
-    <LinearLayout
+    <EditText
+        android:id="@+id/etPhoneNumber"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="50dp"
+        android:hint="Phone Number"
+        android:inputType="phone"
         android:background="@drawable/input_field"
-        android:paddingEnd="12dp"
-        android:gravity="center_vertical"
-        android:layout_marginTop="8dp">
+        android:padding="12dp"
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"/>
 
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="50dp"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:textColorHint="@color/text_secondary"
-            android:textColor="@color/black"
-            android:background="@null"/>
-
-        <ImageView
-            android:id="@+id/showPassword1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_visibility_off"
-            android:padding="4dp"/>
-    </LinearLayout>
-
-    <!-- Confirm Password Input & Toggle -->
-    <LinearLayout
+    <EditText
+        android:id="@+id/etPassword"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="50dp"
+        android:hint="Password"
+        android:inputType="textPassword"
         android:background="@drawable/input_field"
-        android:paddingEnd="12dp"
-        android:gravity="center_vertical"
-        android:layout_marginTop="8dp">
-
-        <EditText
-            android:id="@+id/etConfirmPassword"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="50dp"
-            android:hint="Confirm Password"
-            android:inputType="textPassword"
-            android:textColorHint="@color/text_secondary"
-            android:textColor="@color/black"
-            android:background="@null"/>
-
-        <ImageView
-            android:id="@+id/showPassword2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_visibility_off"
-            android:padding="4dp"/>
-    </LinearLayout>
-
-    <!-- Gender Selection -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Gender"
-        android:textColor="@color/text_primary"
-        android:textSize="16sp"
-        android:layout_marginTop="12dp"/>
-
-    <RadioGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="4dp">
-
-        <RadioButton
-            android:id="@+id/rbMale"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/radio_button_selector"
-            android:text="Male"
-            android:textColor="@color/black"
-            android:button="@null"/>
-
-        <RadioButton
-            android:id="@+id/rbFemale"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/radio_button_selector"
-            android:text="Female"
-            android:textColor="@color/black"
-            android:button="@null"
-            android:layout_marginStart="8dp"/>
-    </RadioGroup>
+        android:padding="12dp"
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"/>
 
     <!-- Sign Up Button -->
     <Button
@@ -222,11 +128,22 @@
         android:textColor="@color/white"
         android:layout_marginTop="16dp"/>
 
+    <!-- Continue with Google -->
+    <Button
+        android:id="@+id/btnGoogleSignUp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Continue with Google"
+        android:textSize="16sp"
+        android:background="@drawable/google_button"
+        android:textColor="@color/white"
+        android:layout_marginTop="8dp"/>
+
     <!-- Login Link -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Already have an account?"
+        android:text="Already have an account? "
         android:textSize="14sp"
         android:textColor="@color/text_secondary"
         android:layout_gravity="center"

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".serviceprovider.SP_RegistrationFragment">
+    tools:context=".view.serviceprovider.SP_RegistrationFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
