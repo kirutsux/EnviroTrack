@@ -5,6 +5,7 @@
 
     <application
         android:allowBackup="true"
+        android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/logo"
@@ -13,8 +14,30 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CapstoneEnviroTrack"
         tools:targetApi="31">
+
+        <!-- Select User Type Activity -->
         <activity
-            android:name=".SelectUserType"
+            android:name=".model.SelectUserType"
+            android:exported="true" />
+
+        <!-- Main Activity (Hosts Navigation Graph including VerificationFragment) -->
+        <activity
+            android:name=".view.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Service Provider Dashboard -->
+        <activity
+            android:name=".view.serviceprovider.ServiceProvider_Dashboard"
+            android:exported="false" />
+
+        <!-- Welcome Page (Launcher) -->
+        <activity
+            android:name=".view.WelcomePage"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,14 +45,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Activity -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true" /> <!-- Service Provider Dashboard -->
-        <activity
-            android:name=".serviceprovider.ServiceProvider_Dashboard"
-            android:exported="false" /> <!-- Welcome Page -->
-        <activity
             android:name=".WelcomePage"
             android:exported="false" />
 

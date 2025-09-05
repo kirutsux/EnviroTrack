@@ -15,7 +15,7 @@
     <string name="default_web_client_id">191944189574-hbtag9qvcdlhsqlq5m2gi8pafti4pvj2.apps.googleusercontent.com</string>
     <string-array name="register_as_options">
         <item>Service Provider</item>
-        <item>PCO</item>
+        <item>Pollution Control Officer</item>
     </string-array>
     <string-array name="service_categories">
         <!-- Waste Disposal Services -->

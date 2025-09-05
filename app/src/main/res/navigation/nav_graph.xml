@@ -2,42 +2,138 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
 
-    <!-- Login Fragment -->
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.ecocp.capstoneenvirotrack.LoginFragment"
-        android:label="Login"
+        android:name="com.ecocp.capstoneenvirotrack.view.LoginFragment"
         tools:layout="@layout/fragment_log_in">
-
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
-
-        <!-- ✅ ADD THIS: Navigation to EMB Dashboard -->
+            app:destination="@id/registrationFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="false" />
         <action
-            android:id="@+id/action_loginFragment_to_EMB_Dashboard"
-            app:destination="@id/EMB_Dashboard" />
+            android:id="@+id/action_loginFragment_to_embDashboard"
+            app:destination="@id/embDashboard"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_serviceProviderDashboard"
+            app:destination="@id/serviceProviderDashboard"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_pcoDashboard"
+            app:destination="@id/pcoDashboard"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- Registration Fragment -->
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="com.ecocp.capstoneenvirotrack.RegistrationFragment"
-        android:label="Register"
+        android:name="com.ecocp.capstoneenvirotrack.view.RegistrationFragment"
         tools:layout="@layout/fragment_registration">
-
         <action
             android:id="@+id/action_registrationFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/registrationFragment"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_registrationFragment_to_verificationFragment"
+            app:destination="@id/verificationFragment">
+            <argument
+                android:name="email"
+                app:argType="string" />
+            <argument
+                android:name="firstName"
+                app:argType="string" />
+            <argument
+                android:name="lastName"
+                app:argType="string" />
+            <argument
+                android:name="password"
+                app:argType="string" />
+            <argument
+                android:name="phoneNumber"
+                app:argType="string" />
+            <argument
+                android:name="userType"
+                app:argType="string" />
+        </action>
+        <action
+            android:id="@+id/action_registrationFragment_to_googleSignUpFragment"
+            app:destination="@id/googleSignUpFragment">
+            <argument
+                android:name="uid"
+                app:argType="string" />
+            <argument
+                android:name="email"
+                app:argType="string" />
+            <argument
+                android:name="firstName"
+                app:argType="string" />
+            <argument
+                android:name="lastName"
+                app:argType="string" />
+            <argument
+                android:name="password"
+                app:argType="string" />
+            <argument
+                android:name="phoneNumber"
+                app:argType="string" />
+            <argument
+                android:name="userType"
+                app:argType="string" />
+        </action>
     </fragment>
 
-    <!-- ✅ ADD THIS: EMB Dashboard Fragment -->
     <fragment
-        android:id="@+id/EMB_Dashboard"
-        android:name="com.ecocp.capstoneenvirotrack.emb.EMB_Dashboard"
-        android:label="EMB Dashboard"
+        android:id="@+id/verificationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.VerificationFragment"
+        tools:layout="@layout/fragment_verification">
+        <action
+            android:id="@+id/action_verificationFragment_to_embDashboard"
+            app:destination="@id/embDashboard"
+            app:popUpTo="@id/verificationFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_verificationFragment_to_serviceProviderDashboard"
+            app:destination="@id/serviceProviderDashboard"
+            app:popUpTo="@id/verificationFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_verificationFragment_to_pcoDashboard"
+            app:destination="@id/pcoDashboard"
+            app:popUpTo="@id/verificationFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/googleSignUpFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.GoogleSignUpFragment"
+        tools:layout="@layout/fragment_google_sign_up">
+        <action
+            android:id="@+id/action_googleSignUpFragment_to_embDashboard"
+            app:destination="@id/embDashboard"
+            app:popUpTo="@id/googleSignUpFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/embDashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_Dashboard"
         tools:layout="@layout/emb_dashboard" />
+
+    <fragment
+        android:id="@+id/serviceProviderDashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_RegistrationFragment"
+        tools:layout="@layout/fragment_service_provider_dashboard" />
+
+    <fragment
+        android:id="@+id/pcoDashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_Dashboard"
+        tools:layout="@layout/fragment_pco_dashboard" />
 
 </navigation>
