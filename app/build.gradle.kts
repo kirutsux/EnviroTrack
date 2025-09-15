@@ -15,6 +15,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -27,31 +28,12 @@ android {
             )
         }
     }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "17"
-    }
-    buildFeatures {
-        viewBinding = true
-    }
-    packaging {
-        resources {
-            excludes += "META-INF/INDEX.LIST"
-            excludes += "META-INF/DEPENDENCIES"
-            excludes += "META-INF/*.SF"
-            excludes += "META-INF/*.DSA"
-            excludes += "META-INF/*.RSA"
-            excludes += "META-INF/io.netty.versions.properties"
-            excludes += "META-INF/NOTICE"
-            excludes += "META-INF/LICENSE"
-            excludes += "META-INF/LICENSE.txt"
-            excludes += "META-INF/NOTICE.txt"
-            excludes += "META-INF/ASL2.0"
-        }
+        jvmTarget = "1.8"
     }
 }
 
@@ -63,24 +45,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation("androidx.fragment:fragment-ktx:1.8.9")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.9.3")
-    implementation("androidx.navigation:navigation-ui-ktx:2.9.3")
-    implementation(libs.firebase.appdistribution.gradle)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-
-    // Firebase BOM
-    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-database-ktx")
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("androidx.navigation:navigation-fragment:$nav_version")
     implementation("androidx.navigation:navigation-ui:$nav_version")
@@ -96,10 +63,7 @@ dependencies {
 
     // Firebase Database (optional)
     implementation("com.google.firebase:firebase-database-ktx")
-}
 
-configurations.all {
-    exclude(group = "com.google.protobuf", module = "protobuf-java")
-    exclude(group = "com.google.firebase", module = "protolite-well-known-types")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }
-

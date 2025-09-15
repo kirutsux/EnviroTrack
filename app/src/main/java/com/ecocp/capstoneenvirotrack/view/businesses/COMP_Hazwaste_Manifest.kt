@@ -1,5 +1,4 @@
-package com.ecocp.capstoneenvirotrack.businesses
-
+package com.ecocp.capstoneenvirotrack.view.businesses
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
