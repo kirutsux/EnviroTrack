@@ -3,7 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/welcomeFragment">
+
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.WelcomePage"
+        tools:layout="@layout/welcome_page">
+        <action
+            android:id="@+id/action_welcomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+        android:id="@+id/action_welcomeFragment_to_registrationFragment"
+        app:destination="@id/registrationFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/loginFragment"
@@ -58,9 +70,6 @@
             <argument
                 android:name="phoneNumber"
                 app:argType="string" />
-            <argument
-                android:name="userType"
-                app:argType="string" />
         </action>
         <action
             android:id="@+id/action_registrationFragment_to_googleSignUpFragment"
@@ -85,7 +94,8 @@
                 app:argType="string" />
             <argument
                 android:name="userType"
-                app:argType="string" />
+                app:argType="string"
+                android:defaultValue="pco" />
         </action>
     </fragment>
 
@@ -124,16 +134,73 @@
     <fragment
         android:id="@+id/embDashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_Dashboard"
-        tools:layout="@layout/emb_dashboard" />
+        tools:layout="@layout/emb_dashboard">
+        <!-- Icon Navigation Actions -->
+        <action
+            android:id="@+id/action_embDashboard_to_embCNCFragment"
+            app:destination="@id/embCNCFragment"
+            app:popUpTo="@id/embDashboard"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_embDashboard_to_embSMRFragment"
+            app:destination="@id/embSMRFragment"
+            app:popUpTo="@id/embDashboard"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_embDashboard_to_embOPMSFragment"
+            app:destination="@id/embOPMSFragment"
+            app:popUpTo="@id/embDashboard"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_embDashboard_to_embHMSFragment"
+            app:destination="@id/embHMSFragment"
+            app:popUpTo="@id/embDashboard"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_embDashboard_to_embCRSFragment"
+            app:destination="@id/embCRSFragment"
+            app:popUpTo="@id/embDashboard"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_embDashboard_to_embPCOFragment"
+            app:destination="@id/embPCOFragment"
+            app:popUpTo="@id/embDashboard"
+            app:popUpToInclusive="false" />
+    </fragment>
 
     <fragment
         android:id="@+id/serviceProviderDashboard"
-        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_RegistrationFragment"
-        tools:layout="@layout/fragment_service_provider_dashboard" />
-
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Dashboard"
+        tools:layout="@layout/sp_dashboard" />
     <fragment
         android:id="@+id/pcoDashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_Dashboard"
-        tools:layout="@layout/fragment_pco_dashboard" />
+        tools:layout="@layout/fragment_comp__dashboard" />
+
+    <!-- Icon Fragments -->
+    <fragment
+        android:id="@+id/embCNCFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CNC"
+        tools:layout="@layout/emb_cnc" />
+    <fragment
+        android:id="@+id/embSMRFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_SMR"
+        tools:layout="@layout/emb_smr" />
+    <fragment
+        android:id="@+id/embOPMSFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_OPMS"
+        tools:layout="@layout/emb_opms" />
+    <fragment
+        android:id="@+id/embHMSFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS"
+        tools:layout="@layout/emb_hms" />
+    <fragment
+        android:id="@+id/embCRSFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CRS"
+        tools:layout="@layout/emb_crs" />
+    <fragment
+        android:id="@+id/embPCOFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_PCO"
+        tools:layout="@layout/emb_pco" />
 
 </navigation>

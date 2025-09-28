@@ -53,6 +53,16 @@ android {
             excludes += "META-INF/ASL2.0"
         }
     }
+
+    // Add dependency resolution strategy
+    configurations.all {
+        resolutionStrategy {
+            // Force a specific version of protobuf-java
+            force("com.google.protobuf:protobuf-java:3.21.12")
+            // Optionally force other conflicting dependencies if needed
+            // force("com.google.firebase:protolite-well-known-types:18.0.0") // Adjust version based on Firebase BOM
+        }
+    }
 }
 
 dependencies {
@@ -65,6 +75,11 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.9.3")
     implementation(libs.firebase.appdistribution.gradle)
+    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    // Removed explicit protobuf-java to rely on resolution strategy and Firebase BOM
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -81,8 +96,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 }
 
+
 configurations.all {
-    exclude(group = "com.google.protobuf", module = "protobuf-java")
+   exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "com.google.firebase", module = "protolite-well-known-types")
 }
-

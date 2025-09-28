@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
@@ -18,15 +19,16 @@ class GoogleSignUpFragment : Fragment() {
     // Manual argument retrieval
     private val uid: String by lazy { arguments?.getString("uid") ?: "" }
     private val email: String by lazy { arguments?.getString("email") ?: "" }
-    private val fullName: String by lazy { arguments?.getString("fullName") ?: "" }
+    private val firstName: String by lazy { arguments?.getString("firstName") ?: "" }
+    private val lastName: String by lazy { arguments?.getString("lastName") ?: "" }
+    private val userType: String by lazy { arguments?.getString("userType") ?: "pco" } // Default to "pco" from navigation
 
-    private val viewModel: RegistrationViewModel by viewModels {
-        RegistrationViewModelFactory(UserRepository())
+    private val viewModel: RegistrationViewModel by activityViewModels {
+        RegistrationViewModelFactory(UserRepository()) // No Context needed
     }
 
     private lateinit var etPhoneNumber: EditText
     private lateinit var etPassword: EditText
-    private lateinit var spUserType: Spinner
     private lateinit var btnSubmit: Button
 
     override fun onCreateView(
@@ -37,27 +39,27 @@ class GoogleSignUpFragment : Fragment() {
 
         etPhoneNumber = view.findViewById(R.id.etPhoneNumber)
         etPassword = view.findViewById(R.id.etPassword)
-        spUserType = view.findViewById(R.id.spUserType)
         btnSubmit = view.findViewById(R.id.btnSubmit)
 
-        // Populate Spinner with user types
-        val userTypes = arrayOf("emb", "service provider", "pco")
-        spUserType.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            userTypes
-        ).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
-
         btnSubmit.setOnClickListener {
+            val phoneNumber = etPhoneNumber.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+
+            if (phoneNumber.isEmpty() || password.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill all fields.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (password.length < 6) {
+                Toast.makeText(requireContext(), "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             viewModel.completeGoogleRegistration(
                 uid = uid,
                 email = email,
-                fullName = fullName,
-                phoneNumber = etPhoneNumber.text.toString().trim(),
-                password = etPassword.text.toString().trim(),
-                userType = spUserType.selectedItem?.toString() ?: ""
+                fullName = "$firstName $lastName", // Combine firstName and lastName
+                phoneNumber = phoneNumber,
+                password = password
             )
         }
 

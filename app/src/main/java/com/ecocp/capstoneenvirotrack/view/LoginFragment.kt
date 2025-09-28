@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.serviceprovider.ServiceProvider_Dashboard
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -182,6 +181,7 @@ class LoginFragment : Fragment() {
             }
         }
     }
+     
 
 
     // ✅ Toggle Password Visibility Function

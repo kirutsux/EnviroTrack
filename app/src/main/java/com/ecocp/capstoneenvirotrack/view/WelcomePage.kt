@@ -1,35 +1,40 @@
 package com.ecocp.capstoneenvirotrack.view
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
-import androidx.fragment.app.commit
 
-class WelcomePage : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_welcome_page)
+class WelcomePage : Fragment() {
 
-        // Set padding for system bars
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment that contains your Login and Register buttons
+        return inflater.inflate(R.layout.welcome_page, container, false) // Ensure this layout exists
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val btnLogin: Button = view.findViewById(R.id.btnLogin) // Ensure this ID is in fragment_welcome.xml
+        val btnRegister: Button = view.findViewById(R.id.btnRegister) // Ensure this ID is in fragment_welcome.xml
+
+        btnLogin.setOnClickListener {
+            // Use NavController to navigate to LoginFragment
+            // Make sure R.id.action_welcomeFragment_to_loginFragment is defined in your nav graph
+            findNavController().navigate(R.id.action_welcomeFragment_to_loginFragment)
         }
 
-        // Handle Register button click
-        val btnRegister: Button = findViewById(R.id.btnRegister)
         btnRegister.setOnClickListener {
-            // Perform fragment transaction to show RegistrationFragment
-            supportFragmentManager.commit {
-                replace(R.id.main, RegistrationFragment())
-                addToBackStack(null) // Optional: Adds fragment to back stack for back navigation
-            }
+            // Use NavController to navigate to RegistrationFragment
+            // Make sure R.id.action_welcomeFragment_to_registrationFragment is defined in your nav graph
+            findNavController().navigate(R.id.action_welcomeFragment_to_registrationFragment)
         }
     }
 }
