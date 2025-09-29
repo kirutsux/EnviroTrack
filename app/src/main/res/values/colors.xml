@@ -54,7 +54,7 @@
 
     <!-- New Colors -->
     <color name="gray">#808080</color> <!-- Standard Gray -->
-    <color name="teal_700">#00796B</color> <!-- Material Teal 700 -->
+    <color name="teal_700">#E60FA091</color> <!-- Material Teal 700 -->
     <color name="darker_gray">#A9A9A9</color> <!-- Dark Gray for dividers -->
     <color name="module_label_background">#E0E0E0</color>
 </resources>
