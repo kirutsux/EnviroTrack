@@ -54,5 +54,7 @@
     <style name="CompactPrimaryButton" parent="@style/PrimaryButton">
         <item name="android:textSize">14sp</item>
         <item name="android:padding">6dp</item>
+        <!-- Ensure background and tint are not overridden -->
+        <item name="android:backgroundTintMode">src_over</item>
     </style>
 </resources>

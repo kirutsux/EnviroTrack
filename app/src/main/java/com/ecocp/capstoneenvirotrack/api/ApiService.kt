@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.network
+package com.ecocp.capstoneenvirotrack.api
 
 import retrofit2.http.Body
 import retrofit2.http.POST

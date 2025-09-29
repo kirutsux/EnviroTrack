@@ -15,6 +15,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -27,45 +28,18 @@ android {
             )
         }
     }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "17"
-    }
-    buildFeatures {
-        viewBinding = true
-    }
-    packaging {
-        resources {
-            excludes += "META-INF/INDEX.LIST"
-            excludes += "META-INF/DEPENDENCIES"
-            excludes += "META-INF/*.SF"
-            excludes += "META-INF/*.DSA"
-            excludes += "META-INF/*.RSA"
-            excludes += "META-INF/io.netty.versions.properties"
-            excludes += "META-INF/NOTICE"
-            excludes += "META-INF/LICENSE"
-            excludes += "META-INF/LICENSE.txt"
-            excludes += "META-INF/NOTICE.txt"
-            excludes += "META-INF/ASL2.0"
-        }
-    }
-
-    // Add dependency resolution strategy
-    configurations.all {
-        resolutionStrategy {
-            // Force a specific version of protobuf-java
-            force("com.google.protobuf:protobuf-java:3.21.12")
-            // Optionally force other conflicting dependencies if needed
-            // force("com.google.firebase:protolite-well-known-types:18.0.0") // Adjust version based on Firebase BOM
-        }
+        jvmTarget = "1.8"
     }
 }
 
 dependencies {
+    val nav_version = "2.8.9"
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -94,10 +68,4 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
-}
-
-
-configurations.all {
-   exclude(group = "com.google.protobuf", module = "protobuf-java")
-    exclude(group = "com.google.firebase", module = "protolite-well-known-types")
 }
