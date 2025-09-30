@@ -1,12 +1,10 @@
 package com.ecocp.capstoneenvirotrack.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.ecocp.capstoneenvirotrack.model.User
 import com.ecocp.capstoneenvirotrack.repository.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseUser
@@ -24,17 +22,25 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
         val googleUser: FirebaseUser? = null
     )
 
-    fun signInWithEmail(email: String, password: String, phoneNumber: String, userType: String) {
+    fun signInWithEmail(
+        email: String,
+        password: String,
+        phoneNumber: String,
+        userType: String,
+        firstName: String,
+        lastName: String
+    ) {
         _uiState.value = UiState(isLoading = true)
         viewModelScope.launch {
             try {
                 val result = repository.signInWithEmailAndPassword(email, password)
                 if (result != null) {
-                    // Optionally update Firestore with additional details if needed
+                    // Save/update user info in Firestore
                     repository.saveUserToFirestore(
                         uid = result.uid,
                         email = email,
-                        fullName = "", // Placeholder, update if needed
+                        firstName = firstName,
+                        lastName = lastName,
                         phoneNumber = phoneNumber,
                         password = password,
                         userType = userType
@@ -49,23 +55,55 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun signInWithGoogle(idToken: String) {
+    fun signInWithGoogle(account: GoogleSignInAccount) {
         _uiState.value = UiState(isLoading = true)
         viewModelScope.launch {
-            val user = repository.signInWithGoogle(idToken)
-            if (user != null) {
-                _uiState.value = UiState(isLoading = false, successMessage = "Google Sign-In Successful!", googleUser = user)
-            } else {
-                _uiState.value = UiState(isLoading = false, errorMessage = "Google Sign-In failed")
+            try {
+                val idToken = account.idToken
+                if (idToken != null) {
+                    val user = repository.signInWithGoogle(idToken)
+                    if (user != null) {
+                        // Split display name into firstName + lastName
+                        val displayName = account.displayName ?: ""
+                        val nameParts = displayName.trim().split(" ")
+                        val firstName = nameParts.firstOrNull() ?: ""
+                        val lastName =
+                            if (nameParts.size > 1) nameParts.drop(1).joinToString(" ") else ""
+
+                        // Save to Firestore (Google users are PCO by default)
+                        repository.saveUserToFirestore(
+                            uid = user.uid,
+                            email = account.email ?: "",
+                            firstName = firstName,
+                            lastName = lastName,
+                            phoneNumber = "", // they can update in account settings
+                            password = "", // not needed for Google sign-in
+                            userType = "pco"
+                        )
+
+                        _uiState.value = UiState(
+                            isLoading = false,
+                            successMessage = "Google Sign-In Successful!",
+                            googleUser = user
+                        )
+                    } else {
+                        _uiState.value =
+                            UiState(isLoading = false, errorMessage = "Google Sign-In failed")
+                    }
+                } else {
+                    _uiState.value = UiState(isLoading = false, errorMessage = "No ID token available")
+                }
+            } catch (e: Exception) {
+                _uiState.value = UiState(isLoading = false, errorMessage = e.message)
             }
         }
     }
 
     fun handleGoogleSignInResult(account: GoogleSignInAccount?) {
-        account?.idToken?.let { idToken ->
-            signInWithGoogle(idToken)
+        account?.let {
+            signInWithGoogle(it)
         } ?: run {
-            _uiState.value = UiState(errorMessage = "No ID token available")
+            _uiState.value = UiState(errorMessage = "No Google account available")
         }
     }
 

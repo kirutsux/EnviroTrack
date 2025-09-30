@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view
 
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,22 +9,23 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.navigation.findNavController
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.repository.UserRepository
 import com.ecocp.capstoneenvirotrack.viewmodel.RegistrationViewModel
 import com.ecocp.capstoneenvirotrack.viewmodel.RegistrationViewModelFactory
+import com.ecocp.capstoneenvirotrack.viewmodel.UiState
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 
 class RegistrationFragment : Fragment() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
 
-    private val viewModel: RegistrationViewModel by viewModels {
+    private val viewModel: RegistrationViewModel by activityViewModels {
         RegistrationViewModelFactory(UserRepository())
     }
 
@@ -32,18 +34,39 @@ class RegistrationFragment : Fragment() {
     private lateinit var etLastName: EditText
     private lateinit var etPassword: EditText
     private lateinit var etPhoneNumber: EditText
-    private lateinit var spUserType: Spinner
-    private lateinit var tvLogin: TextView
+    private lateinit var tvUserType: TextView
 
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        val account = task.result
-        account?.idToken?.let { idToken ->
-            viewModel.handleGoogleSignIn(idToken)
-        } ?: run {
-            Toast.makeText(requireContext(), "Google Sign-In failed: No ID token", Toast.LENGTH_SHORT).show()
+        Log.d("RegistrationFragment", "Google Sign-In intent returned, resultCode=${result.resultCode}")
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                if (account != null) {
+                    Log.d("RegistrationFragment", "Google account retrieved: email=${account.email}, displayName=${account.displayName}")
+                    if (account.idToken != null) {
+                        Log.d("RegistrationFragment", "Google ID Token retrieved. Sending to ViewModel...")
+                        viewModel.handleGoogleSignIn(account.idToken!!)
+                    } else {
+                        Log.e("RegistrationFragment", "Google ID token is null")
+                        Toast.makeText(requireContext(), "Google Sign-In failed: No ID token", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Log.e("RegistrationFragment", "Google account is null")
+                    Toast.makeText(requireContext(), "Google Sign-In failed: Null account", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: ApiException) {
+                Log.e("RegistrationFragment", "Google sign in failed: ${e.statusCode}", e)
+                Toast.makeText(requireContext(), "Google Sign-In failed: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e("RegistrationFragment", "Unexpected error in Google Sign-In result", e)
+                Toast.makeText(requireContext(), "Unexpected error occurred during Google Sign-In.", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Log.w("RegistrationFragment", "Google Sign-In canceled or no data returned")
+            Toast.makeText(requireContext(), "Google Sign-In canceled.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -54,7 +77,6 @@ class RegistrationFragment : Fragment() {
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
-
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
     }
 
@@ -62,7 +84,11 @@ class RegistrationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_registration, container, false)
+        return inflater.inflate(R.layout.fragment_registration, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val btnGoogleSignUp: Button = view.findViewById(R.id.btnGoogleSignUp)
         val btnBack: ImageView = view.findViewById(R.id.btnBack)
@@ -72,21 +98,18 @@ class RegistrationFragment : Fragment() {
         etLastName = view.findViewById(R.id.etLastName)
         etPassword = view.findViewById(R.id.etPassword)
         etPhoneNumber = view.findViewById(R.id.etPhoneNumber)
-        spUserType = view.findViewById(R.id.spUserType)
-        tvLogin = view.findViewById(R.id.tvLogin)
-
-        // Populate Spinner with register_as_options from strings.xml
-        spUserType.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            resources.getStringArray(R.array.register_as_options)
-        ).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
+        tvUserType = view.findViewById(R.id.UserType)
+        val tvLoginView: TextView = view.findViewById(R.id.tvLogin)
 
         btnGoogleSignUp.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
+            Log.d("RegistrationFragment", "Google Sign-Up button clicked. Forcing popup by revoking session.")
+            googleSignInClient.signOut().addOnCompleteListener {
+                googleSignInClient.revokeAccess().addOnCompleteListener {
+                    Log.d("RegistrationFragment", "Launching Google Sign-In intent...")
+                    val signInIntent = googleSignInClient.signInIntent
+                    googleSignInLauncher.launch(signInIntent)
+                }
+            }
         }
 
         btnBack.setOnClickListener {
@@ -94,80 +117,94 @@ class RegistrationFragment : Fragment() {
         }
 
         btnSignUp.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            val firstName = etFirstName.text.toString().trim()
+            val lastName = etLastName.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+            val phoneNumber = etPhoneNumber.text.toString().trim()
+
+            if (email.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || password.isEmpty() || phoneNumber.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill all fields.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "Please enter a valid email address.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (password.length < 6) {
+                Toast.makeText(requireContext(), "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            Log.d("RegistrationFragment", "Manual Sign-Up clicked. Registering PCO with email: $email")
             viewModel.registerWithEmail(
-                email = etEmail.text.toString().trim(),
-                firstName = etFirstName.text.toString().trim(),
-                lastName = etLastName.text.toString().trim(),
-                password = etPassword.text.toString().trim(),
-                phoneNumber = etPhoneNumber.text.toString().trim(),
-                userType = spUserType.selectedItem?.toString() ?: ""
+                email = email,
+                firstName = firstName,
+                lastName = lastName,
+                password = password,
+                phoneNumber = phoneNumber,
+                enteredCode = null
             )
         }
 
-        tvLogin.setOnClickListener {
+        tvLoginView.setOnClickListener {
             findNavController().navigate(R.id.action_registrationFragment_to_loginFragment)
         }
 
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            if (state.isLoading) {
-                // TODO: Show loading indicator
-                return@observe
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+        viewModel.uiState.observe(viewLifecycleOwner) { state: UiState? ->
+            state ?: return@observe
+
+            state.errorMessage?.let { errorMsg ->
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+                Log.e("RegistrationFragment", "Error from ViewModel: $errorMsg")
+                viewModel.clearErrorMessage()
             }
 
-            state.errorMessage?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
-            }
-
-            state.successMessage?.let { msg ->
-                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-
-                if (view != null && isAdded) {
-                    try {
-                        val navController = try {
-                            findNavController()
-                        } catch (e: IllegalStateException) {
-                            Log.w("RegistrationFragment", "Fragment NavController failed, using activity fallback")
-                            requireActivity().findNavController(R.id.nav_host_fragment) // No change needed if ID is correct
-                        }
-                        when {
-                            msg.startsWith("Verification code sent") -> {
-                                val action = RegistrationFragmentDirections.actionRegistrationFragmentToVerificationFragment(
+            state.successMessage?.let { successMsg ->
+                try {
+                    val currentNavController = findNavController()
+                    when {
+                        successMsg.startsWith("Verification code sent") -> {
+                            Toast.makeText(requireContext(), successMsg, Toast.LENGTH_SHORT).show()
+                            Log.d("RegistrationFragment", "OTP Sent. Navigating to VerificationFragment.")
+                            val action =
+                                RegistrationFragmentDirections.actionRegistrationFragmentToVerificationFragment(
                                     email = etEmail.text.toString().trim(),
                                     firstName = etFirstName.text.toString().trim(),
                                     lastName = etLastName.text.toString().trim(),
                                     password = etPassword.text.toString().trim(),
-                                    phoneNumber = etPhoneNumber.text.toString().trim(),
-                                    userType = spUserType.selectedItem?.toString() ?: ""
+                                    phoneNumber = etPhoneNumber.text.toString().trim()
                                 )
-                                navController.navigate(action)
-                                Log.d("RegistrationFragment", "Navigated to VerificationFragment")
-                            }
-                            msg == "Google sign-in successful" -> {
-                                val fullName = state.googleUser?.displayName ?: ""
-                                val nameParts = fullName.split(" ", limit = 2)
-                                val firstName = nameParts.getOrNull(0) ?: ""
-                                val lastName = nameParts.getOrNull(1) ?: ""
-                                val action = RegistrationFragmentDirections.actionRegistrationFragmentToGoogleSignUpFragment(
-                                    uid = state.googleUser?.uid ?: "",
-                                    email = state.googleUser?.email ?: "",
-                                    firstName = firstName,
-                                    lastName = lastName,
-                                    password = "",
-                                    phoneNumber = "",
-                                    userType = ""
-                                )
-                                navController.navigate(action)
-                                Log.d("RegistrationFragment", "Navigated to GoogleSignUpFragment")
-                            }
+                            currentNavController.navigate(action)
+                            viewModel.clearSuccessMessage()
                         }
-                    } catch (e: Exception) {
-                        Log.e("RegistrationFragment", "Navigation failed: ${e.message}", e)
-                        Toast.makeText(requireContext(), "Navigation failed, please try again", Toast.LENGTH_LONG).show()
+                        // ✅ Google sign-in case handled here
+                        state.googleUser != null && state.navigateToDashboardForUserType == "pco" -> {
+                            val googleUser = state.googleUser
+                            Log.d("RegistrationFragment", "Google Sign-In completed. UID=${googleUser.uid}, email=${googleUser.email}")
+                            Toast.makeText(requireContext(), "Google Sign-In successful. Registered as PCO.", Toast.LENGTH_SHORT).show()
+                            currentNavController.navigate(R.id.action_registrationFragment_to_dashboardFragment)
+                            viewModel.clearNavigationSignal()
+                            viewModel.clearSuccessMessage()
+                        }
+                        else -> {
+                            if (successMsg.isNotEmpty()) {
+                                Toast.makeText(requireContext(), successMsg, Toast.LENGTH_SHORT).show()
+                                Log.d("RegistrationFragment", "Other success: $successMsg")
+                            }
+                            viewModel.clearSuccessMessage()
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("RegistrationFragment", "Navigation failed: ${e.message}", e)
+                    Toast.makeText(requireContext(), "Navigation error. Please try again.", Toast.LENGTH_LONG).show()
+                    viewModel.clearSuccessMessage()
                 }
             }
         }
-
-        return view
     }
 }

@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.serviceprovider.ServiceProvider_Dashboard
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -26,7 +25,6 @@ class LoginFragment : Fragment() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var firestore: FirebaseFirestore
     private var isPasswordVisible = false
-    private var selectedUserType: String? = null // Store user type
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -36,9 +34,12 @@ class LoginFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        // Get selected user type from SharedPreferences
-        val sharedPreferences = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        selectedUserType = sharedPreferences.getString("selectedUserType", "")
+        val btnGoogle: Button = view.findViewById(R.id.btnGoogle)
+        val btnLogin: Button = view.findViewById(R.id.btnLogin)
+        val etEmail: EditText = view.findViewById(R.id.etEmail)
+        val etPassword: EditText = view.findViewById(R.id.etPassword)
+        val tvGoToRegister: TextView = view.findViewById(R.id.tvGoToRegister)
+        val showPassword: ImageView = view.findViewById(R.id.showPassword)
 
         // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -46,13 +47,6 @@ class LoginFragment : Fragment() {
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-
-        val btnGoogle: Button = view.findViewById(R.id.btnGoogle)
-        val btnLogin: Button = view.findViewById(R.id.btnLogin)
-        val etEmail: EditText = view.findViewById(R.id.etEmail)
-        val etPassword: EditText = view.findViewById(R.id.etPassword)
-        val tvGoToRegister: TextView = view.findViewById(R.id.tvGoToRegister)
-        val showPassword: ImageView = view.findViewById(R.id.showPassword)
 
         btnGoogle.setOnClickListener { signInWithGoogle() }
 
@@ -73,9 +67,11 @@ class LoginFragment : Fragment() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        Log.d("LoginFragment", "Login successful for email: $email")
                         checkUserType(email)
                     } else {
                         Toast.makeText(requireContext(), "Login failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("LoginFragment", "Login failed", task.exception)
                     }
                 }
         }
@@ -87,11 +83,20 @@ class LoginFragment : Fragment() {
         return view
     }
 
-    // ✅ Google Sign-In Intent
+    // ✅ Google Sign-In Intent with forced popup
     private fun signInWithGoogle() {
-        val signInIntent = googleSignInClient.signInIntent
-        googleSignInLauncher.launch(signInIntent)
+        Log.d("LoginFragment", "Google Sign-In button clicked. Forcing popup by revoking session.")
+
+        // Sign out & revoke access so popup always appears
+        googleSignInClient.signOut().addOnCompleteListener {
+            googleSignInClient.revokeAccess().addOnCompleteListener {
+                Log.d("LoginFragment", "Launching Google Sign-In intent...")
+                val signInIntent = googleSignInClient.signInIntent
+                googleSignInLauncher.launch(signInIntent)
+            }
+        }
     }
+
 
     // ✅ Handle Google Sign-In Result
     private val googleSignInLauncher =
@@ -108,12 +113,13 @@ class LoginFragment : Fragment() {
                 }
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Google Sign-In error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("LoginFragment", "Google Sign-In error", e)
             }
         }
 
     // ✅ Check if user exists in Firestore before allowing Google Sign-In
     private fun checkIfUserExists(email: String, idToken: String?) {
-        firestore.collection("Users")
+        firestore.collection("users")
             .whereEqualTo("email", email)
             .get()
             .addOnSuccessListener { documents ->
@@ -122,67 +128,72 @@ class LoginFragment : Fragment() {
                     auth.signInWithCredential(credential)
                         .addOnCompleteListener { authTask ->
                             if (authTask.isSuccessful) {
+                                Log.d("LoginFragment", "Google auth successful for email: $email")
                                 checkUserType(email)
                             } else {
                                 Toast.makeText(requireContext(), "Authentication failed!", Toast.LENGTH_SHORT).show()
+                                Log.e("LoginFragment", "Google auth failed", authTask.exception)
                             }
                         }
                 } else {
                     Toast.makeText(requireContext(), "Email is not registered. Please sign up first.", Toast.LENGTH_LONG).show()
+                    Log.w("LoginFragment", "Email not found: $email")
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("Firestore", "Error checking user existence", e)
+                Log.e("LoginFragment", "Error checking user existence", e)
                 Toast.makeText(requireContext(), "Error checking user: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    // ✅ Check user type before redirecting to the correct dashboard
+    // ✅ Check user type from Firestore and navigate to the correct dashboard
     private fun checkUserType(email: String) {
-        val sharedPreferences = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        val selectedUserType = sharedPreferences.getString("selectedUserType", "")
+        Log.d("LoginFragment", "Checking user type for email: $email")
 
-        firestore.collection("Users")
+        firestore.collection("users")
             .whereEqualTo("email", email)
             .get()
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
-                    val userType = documents.documents[0].getString("userType")
+                    val userDoc = documents.documents[0]
+                    val userType = userDoc.getString("userType")
+                    Log.d("LoginFragment", "Firestore userType: $userType")
 
-                    if (userType != null && userType.trim() == selectedUserType?.trim()) {
+                    if (userType != null) {
                         navigateToDashboard(userType)
                     } else {
-                        Toast.makeText(requireContext(), "Invalid user type selection!", Toast.LENGTH_SHORT).show()
-                        Log.e("Login", "UserType mismatch: Selected = $selectedUserType, Firestore = $userType")
+                        Toast.makeText(requireContext(), "User type not found in Firestore!", Toast.LENGTH_SHORT).show()
+                        Log.e("LoginFragment", "User type is null for email: $email")
                     }
                 } else {
                     Toast.makeText(requireContext(), "User not found!", Toast.LENGTH_SHORT).show()
+                    Log.w("LoginFragment", "User not found for email: $email")
                 }
             }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error checking user type!", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Log.e("LoginFragment", "Error checking user type", e)
+                Toast.makeText(requireContext(), "Error checking user type: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-
-    // ✅ Navigate to the correct dashboard
+    // ✅ Navigate to the correct dashboard based on Firestore userType
     private fun navigateToDashboard(userType: String) {
         when (userType) {
-            "EMB" -> {
+            "EMB", "emb" -> {
                 findNavController().navigate(R.id.action_loginFragment_to_embDashboard)
             }
-            "Service Provider" -> {
+            "Service Provider", "service provider" -> {
                 findNavController().navigate(R.id.action_loginFragment_to_serviceProviderDashboard)
             }
-            "PCO" -> {
+            "PCO", "pco" -> {
                 findNavController().navigate(R.id.action_loginFragment_to_pcoDashboard)
             }
             else -> {
-                Toast.makeText(requireContext(), "Invalid user type!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Invalid user type: $userType", Toast.LENGTH_SHORT).show()
+                Log.w("LoginFragment", "Unknown user type: $userType")
             }
         }
     }
-
 
     // ✅ Toggle Password Visibility Function
     private fun togglePasswordVisibility(editText: EditText, toggleIcon: ImageView, isVisible: Boolean) {

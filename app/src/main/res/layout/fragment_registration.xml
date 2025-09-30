@@ -8,6 +8,21 @@
     android:padding="16dp"
     tools:context=".view.RegistrationFragment">
 
+    <FrameLayout
+        android:id="@+id/progressOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+</FrameLayout>
+
     <!-- Back Button -->
     <ImageView
         android:id="@+id/btnBack"
@@ -51,13 +66,16 @@
         android:textSize="16sp"
         android:layout_marginTop="12dp"/>
 
-    <Spinner
-        android:id="@+id/spUserType"
+    <TextView
+        android:id="@+id/UserType"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@drawable/input_field"
+        android:text="Pollution Control Officer"
+        android:textSize="18dp"
+        android:layout_marginTop="10dp"
         android:padding="12dp"
-        android:layout_marginTop="4dp"/>
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/black"/>
 
     <!-- Input Fields -->
     <EditText

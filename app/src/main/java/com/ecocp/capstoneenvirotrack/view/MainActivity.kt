@@ -6,8 +6,11 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar // Import Toolbar if you are using it
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.google.firebase.auth.EmailAuthProvider
@@ -16,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var navController: NavController
+    private lateinit var appBarConfiguration: AppBarConfiguration // For more advanced Toolbar setup
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,59 +28,85 @@ class MainActivity : AppCompatActivity() {
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
-        // Safely initialize NavHostFragment and NavController
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
-            ?: run {
-                Log.w("MainActivity", "NavHostFragment not found in layout with ID nav_host_fragment, creating new instance")
-                try {
-                    NavHostFragment.create(R.navigation.nav_graph).also { fragment ->
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.nav_host_fragment, fragment)
-                            .setPrimaryNavigationFragment(fragment)
-                            .commitNow()
-                    }
-                } catch (e: IllegalArgumentException) {
-                    Log.e("MainActivity", "Failed to create NavHostFragment: ${e.message}", e)
-                    Toast.makeText(this, "Navigation setup failed, please check configuration", Toast.LENGTH_LONG).show()
-                    return
-                }
-            }
+        // --- NavController Setup ---
+        // 1. Get the NavHostFragment from your XML layout
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        // Ensure R.id.nav_host_fragment is the ID of your FragmentContainerView in activity_main.xml
+        // AND that FragmentContainerView has android:name="androidx.navigation.fragment.NavHostFragment"
+        // AND app:navGraph="@navigation/your_nav_graph" (e.g., @navigation/nav_graph)
+
+        // 2. Get the NavController from the NavHostFragment
+        // 2. Get the NavController from the NavHostFragment
         navController = navHostFragment.navController
-        Log.d("MainActivity", "NavHostFragment found: ${navHostFragment != null}, NavController: $navController")
+        Log.d("MainActivity", "NavController initialized from NavHostFragment in XML.")
 
-        // Set up ActionBar with NavController and Toolbar
-        setupActionBarWithNavController(navController, findViewById(R.id.toolbar))
-        Log.d("MainActivity", "ActionBar set up with NavController and Toolbar")
+        // --- ActionBar/Toolbar Setup (Optional but common) ---
+        // Assuming you have a Toolbar in activity_main.xml with id "toolbar"
+        val toolbar = findViewById<Toolbar>(R.id.toolbar) // Find your Toolbar
+        setSupportActionBar(toolbar) // Set it as the action bar
 
-        // Handle deep link for email authentication
+        // Define top-level destinations for AppBarConfiguration if needed (e.g., for hamburger menu)
+        // If WelcomeFragment is your absolute start and you don't use a drawer,
+        // you might just pass the graph or a set of top-level screen IDs.
+        appBarConfiguration = AppBarConfiguration(navController.graph) // Basic configuration
+        // Example with specific top-level destinations:
+        // appBarConfiguration = AppBarConfiguration(setOf(R.id.welcomeFragment, R.id.homeFragment))
+
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        Log.d("MainActivity", "ActionBar set up with NavController and Toolbar.")
+
+        // Handle deep link for email authentication (Your existing logic)
+        handleDeepLink()
+    }
+
+    private fun handleDeepLink() {
         val intentData: Uri? = intent?.data
         if (intentData != null) {
             val emailLink = intentData.toString()
-            val email = getEmailFromPreferences()
-
-            if (auth.isSignInWithEmailLink(emailLink) && email != null) {
-                if (auth.currentUser != null) {
-                    linkEmailToExistingUser(email, emailLink)
+            Log.d("MainActivity", "Deep link received: $emailLink")
+            // Check if the user is already signed in when the app is opened via link
+            if (auth.isSignInWithEmailLink(emailLink)) {
+                val email = getEmailFromPreferences() // Retrieve the stored email
+                if (email != null) {
+                    if (auth.currentUser != null) {
+                        // User is already signed in (maybe with another provider), link this email
+                        Log.d("MainActivity", "Linking email to existing user.")
+                        linkEmailToExistingUser(email, emailLink)
+                    } else {
+                        // User is not signed in, sign them in with the email link
+                        Log.d("MainActivity", "Signing in with email link.")
+                        verifySignInLink(email, emailLink)
+                    }
                 } else {
-                    verifySignInLink(email, emailLink)
+                    Log.w("MainActivity", "Email for link sign-in not found in preferences.")
+                    Toast.makeText(this, "Email for sign-in link not found. Please try sending the link again.", Toast.LENGTH_LONG).show()
                 }
+            } else {
+                Log.d("MainActivity", "Intent data is not a sign-in email link.")
             }
         }
     }
 
-    // Verify Email Link and Sign In
+
     private fun verifySignInLink(email: String, emailLink: String) {
         auth.signInWithEmailLink(email, emailLink)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("FirebaseAuth", "Successfully signed in with email link!")
                     Toast.makeText(this, "Sign-in successful!", Toast.LENGTH_SHORT).show()
-
+                    // Clear the stored email after successful sign-in
+                    clearEmailFromPreferences()
                     try {
-                        navController.navigate(R.id.embDashboard)
-                        Log.d("Navigation", "Navigated to embDashboard")
-                    } catch (e: IllegalStateException) {
-                        Log.e("Navigation", "Failed to navigate to embDashboard", e)
+                        // Check current destination to avoid unnecessary navigation if already there
+                        if (navController.currentDestination?.id != R.id.embDashboard) {
+                            navController.navigate(R.id.embDashboard) // Or your main app screen
+                            Log.d("Navigation", "Navigated to embDashboard after email link sign-in.")
+                        } else {
+                            Log.d("Navigation", "Already at embDashboard. No navigation needed.")
+                        }
+                    } catch (e: Exception) { // Catch broader exceptions for navigation
+                        Log.e("Navigation", "Failed to navigate after email link sign-in", e)
                         Toast.makeText(this, "Navigation failed, please try again", Toast.LENGTH_SHORT).show()
                     }
                 } else {
@@ -86,27 +116,23 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    // Retrieve Stored Email from SharedPreferences
-    private fun getEmailFromPreferences(): String? {
-        val sharedPref = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE)
-        return sharedPref.getString("user_email", null)
-    }
-
-    // Link Email Authentication to an Existing User
     private fun linkEmailToExistingUser(email: String, emailLink: String) {
         val credential = EmailAuthProvider.getCredentialWithLink(email, emailLink)
-
         auth.currentUser?.linkWithCredential(credential)
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("FirebaseAuth", "Successfully linked email authentication!")
                     Toast.makeText(this, "Email linked to account!", Toast.LENGTH_SHORT).show()
-
+                    clearEmailFromPreferences()
                     try {
-                        navController.navigate(R.id.embDashboard)
-                        Log.d("Navigation", "Navigated to embDashboard")
-                    } catch (e: IllegalStateException) {
-                        Log.e("Navigation", "Failed to navigate to embDashboard", e)
+                        if (navController.currentDestination?.id != R.id.embDashboard) {
+                            navController.navigate(R.id.embDashboard) // Or your main app screen
+                            Log.d("Navigation", "Navigated to embDashboard after email link.")
+                        } else {
+                            Log.d("Navigation", "Already at embDashboard. No navigation needed.")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Navigation", "Failed to navigate after email link", e)
                         Toast.makeText(this, "Navigation failed, please try again", Toast.LENGTH_SHORT).show()
                     }
                 } else {
@@ -116,8 +142,24 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    // Handle back press with NavController
+    private fun getEmailFromPreferences(): String? {
+        val sharedPref = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE)
+        return sharedPref.getString("user_email_for_link", null) // Use a more specific key
+    }
+
+    // It's good practice to clear the email once it's used or no longer needed
+    private fun clearEmailFromPreferences() {
+        val sharedPref = getSharedPreferences("AuthPrefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            remove("user_email_for_link")
+            apply()
+        }
+    }
+
+
+    // Handle Up button press with NavController and AppBarConfiguration
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }
+

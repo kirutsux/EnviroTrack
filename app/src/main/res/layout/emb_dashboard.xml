@@ -1,355 +1,370 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".view.emb.EMB_Dashboard">
 
-    <!-- Top Navigation Bar -->
+    <!-- Main Content -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="#445B6C"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/menu_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_menu"
-            android:layout_marginTop="25dp"/>
+        <!-- Top Navigation Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="#445B6C"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/app_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            <ImageView
+                android:id="@+id/menu_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_menu"
+                android:layout_marginTop="25dp"
+                android:contentDescription="Menu Icon" />
+
+            <TextView
+                android:id="@+id/app_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:text="@string/home"
+                android:textSize="23sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginTop="25dp" />
+
+            <ImageView
+                android:id="@+id/notification_icon"
+                android:layout_width="61dp"
+                android:layout_height="47dp"
+                android:src="@drawable/ic_notifications"
+                android:layout_marginTop="25dp"
+                android:contentDescription="Notification Icon" />
+        </LinearLayout>
+
+        <!-- Scrollable Content -->
+        <ScrollView
+            android:id="@+id/rdy8igdwc09t"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:textColor="@color/white"
-            android:text="@string/home"
-            android:textSize="23sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginTop="25dp"/>
+            android:background="#FFFFFF"
+            android:fillViewport="true">
 
-        <ImageView
-            android:id="@+id/notification_icon"
-            android:layout_width="61dp"
-            android:layout_height="47dp"
-            android:src="@drawable/ic_notifications"
-            android:layout_marginTop="25dp"/>
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-    <!-- Scrollable Content -->
-    <ScrollView
-        android:id="@+id/rdy8igdwc09t"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#FFFFFF"
-        android:fillViewport="true">
+                <!-- Greeting Message -->
+                <TextView
+                    android:id="@+id/greeting_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Hi Iandane! Good Day"
+                    android:textSize="18sp"
+                    android:textColor="#0088ED"
+                    android:textStyle="bold" />
 
-        <!-- Wrap all content inside a LinearLayout -->
+                <!-- Search Bar -->
+                <EditText
+                    android:id="@+id/search_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="@string/search"
+                    android:background="@drawable/search_bar_background"
+                    android:padding="8dp" />
+
+                <!-- Welcome Message -->
+                <TextView
+                    android:id="@+id/welcome_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="16dp"
+                    android:padding="8dp"
+                    android:textStyle="bold"
+                    android:background="@drawable/welcome_background"
+                    android:text="@string/welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time"
+                    android:textSize="16sp" />
+
+                <!-- Recent Section -->
+                <TextView
+                    android:id="@+id/recent_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/recent"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Row 1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <LinearLayout
+                        android:id="@+id/CNC_icon"
+                        android:layout_width="170dp"
+                        android:layout_height="170dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/recent_item_background">
+
+                        <ImageView
+                            android:id="@+id/recent_icon_1"
+                            android:layout_width="105dp"
+                            android:layout_height="105dp"
+                            android:src="@drawable/ic_recent"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/recent_item_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/certificate_of_non_coverage_cnc_management"
+                            android:textSize="14sp"
+                            android:textAlignment="center"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="16dp"
+                        android:layout_height="match_parent" />
+
+                    <LinearLayout
+                        android:id="@+id/SMR_icon"
+                        android:layout_width="170dp"
+                        android:layout_height="170dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:background="@drawable/recent_item_background">
+
+                        <ImageView
+                            android:id="@+id/recent_icon_2"
+                            android:layout_width="105dp"
+                            android:layout_height="105dp"
+                            android:src="@drawable/smr"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/recent_item_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/self_monitoring_report_smr_management"
+                            android:textSize="14sp"
+                            android:textAlignment="center"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Row 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <LinearLayout
+                        android:id="@+id/OPMS_icon"
+                        android:layout_width="170dp"
+                        android:layout_height="170dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:padding="8dp"
+                        android:background="@drawable/recent_item_background">
+
+                        <ImageView
+                            android:id="@+id/recent_icon_3"
+                            android:layout_width="105dp"
+                            android:layout_height="105dp"
+                            android:src="@drawable/opms"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/recent_item_3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/online_permitting_and_monitoring_system"
+                            android:textSize="14sp"
+                            android:textAlignment="center"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="16dp"
+                        android:layout_height="match_parent" />
+
+                    <LinearLayout
+                        android:id="@+id/HMS_icon"
+                        android:layout_width="170dp"
+                        android:layout_height="170dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:background="@drawable/recent_item_background">
+
+                        <ImageView
+                            android:id="@+id/recent_icon_4"
+                            android:layout_width="105dp"
+                            android:layout_height="105dp"
+                            android:src="@drawable/hms"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/recent_item_4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/self_monitoring_report_smr_management"
+                            android:textSize="14sp"
+                            android:textAlignment="center"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Row 3 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <LinearLayout
+                        android:id="@+id/CRS_icon"
+                        android:layout_width="170dp"
+                        android:layout_height="170dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:padding="8dp"
+                        android:background="@drawable/recent_item_background">
+
+                        <ImageView
+                            android:id="@+id/recent_icon_5"
+                            android:layout_width="105dp"
+                            android:layout_height="105dp"
+                            android:src="@drawable/crs"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/recent_item_5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/company_registration"
+                            android:textSize="14sp"
+                            android:textAlignment="center"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="16dp"
+                        android:layout_height="match_parent" />
+
+                    <LinearLayout
+                        android:id="@+id/PCO_icon"
+                        android:layout_width="170dp"
+                        android:layout_height="170dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:background="@drawable/recent_item_background">
+
+                        <ImageView
+                            android:id="@+id/recent_icon_6"
+                            android:layout_width="105dp"
+                            android:layout_height="105dp"
+                            android:src="@drawable/pco"
+                            android:layout_gravity="center" />
+
+                        <TextView
+                            android:id="@+id/recent_item_6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/pco_accreditation"
+                            android:textSize="14sp"
+                            android:textAlignment="center"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Bottom Navigation Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingVertical="12dp"
+            android:background="#FFF">
 
-            <!-- Greeting Message -->
-            <TextView
-                android:id="@+id/greeting_message"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/nav_home"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Hi Iandane! Good Day"
-                android:textSize="18sp"
-                android:textColor="#0088ED"
-                android:textStyle="bold"/>
+                android:src="@drawable/ic_home"
+                android:layout_marginHorizontal="12dp" />
 
-            <!-- Search Bar -->
-            <EditText
-                android:id="@+id/search_bar"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/nav_task"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="@string/search"
-                android:background="@drawable/search_bar_background"
-                android:padding="8dp"/>
+                android:src="@drawable/ic_task"
+                android:layout_marginHorizontal="12dp" />
 
-            <!-- Welcome Message -->
-            <TextView
-                android:id="@+id/welcome_message"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginTop="16dp"
-                android:padding="8dp"
-                android:textStyle="bold"
-                android:background="@drawable/welcome_background"
-                android:text="@string/welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time"
-                android:textSize="16sp"/>
-
-            <!-- Recent Section -->
-            <TextView
-                android:id="@+id/recent_label"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/nav_providers"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/recent"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:src="@drawable/ic_providers"
+                android:layout_marginHorizontal="12dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
+            <ImageView
+                android:id="@+id/nav_chats"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_chats"
+                android:layout_marginHorizontal="12dp" />
 
-                <LinearLayout
-                    android:id="@+id/CNC_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginStart="30dp"
-                    android:padding="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="@drawable/recent_item_background">
-
-                    <ImageView
-                        android:id="@+id/recent_icon_1"
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/ic_recent"
-                        android:layout_gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/recent_item_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/certificate_of_non_coverage_cnc_management"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="16dp"
-                    android:layout_height="match_parent"/>
-
-                <LinearLayout
-                    android:id="@+id/SMR_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    android:background="@drawable/recent_item_background">
-
-                    <ImageView
-                        android:id="@+id/recent_icon_2"
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/smr"
-                        android:layout_gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/recent_item_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/self_monitoring_report_smr_management"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
-
-                <LinearLayout
-                    android:id="@+id/OPMS_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginStart="30dp"
-                    android:padding="8dp"
-                    android:background="@drawable/recent_item_background">
-
-                    <ImageView
-                        android:id="@+id/recent_icon_3"
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/opms"
-                        android:layout_gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/recent_item_3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/online_permitting_and_monitoring_system"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="16dp"
-                    android:layout_height="match_parent"/>
-
-                <LinearLayout
-                    android:id="@+id/HMS_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    android:background="@drawable/recent_item_background">
-
-                    <ImageView
-                        android:id="@+id/recent_icon_4"
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/hms"
-                        android:layout_gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/recent_item_4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/self_monitoring_report_smr_management"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
-
-                <LinearLayout
-                    android:id="@+id/CRS_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginStart="30dp"
-                    android:padding="8dp"
-                    android:background="@drawable/recent_item_background">
-
-                    <ImageView
-                        android:id="@+id/recent_icon_5"
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/crs"
-                        android:layout_gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/recent_item_5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/company_registration"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="16dp"
-                    android:layout_height="match_parent"/>
-
-                <LinearLayout
-                    android:id="@+id/PCO_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    android:background="@drawable/recent_item_background">
-
-                    <ImageView
-                        android:id="@+id/recent_icon_6"
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/pco"
-                        android:layout_gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/recent_item_6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/pco_accreditation"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center"/>
-                </LinearLayout>
-            </LinearLayout>
+            <ImageView
+                android:id="@+id/nav_profile"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_profile"
+                android:layout_marginHorizontal="12dp" />
         </LinearLayout>
-
-    </ScrollView>
-
-    <!-- Bottom Navigation Bar -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingVertical="12dp"
-        android:background="#FFF">
-
-        <ImageView
-            android:id="@+id/nav_home"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_home"
-            android:layout_marginHorizontal="12dp"/>
-
-        <ImageView
-            android:id="@+id/nav_task"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_task"
-            android:layout_marginHorizontal="12dp"/>
-
-        <ImageView
-            android:id="@+id/nav_providers"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_providers"
-            android:layout_marginHorizontal="12dp"/>
-
-        <ImageView
-            android:id="@+id/nav_chats"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_chats"
-            android:layout_marginHorizontal="12dp"/>
-
-        <ImageView
-            android:id="@+id/nav_profile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_profile"
-            android:layout_marginHorizontal="12dp"/>
     </LinearLayout>
 
-</LinearLayout>
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/drawer_menu"
+        app:headerLayout="@layout/drawer_header" />
+
+</androidx.drawerlayout.widget.DrawerLayout>
