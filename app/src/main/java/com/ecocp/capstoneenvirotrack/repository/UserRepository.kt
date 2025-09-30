@@ -1,14 +1,12 @@
 package com.ecocp.capstoneenvirotrack.repository
 
 import android.util.Log
-import com.ecocp.capstoneenvirotrack.model.User
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.ktx.firestore
 import kotlinx.coroutines.tasks.await
 
 class UserRepository {
@@ -36,6 +34,7 @@ class UserRepository {
             conn.outputStream.use { it.write(json.toByteArray()) }
 
             if (conn.responseCode == 200) {
+                Log.d("UserRepository", "Verification code $code sent to $email")
                 return code
             } else {
                 Log.e("UserRepository", "Failed to send email: ${conn.responseMessage}")
@@ -63,11 +62,13 @@ class UserRepository {
             saveUserToFirestore(
                 uid = uid,
                 email = email,
-                fullName = "$firstName $lastName",
+                firstName = firstName,
+                lastName = lastName,
                 phoneNumber = phoneNumber,
                 password = password,
                 userType = userType
             )
+            Log.d("UserRepository", "Manual registration successful for $email")
             true
         } catch (e: Exception) {
             Log.e("UserRepository", "Error registering user", e)
@@ -75,23 +76,49 @@ class UserRepository {
         }
     }
 
-    // Google sign-in (Firebase Auth only, before extra fields)
+    // Google sign-in (Firebase Auth + save to Firestore immediately)
     suspend fun signInWithGoogle(idToken: String): FirebaseUser? {
         return try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val result = auth.signInWithCredential(credential).await()
-            result.user
+            val user = result.user
+
+            if (user != null) {
+                Log.d("UserRepository", "Google sign-in successful for ${user.email}")
+
+                val displayName = user.displayName ?: ""
+                val parts = displayName.split(" ")
+                val firstName = parts.firstOrNull() ?: ""
+                val lastName = parts.drop(1).joinToString(" ")
+
+                // Save to Firestore right away
+                saveUserToFirestore(
+                    uid = user.uid,
+                    email = user.email ?: "",
+                    firstName = firstName,
+                    lastName = lastName,
+                    phoneNumber = "",
+                    password = "", // empty for Google accounts
+                    userType = "PCO" // default PCO type
+                )
+                Log.d("UserRepository", "Google user saved to Firestore with uid=${user.uid}")
+            } else {
+                Log.w("UserRepository", "Google sign-in returned null user")
+            }
+
+            user
         } catch (e: Exception) {
             Log.e("UserRepository", "Error in Google Sign-In", e)
             null
         }
     }
 
-    // Finalize Google registration (extra fields)
+    // Optional: update user data later (e.g. phone/password)
     suspend fun completeGoogleRegistration(
         uid: String,
         email: String,
-        fullName: String,
+        firstName: String,
+        lastName: String,
         phoneNumber: String,
         password: String,
         userType: String
@@ -100,11 +127,13 @@ class UserRepository {
             saveUserToFirestore(
                 uid = uid,
                 email = email,
-                fullName = fullName,
+                firstName = firstName,
+                lastName = lastName,
                 phoneNumber = phoneNumber,
                 password = password,
                 userType = userType
             )
+            Log.d("UserRepository", "Google registration completed for $email")
             true
         } catch (e: Exception) {
             Log.e("UserRepository", "Error completing Google registration", e)
@@ -127,7 +156,8 @@ class UserRepository {
     suspend fun saveUserToFirestore(
         uid: String,
         email: String,
-        fullName: String,
+        firstName: String,
+        lastName: String,
         phoneNumber: String,
         password: String,
         userType: String
@@ -135,7 +165,8 @@ class UserRepository {
         val user = hashMapOf(
             "uid" to uid,
             "email" to email,
-            "fullName" to fullName,
+            "firstName" to firstName,
+            "lastName" to lastName,
             "phoneNumber" to phoneNumber,
             "password" to password,
             "userType" to userType
@@ -145,5 +176,7 @@ class UserRepository {
             .document(uid)
             .set(user)
             .await()
+
+        Log.d("UserRepository", "User saved to Firestore: $email ($uid)")
     }
 }

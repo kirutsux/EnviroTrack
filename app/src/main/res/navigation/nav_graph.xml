@@ -53,6 +53,11 @@
             app:popUpTo="@id/registrationFragment"
             app:popUpToInclusive="false" />
         <action
+            android:id="@+id/action_registrationFragment_to_dashboardFragment"
+            app:destination="@id/pcoDashboard"
+            app:popUpTo="@id/registrationFragment"
+            app:popUpToInclusive="true" />
+        <action
             android:id="@+id/action_registrationFragment_to_verificationFragment"
             app:destination="@id/verificationFragment">
             <argument
@@ -70,32 +75,6 @@
             <argument
                 android:name="phoneNumber"
                 app:argType="string" />
-        </action>
-        <action
-            android:id="@+id/action_registrationFragment_to_googleSignUpFragment"
-            app:destination="@id/googleSignUpFragment">
-            <argument
-                android:name="uid"
-                app:argType="string" />
-            <argument
-                android:name="email"
-                app:argType="string" />
-            <argument
-                android:name="firstName"
-                app:argType="string" />
-            <argument
-                android:name="lastName"
-                app:argType="string" />
-            <argument
-                android:name="password"
-                app:argType="string" />
-            <argument
-                android:name="phoneNumber"
-                app:argType="string" />
-            <argument
-                android:name="userType"
-                app:argType="string"
-                android:defaultValue="pco" />
         </action>
     </fragment>
 
@@ -117,17 +96,6 @@
             android:id="@+id/action_verificationFragment_to_pcoDashboard"
             app:destination="@id/pcoDashboard"
             app:popUpTo="@id/verificationFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/googleSignUpFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.GoogleSignUpFragment"
-        tools:layout="@layout/fragment_google_sign_up">
-        <action
-            android:id="@+id/action_googleSignUpFragment_to_embDashboard"
-            app:destination="@id/embDashboard"
-            app:popUpTo="@id/googleSignUpFragment"
             app:popUpToInclusive="true" />
     </fragment>
 

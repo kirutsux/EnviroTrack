@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ecocp.capstoneenvirotrack.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
@@ -25,16 +28,17 @@ data class UiState(
 
 class RegistrationViewModel(private val repository: UserRepository) : ViewModel() {
 
-    private val _uiState = MutableLiveData(UiState()) // Initialize with default state
+    private val _uiState = MutableLiveData(UiState())
     val uiState: LiveData<UiState> = _uiState
 
-    /** Keeps the last verification code sent to the email and its timestamp */
     private var verificationCode: String? = null
-    private var codeSentTime: Long? = null // Timestamp when the code was sent
-    private val SESSION_TIMEOUT_MINUTES = 10 // Verification code valid for 10 minutes
-    private var tempUserDetails: UserDetails? = null // Temporary storage for user details
+    private var codeSentTime: Long? = null
+    private val SESSION_TIMEOUT_MINUTES = 10
+    private var tempUserDetails: UserDetails? = null
 
-    // Data class to hold temporary user details
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
+    // Data class for holding temporary user details
     data class UserDetails(
         val email: String,
         val firstName: String,
@@ -43,9 +47,7 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
         val phoneNumber: String
     )
 
-    /**
-     * Stores user details temporarily for the PCO registration process.
-     */
+    // ---------------- EMAIL REGISTRATION (unchanged except logs) ----------------
     fun storeUserDetails(
         email: String,
         firstName: String,
@@ -198,6 +200,70 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
         }
     }
 
+    // ---------------- GOOGLE REGISTRATION ----------------
+    fun handleGoogleSignIn(idToken: String) {
+        viewModelScope.launch {
+            Log.d("RegistrationViewModel", "handleGoogleSignIn called with idToken=${idToken.take(10)}...")
+
+            _uiState.value = _uiState.value?.copy(isLoading = true, errorMessage = null, successMessage = null)
+
+            try {
+                val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+                // Sign into Firebase Authentication
+                val authResult = withContext(Dispatchers.IO) {
+                    auth.signInWithCredential(credential).await()
+                }
+
+                val firebaseUser = authResult.user
+                if (firebaseUser == null) {
+                    Log.e("RegistrationViewModel", "Google sign-in failed: FirebaseUser is null")
+                    _uiState.value = _uiState.value?.copy(
+                        isLoading = false,
+                        errorMessage = "Google sign-in failed."
+                    )
+                    return@launch
+                }
+
+                Log.d("RegistrationViewModel", "Google sign-in successful. UID=${firebaseUser.uid}, Email=${firebaseUser.email}")
+
+                val displayName = firebaseUser.displayName ?: ""
+                val nameParts = displayName.split(" ")
+                val firstName = nameParts.firstOrNull() ?: ""
+                val lastName = nameParts.drop(1).joinToString(" ")
+
+                // Save user details into Firestore
+                withContext(Dispatchers.IO) {
+                    repository.saveUserToFirestore(
+                        uid = firebaseUser.uid,
+                        email = firebaseUser.email ?: "",
+                        firstName = firstName,
+                        lastName = lastName,
+                        phoneNumber = firebaseUser.phoneNumber ?: "",
+                        password = "", // Google login, no password
+                        userType = "pco"
+                    )
+                }
+
+                Log.d("RegistrationViewModel", "Google user saved in Firestore successfully.")
+
+                _uiState.value = _uiState.value?.copy(
+                    isLoading = false,
+                    googleUser = firebaseUser,
+                    successMessage = "Google user registered as PCO successfully!",
+                    navigateToDashboardForUserType = "pco"
+                )
+
+            } catch (e: Exception) {
+                Log.e("RegistrationViewModel", "Google sign-in error: ${e.message}", e)
+                _uiState.value = _uiState.value?.copy(
+                    isLoading = false,
+                    errorMessage = e.message ?: "Google sign-in failed"
+                )
+            }
+        }
+    }
+
     /**
      * Resends the verification code using the stored email.
      */
@@ -240,75 +306,8 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
         }
     }
 
-    /**
-     * Clears the navigation signal to prevent multiple navigations.
-     */
     fun clearNavigationSignal() {
         _uiState.value = _uiState.value?.copy(navigateToDashboardForUserType = null)
-    }
-
-    fun completeGoogleRegistration(
-        uid: String,
-        email: String,
-        fullName: String,
-        phoneNumber: String,
-        password: String
-    ) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value?.copy(isLoading = true, successMessage = null, errorMessage = null)
-                ?: UiState(isLoading = true)
-
-            try {
-                withContext(Dispatchers.IO) {
-                    repository.saveUserToFirestore(
-                        uid = uid,
-                        email = email,
-                        fullName = fullName,
-                        phoneNumber = phoneNumber,
-                        password = password,
-                        userType = "pco" // Hardcoded to PCO for Google registrations
-                    )
-                }
-                _uiState.value = _uiState.value?.copy(
-                    isLoading = false,
-                    successMessage = "Registration successful!",
-                    navigateToDashboardForUserType = "pco"
-                )
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value?.copy(
-                    isLoading = false,
-                    errorMessage = e.message ?: "Failed to complete registration"
-                )
-            }
-        }
-    }
-
-    fun handleGoogleSignIn(idToken: String) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value?.copy(isLoading = true, successMessage = null, errorMessage = null)
-                ?: UiState(isLoading = true)
-
-            val user = try {
-                withContext(Dispatchers.IO) {
-                    repository.signInWithGoogle(idToken)
-                }
-            } catch (e: Exception) {
-                null
-            }
-
-            if (user != null) {
-                _uiState.value = _uiState.value?.copy(
-                    isLoading = false,
-                    successMessage = "Google sign-in successful",
-                    googleUser = user
-                )
-            } else {
-                _uiState.value = _uiState.value?.copy(
-                    isLoading = false,
-                    errorMessage = "Google sign-in failed"
-                )
-            }
-        }
     }
 
     fun clearErrorMessage() {
@@ -323,10 +322,7 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
         }
     }
 
-    // Added method to access verificationCode for debugging
-    fun getVerificationCodeForDebug(): String? {
-        return verificationCode
-    }
+    fun getVerificationCodeForDebug(): String? = verificationCode
 }
 
 class RegistrationViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {

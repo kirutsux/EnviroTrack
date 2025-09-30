@@ -63,6 +63,7 @@ class VerificationFragment : Fragment() {
 
     private fun setupOtpInputListeners() {
         val otpFields = listOf(otp1, otp2, otp3, otp4, otp5, otp6)
+
         for (i in otpFields.indices) {
             otpFields[i].addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -74,10 +75,11 @@ class VerificationFragment : Fragment() {
                 override fun afterTextChanged(s: Editable?) {}
             })
 
-            // Handle backspace to move to previous field
             otpFields[i].setOnKeyListener { v, keyCode, event ->
                 if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL) {
                     if (otpFields[i].text.isEmpty() && i > 0) {
+                        // ✅ delete the previous field’s digit before moving back
+                        otpFields[i - 1].setText("")
                         otpFields[i - 1].requestFocus()
                     }
                     true
@@ -87,6 +89,7 @@ class VerificationFragment : Fragment() {
             }
         }
     }
+
 
     private fun setupClickListeners() {
         backButton.setOnClickListener {

@@ -83,11 +83,20 @@ class LoginFragment : Fragment() {
         return view
     }
 
-    // ✅ Google Sign-In Intent
+    // ✅ Google Sign-In Intent with forced popup
     private fun signInWithGoogle() {
-        val signInIntent = googleSignInClient.signInIntent
-        googleSignInLauncher.launch(signInIntent)
+        Log.d("LoginFragment", "Google Sign-In button clicked. Forcing popup by revoking session.")
+
+        // Sign out & revoke access so popup always appears
+        googleSignInClient.signOut().addOnCompleteListener {
+            googleSignInClient.revokeAccess().addOnCompleteListener {
+                Log.d("LoginFragment", "Launching Google Sign-In intent...")
+                val signInIntent = googleSignInClient.signInIntent
+                googleSignInLauncher.launch(signInIntent)
+            }
+        }
     }
+
 
     // ✅ Handle Google Sign-In Result
     private val googleSignInLauncher =
