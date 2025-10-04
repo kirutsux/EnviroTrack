@@ -18,7 +18,7 @@ class UserRepository {
         val code = (100000..999999).random().toString()
 
         try {
-            val url = "http://10.0.2.2:5001/send-email" // Emulator localhost
+            val url = "http://10.0.2.2:5000/send-email" // Emulator localhost
             val json = """
                 {
                   "to": "$email",
