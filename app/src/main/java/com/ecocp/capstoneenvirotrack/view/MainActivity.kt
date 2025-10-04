@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar // Import Toolbar if you are using it
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -25,38 +24,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
-        // --- NavController Setup ---
-        // 1. Get the NavHostFragment from your XML layout
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        // Ensure R.id.nav_host_fragment is the ID of your FragmentContainerView in activity_main.xml
-        // AND that FragmentContainerView has android:name="androidx.navigation.fragment.NavHostFragment"
-        // AND app:navGraph="@navigation/your_nav_graph" (e.g., @navigation/nav_graph)
 
-        // 2. Get the NavController from the NavHostFragment
-        // 2. Get the NavController from the NavHostFragment
         navController = navHostFragment.navController
         Log.d("MainActivity", "NavController initialized from NavHostFragment in XML.")
 
-        // --- ActionBar/Toolbar Setup (Optional but common) ---
-        // Assuming you have a Toolbar in activity_main.xml with id "toolbar"
-        val toolbar = findViewById<Toolbar>(R.id.toolbar) // Find your Toolbar
-        setSupportActionBar(toolbar) // Set it as the action bar
+        appBarConfiguration = AppBarConfiguration(navController.graph)
 
-        // Define top-level destinations for AppBarConfiguration if needed (e.g., for hamburger menu)
-        // If WelcomeFragment is your absolute start and you don't use a drawer,
-        // you might just pass the graph or a set of top-level screen IDs.
-        appBarConfiguration = AppBarConfiguration(navController.graph) // Basic configuration
-        // Example with specific top-level destinations:
-        // appBarConfiguration = AppBarConfiguration(setOf(R.id.welcomeFragment, R.id.homeFragment))
-
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        Log.d("MainActivity", "ActionBar set up with NavController and Toolbar.")
-
-        // Handle deep link for email authentication (Your existing logic)
         handleDeepLink()
     }
 
@@ -159,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 
     // Handle Up button press with NavController and AppBarConfiguration
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }
 
