@@ -14,20 +14,20 @@ class COMP_Dashboard : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_comp__dashboard, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Get references to CardViews
+        val dialog = PCOVerificationDialogFragment()
+        dialog.show(childFragmentManager, "PCOVerificationDialog")
+
         val cncCard = view.findViewById<CardView>(R.id.cnc_card)
         val smrCard = view.findViewById<CardView>(R.id.smr_card)
         val opmsCard = view.findViewById<CardView>(R.id.opms_card)
         val hazewasteCard = view.findViewById<CardView>(R.id.hazewaste_card)
 
-        // Set OnClickListeners
         cncCard.setOnClickListener {
             navigateToFragment(COMP_CNC())
         }
