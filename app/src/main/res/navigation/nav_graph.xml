@@ -13,8 +13,8 @@
             android:id="@+id/action_welcomeFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
         <action
-        android:id="@+id/action_welcomeFragment_to_registrationFragment"
-        app:destination="@id/registrationFragment" />
+            android:id="@+id/action_welcomeFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
     </fragment>
 
     <fragment
@@ -103,7 +103,6 @@
         android:id="@+id/embDashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_Dashboard"
         tools:layout="@layout/emb_dashboard">
-        <!-- Icon Navigation Actions -->
         <action
             android:id="@+id/action_embDashboard_to_embCNCFragment"
             app:destination="@id/embCNCFragment"
@@ -140,12 +139,23 @@
         android:id="@+id/serviceProviderDashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Dashboard"
         tools:layout="@layout/sp_dashboard" />
+
     <fragment
         android:id="@+id/pcoDashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_Dashboard"
-        tools:layout="@layout/fragment_comp__dashboard" />
+        tools:layout="@layout/fragment_comp__dashboard">
+        <action
+            android:id="@+id/action_COMP_Dashboard_to_COMP_PCOAccreditation"
+            app:destination="@id/COMP_PCOAccreditation"
+            app:popUpTo="@id/pcoDashboard"
+            app:popUpToInclusive="false" />
+    </fragment>
 
-    <!-- Icon Fragments -->
+    <fragment
+        android:id="@+id/COMP_PCOAccreditation"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCOAccreditation"
+        tools:layout="@layout/fragment_comp_pco_accreditation" />
+
     <fragment
         android:id="@+id/embCNCFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CNC"
