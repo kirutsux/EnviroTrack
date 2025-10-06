@@ -26,17 +26,11 @@ class PCOVerificationDialogFragment : DialogFragment() {
         view.startAnimation(AnimationUtils.loadAnimation(requireContext(), android.R.anim.fade_in))
 
         val buttonOkay = view.findViewById<Button>(R.id.buttonOkay)
-        val buttonLater = view.findViewById<Button>(R.id.buttonLater)
 
         buttonOkay.setOnClickListener {
             Toast.makeText(requireContext(), "Proceeding to PCO accreditation", Toast.LENGTH_SHORT).show()
             dismiss()
             findNavController().navigate(R.id.action_COMP_Dashboard_to_COMP_PCOAccreditation)
-        }
-
-        buttonLater.setOnClickListener {
-            Toast.makeText(requireContext(), "You can verify your PCO accreditation later from settings", Toast.LENGTH_SHORT).show()
-            dismiss()
         }
     }
 
