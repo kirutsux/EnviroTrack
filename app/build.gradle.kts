@@ -29,6 +29,10 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -78,6 +82,11 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.google.firebase:firebase-storage")
+    implementation ("com.google.firebase:firebase-appcheck-playintegrity")
+    implementation ("com.google.firebase:firebase-common-ktx")
+    implementation("com.google.firebase:firebase-appcheck-debug")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

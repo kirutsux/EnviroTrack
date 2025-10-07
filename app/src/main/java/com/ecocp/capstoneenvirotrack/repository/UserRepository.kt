@@ -5,8 +5,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+
 import kotlinx.coroutines.tasks.await
 
 class UserRepository {
@@ -14,7 +15,7 @@ class UserRepository {
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     // Send verification code via Nodemailer backend
-    suspend fun sendVerificationCode(email: String): String? {
+    fun sendVerificationCode(email: String): String? {
         val code = (100000..999999).random().toString()
 
         try {

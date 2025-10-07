@@ -8,6 +8,10 @@ import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.commit
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC
+import com.ecocp.capstoneenvirotrack.view.businesses.hwms.COMP_Hazwaste_Manifest
+import com.ecocp.capstoneenvirotrack.view.businesses.opms.COMP_OPMS
+import com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR
 
 class COMP_Dashboard : Fragment() {
     override fun onCreateView(

@@ -153,7 +153,7 @@
 
     <fragment
         android:id="@+id/COMP_PCOAccreditation"
-        android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCOAccreditation"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.pcoacc.COMP_PCOAccreditation"
         tools:layout="@layout/fragment_comp_pco_accreditation" />
 
     <fragment
