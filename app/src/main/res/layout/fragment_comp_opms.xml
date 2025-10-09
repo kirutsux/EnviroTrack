@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background_default"
-    tools:context=".businesses.COMP_OPMS">
+    tools:context="view.businesses.opms.COMP_OPMS">
 
     <!-- Header -->
     <LinearLayout

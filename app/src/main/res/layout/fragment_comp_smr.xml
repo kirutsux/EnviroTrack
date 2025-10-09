@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_default"
-    tools:context=".businesses.COMP_SMR">
+    tools:context="view.businesses.smr.COMP_SMR">
 
     <!-- Header -->
     <LinearLayout
