@@ -1,0 +1,237 @@
+package com.ecocp.capstoneenvirotrack.view.businesses
+
+import android.app.Activity
+import android.app.ProgressDialog
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.provider.OpenableColumns
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.fragment.app.Fragment
+import com.ecocp.capstoneenvirotrack.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.util.*
+
+class COMP_PCOAccreditation : Fragment() {
+
+    private lateinit var fullName: EditText
+    private lateinit var positionDesignation: EditText
+    private lateinit var accreditationNumber: EditText
+    private lateinit var companyAffiliationSpinner: Spinner
+    private lateinit var educationalBackground: EditText
+    private lateinit var experienceInEnvManagement: EditText
+    private lateinit var uploadCertificateButton: Button
+    private lateinit var uploadGovernmentIDButton: Button
+    private lateinit var uploadTrainingCertificateButton: Button
+    private lateinit var submitApplicationButton: Button
+    private lateinit var progressDialog: ProgressDialog
+    private lateinit var backButton: ImageView
+
+    private var certificateUri: Uri? = null
+    private var governmentIdUri: Uri? = null
+    private var trainingCertUri: Uri? = null
+
+    private val storage = FirebaseStorage.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    companion object {
+        private const val PICK_CERTIFICATE_REQUEST = 1
+        private const val PICK_GOV_ID_REQUEST = 2
+        private const val PICK_TRAINING_CERT_REQUEST = 3
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val view = inflater.inflate(R.layout.fragment_comp_pco_accreditation, container, false)
+
+        fullName = view.findViewById(R.id.fullName)
+        positionDesignation = view.findViewById(R.id.positionDesignation)
+        accreditationNumber = view.findViewById(R.id.accreditationNumber)
+        companyAffiliationSpinner = view.findViewById(R.id.companyAffiliationSpinner)
+        educationalBackground = view.findViewById(R.id.educationalBackground)
+        experienceInEnvManagement = view.findViewById(R.id.experienceInEnvManagement)
+        uploadCertificateButton = view.findViewById(R.id.uploadCertificateButton)
+        uploadGovernmentIDButton = view.findViewById(R.id.uploadGovernmentIDButton)
+        uploadTrainingCertificateButton = view.findViewById(R.id.uploadTrainingCertificateButton)
+        submitApplicationButton = view.findViewById(R.id.submitApplicationButton)
+        backButton = view.findViewById(R.id.backButton)
+
+        // ✅ Back button returns to previous fragment
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
+        progressDialog = ProgressDialog(requireContext()).apply {
+            setMessage("Submitting Application...")
+            setCancelable(false)
+        }
+
+        setupCompanyAffiliationSpinner()
+        setupButtonListeners()
+
+        return view
+    }
+
+    private fun setupCompanyAffiliationSpinner() {
+        val companies = arrayOf("Select Company", "ABC Corp", "XYZ Industries", "Green Earth Ltd.")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, companies)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        companyAffiliationSpinner.adapter = adapter
+    }
+
+    private fun setupButtonListeners() {
+        uploadCertificateButton.setOnClickListener { openFileChooser(PICK_CERTIFICATE_REQUEST) }
+        uploadGovernmentIDButton.setOnClickListener { openFileChooser(PICK_GOV_ID_REQUEST) }
+        uploadTrainingCertificateButton.setOnClickListener { openFileChooser(PICK_TRAINING_CERT_REQUEST) }
+
+        submitApplicationButton.setOnClickListener {
+            if (validateInputs()) uploadFilesAndSaveData()
+        }
+    }
+
+    private fun openFileChooser(requestCode: Int) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "application/pdf"
+        }
+        startActivityForResult(intent, requestCode)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && data?.data != null) {
+            val uri = data.data
+            val fileName = getFileNameFromUri(uri)
+
+            when (requestCode) {
+                PICK_CERTIFICATE_REQUEST -> {
+                    certificateUri = uri
+                    uploadCertificateButton.text = fileName ?: "Certificate Selected"
+                }
+                PICK_GOV_ID_REQUEST -> {
+                    governmentIdUri = uri
+                    uploadGovernmentIDButton.text = fileName ?: "Government ID Selected"
+                }
+                PICK_TRAINING_CERT_REQUEST -> {
+                    trainingCertUri = uri
+                    uploadTrainingCertificateButton.text = fileName ?: "Training Certificate Selected"
+                }
+            }
+        }
+    }
+
+    private fun getFileNameFromUri(uri: Uri?): String? {
+        uri ?: return null
+        var name: String? = null
+        val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0) name = it.getString(nameIndex)
+            }
+        }
+        return name
+    }
+
+    private fun validateInputs(): Boolean {
+        if (fullName.text.isEmpty() ||
+            positionDesignation.text.isEmpty() ||
+            educationalBackground.text.isEmpty() ||
+            experienceInEnvManagement.text.isEmpty() ||
+            companyAffiliationSpinner.selectedItemPosition == 0
+        ) {
+            Toast.makeText(requireContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (certificateUri == null || governmentIdUri == null || trainingCertUri == null) {
+            Toast.makeText(requireContext(), "Please upload all required documents.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
+    }
+
+    private fun uploadFilesAndSaveData() {
+        val uid = auth.currentUser?.uid ?: return
+        progressDialog.show()
+
+        val accreditationId = UUID.randomUUID().toString()
+        val userFolderRef = storage.reference.child("accreditations/$uid/$accreditationId")
+
+        val certificateRef = userFolderRef.child("certificate.pdf")
+        val govIdRef = userFolderRef.child("government_id.pdf")
+        val trainingCertRef = userFolderRef.child("training_certificate.pdf")
+
+        certificateRef.putFile(certificateUri!!)
+            .continueWithTask { certificateRef.downloadUrl }
+            .addOnSuccessListener { certificateUrl ->
+                govIdRef.putFile(governmentIdUri!!)
+                    .continueWithTask { govIdRef.downloadUrl }
+                    .addOnSuccessListener { govIdUrl ->
+                        trainingCertRef.putFile(trainingCertUri!!)
+                            .continueWithTask { trainingCertRef.downloadUrl }
+                            .addOnSuccessListener { trainingCertUrl ->
+                                saveAccreditationData(
+                                    uid,
+                                    accreditationId,
+                                    certificateUrl.toString(),
+                                    govIdUrl.toString(),
+                                    trainingCertUrl.toString()
+                                )
+                            }
+                    }
+            }
+            .addOnFailureListener {
+                progressDialog.dismiss()
+                Toast.makeText(requireContext(), "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun saveAccreditationData(
+        uid: String,
+        accreditationId: String,
+        certUrl: String,
+        govIdUrl: String,
+        trainingUrl: String
+    ) {
+        val data = hashMapOf(
+            "accreditationId" to accreditationId,
+            "fullName" to fullName.text.toString(),
+            "positionDesignation" to positionDesignation.text.toString(),
+            "accreditationNumber" to accreditationNumber.text.toString(),
+            "companyAffiliation" to companyAffiliationSpinner.selectedItem.toString(),
+            "educationalBackground" to educationalBackground.text.toString(),
+            "experienceInEnvManagement" to experienceInEnvManagement.text.toString(),
+            "certificateUrl" to certUrl,
+            "governmentIdUrl" to govIdUrl,
+            "trainingCertificateUrl" to trainingUrl,
+            "uid" to uid,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        firestore.collection("accreditations")
+            .document(accreditationId)
+            .set(data)
+            .addOnSuccessListener {
+                progressDialog.dismiss()
+                Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()
+
+                // ✅ Navigate to COMP_PCO Fragment instead of Activity
+                val compPCOFragment = COMP_PCO()
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.nav_host_fragment, compPCOFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+            .addOnFailureListener {
+                progressDialog.dismiss()
+                Toast.makeText(requireContext(), "Failed to save application: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+}

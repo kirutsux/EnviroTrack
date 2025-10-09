@@ -1,12 +1,11 @@
-package com.ecocp.capstoneenvirotrack.view.businesses
+package com.ecocp.capstoneenvirotrack.view.businesses.cnc
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
-
 
 class COMP_CNC : Fragment() {
 
