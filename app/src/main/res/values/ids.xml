@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Existing IDs -->
     <item name="app_title" type="id" />
     <item name="notification_icon" type="id" />
     <item name="greeting_message" type="id" />
@@ -14,4 +15,21 @@
     <item name="nav_providers" type="id" />
     <item name="nav_chats" type="id" />
     <item name="nav_profile" type="id" />
+
+    <!-- Accreditation form fields -->
+    <item name="fullName" type="id" />
+    <item name="positionDesignation" type="id" />
+    <item name="accreditationNumber" type="id" />
+    <item name="companyAffiliationSpinner" type="id" />
+    <item name="educationalBackground" type="id" />
+    <item name="experienceInEnvManagement" type="id" />
+    <item name="uploadGovernmentIDButton" type="id" />
+    <item name="uploadTrainingCertificateButton" type="id" />
+    <item name="submitApplicationButton" type="id" />
+
+    <!-- Additional layout IDs for COMP_PCO -->
+    <item name="recycler_accreditations" type="id" />
+    <item name="progress_loading" type="id" />
+    <item name="btn_add_new" type="id" />
+    <item name="text_no_records" type="id" />
 </resources>
