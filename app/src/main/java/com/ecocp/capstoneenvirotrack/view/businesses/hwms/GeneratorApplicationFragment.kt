@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.hwms
 
+import android.app.ProgressDialog
 import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
@@ -9,7 +10,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
+import androidx.fragment.app.commit
+import com.google.firebase.firestore.FieldValue
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.repository.GeneratorRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -70,28 +72,37 @@ class GeneratorApplicationFragment : Fragment() {
     private var currentPickingKey: String? = null
 
     // file picker launcher
-    private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri == null) {
-            Toast.makeText(requireContext(), "No file selected", Toast.LENGTH_SHORT).show()
-            return@registerForActivityResult
-        }
-        val key = currentPickingKey ?: return@registerForActivityResult
-        try {
-            if (!validateFile(uri)) {
+    private val pickFileLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri == null) {
+                Toast.makeText(requireContext(), "No file selected", Toast.LENGTH_SHORT).show()
                 return@registerForActivityResult
             }
-            docUris[key] = uri
-            // update UI: find the row for this key and set name
-            updateDocRowUi(key, uri)
-            checkFinalizeEnabled()
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), "File validation error: ${e.message}", Toast.LENGTH_LONG).show()
-        } finally {
-            currentPickingKey = null
+            val key = currentPickingKey ?: return@registerForActivityResult
+            try {
+                if (!validateFile(uri)) {
+                    return@registerForActivityResult
+                }
+                docUris[key] = uri
+                // update UI: find the row for this key and set name
+                updateDocRowUi(key, uri)
+                checkFinalizeEnabled()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "File validation error: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            } finally {
+                currentPickingKey = null
+            }
         }
-    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val v = inflater.inflate(R.layout.fragment_generator_application, container, false)
 
         // top-level UI
@@ -301,7 +312,11 @@ class GeneratorApplicationFragment : Fragment() {
         val mime = resolver.getType(uri) ?: ""
         val allowed = setOf("application/pdf", "image/jpeg", "image/png", "image/gif")
         if (!allowed.contains(mime)) {
-            Toast.makeText(requireContext(), "Invalid file type: $mime. Allowed: pdf, jpg, png, gif", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                "Invalid file type: $mime. Allowed: pdf, jpg, png, gif",
+                Toast.LENGTH_LONG
+            ).show()
             return false
         }
         // check size
@@ -312,12 +327,20 @@ class GeneratorApplicationFragment : Fragment() {
             pfd?.close()
             val max = 20L * 1024L * 1024L
             if (size > max) {
-                Toast.makeText(requireContext(), "File too large (${size} bytes). Max 20MB", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "File too large (${size} bytes). Max 20MB",
+                    Toast.LENGTH_LONG
+                ).show()
                 sizeOk = false
             }
         } catch (e: Exception) {
             // if we cannot obtain size, we will allow but warn (rare)
-            Toast.makeText(requireContext(), "Could not validate file size; try another file.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Could not validate file size; try another file.",
+                Toast.LENGTH_SHORT
+            ).show()
             sizeOk = false
         }
         return sizeOk
@@ -356,7 +379,12 @@ class GeneratorApplicationFragment : Fragment() {
             val etDesc = row.findViewById<EditText>(R.id.etServiceDesc)
             val name = etName.text.toString().trim()
             if (name.isEmpty()) continue
-            list.add(mapOf("productName" to name, "serviceDescription" to etDesc.text.toString().trim()))
+            list.add(
+                mapOf(
+                    "productName" to name,
+                    "serviceDescription" to etDesc.text.toString().trim()
+                )
+            )
         }
         return list
     }
@@ -394,7 +422,6 @@ class GeneratorApplicationFragment : Fragment() {
             return
         }
 
-        // Build payload
         val payload = mutableMapOf<String, Any>(
             "companyName" to etCompany.text.toString().trim(),
             "managingHead" to etManagingHead.text.toString().trim(),
@@ -412,42 +439,50 @@ class GeneratorApplicationFragment : Fragment() {
             "permits" to collectPermits(),
             "products" to collectProducts(),
             "wastes" to collectWastes(),
-            "status" to "submitted"
+            "status" to "Submitted",
+            // ✅ add this new field
+            "dateSubmitted" to FieldValue.serverTimestamp()
         )
 
-        // ensure required docs present
+
         val missing = requiredDocKeys.filter { docUris[it] == null }
         if (missing.isNotEmpty()) {
             Toast.makeText(requireContext(), "Please upload all required documents before finalizing.", Toast.LENGTH_LONG).show()
             return
         }
 
-        // prepare docUris map (non-null)
         val toUpload = docUris.filterValues { it != null }.mapValues { it.value!! }
 
-        // disable finalize to prevent duplicate taps
         btnFinalize.isEnabled = false
-        Toast.makeText(requireContext(), "Submitting application... please wait", Toast.LENGTH_SHORT).show()
+
+        // ✅ Show default ProgressDialog
+        val progressDialog = ProgressDialog(requireContext()).apply {
+            setMessage("Submitting your application...")
+            setCancelable(false)
+            setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            show()
+        }
 
         repository.submitGeneratorApplication(uid, payload, toUpload,
             onSuccess = { appId ->
-                Toast.makeText(requireContext(), "Application submitted (id=$appId)", Toast.LENGTH_LONG).show()
-                // store in session (for later manifest use)
+                progressDialog.dismiss()
                 HwmsSession.generatorId = appId
-                // Optionally navigate to next HWMS step (transporter selection)
-                try {
-                    // this nav action should exist in your manifest_nav_graph:
-                    val navController = requireActivity().supportFragmentManager.findFragmentById(R.id.hwms_nav_host_fragment)
-                    // instead of trying to programmatically navigate here (child nav), we will use parent navigation:
-                    // If using child nav graph, call findNavController().navigate(R.id.action_generator_to_transporter)
-                    val parentNav = requireActivity().findNavController(R.id.nav_host_fragment) // best effort, may vary
-                } catch (e: Exception) {
-                    // ignore nav attempt — your nav graph will control flow
+
+                // ✅ Navigate to dashboard
+                requireActivity().supportFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace(R.id.nav_host_fragment, GeneratorDashboardFragment())
+                    addToBackStack(null)
                 }
+
+                Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()
             },
             onFailure = { e ->
+                progressDialog.dismiss()
                 btnFinalize.isEnabled = true
                 Toast.makeText(requireContext(), "Submission failed: ${e.message}", Toast.LENGTH_LONG).show()
-            })
+            }
+        )
     }
+
 }

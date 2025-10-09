@@ -29,6 +29,10 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -67,6 +71,8 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.9.3")
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 
     // ✅ Retrofit (correct version)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

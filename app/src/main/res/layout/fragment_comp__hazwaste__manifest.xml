@@ -1,25 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_hwms_gradient"
+    tools:context=".view.businesses.hwms.COMP_Hazwaste_Manifest">
 
-    <TextView
-        android:text="Hazardous Waste Manifest System"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_margin="16dp"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:layout_height="30dp"
-        android:layout_width="match_parent"/>
-
-    <fragment
-        android:id="@+id/hwms_nav_host_fragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:navGraph="@navigation/manifest_nav_graph"
-        app:defaultNavHost="false" />
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:gravity="center_horizontal">
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/title_hwms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hazardous Waste Management System"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Dashboard Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <!-- 1. Generator Application -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_generator"
+                style="@style/HWMSCardButton"
+                app:cardBackgroundColor="#FFFFFF">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="Generator Application" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 2. Transporter Selection -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_transporter"
+                style="@style/HWMSCardButton">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="Select Transporter" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 3. TSD Facility Selection -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_tsd"
+                style="@style/HWMSCardButton">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="Select TSD Facility" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 4. Permit to Transport -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_permit_transport"
+                style="@style/HWMSCardButton">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="Permit to Transport" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 5. Payment to EMB -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_payment_emb"
+                style="@style/HWMSCardButton">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="Payment to EMB" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 6. Generator Manifest -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_manifest_generator"
+                style="@style/HWMSCardButton">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="Generator Manifest" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 7. Transporter Manifest -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_manifest_transporter"
+                style="@style/HWMSCardButton">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="Transporter Manifest" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 8. TSD Manifest -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_manifest_tsd"
+                style="@style/HWMSCardButton">
+                <TextView
+                    style="@style/HWMSCardText"
+                    android:text="TSD Manifest" />
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
