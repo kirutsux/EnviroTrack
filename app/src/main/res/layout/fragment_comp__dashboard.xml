@@ -139,16 +139,16 @@
                     android:layout_width="160dp"
                     android:layout_height="150dp"
                     android:layout_margin="8dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="6dp"
-                    app:cardBackgroundColor="@color/card_background">
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="6dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:background="@drawable/recent_item_background">
 
                         <ImageView
                             android:layout_width="64dp"
@@ -174,16 +174,16 @@
                     android:layout_width="160dp"
                     android:layout_height="150dp"
                     android:layout_margin="8dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="6dp"
-                    app:cardBackgroundColor="@color/card_background">
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="6dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:background="@drawable/recent_item_background">
 
                         <ImageView
                             android:layout_width="64dp"
@@ -209,16 +209,16 @@
                     android:layout_width="160dp"
                     android:layout_height="150dp"
                     android:layout_margin="8dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="6dp"
-                    app:cardBackgroundColor="@color/card_background">
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="6dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:background="@drawable/recent_item_background">
 
                         <ImageView
                             android:layout_width="64dp"
@@ -244,16 +244,16 @@
                     android:layout_width="160dp"
                     android:layout_height="150dp"
                     android:layout_margin="8dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="6dp"
-                    app:cardBackgroundColor="@color/card_background">
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="6dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:background="@drawable/recent_item_background">
 
                         <ImageView
                             android:layout_width="64dp"

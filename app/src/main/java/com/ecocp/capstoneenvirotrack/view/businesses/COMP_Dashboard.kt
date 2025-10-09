@@ -8,26 +8,30 @@ import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.commit
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC
+import com.ecocp.capstoneenvirotrack.view.businesses.hwms.COMP_Hazwaste_Manifest
+import com.ecocp.capstoneenvirotrack.view.businesses.opms.COMP_OPMS
+import com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR
 
 class COMP_Dashboard : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_comp__dashboard, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Get references to CardViews
+        val dialog = PCOVerificationDialogFragment()
+        dialog.show(childFragmentManager, "PCOVerificationDialog")
+
         val cncCard = view.findViewById<CardView>(R.id.cnc_card)
         val smrCard = view.findViewById<CardView>(R.id.smr_card)
         val opmsCard = view.findViewById<CardView>(R.id.opms_card)
         val hazewasteCard = view.findViewById<CardView>(R.id.hazewaste_card)
 
-        // Set OnClickListeners
         cncCard.setOnClickListener {
             navigateToFragment(COMP_CNC())
         }
