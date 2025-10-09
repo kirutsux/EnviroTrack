@@ -151,10 +151,24 @@
             app:popUpToInclusive="false" />
     </fragment>
 
+    <!-- Existing PCO Accreditation Fragment -->
     <fragment
         android:id="@+id/COMP_PCOAccreditation"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCOAccreditation"
-        tools:layout="@layout/fragment_comp_pco_accreditation" />
+        tools:layout="@layout/fragment_comp_pco_accreditation">
+        <!-- ➕ NEW ACTION ADDED HERE -->
+        <action
+            android:id="@+id/action_COMP_PCOAccreditation_to_COMP_PCO"
+            app:destination="@id/COMP_PCO"
+            app:popUpTo="@id/COMP_PCOAccreditation"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <!-- ➕ NEW FRAGMENT FOR PCO LIST/TABLE -->
+    <fragment
+        android:id="@+id/COMP_PCO"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCO"
+        tools:layout="@layout/fragment_comp_pco" />
 
     <fragment
         android:id="@+id/embCNCFragment"

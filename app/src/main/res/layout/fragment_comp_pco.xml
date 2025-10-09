@@ -14,17 +14,32 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Title -->
-        <TextView
-            android:id="@+id/tvTitle"
+        <!-- Top Bar (Back button + Title) -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PCO Accreditation Management"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:gravity="center"
-            android:layout_marginBottom="12dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:id="@+id/backButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/backbtn"
+                android:contentDescription="Back Button"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PCO Accreditation Management"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+        </LinearLayout>
 
         <!-- Search and Filter Row -->
         <LinearLayout
@@ -45,7 +60,7 @@
                 android:background="@drawable/edittext_background"
                 android:padding="8dp"
                 android:textColor="@color/black"
-                android:textColorHint="@color/dark_gray" />
+                android:textColorHint="@color/darker_gray" />
 
             <Spinner
                 android:id="@+id/spinnerStatus"
@@ -57,51 +72,6 @@
                 android:background="@drawable/spinner_background" />
         </LinearLayout>
 
-        <!-- RecyclerView Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="6dp"
-            android:background="#E9ECEF">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="#"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="13sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="Application"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="13sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="Forwarded To"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="13sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Status"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="13sp" />
-        </LinearLayout>
 
         <!-- RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
@@ -119,7 +89,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="No accreditations available"
-            android:textColor="@color/dark_gray"
+            android:textColor="@color/darker_gray"
             android:textAlignment="center"
             android:padding="12dp"
             android:visibility="gone" />
