@@ -4,18 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="8dp"
-    android:layout_marginHorizontal="4dp"
-    app:cardBackgroundColor="#1E1E2F"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="6dp">
+    android:layout_marginHorizontal="6dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="6dp"
+    app:cardBackgroundColor="#F8FAFB">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="14dp">
 
-        <!-- Top Header -->
+        <!-- 🔹 Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,12 +28,12 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="ID: 0591 (R11)"
-                android:textColor="#BB86FC"
+                android:textColor="#2980B9"
                 android:textStyle="bold"
                 android:textSize="13sp" />
         </LinearLayout>
 
-        <!-- Application Name -->
+        <!-- 🏢 Application Name -->
         <TextView
             android:id="@+id/tvAppName"
             android:layout_width="wrap_content"
@@ -41,20 +41,20 @@
             android:text="ECOLAND PETRON SERVICE CENTER"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
+            android:textColor="#1E2A35"
             android:paddingTop="4dp" />
 
-        <!-- Applicant -->
+        <!-- 👤 Applicant -->
         <TextView
             android:id="@+id/tvApplicant"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="John C. Dela Cruz II"
             android:textSize="13sp"
-            android:textColor="#B0B0B0"
+            android:textColor="#5A6D85"
             android:paddingBottom="6dp" />
 
-        <!-- Detail Rows -->
+        <!-- 📋 Details Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Forwarded to: Melvin M. Dapitanon"
-                android:textColor="#CCCCCC"
+                android:textColor="#3E4C59"
                 android:textSize="13sp"
                 android:paddingVertical="4dp" />
 
@@ -76,7 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Last updated: Sept 28, 2021"
-                android:textColor="#CCCCCC"
+                android:textColor="#3E4C59"
                 android:textSize="13sp"
                 android:paddingVertical="4dp" />
 
@@ -85,19 +85,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Type: Renewal"
-                android:textColor="#9FA8DA"
+                android:textColor="#2980B9"
                 android:textSize="13sp"
                 android:paddingVertical="4dp" />
 
             <TextView
                 android:id="@+id/tvStatus"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Status: Submitted"
-                android:textColor="#FFB74D"
+                android:textColor="#A8DADC"
                 android:textStyle="bold"
                 android:textSize="13sp"
-                android:paddingVertical="4dp" />
+                android:padding="10dp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

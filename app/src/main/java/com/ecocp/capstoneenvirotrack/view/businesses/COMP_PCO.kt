@@ -84,7 +84,7 @@ class COMP_PCO : Fragment() {
                         appId = shortId,
                         appName = company,
                         applicant = fullName,
-                        forwardedTo = position,
+                        forwardedTo = "EMB",
                         updatedDate = formattedDate,
                         type = "Accreditation",
                         status = "Submitted"

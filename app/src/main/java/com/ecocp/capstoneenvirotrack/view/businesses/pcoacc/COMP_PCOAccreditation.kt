@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view.businesses
+package com.ecocp.capstoneenvirotrack.view.businesses.pcoacc
 
 import android.app.Activity
 import android.app.ProgressDialog
@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
