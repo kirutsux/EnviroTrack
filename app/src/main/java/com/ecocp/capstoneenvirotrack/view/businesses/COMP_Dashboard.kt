@@ -10,6 +10,7 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.businesses.COMP_Profile
 import com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC
 import com.ecocp.capstoneenvirotrack.view.businesses.hwms.COMP_Hazwaste_Manifest
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.COMP_OPMS
@@ -35,7 +36,7 @@ class COMP_Dashboard : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_comp__dashboard, container, false)
+        return inflater.inflate(R.layout.pco_dashboard, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

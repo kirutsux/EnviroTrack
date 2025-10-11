@@ -4,6 +4,7 @@
     android:id="@+id/genAppRoot"
     android:orientation="vertical"
     android:padding="12dp"
+    android:background="#FFFFFF"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 

@@ -14,7 +14,7 @@ class COMP_SP_Directory : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comp_sp_directory, container, false)
+        return inflater.inflate(R.layout.pco_spdirectory, container, false)
     }
 
 }

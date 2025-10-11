@@ -14,7 +14,7 @@ class COMP_PendingComplSubmission : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comp__pending_compl_submission, container, false)
+        return inflater.inflate(R.layout.pco_pending_compl_submission, container, false)
     }
 
 }

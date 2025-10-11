@@ -143,7 +143,7 @@
     <fragment
         android:id="@+id/pcoDashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_Dashboard"
-        tools:layout="@layout/fragment_comp__dashboard">
+        tools:layout="@layout/pco_dashboard">
         <action
             android:id="@+id/action_COMP_Dashboard_to_COMP_PCOAccreditation"
             app:destination="@id/COMP_PCOAccreditation"
@@ -155,7 +155,7 @@
     <fragment
         android:id="@+id/COMP_PCOAccreditation"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCOAccreditation"
-        tools:layout="@layout/fragment_comp_pco_accreditation">
+        tools:layout="@layout/pco_accreditation">
         <!-- ➕ NEW ACTION ADDED HERE -->
         <action
             android:id="@+id/action_COMP_PCOAccreditation_to_COMP_PCO"

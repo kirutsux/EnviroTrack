@@ -15,7 +15,7 @@ class COMP_Hazwaste_Manifest : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_comp__hazwaste__manifest, container, false)
+        return inflater.inflate(R.layout.pco_hazwaste_manifest, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

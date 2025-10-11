@@ -15,7 +15,7 @@ class SP_RegistrationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_sp__registration, container, false)
+        val view = inflater.inflate(R.layout.sp_registration, container, false)
 
         // Initialize Spinner
         val spinner: Spinner = view.findViewById(R.id.spinnerServiceCategory)

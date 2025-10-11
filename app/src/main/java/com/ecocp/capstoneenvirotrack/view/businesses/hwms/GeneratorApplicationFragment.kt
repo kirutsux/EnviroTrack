@@ -103,7 +103,7 @@ class GeneratorApplicationFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val v = inflater.inflate(R.layout.fragment_generator_application, container, false)
+        val v = inflater.inflate(R.layout.pco_hwms_generator_application, container, false)
 
         // top-level UI
         flipper = v.findViewById(R.id.viewFlipperSteps)
@@ -439,7 +439,7 @@ class GeneratorApplicationFragment : Fragment() {
             "permits" to collectPermits(),
             "products" to collectProducts(),
             "wastes" to collectWastes(),
-            "status" to "Submitted",
+            "status" to "Pending",
             // ✅ add this new field
             "dateSubmitted" to FieldValue.serverTimestamp()
         )
@@ -472,7 +472,6 @@ class GeneratorApplicationFragment : Fragment() {
                 requireActivity().supportFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace(R.id.nav_host_fragment, GeneratorDashboardFragment())
-                    addToBackStack(null)
                 }
 
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()

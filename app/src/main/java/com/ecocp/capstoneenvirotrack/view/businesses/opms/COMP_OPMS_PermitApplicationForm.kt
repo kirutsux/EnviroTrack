@@ -15,7 +15,7 @@ class COMP_OPMS_PermitApplicationForm : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(
-            R.layout.fragment_comp_opms_permit_application_form,
+            R.layout.pco_permit_application_form,
             container,
             false
         )

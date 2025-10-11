@@ -15,7 +15,7 @@ class COMP_Pending_Documents_Submission : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(
-            R.layout.fragment_comp__pending__documents__submission,
+            R.layout.pco_pending_documents_submission,
             container,
             false
         )

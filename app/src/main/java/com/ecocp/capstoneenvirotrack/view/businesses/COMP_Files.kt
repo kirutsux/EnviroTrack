@@ -14,7 +14,7 @@ class COMP_Files : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comp__files, container, false)
+        return inflater.inflate(R.layout.pco_files, container, false)
     }
 
 }

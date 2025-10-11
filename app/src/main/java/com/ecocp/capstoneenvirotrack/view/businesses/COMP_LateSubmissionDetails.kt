@@ -14,6 +14,6 @@ class COMP_LateSubmissionDetails : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comp__late_submission_details, container, false)
+        return inflater.inflate(R.layout.pco_late_submission_details, container, false)
     }
 }

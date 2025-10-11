@@ -51,7 +51,7 @@ class COMP_PCOAccreditation : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_comp_pco_accreditation, container, false)
+        val view = inflater.inflate(R.layout.pco_accreditation, container, false)
 
         fullName = view.findViewById(R.id.fullName)
         positionDesignation = view.findViewById(R.id.positionDesignation)

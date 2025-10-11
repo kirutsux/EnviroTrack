@@ -1,15 +1,19 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.hwms
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.databinding.FragmentGeneratorDashboardBinding
+import com.ecocp.capstoneenvirotrack.databinding.PcoHwmsGeneratorDashboardBinding
 import com.ecocp.capstoneenvirotrack.view.businesses.adapters.GeneratorDashboardAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -20,37 +24,70 @@ import java.util.*
 
 class GeneratorDashboardFragment : Fragment() {
 
-    private var _binding: FragmentGeneratorDashboardBinding? = null
+    private var _binding: PcoHwmsGeneratorDashboardBinding? = null
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private lateinit var adapter: GeneratorDashboardAdapter
     private val applications = mutableListOf<GeneratorApplication>()
+    private val filteredList = mutableListOf<GeneratorApplication>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentGeneratorDashboardBinding.inflate(inflater, container, false)
+        _binding = PcoHwmsGeneratorDashboardBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = GeneratorDashboardAdapter(applications)
+        adapter = GeneratorDashboardAdapter(filteredList)
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
 
         // Swipe-to-refresh
-        binding.swipeRefresh.setOnRefreshListener {
-            fetchApplications()
-        }
+        binding.swipeRefresh.setOnRefreshListener { fetchApplications() }
 
-        // Add button
+        // Add new generator application
         binding.btnAddApplication.setOnClickListener {
             navigateToFragment(GeneratorApplicationFragment())
         }
+
+        // Back button
+        binding.btnBack.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
+        // Spinner setup
+        val statusOptions = arrayOf("All", "Pending", "Approved", "Rejected")
+        val spinnerAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_dropdown_item,
+            statusOptions
+        )
+        binding.spinnerStatus.adapter = spinnerAdapter
+
+        binding.spinnerStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                filterApplications()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Search filter
+        binding.searchBar.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) = filterApplications()
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
         // Initial load
         fetchApplications()
@@ -67,17 +104,12 @@ class GeneratorDashboardFragment : Fragment() {
 
         db.collection("HazardousWasteGenerator")
             .whereEqualTo("userId", uid)
-            .orderBy("submittedAt", Query.Direction.DESCENDING)
+            .orderBy("dateSubmitted", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { snapshot ->
                 applications.clear()
 
-                if (snapshot.isEmpty) {
-                    Toast.makeText(requireContext(), "No applications found.", Toast.LENGTH_SHORT).show()
-                }
-
                 for (doc in snapshot.documents) {
-                    // ✅ Handle Timestamp for dateSubmitted
                     val timestamp = doc.get("dateSubmitted")
                     val formattedDate = when (timestamp) {
                         is Timestamp -> SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(timestamp.toDate())
@@ -99,13 +131,41 @@ class GeneratorDashboardFragment : Fragment() {
                     applications.add(app)
                 }
 
-                adapter.notifyDataSetChanged()
+                filterApplications()
                 binding.swipeRefresh.isRefreshing = false
             }
             .addOnFailureListener { e ->
                 binding.swipeRefresh.isRefreshing = false
                 Toast.makeText(requireContext(), "Error loading data: ${e.message}", Toast.LENGTH_LONG).show()
             }
+    }
+
+    // ✅ Enhanced Search & Filter
+    private fun filterApplications() {
+        val searchText = binding.searchBar.text.toString().trim().lowercase(Locale.getDefault())
+        val selectedStatus = binding.spinnerStatus.selectedItem.toString()
+
+        filteredList.clear()
+
+        for (app in applications) {
+            val matchesSearch = listOf(
+                app.companyName,
+                app.establishmentName,
+                app.pcoName,
+                app.natureOfBusiness,
+                app.status,
+                app.dateSubmitted
+            ).any { it.lowercase(Locale.getDefault()).contains(searchText) }
+
+            val matchesStatus =
+                selectedStatus == "All" || app.status.equals(selectedStatus, ignoreCase = true)
+
+            if (matchesSearch && matchesStatus) {
+                filteredList.add(app)
+            }
+        }
+
+        adapter.notifyDataSetChanged()
     }
 
     private fun navigateToFragment(fragment: Fragment) {
@@ -122,7 +182,7 @@ class GeneratorDashboardFragment : Fragment() {
     }
 }
 
-// ✅ Minimal data model (only for dashboard)
+// ✅ Data Model
 data class GeneratorApplication(
     val id: String,
     val companyName: String,
