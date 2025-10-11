@@ -1,18 +1,21 @@
 package com.ecocp.capstoneenvirotrack.view.businesses
 
-import android.view.View
-import android.widget.ImageView
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.PCO
 import com.ecocp.capstoneenvirotrack.view.businesses.adapters.PCOAdapter
-import com.google.firebase.auth.FirebaseAuth
+import com.ecocp.capstoneenvirotrack.view.businesses.dialogs.PCODetailsDialog
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,11 +24,11 @@ class COMP_PCO : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvNoData: TextView
+    private lateinit var etSearch: EditText
+    private lateinit var spinnerStatus: Spinner
     private lateinit var adapter: PCOAdapter
     private val list = mutableListOf<PCO>()
     private lateinit var backButton: ImageView
-
-    private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
@@ -36,67 +39,152 @@ class COMP_PCO : Fragment() {
 
         recyclerView = view.findViewById(R.id.pcoRecyclerView)
         tvNoData = view.findViewById(R.id.tvNoData)
+        etSearch = view.findViewById(R.id.etSearch)
+        spinnerStatus = view.findViewById(R.id.spinnerStatus)
         backButton = view.findViewById(R.id.backButton)
+        val newApplicationButton: FloatingActionButton = view.findViewById(R.id.NewApplication)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = PCOAdapter(list)
+        recyclerView.setHasFixedSize(true)
+
+        adapter = PCOAdapter(mutableListOf()) { selectedItem ->
+            showDetails(selectedItem)
+        }
         recyclerView.adapter = adapter
 
-        // 🔙 Handle back navigation
-        backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-
+        setupSearch()
+        setupSpinner()
+        setupButtons(newApplicationButton)
         fetchAccreditations()
 
         return view
     }
 
+    private fun setupSearch() {
+        etSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                adapter.filter.filter(s.toString())
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    private fun setupSpinner() {
+        val statuses = listOf("All", "Approved", "Rejected", "Pending", "Submitted")
+        val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statuses)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerStatus.adapter = spinnerAdapter
+
+        spinnerStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?, view: View?, position: Int, id: Long
+            ) {
+                adapter.filterByStatus(statuses[position])
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setupButtons(newApplicationButton: FloatingActionButton) {
+        backButton.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
+        newApplicationButton.setOnClickListener {
+            val newFragment = COMP_PCOAccreditation()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.nav_host_fragment, newFragment)
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
     private fun fetchAccreditations() {
-        val uid = auth.currentUser?.uid ?: return
+        Log.d("COMP_PCO", "Fetching all accreditations...")
 
         firestore.collection("accreditations")
-            .whereEqualTo("uid", uid)
             .get()
             .addOnSuccessListener { documents ->
-                list.clear()
+                Log.d("COMP_PCO", "Fetched ${documents.size()} documents")
+                val fetchedList = mutableListOf<PCO>()
 
                 for (doc in documents) {
                     val accreditationId = doc.getString("accreditationId") ?: "N/A"
-                    val shortId = if (accreditationId.length >= 4) {
+                    val shortId = if (accreditationId.length >= 4)
                         "ID: ${accreditationId.take(4)}"
-                    } else {
-                        "ID: $accreditationId"
-                    }
+                    else "ID: $accreditationId"
 
                     val fullName = doc.getString("fullName") ?: "N/A"
                     val company = doc.getString("companyAffiliation") ?: "N/A"
-                    val position = doc.getString("positionDesignation") ?: "N/A"
+                    val status = doc.getString("status") ?: "Submitted"
                     val timestamp = doc.getLong("timestamp") ?: 0L
 
-                    val formattedDate = if (timestamp > 0) {
+                    val formattedDate = if (timestamp > 0)
                         SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
-                    } else {
-                        "N/A"
-                    }
+                    else "N/A"
 
-                    val item = PCO(
-                        appId = shortId,
-                        appName = company,
-                        applicant = fullName,
-                        forwardedTo = "EMB",
-                        updatedDate = formattedDate,
-                        type = "Accreditation",
-                        status = "Submitted"
+                    fetchedList.add(
+                        PCO(
+                            appId = shortId,
+                            appName = company,
+                            applicant = fullName,
+                            forwardedTo = "EMB",
+                            updatedDate = formattedDate,
+                            type = "Accreditation",
+                            status = status
+                        )
                     )
-                    list.add(item)
                 }
 
-                adapter.notifyDataSetChanged()
-                tvNoData.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                if (fetchedList.isEmpty()) {
+                    recyclerView.visibility = View.GONE
+                    tvNoData.visibility = View.VISIBLE
+                } else {
+                    recyclerView.visibility = View.VISIBLE
+                    tvNoData.visibility = View.GONE
+                    adapter.updateList(fetchedList)
+                }
             }
-            .addOnFailureListener {
+            .addOnFailureListener { e ->
+                Log.e("COMP_PCO", "Error fetching accreditations", e)
+                recyclerView.visibility = View.GONE
                 tvNoData.visibility = View.VISIBLE
             }
     }
+
+    private fun showDetails(selectedItem: PCO) {
+        firestore.collection("accreditations")
+            .whereEqualTo("fullName", selectedItem.applicant)
+            .get()
+            .addOnSuccessListener { docs ->
+                if (!docs.isEmpty) {
+                    val doc = docs.documents.first()
+
+                    // Extract the file URLs
+                    val governmentIdUrl = doc.getString("governmentIdUrl")
+                    val certificateUrl = doc.getString("certificateUrl")
+                    val trainingCertificateUrl = doc.getString("trainingCertificateUrl")
+
+                    val dialog = PCODetailsDialog.newInstance(
+                        doc.getString("fullName") ?: "N/A",
+                        doc.getString("positionDesignation") ?: "N/A",
+                        doc.getString("accreditationNumber") ?: "N/A",
+                        doc.getString("companyAffiliation") ?: "N/A",
+                        doc.getString("educationalBackground") ?: "N/A",
+                        doc.getString("experienceInEnvManagement") ?: "N/A",
+                        governmentIdUrl,
+                        certificateUrl,
+                        trainingCertificateUrl
+                    )
+
+                    dialog.show(parentFragmentManager, "PCODetailsDialog")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("COMP_PCO", "Error fetching details: ${e.message}", e)
+            }
+    }
+
 }

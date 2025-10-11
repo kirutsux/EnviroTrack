@@ -57,4 +57,10 @@
         <!-- Ensure background and tint are not overridden -->
         <item name="android:backgroundTintMode">src_over</item>
     </style>
+    <!-- Italic version -->
+    <style name="FormLabel.Italic">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
 </resources>

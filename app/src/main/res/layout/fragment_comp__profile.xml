@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#FFFFFF">
 
     <LinearLayout
@@ -25,14 +26,13 @@
                 android:textColor="@android:color/white"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="12dp"/>
-
+            <!-- editing profile picture part -->
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/ivProfilePic"
                 android:layout_width="90dp"
                 android:layout_height="90dp"
                 android:layout_centerInParent="true"
                 android:src="@drawable/sample_profile"
-                android:background="@drawable/circle_background"
                 android:scaleType="centerCrop" />
 
             <ImageView
@@ -43,7 +43,8 @@
                 android:background="@drawable/circle_white_background"
                 android:layout_alignBottom="@id/ivProfilePic"
                 android:layout_alignEnd="@id/ivProfilePic"
-                android:padding="4dp"/>
+                android:padding="4dp"
+                app:tint="#2563EB"/>
         </RelativeLayout>
 
         <!-- Name and Email -->
@@ -58,7 +59,7 @@
                 android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Kurtz Malong"
+                android:text="User's Fullname"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="#000000"
@@ -68,7 +69,7 @@
                 android:id="@+id/tvEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="kurtz.malong@gmail.com"
+                android:text="User's@gmail.com"
                 android:textSize="14sp"
                 android:textColor="#666666"/>
         </LinearLayout>
@@ -81,8 +82,10 @@
             android:divider="@android:color/darker_gray"
             android:showDividers="middle">
 
+            <!-- Account give me intent for this part-->
             <!-- Account -->
             <LinearLayout
+                android:id="@+id/btnAccount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -107,6 +110,7 @@
                     android:layout_height="20dp"
                     android:src="@drawable/ic_arrow_right"/>
             </LinearLayout>
+
 
             <!-- Feedback -->
             <LinearLayout

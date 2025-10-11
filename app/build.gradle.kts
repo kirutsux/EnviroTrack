@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
     id("androidx.navigation.safeargs.kotlin")
+    id("kotlin-kapt") // ✅ Use this instead of org.jetbrains.kotlin.kapt
 }
+
 
 android {
     namespace = "com.ecocp.capstoneenvirotrack"
@@ -81,6 +83,12 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation ("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
+
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    // ✅ Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
