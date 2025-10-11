@@ -1,14 +1,9 @@
 package com.ecocp.capstoneenvirotrack.view.businesses
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -18,7 +13,6 @@ import com.bumptech.glide.Glide
 import com.ecocp.capstoneenvirotrack.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import de.hdodenhof.circleimageview.CircleImageView
 
 class COMP_Profile : Fragment() {
@@ -26,14 +20,9 @@ class COMP_Profile : Fragment() {
     private lateinit var tvName: TextView
     private lateinit var tvEmail: TextView
     private lateinit var ivProfilePic: CircleImageView
-    private lateinit var ivEditPic: ImageView
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
-
-    private val PICK_IMAGE_REQUEST = 1001
-    private var imageUri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,13 +34,9 @@ class COMP_Profile : Fragment() {
         tvName = view.findViewById(R.id.tvName)
         tvEmail = view.findViewById(R.id.tvEmail)
         ivProfilePic = view.findViewById(R.id.ivProfilePic)
-        ivEditPic = view.findViewById(R.id.ivEditPic)
 
         // Load user data from Firebase
         loadUserData()
-
-        // Edit profile picture
-        ivEditPic.setOnClickListener { openImagePicker() }
 
         // 🔹 Navigate to Account Fragment
         val btnAccount = view.findViewById<LinearLayout>(R.id.btnAccount)
@@ -64,55 +49,6 @@ class COMP_Profile : Fragment() {
         }
 
         return view
-    }
-
-    // 🖼️ Open Image Picker
-    private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(intent, PICK_IMAGE_REQUEST)
-    }
-
-    // 📥 Handle Image Picker Result
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
-            imageUri = data.data
-            imageUri?.let {
-                ivProfilePic.setImageURI(it)
-                uploadImageToFirebase(it)
-            }
-        }
-    }
-
-    // ☁️ Upload Image to Firebase Storage
-    private fun uploadImageToFirebase(imageUri: Uri) {
-        val currentUser = auth.currentUser ?: run {
-            Toast.makeText(requireContext(), "Not logged in", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val uid = currentUser.uid
-        val storageRef = storage.reference.child("profile_pictures/$uid/profile.jpg")
-
-        storageRef.putFile(imageUri)
-            .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    val downloadUrl = uri.toString()
-
-                    db.collection("users").document(uid)
-                        .update("profileImageUrl", downloadUrl)
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Profile picture updated!", Toast.LENGTH_SHORT).show()
-                            loadUserData()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Failed to update Firestore: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                }
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
     }
 
     // 👤 Load user info from Firestore

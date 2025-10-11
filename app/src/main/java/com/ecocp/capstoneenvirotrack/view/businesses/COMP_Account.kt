@@ -1,17 +1,24 @@
 package com.ecocp.capstoneenvirotrack.view.businesses
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.ecocp.capstoneenvirotrack.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import de.hdodenhof.circleimageview.CircleImageView
 
 class COMP_Account : Fragment() {
@@ -21,10 +28,16 @@ class COMP_Account : Fragment() {
     private lateinit var etPassword: EditText
     private lateinit var etContact: EditText
     private lateinit var ivProfilePic: CircleImageView
+    private lateinit var btnUploadPhoto: Button
     private lateinit var btnSaveChanges: Button
+    private lateinit var ivBack: ImageView
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+
+    private val PICK_IMAGE_REQUEST = 1001
+    private var imageUri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,10 +51,22 @@ class COMP_Account : Fragment() {
         etPassword = view.findViewById(R.id.etPassword)
         etContact = view.findViewById(R.id.etContact)
         ivProfilePic = view.findViewById(R.id.ivProfilePic)
+        btnUploadPhoto = view.findViewById(R.id.btnUploadPhoto)
         btnSaveChanges = view.findViewById(R.id.btnSaveChanges)
+        ivBack = view.findViewById(R.id.ivBack)
 
+        // 🔙 Back button setup
+        ivBack.setOnClickListener {
+            findNavController().navigateUp() // This safely goes back to the previous fragment
+        }
+
+        // Load existing user data
         fetchUserDetails()
 
+        // Upload photo button functionality
+        btnUploadPhoto.setOnClickListener { openImagePicker() }
+
+        // Save changes placeholder
         btnSaveChanges.setOnClickListener {
             Toast.makeText(requireContext(), "Save feature coming soon!", Toast.LENGTH_SHORT).show()
         }
@@ -49,6 +74,56 @@ class COMP_Account : Fragment() {
         return view
     }
 
+    // 🔹 Open image picker
+    private fun openImagePicker() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+    }
+
+    // 🔹 Handle image selection result
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            imageUri = data.data
+            imageUri?.let {
+                ivProfilePic.setImageURI(it)
+                uploadImageToFirebase(it)
+            }
+        }
+    }
+
+    // 🔹 Upload to Firebase Storage
+    private fun uploadImageToFirebase(imageUri: Uri) {
+        val currentUser = auth.currentUser ?: run {
+            Toast.makeText(requireContext(), "Not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uid = currentUser.uid
+        val storageRef = storage.reference.child("profile_pictures/$uid/profile.jpg")
+
+        storageRef.putFile(imageUri)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val downloadUrl = uri.toString()
+
+                    firestore.collection("users").document(uid)
+                        .update("profileImageUrl", downloadUrl)
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Profile picture updated!", Toast.LENGTH_SHORT).show()
+                            fetchUserDetails()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(requireContext(), "Failed to update Firestore: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // 🔹 Fetch user data from Firestore
     private fun fetchUserDetails() {
         val uid = auth.currentUser?.uid
         if (uid == null) {
@@ -69,7 +144,7 @@ class COMP_Account : Fragment() {
                 etName.setText("$firstName $lastName")
                 etEmail.setText(email)
                 etPassword.setText(password)
-                etContact.setText(phoneNumber) // using phone number as placeholder for address
+                etContact.setText(phoneNumber)
 
                 if (profileImageUrl.isNotEmpty()) {
                     Glide.with(this)
