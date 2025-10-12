@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.MainActivity
+import com.ecocp.capstoneenvirotrack.view.all.MainActivity
 
 class SelectUserType : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

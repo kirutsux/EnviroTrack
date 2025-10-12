@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view.businesses
+package com.ecocp.capstoneenvirotrack.view.all
 
 import android.os.Bundle
 import android.util.Log
@@ -10,9 +10,10 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.businesses.COMP_Profile
+import com.ecocp.capstoneenvirotrack.view.all.COMP_PCO
+import com.ecocp.capstoneenvirotrack.view.all.PCOVerificationDialogFragment
 import com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC
-import com.ecocp.capstoneenvirotrack.view.businesses.hwms.COMP_Hazwaste_Manifest
+import com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.COMP_OPMS
 import com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR
 import com.google.firebase.auth.FirebaseAuth
@@ -64,7 +65,7 @@ class COMP_Dashboard : Fragment() {
             cncCard.setOnClickListener { navigateToFragment(COMP_CNC()) }
             smrCard.setOnClickListener { navigateToFragment(COMP_SMR()) }
             opmsCard.setOnClickListener { navigateToFragment(COMP_OPMS()) }
-            hazewasteCard.setOnClickListener { navigateToFragment(COMP_Hazwaste_Manifest()) }
+            hazewasteCard.setOnClickListener { navigateToFragment(HWMSDashboardFragment()) }
         } else {
             // 🚫 User not accredited — disable other cards
             val lockMessage = "Please complete your accreditation first via the PCO section."

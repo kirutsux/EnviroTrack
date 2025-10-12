@@ -1,10 +1,10 @@
-package com.ecocp.capstoneenvirotrack.businesses
+package com.ecocp.capstoneenvirotrack.view.all
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
 
 class COMP_Pending_Documents_Submission : Fragment() {

@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view
+package com.ecocp.capstoneenvirotrack.view.all
 
 import android.os.Bundle
 import android.util.Log
@@ -34,4 +34,3 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }
-

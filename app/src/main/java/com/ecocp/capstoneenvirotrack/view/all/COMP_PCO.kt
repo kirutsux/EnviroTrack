@@ -1,10 +1,10 @@
-package com.ecocp.capstoneenvirotrack.view.businesses
+package com.ecocp.capstoneenvirotrack.view.all
 
-import android.view.View
-import android.widget.ImageView
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +15,8 @@ import com.ecocp.capstoneenvirotrack.view.businesses.adapters.PCOAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class COMP_PCO : Fragment() {
 
@@ -75,7 +76,10 @@ class COMP_PCO : Fragment() {
                     val timestamp = doc.getLong("timestamp") ?: 0L
 
                     val formattedDate = if (timestamp > 0) {
-                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
+                        SimpleDateFormat(
+                            "MMM dd, yyyy",
+                            Locale.getDefault()
+                        ).format(Date(timestamp))
                     } else {
                         "N/A"
                     }

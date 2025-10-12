@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view
+package com.ecocp.capstoneenvirotrack.view.all
 
 import android.os.Bundle
 import android.text.Editable
@@ -14,13 +14,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels // Changed to activityViewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.repository.UserRepository
 import com.ecocp.capstoneenvirotrack.viewmodel.RegistrationViewModel
 import com.ecocp.capstoneenvirotrack.viewmodel.RegistrationViewModelFactory
-import com.ecocp.capstoneenvirotrack.viewmodel.UiState // Ensure you import your UiState
+import com.ecocp.capstoneenvirotrack.viewmodel.UiState
 
 class VerificationFragment : Fragment() {
 

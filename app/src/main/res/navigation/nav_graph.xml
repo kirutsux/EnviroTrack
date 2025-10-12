@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/welcomeFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.WelcomePage"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.WelcomePage"
         tools:layout="@layout/welcome_page">
         <action
             android:id="@+id/action_welcomeFragment_to_loginFragment"
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.LoginFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.LoginFragment"
         tools:layout="@layout/fragment_log_in">
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
@@ -80,7 +80,7 @@
 
     <fragment
         android:id="@+id/verificationFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.VerificationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.VerificationFragment"
         tools:layout="@layout/fragment_verification">
         <action
             android:id="@+id/action_verificationFragment_to_embDashboard"
@@ -142,7 +142,7 @@
 
     <fragment
         android:id="@+id/pcoDashboard"
-        android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_Dashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Dashboard"
         tools:layout="@layout/pco_dashboard">
         <action
             android:id="@+id/action_COMP_Dashboard_to_COMP_PCOAccreditation"
@@ -167,7 +167,7 @@
     <!-- ➕ NEW FRAGMENT FOR PCO LIST/TABLE -->
     <fragment
         android:id="@+id/COMP_PCO"
-        android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCO"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_PCO"
         tools:layout="@layout/fragment_comp_pco" />
 
     <fragment
@@ -185,7 +185,7 @@
     <fragment
         android:id="@+id/embHMSFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS"
-        tools:layout="@layout/emb_hms" />
+        tools:layout="@layout/emb_hwms" />
     <fragment
         android:id="@+id/embCRSFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CRS"

@@ -1,14 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="8dp"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:layout_marginBottom="12dp"
+    android:elevation="2dp">
 
-    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <EditText android:id="@+id/etWasteName" android:hint="Waste Name (e.g. B201 - Sulfuric acid)" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content"/>
-        <ImageButton android:id="@+id/btnRemoveWaste" android:src="@android:drawable/ic_delete" android:contentDescription="Remove" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <!-- Waste Name and Remove Button -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/etWasteName"
+            android:hint="Waste Name (e.g. B201 - Sulfuric Acid)"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:padding="8dp" />
+
+        <ImageButton
+            android:id="@+id/btnRemoveWaste"
+            android:src="@android:drawable/ic_delete"
+            android:contentDescription="Remove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
-    <EditText android:id="@+id/etNature" android:hint="Nature" android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    <EditText android:id="@+id/etCatalogue" android:hint="Catalogue" android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    <EditText android:id="@+id/etWasteDetails" android:hint="Waste Details" android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    <EditText android:id="@+id/etCurrentPractice" android:hint="Current Waste Management Practice" android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <!-- Nature of Waste -->
+    <EditText
+        android:id="@+id/etNature"
+        android:hint="Nature"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:padding="8dp" />
+
+    <!-- Catalogue -->
+    <EditText
+        android:id="@+id/Quantity"
+        android:hint="Quantity"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:padding="8dp" />
+
+    <EditText
+        android:id="@+id/etCatalogue"
+        android:hint="Catalogue"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:padding="8dp" />
+
+    <!-- Waste Details -->
+    <EditText
+        android:id="@+id/etWasteDetails"
+        android:hint="Waste Details"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:padding="8dp" />
+
+    <!-- Current Waste Management Practice -->
+    <EditText
+        android:id="@+id/etCurrentPractice"
+        android:hint="Current Waste Management Practice"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:padding="8dp" />
+
 </LinearLayout>
