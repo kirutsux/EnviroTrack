@@ -1,16 +1,22 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.adapters
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.PCO
+import java.util.*
 
 class PCOAdapter(
-    private val list: List<PCO>
-) : RecyclerView.Adapter<PCOAdapter.ViewHolder>() {
+    private val list: MutableList<PCO>,
+    private val onItemClick: (PCO) -> Unit
+) : RecyclerView.Adapter<PCOAdapter.ViewHolder>(), Filterable {
+
+    private var filteredList = list.toMutableList()
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvAppId: TextView = itemView.findViewById(R.id.tvAppId)
@@ -28,10 +34,11 @@ class PCOAdapter(
         return ViewHolder(view)
     }
 
-    override fun getItemCount(): Int = list.size
+    override fun getItemCount(): Int = filteredList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[position]
+        val item = filteredList[position]
+
         holder.tvAppId.text = item.appId
         holder.tvAppName.text = item.appName
         holder.tvApplicant.text = item.applicant
@@ -40,12 +47,75 @@ class PCOAdapter(
         holder.tvType.text = item.type
         holder.tvStatus.text = item.status
 
-        // 🔹 Optional: Status color logic
-        when (item.status.lowercase()) {
-            "approved" -> holder.tvStatus.setBackgroundResource(R.drawable.bg_badge_green)
-            "rejected" -> holder.tvStatus.setBackgroundResource(R.drawable.bg_badge_red)
-            "submitted" -> holder.tvStatus.setBackgroundResource(R.drawable.bg_badge_orange)
-            else -> holder.tvStatus.setBackgroundResource(R.drawable.bg_badge_gray)
+        applyStatusStyle(holder.tvStatus, item.status)
+
+        holder.itemView.setOnClickListener {
+            onItemClick(item)
         }
+    }
+
+    private fun applyStatusStyle(tv: TextView, status: String) {
+        when (status.lowercase()) {
+            "approved" -> {
+                tv.setTextColor(tv.context.getColor(R.color.white))
+                tv.setBackgroundResource(R.drawable.bg_badge_green)
+            }
+            "rejected" -> {
+                tv.setTextColor(tv.context.getColor(R.color.white))
+                tv.setBackgroundResource(R.drawable.bg_badge_red)
+            }
+            "submitted" -> {
+                tv.setTextColor(tv.context.getColor(R.color.white))
+                tv.setBackgroundResource(R.drawable.bg_badge_orange)
+            }
+            "pending" -> {
+                tv.setTextColor(tv.context.getColor(R.color.white))
+                tv.setBackgroundResource(R.drawable.bg_badge_blue)
+            }
+            else -> {
+                tv.setTextColor(tv.context.getColor(R.color.black))
+                tv.setBackgroundResource(R.drawable.bg_badge_gray)
+            }
+        }
+    }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val charString = constraint?.toString()?.lowercase(Locale.getDefault()) ?: ""
+                val results = FilterResults()
+                results.values = if (charString.isEmpty()) {
+                    list
+                } else {
+                    list.filter {
+                        it.appName.lowercase(Locale.getDefault()).contains(charString) ||
+                                it.applicant.lowercase(Locale.getDefault()).contains(charString) ||
+                                it.status.lowercase(Locale.getDefault()).contains(charString)
+                    }
+                }
+                return results
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                filteredList = (results?.values as? List<PCO>)?.toMutableList() ?: mutableListOf()
+                notifyDataSetChanged()
+            }
+        }
+    }
+
+    fun filterByStatus(status: String) {
+        filteredList = if (status == "All") {
+            list.toMutableList()
+        } else {
+            list.filter { it.status.equals(status, ignoreCase = true) }.toMutableList()
+        }
+        notifyDataSetChanged()
+    }
+
+    fun updateList(newList: List<PCO>) {
+        list.clear()
+        list.addAll(newList)
+        filteredList = list.toMutableList()
+        notifyDataSetChanged()
     }
 }

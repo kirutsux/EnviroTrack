@@ -57,36 +57,10 @@
         <!-- Ensure background and tint are not overridden -->
         <item name="android:backgroundTintMode">src_over</item>
     </style>
-
-    <style name="HWMSCardButton" parent="Widget.MaterialComponents.CardView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginBottom">12dp</item>
-        <item name="android:elevation">6dp</item>
-        <item name="cardCornerRadius">16dp</item>
-        <item name="cardUseCompatPadding">true</item>
+    <!-- Italic version -->
+    <style name="FormLabel.Italic">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
     </style>
-
-    <style name="HWMSCardFancy" parent="Widget.MaterialComponents.CardView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginBottom">16dp</item>
-        <item name="cardCornerRadius">18dp</item>
-        <item name="cardElevation">8dp</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:foreground">?attr/selectableItemBackground</item>
-    </style>
-
-    <style name="HWMSCardText">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">18dp</item>
-        <item name="android:textColor">#16476A</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-
 </resources>

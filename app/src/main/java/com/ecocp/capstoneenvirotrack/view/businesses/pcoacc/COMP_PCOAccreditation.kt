@@ -23,7 +23,7 @@ class COMP_PCOAccreditation : Fragment() {
     private lateinit var fullName: EditText
     private lateinit var positionDesignation: EditText
     private lateinit var accreditationNumber: EditText
-    private lateinit var companyAffiliationSpinner: Spinner
+    private lateinit var companyAffiliation: EditText
     private lateinit var educationalBackground: EditText
     private lateinit var experienceInEnvManagement: EditText
     private lateinit var uploadCertificateButton: Button
@@ -56,7 +56,7 @@ class COMP_PCOAccreditation : Fragment() {
         fullName = view.findViewById(R.id.fullName)
         positionDesignation = view.findViewById(R.id.positionDesignation)
         accreditationNumber = view.findViewById(R.id.accreditationNumber)
-        companyAffiliationSpinner = view.findViewById(R.id.companyAffiliationSpinner)
+        companyAffiliation = view.findViewById(R.id.companyAffiliation)
         educationalBackground = view.findViewById(R.id.educationalBackground)
         experienceInEnvManagement = view.findViewById(R.id.experienceInEnvManagement)
         uploadCertificateButton = view.findViewById(R.id.uploadCertificateButton)
@@ -75,17 +75,9 @@ class COMP_PCOAccreditation : Fragment() {
             setCancelable(false)
         }
 
-        setupCompanyAffiliationSpinner()
         setupButtonListeners()
 
         return view
-    }
-
-    private fun setupCompanyAffiliationSpinner() {
-        val companies = arrayOf("Select Company", "ABC Corp", "XYZ Industries", "Green Earth Ltd.")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, companies)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        companyAffiliationSpinner.adapter = adapter
     }
 
     private fun setupButtonListeners() {
@@ -144,9 +136,9 @@ class COMP_PCOAccreditation : Fragment() {
     private fun validateInputs(): Boolean {
         if (fullName.text.isEmpty() ||
             positionDesignation.text.isEmpty() ||
+            companyAffiliation.text.isEmpty() ||
             educationalBackground.text.isEmpty() ||
-            experienceInEnvManagement.text.isEmpty() ||
-            companyAffiliationSpinner.selectedItemPosition == 0
+            experienceInEnvManagement.text.isEmpty()
         ) {
             Toast.makeText(requireContext(), "Please fill in all required fields.", Toast.LENGTH_SHORT).show()
             return false
@@ -206,7 +198,7 @@ class COMP_PCOAccreditation : Fragment() {
             "fullName" to fullName.text.toString(),
             "positionDesignation" to positionDesignation.text.toString(),
             "accreditationNumber" to accreditationNumber.text.toString(),
-            "companyAffiliation" to companyAffiliationSpinner.selectedItem.toString(),
+            "companyAffiliation" to companyAffiliation.text.toString(),
             "educationalBackground" to educationalBackground.text.toString(),
             "experienceInEnvManagement" to experienceInEnvManagement.text.toString(),
             "certificateUrl" to certUrl,
@@ -223,7 +215,7 @@ class COMP_PCOAccreditation : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()
 
-                // ✅ Navigate to COMP_PCO Fragment instead of Activity
+                // ✅ Navigate back to PCO fragment
                 val compPCOFragment = COMP_PCO()
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.nav_host_fragment, compPCOFragment)
