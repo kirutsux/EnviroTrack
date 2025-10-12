@@ -18,17 +18,18 @@
     </string-array>
 
     <string-array name="nature_of_business">
-        <item>Select Industry Type</item>
         <item>Manufacturing</item>
-        <item>Retail</item>
-        <item>Services</item>
+        <item>Retail / Trade</item>
         <item>Construction</item>
-        <item>Agriculture</item>
-        <item>Technology</item>
-        <item>Healthcare</item>
+        <item>Mining / Quarrying</item>
+        <item>Energy / Power Generation</item>
+        <item>Transportation / Logistics</item>
+        <item>Waste Management</item>
+        <item>Agriculture / Fishery</item>
+        <item>Hospitality / Tourism</item>
+        <item>Healthcare / Pharmaceutical</item>
+        <item>Information Technology</item>
         <item>Education</item>
-        <item>Transportation</item>
-        <item>Hospitality</item>
-        <item>Other</item>
+        <item>Others</item>
     </string-array>
 </resources>
