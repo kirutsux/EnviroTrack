@@ -6,7 +6,7 @@
     android:id="@+id/main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.MainActivity">
+    tools:context=".view.all.MainActivity">
 
     <!-- NavHostFragment fills all space above the BottomNavigationView -->
     <androidx.fragment.app.FragmentContainerView

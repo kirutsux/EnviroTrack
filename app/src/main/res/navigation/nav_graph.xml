@@ -48,7 +48,7 @@
     <!-- 📝 Registration -->
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.RegistrationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.RegistrationFragment"
         tools:layout="@layout/fragment_registration">
         <action
             android:id="@+id/action_registrationFragment_to_loginFragment"
@@ -139,13 +139,13 @@
     <!-- 💬 Chat -->
     <fragment
         android:id="@+id/chatFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.ChatFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.ChatFragment"
         tools:layout="@layout/fragment_chat" />
 
     <!-- 🤖 AI FAQ Bot -->
     <fragment
         android:id="@+id/aiFaqBotFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.AiFaqBotFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.AiFaqBotFragment"
         tools:layout="@layout/fragment_ai_faq_bot" />
 
     <!-- 👤 Profile -->

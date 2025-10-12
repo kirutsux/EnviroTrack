@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="@drawable/wavegreenish"
     android:padding="16dp"
-    tools:context=".view.RegistrationFragment">
+    tools:context=".view.all.RegistrationFragment">
 
     <FrameLayout
         android:id="@+id/progressOverlay"
