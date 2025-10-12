@@ -1,84 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">EnviroTrack</string>
     <string name="self_monitoring_report_smr_management">Self-Monitoring Report (SMR) Management</string>
     <string name="certificate_of_non_coverage_cnc_management">Certificate of Non-Coverage (CNC) Management</string>
     <string name="recent">Recent</string>
-    <string name="welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time">Welcome!\n Monitor document reviews efficiently and process compliance submissions on time.</string>
+    <string name="welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time">
+        Welcome!\n Monitor document reviews efficiently and process compliance submissions on time.
+    </string>
     <string name="search">Search</string>
     <string name="home">Home</string>
     <string name="online_permitting_and_monitoring_system">Online Permitting and Monitoring</string>
     <string name="company_registration">Company Registration</string>
     <string name="pco_accreditation">PCO Accreditation</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Registration and dropdown text -->
     <string name="select_prompt">Select</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="default_web_client_id">191944189574-hbtag9qvcdlhsqlq5m2gi8pafti4pvj2.apps.googleusercontent.com</string>
+
+    <!-- Dropdown Arrays -->
     <string-array name="register_as_options">
         <item>Service Provider</item>
         <item>Pollution Control Officer</item>
     </string-array>
+
+    <string-array name="company_types">
+        <item>Single Proprietorship</item>
+        <item>Partnership</item>
+        <item>Corporation</item>
+        <item>Cooperative</item>
+        <item>Government</item>
+        <item>NGO / Foundation</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="nature_of_business">
+        <item>Manufacturing</item>
+        <item>Retail / Trade</item>
+        <item>Construction</item>
+        <item>Mining / Quarrying</item>
+        <item>Energy / Power Generation</item>
+        <item>Transportation / Logistics</item>
+        <item>Waste Management</item>
+        <item>Agriculture / Fishery</item>
+        <item>Hospitality / Tourism</item>
+        <item>Healthcare / Pharmaceutical</item>
+        <item>Information Technology</item>
+        <item>Education</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="provinces_philippines">
+        <item>Abra</item>
+        <item>Agusan del Norte</item>
+        <item>Agusan del Sur</item>
+        <item>Aklan</item>
+        <item>Albay</item>
+        <item>Antique</item>
+        <item>Apayao</item>
+        <item>Aurora</item>
+        <item>Basilan</item>
+        <item>Bataan</item>
+        <item>Batanes</item>
+        <item>Batangas</item>
+        <item>Benguet</item>
+        <item>Biliran</item>
+        <item>Bohol</item>
+        <item>Bukidnon</item>
+        <item>Bulacan</item>
+        <item>Cagayan</item>
+        <item>Camarines Norte</item>
+        <item>Camarines Sur</item>
+        <item>Camiguin</item>
+        <item>Capiz</item>
+        <item>Catanduanes</item>
+        <item>Cavite</item>
+        <item>Cebu</item>
+        <item>Compostela Valley</item>
+        <item>Cotabato</item>
+        <item>Davao de Oro</item>
+        <item>Davao del Norte</item>
+        <item>Davao del Sur</item>
+        <item>Davao Occidental</item>
+        <item>Davao Oriental</item>
+        <item>Dinagat Islands</item>
+        <item>Eastern Samar</item>
+        <item>Guimaras</item>
+        <item>Ifugao</item>
+        <item>Ilocos Norte</item>
+        <item>Ilocos Sur</item>
+        <item>Iloilo</item>
+        <item>Isabela</item>
+        <item>Kalinga</item>
+        <item>La Union</item>
+        <item>Laguna</item>
+        <item>Lanao del Norte</item>
+        <item>Lanao del Sur</item>
+        <item>Leyte</item>
+        <item>Maguindanao</item>
+        <item>Marinduque</item>
+        <item>Masbate</item>
+        <item>Misamis Occidental</item>
+        <item>Misamis Oriental</item>
+        <item>Mountain Province</item>
+        <item>Negros Occidental</item>
+        <item>Negros Oriental</item>
+        <item>Northern Samar</item>
+        <item>Nueva Ecija</item>
+        <item>Nueva Vizcaya</item>
+        <item>Occidental Mindoro</item>
+        <item>Oriental Mindoro</item>
+        <item>Palawan</item>
+        <item>Pampanga</item>
+        <item>Pangasinan</item>
+        <item>Quezon</item>
+        <item>Quirino</item>
+        <item>Rizal</item>
+        <item>Romblon</item>
+        <item>Samar</item>
+        <item>Sarangani</item>
+        <item>Siquijor</item>
+        <item>Sorsogon</item>
+        <item>South Cotabato</item>
+        <item>Southern Leyte</item>
+        <item>Sultan Kudarat</item>
+        <item>Sulu</item>
+        <item>Surigao del Norte</item>
+        <item>Surigao del Sur</item>
+        <item>Tarlac</item>
+        <item>Tawi-Tawi</item>
+        <item>Zambales</item>
+        <item>Zamboanga del Norte</item>
+        <item>Zamboanga del Sur</item>
+        <item>Zamboanga Sibugay</item>
+    </string-array>
+
+    <!-- Existing service categories -->
     <string-array name="service_categories">
-        <!-- Waste Disposal Services -->
         <item>Waste Disposal Services</item>
         <item>Hazardous Waste Collection</item>
         <item>Non-Hazardous Waste Disposal</item>
-
-        <!-- Water Quality Services -->
         <item>Water Testing &amp; Analysis</item>
         <item>Wastewater Treatment</item>
         <item>Drinking Water Purification</item>
         <item>Industrial Water Treatment</item>
-
-        <!-- Air Quality & Pollution Control -->
         <item>Air Emission Monitoring</item>
         <item>Odor Control Solutions</item>
         <item>Industrial Air Filtration</item>
-
-        <!-- Energy & Sustainability Services -->
         <item>Renewable Energy Consulting</item>
         <item>Carbon Footprint Reduction</item>
     </string-array>
-    <!-- Strings used for fragments for navigation -->
+
+    <!-- Navigation labels -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
     <string name="lorem_ipsum">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
-        volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
-        dui nec risus. Maecenas non sodales nisi, vel dictum dolor. Class aptent taciti sociosqu ad
-        litora torquent per conubia nostra, per inceptos himenaeos. Suspendisse blandit eleifend
-        diam, vel rutrum tellus vulputate quis. Aliquam eget libero aliquet, imperdiet nisl a,
-        ornare ex. Sed rhoncus est ut libero porta lobortis. Fusce in dictum tellus.\n\n
-        Suspendisse interdum ornare ante. Aliquam nec cursus lorem. Morbi id magna felis. Vivamus
-        egestas, est a condimentum egestas, turpis nisl iaculis ipsum, in dictum tellus dolor sed
-        neque. Morbi tellus erat, dapibus ut sem a, iaculis tincidunt dui. Interdum et malesuada
-        fames ac ante ipsum primis in faucibus. Curabitur et eros porttitor, ultricies urna vitae,
-        molestie nibh. Phasellus at commodo eros, non aliquet metus. Sed maximus nisl nec dolor
-        bibendum, vel congue leo egestas.\n\n
-        Sed interdum tortor nibh, in sagittis risus mollis quis. Curabitur mi odio, condimentum sit
-        amet auctor at, mollis non turpis. Nullam pretium libero vestibulum, finibus orci vel,
-        molestie quam. Fusce blandit tincidunt nulla, quis sollicitudin libero facilisis et. Integer
-        interdum nunc ligula, et fermentum metus hendrerit id. Vestibulum lectus felis, dictum at
-        lacinia sit amet, tristique id quam. Cras eu consequat dui. Suspendisse sodales nunc ligula,
-        in lobortis sem porta sed. Integer id ultrices magna, in luctus elit. Sed a pellentesque
-        est.\n\n
-        Aenean nunc velit, lacinia sed dolor sed, ultrices viverra nulla. Etiam a venenatis nibh.
-        Morbi laoreet, tortor sed facilisis varius, nibh orci rhoncus nulla, id elementum leo dui
-        non lorem. Nam mollis ipsum quis auctor varius. Quisque elementum eu libero sed commodo. In
-        eros nisl, imperdiet vel imperdiet et, scelerisque a mauris. Pellentesque varius ex nunc,
-        quis imperdiet eros placerat ac. Duis finibus orci et est auctor tincidunt. Sed non viverra
-        ipsum. Nunc quis augue egestas, cursus lorem at, molestie sem. Morbi a consectetur ipsum, a
-        placerat diam. Etiam vulputate dignissim convallis. Integer faucibus mauris sit amet finibus
-        convallis.\n\n
-        Phasellus in aliquet mi. Pellentesque habitant morbi tristique senectus et netus et
-        malesuada fames ac turpis egestas. In volutpat arcu ut felis sagittis, in finibus massa
-        gravida. Pellentesque id tellus orci. Integer dictum, lorem sed efficitur ullamcorper,
-        libero justo consectetur ipsum, in mollis nisl ex sed nisl. Donec maximus ullamcorper
-        sodales. Praesent bibendum rhoncus tellus nec feugiat. In a ornare nulla. Donec rhoncus
-        libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
-        vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem...
     </string>
 
     <string-array name="status_options">
@@ -87,5 +167,4 @@
         <item>Approved</item>
         <item>Rejected</item>
     </string-array>
-
 </resources>
