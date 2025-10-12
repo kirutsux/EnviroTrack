@@ -6,4 +6,29 @@
         <item>Approved</item>
         <item>Rejected</item>
     </string-array>
+
+    <string-array name="company_types">
+        <item>Select Company Type</item>
+        <item>Corporation</item>
+        <item>Partnership</item>
+        <item>Sole Proprietorship</item>
+        <item>Limited Liability Company (LLC)</item>
+        <item>Cooperative</item>
+        <item>Non-Profit Organization</item>
+    </string-array>
+
+    <string-array name="nature_of_business">
+        <item>Select Industry Type</item>
+        <item>Manufacturing</item>
+        <item>Retail</item>
+        <item>Services</item>
+        <item>Construction</item>
+        <item>Agriculture</item>
+        <item>Technology</item>
+        <item>Healthcare</item>
+        <item>Education</item>
+        <item>Transportation</item>
+        <item>Hospitality</item>
+        <item>Other</item>
+    </string-array>
 </resources>
