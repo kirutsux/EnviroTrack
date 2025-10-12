@@ -43,7 +43,7 @@ class COMP_Account : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_comp__account, container, false)
+        val view = inflater.inflate(R.layout.pco_account, container, false)
 
         // Initialize views
         etName = view.findViewById(R.id.etName)

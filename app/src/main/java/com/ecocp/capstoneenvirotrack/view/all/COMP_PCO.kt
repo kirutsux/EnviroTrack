@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view.businesses
+package com.ecocp.capstoneenvirotrack.view.all
 
 import android.os.Bundle
 import android.text.Editable
@@ -15,6 +15,7 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.PCO
 import com.ecocp.capstoneenvirotrack.view.businesses.adapters.PCOAdapter
 import com.ecocp.capstoneenvirotrack.view.businesses.dialogs.PCODetailsDialog
+import com.ecocp.capstoneenvirotrack.view.businesses.pcoacc.COMP_PCOAccreditation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
