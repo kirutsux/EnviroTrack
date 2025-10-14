@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="?android:attr/dividerVertical"
+        android:showDividers="middle">
+
+        <!-- Header / Title Section -->
+        <TextView
+            android:id="@+id/titleHeader"
+            android:text="Discharge Permit Application Form"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="#2E7D32"
+            android:gravity="center"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/subHeader"
+            android:text="Please fill out all required fields accurately before submitting your application."
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:gravity="center"
+            android:layout_marginBottom="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Company Information -->
+        <EditText
+            android:id="@+id/inputCompanyName"
+            android:hint="Company Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputCompanyAddress"
+            android:hint="Company Address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputPcoName"
+            android:hint="PCO Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputPcoAccreditation"
+            android:hint="PCO Accreditation No."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputContactNumber"
+            android:hint="Contact Number"
+            android:inputType="phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputEmail"
+            android:hint="Email Address"
+            android:inputType="textEmailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Discharge Details -->
+        <TextView
+            android:text="B. Discharge Details"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputBodyOfWater"
+            android:hint="Receiving Body of Water"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputSourceWastewater"
+            android:hint="Source of Wastewater"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputVolume"
+            android:hint="Discharge Volume (m³/day)"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputTreatmentMethod"
+            android:hint="Treatment Method"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/inputOperationStartDate"
+            android:hint="Date of Operation Start"
+            android:focusable="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Supporting Documents -->
+        <TextView
+            android:layout_marginTop="16dp"
+            android:text="C. Supporting Documents (Upload Section)"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/fileHintText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please prepare and upload the following documents (PDF or image files only):\n\n• DENR Clearance or Old Permit – Previous discharge permit if renewal\n• Water Analysis Report – Laboratory analysis of effluent\n• Process Flow Diagram – Shows wastewater flow\n• Location Map – For EMB review\n\nYou may select and upload multiple files in one go."
+            android:textSize="14sp"
+            android:textColor="#666"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/btnUploadFile"
+            android:text="Upload File(s)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/txtFileName"
+            android:text="No files selected"
+            android:textStyle="italic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:textColor="#666" />
+
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/btnSubmitPermit"
+            android:text="Submit Discharge Permit Application"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>

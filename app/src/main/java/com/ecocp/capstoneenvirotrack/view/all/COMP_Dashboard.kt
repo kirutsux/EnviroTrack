@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.all
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,10 +11,10 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.all.COMP_PCO
 import com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC
 import com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment
-import com.ecocp.capstoneenvirotrack.view.businesses.opms.COMP_OPMS
+import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
+import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsDashboardFragment
 import com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -63,7 +64,10 @@ class COMP_Dashboard : Fragment() {
             // ✅ User has accreditation — unlock all cards
             cncCard.setOnClickListener { navigateToFragment(COMP_CNC()) }
             smrCard.setOnClickListener { navigateToFragment(COMP_SMR()) }
-            opmsCard.setOnClickListener { navigateToFragment(COMP_OPMS()) }
+            opmsCard.setOnClickListener {
+                val intent = Intent(requireContext(), OpmsActivity::class.java)
+                startActivity(intent)
+            }
             hazewasteCard.setOnClickListener { navigateToFragment(HWMSDashboardFragment()) }
         } else {
             // 🚫 User not accredited — disable other cards

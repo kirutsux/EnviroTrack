@@ -53,6 +53,7 @@ class HwmsStep1Fragment : Fragment() {
 
         val etName = row.findViewById<EditText>(R.id.etWasteName)
         val etNature = row.findViewById<EditText>(R.id.etNature)
+        val etQuantity = row.findViewById<EditText>(R.id.Quantity)
         val etCatalogue = row.findViewById<EditText>(R.id.etCatalogue)
         val etDetails = row.findViewById<EditText>(R.id.etWasteDetails)
         val etPractice = row.findViewById<EditText>(R.id.etCurrentPractice)
@@ -62,6 +63,7 @@ class HwmsStep1Fragment : Fragment() {
         existing?.let {
             etName.setText(it["wasteName"] ?: "")
             etNature.setText(it["nature"] ?: "")
+            etQuantity.setText(it["quantity"] ?: "")
             etCatalogue.setText(it["catalogue"] ?: "")
             etDetails.setText(it["details"] ?: "")
             etPractice.setText(it["currentPractice"] ?: "")
@@ -88,6 +90,7 @@ class HwmsStep1Fragment : Fragment() {
 
             val wasteName = view.findViewById<EditText>(R.id.etWasteName).text.toString().trim()
             val nature = view.findViewById<EditText>(R.id.etNature).text.toString().trim()
+            val quantity = view.findViewById<EditText>(R.id.Quantity).text.toString().trim()
             val catalogue = view.findViewById<EditText>(R.id.etCatalogue).text.toString().trim()
             val details = view.findViewById<EditText>(R.id.etWasteDetails).text.toString().trim()
             val practice = view.findViewById<EditText>(R.id.etCurrentPractice).text.toString().trim()
@@ -101,6 +104,7 @@ class HwmsStep1Fragment : Fragment() {
                 mapOf(
                     "wasteName" to wasteName,
                     "nature" to nature,
+                    "quantity" to quantity,
                     "catalogue" to catalogue,
                     "details" to details,
                     "currentPractice" to practice
@@ -125,10 +129,16 @@ class HwmsStep1Fragment : Fragment() {
             .add(data)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Waste details saved successfully.", Toast.LENGTH_SHORT).show()
-                // TODO: navigate to Step 2 fragment
+                navigateToFragment(TransporterStep2Fragment())
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to save waste details.", Toast.LENGTH_SHORT).show()
             }
+    }
+    private fun navigateToFragment(fragment: Fragment) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.nav_host_fragment, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

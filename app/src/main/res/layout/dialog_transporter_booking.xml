@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Transport summary (provider name filled programmatically) -->
+        <TextView
+            android:id="@+id/tvProviderTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Booking for: Provider name"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Waste type (prefill or allow edit) -->
+        <EditText
+            android:id="@+id/etWasteType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Waste type (e.g., B201 - Sulfuric acid)" />
+
+        <EditText
+            android:id="@+id/etQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Quantity (e.g., 150 liters)"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/etPackaging"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Packaging (drums, drums sealed, etc.)" />
+
+        <EditText
+            android:id="@+id/etOrigin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Origin / Pickup address" />
+
+        <EditText
+            android:id="@+id/etDestination"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Destination (TSD facility) - optional" />
+
+        <EditText
+            android:id="@+id/etSpecialInstructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Special handling instructions (optional)"
+            android:inputType="textMultiLine"
+            android:minLines="2" />
+
+        <!-- Date selector -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btnPickDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pick Date" />
+
+            <TextView
+                android:id="@+id/tvDateSelected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No date selected"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnConfirmBooking"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Confirm" />
+
+            <Button
+                android:id="@+id/btnCancelBooking"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Cancel" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
