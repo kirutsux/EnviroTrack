@@ -41,6 +41,15 @@
             app:destination="@id/pcoDashboard"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_loginFragment_to_SP_ChangepasswordFragment"
+            app:destination="@id/SP_ChangepasswordFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_loginFragment_to_SP_RegistrationFragment"
+            app:destination="@id/SP_RegistrationFragment" />
+
     </fragment>
 
     <fragment
@@ -195,4 +204,32 @@
         android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_PCO"
         tools:layout="@layout/emb_pco" />
 
+    <fragment
+        android:id="@+id/SP_ChangepasswordFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
+        tools:layout="@layout/sp_changepassword_fragment">
+
+        <!-- Navigate to service provider dashboard after password change -->
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_serviceProviderDashboard"
+            app:destination="@id/serviceProviderDashboard"
+            app:popUpTo="@id/SP_ChangepasswordFragment"
+            app:popUpToInclusive="true" />
+
+        <!-- Optional: back to login if needed -->
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/SP_RegistrationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_RegistrationFragment"
+        tools:layout="@layout/fragment_sp__registration">
+
+        <action
+            android:id="@+id/action_SP_RegistrationFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/SP_RegistrationFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>
