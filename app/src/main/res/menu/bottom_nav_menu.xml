@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/pcoDashboard"
+        android:icon="@drawable/dashboards"
+        android:title="Dashboard" />
+
+    <item
+        android:id="@+id/chatFragment"
+        android:icon="@drawable/chat"
+        android:title="Chat" />
+
+    <item
+        android:id="@+id/aiFaqBotFragment"
+        android:icon="@drawable/faq"
+        android:title="AI FAQ Bot" />
+
+    <item
+        android:id="@+id/comp_Profile"
+        android:icon="@drawable/user"
+        android:title="Profile" />
+
+</menu>

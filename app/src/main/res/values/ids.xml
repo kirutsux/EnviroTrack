@@ -32,4 +32,23 @@
     <item name="progress_loading" type="id" />
     <item name="btn_add_new" type="id" />
     <item name="text_no_records" type="id" />
+
+    <!-- Fixed invalid IDs -->
+    <item name="inputCompanyName" type="id" />
+    <item name="inputCompanyAddress" type="id" />
+    <item name="inputPcoName" type="id" />
+    <item name="inputPcoAccreditation" type="id" />
+    <item name="inputContactNumber" type="id" />
+    <item name="inputEmail" type="id" />
+    <item name="inputBodyOfWater" type="id" />
+    <item name="inputSourceWastewater" type="id" />
+    <item name="inputVolume" type="id" />
+    <item name="inputTreatmentMethod" type="id" />
+    <item name="inputOperationStartDate" type="id" />
+    <item name="txtFileName" type="id" />
+    <item name="btnSubmitPermit" type="id" />
+    <item name="titleHeader" type="id" />
+    <item name="subHeader" type="id" />
+    <item name="fileHintText" type="id" />
+    <item name="btnUploadFile" type="id" />
 </resources>

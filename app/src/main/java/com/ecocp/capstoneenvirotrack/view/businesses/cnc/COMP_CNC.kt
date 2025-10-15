@@ -14,7 +14,7 @@ class COMP_CNC : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comp_cnc, container, false)
+        return inflater.inflate(R.layout.pco_cnc, container, false)
     }
 
 }

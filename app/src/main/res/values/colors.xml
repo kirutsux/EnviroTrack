@@ -62,4 +62,10 @@
     <color name="teal_700">#E60FA091</color> <!-- Material Teal 700 -->
     <color name="darker_gray">#A9A9A9</color> <!-- Dark Gray for dividers -->
     <color name="module_label_background">#E0E0E0</color>
+
+    <!-- ✅ Status Colors -->
+    <color name="green_approved">#4CAF50</color> <!-- Approved -->
+    <color name="red_rejected">#E53935</color> <!-- Rejected -->
+    <color name="orange_submitted">#FB8C00</color> <!-- Submitted -->
+    <color name="blue_pending">#1E88E5</color> <!-- Pending -->
 </resources>

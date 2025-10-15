@@ -14,7 +14,7 @@ class COMP_Modules : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comp__modules, container, false)
+        return inflater.inflate(R.layout.pco_smr_modules, container, false)
     }
 
 }

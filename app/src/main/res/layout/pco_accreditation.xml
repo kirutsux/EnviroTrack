@@ -1,0 +1,208 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/backbtn"
+            android:contentDescription="Back Button"
+            android:layout_gravity="start"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PCO Accreditation"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Register and apply for official PCO accreditation with the EMB."
+            android:textSize="14sp"
+            android:gravity="center"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="20dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Personal and Professional Details"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
+
+            <EditText
+                android:id="@+id/fullName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Full Name"
+                android:background="@drawable/input_field"
+                android:padding="12dp"
+                android:textColorHint="@android:color/darker_gray"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/positionDesignation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Position / Designation"
+                android:background="@drawable/input_field"
+                android:padding="12dp"
+                android:textColorHint="@android:color/darker_gray"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/accreditationNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Accreditation Number (if existing)"
+                android:background="@drawable/input_field"
+                android:padding="12dp"
+                android:textColorHint="@android:color/darker_gray"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="12dp" />
+
+            <!-- 🔹 Replaced Spinner with EditText -->
+            <EditText
+                android:id="@+id/companyAffiliation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Company Affiliation"
+                android:background="@drawable/input_field"
+                android:padding="12dp"
+                android:textColorHint="@android:color/darker_gray"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/educationalBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Educational Background"
+                android:background="@drawable/input_field"
+                android:padding="12dp"
+                android:textColorHint="@android:color/darker_gray"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/experienceInEnvManagement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Experience in Environmental Management"
+                android:background="@drawable/input_field"
+                android:padding="12dp"
+                android:textColorHint="@android:color/darker_gray"
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <!-- Upload Section remains unchanged -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Required Documents"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PCO Certificate / License"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/uploadCertificateButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choose File"
+                android:background="@drawable/rounded_button"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Government-issued ID"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/uploadGovernmentIDButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choose File"
+                android:background="@drawable/rounded_button"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Training Certificates"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"   />
+
+            <Button
+                android:id="@+id/uploadTrainingCertificateButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choose File"
+                android:background="@drawable/rounded_button"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/submitApplicationButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit Application"
+            android:background="@drawable/rounded_button"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="32dp" />
+    </LinearLayout>
+</ScrollView>

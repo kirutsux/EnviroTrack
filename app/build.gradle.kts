@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
     id("androidx.navigation.safeargs.kotlin")
+    id("kotlin-kapt") // ✅ Use this instead of org.jetbrains.kotlin.kapt
 }
+
 
 android {
     namespace = "com.ecocp.capstoneenvirotrack"
@@ -27,6 +29,10 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     compileOptions {
@@ -59,14 +65,15 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation("androidx.fragment:fragment-ktx:1.8.9")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.9.3")
-    implementation("androidx.navigation:navigation-ui-ktx:2.9.3")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.5")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.5")
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // ✅ Retrofit (correct version)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
@@ -81,6 +88,11 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation ("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
+
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    // ✅ Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
 
 
     testImplementation(libs.junit)

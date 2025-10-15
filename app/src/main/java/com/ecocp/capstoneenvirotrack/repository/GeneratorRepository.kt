@@ -24,7 +24,7 @@ class GeneratorRepository {
         onFailure: (Exception) -> Unit
     ) {
         val appId = UUID.randomUUID().toString()
-        val storageRoot = storage.reference.child("hazwaste_manifests/$uid/$appId")
+        val storageRoot = storage.reference.child("hazwaste_manifests_generator/$uid/$appId")
 
         // Step 1: Upload all required documents in parallel
         val uploadedUrls = mutableMapOf<String, String>()
@@ -80,7 +80,7 @@ class GeneratorRepository {
         )
         appData.putAll(payload)
 
-        db.collection("HazardousWasteManifests").document(appId)
+        db.collection("HazardousWasteGenerator").document(appId)
             .set(appData)
             .addOnSuccessListener { onSuccess(appId) }
             .addOnFailureListener { e -> onFailure(e) }

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.all.COMP_PCO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -50,7 +51,7 @@ class COMP_PCOAccreditation : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_comp_pco_accreditation, container, false)
+        val view = inflater.inflate(R.layout.pco_accreditation, container, false)
 
         fullName = view.findViewById(R.id.fullName)
         positionDesignation = view.findViewById(R.id.positionDesignation)

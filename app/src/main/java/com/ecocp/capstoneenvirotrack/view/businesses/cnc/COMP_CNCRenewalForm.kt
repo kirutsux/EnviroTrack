@@ -13,7 +13,7 @@ class COMP_CNCRenewalForm : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_comp__cnc_renewal_form, container, false)
+        return inflater.inflate(R.layout.pco_cnc_renewal_form, container, false)
     }
 
 }
