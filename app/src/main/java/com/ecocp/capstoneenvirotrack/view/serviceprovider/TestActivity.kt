@@ -7,7 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.commit
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.LoginFragment
+import com.ecocp.capstoneenvirotrack.view.all.LoginFragment
 
 class TestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

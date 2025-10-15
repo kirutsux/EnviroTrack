@@ -8,7 +8,6 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.LoginFragment
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.appcheck.FirebaseAppCheck
@@ -28,7 +27,7 @@ class SP_RegistrationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_sp__registration, container, false)
+        val view = inflater.inflate(R.layout.sp_registration, container, false)
         etEmail = view.findViewById(R.id.etEmail)
         btnRequestAccess = view.findViewById(R.id.btnRequestAccess)
         btnBack = view.findViewById(R.id.btnBack)
