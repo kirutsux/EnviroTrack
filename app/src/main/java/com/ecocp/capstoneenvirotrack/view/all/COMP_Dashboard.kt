@@ -9,13 +9,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
+import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC
-import com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
-import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsDashboardFragment
-import com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -29,8 +25,8 @@ class COMP_Dashboard : Fragment() {
     private lateinit var opmsCard: CardView
     private lateinit var hazewasteCard: CardView
     private lateinit var pcoCard: CardView
+    private lateinit var crsCard: CardView
 
-    // Tracks whether user has accreditation
     private var isAccredited = false
 
     override fun onCreateView(
@@ -43,40 +39,42 @@ class COMP_Dashboard : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize cards
         cncCard = view.findViewById(R.id.cnc_card)
         smrCard = view.findViewById(R.id.smr_card)
         opmsCard = view.findViewById(R.id.opms_card)
         hazewasteCard = view.findViewById(R.id.hazewaste_card)
         pcoCard = view.findViewById(R.id.pco_card)
+        crsCard = view.findViewById(R.id.crs_card)
 
-        // Check if user already has an accreditation record
         checkUserAccreditation()
     }
 
     private fun setupCardListeners() {
-        // PCO card is always available (used to complete accreditation)
+        val navController = findNavController()
+
+        // PCO card is always accessible
         pcoCard.setOnClickListener {
-            navigateToFragment(COMP_PCO())
+            navController.navigate(R.id.action_pcoDashboard_to_COMP_PCO)
         }
 
         if (isAccredited) {
-            // ✅ User has accreditation — unlock all cards
-            cncCard.setOnClickListener { navigateToFragment(COMP_CNC()) }
-            smrCard.setOnClickListener { navigateToFragment(COMP_SMR()) }
+            cncCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_CNC) }
+            smrCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_SMR) }
             opmsCard.setOnClickListener {
                 val intent = Intent(requireContext(), OpmsActivity::class.java)
                 startActivity(intent)
             }
-            hazewasteCard.setOnClickListener { navigateToFragment(HWMSDashboardFragment()) }
+            hazewasteCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_HWMSDashboardFragment) }
+            crsCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_CRS) }
         } else {
-            // 🚫 User not accredited — disable other cards
             val lockMessage = "Please complete your accreditation first via the PCO section."
+            val showToast = { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
 
-            cncCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
-            smrCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
-            opmsCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
-            hazewasteCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
+            cncCard.setOnClickListener { showToast() }
+            smrCard.setOnClickListener { showToast() }
+            opmsCard.setOnClickListener { showToast() }
+            hazewasteCard.setOnClickListener { showToast() }
+            crsCard.setOnClickListener { showToast() }
         }
     }
 
@@ -88,8 +86,6 @@ class COMP_Dashboard : Fragment() {
         }
 
         val userId = user.uid
-
-        // 🔍 Query the "accreditations" collection to find if any document has this UID
         db.collection("accreditations")
             .whereEqualTo("uid", userId)
             .limit(1)
@@ -104,20 +100,11 @@ class COMP_Dashboard : Fragment() {
                     val dialog = PCOVerificationDialogFragment()
                     dialog.show(childFragmentManager, "PCOVerificationDialog")
                 }
-
-                // Always set up the correct behavior for cards after check
                 setupCardListeners()
             }
             .addOnFailureListener { e ->
                 Log.e("COMP_Dashboard", "Error checking accreditation: ", e)
                 Toast.makeText(requireContext(), "Failed to verify accreditation.", Toast.LENGTH_SHORT).show()
             }
-    }
-
-    private fun navigateToFragment(fragment: Fragment) {
-        requireActivity().supportFragmentManager.commit {
-            replace(R.id.nav_host_fragment, fragment)
-            addToBackStack(null)
-        }
     }
 }

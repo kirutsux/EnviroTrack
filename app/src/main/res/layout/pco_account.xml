@@ -250,6 +250,14 @@
                     android:paddingVertical="12dp"
                     android:paddingHorizontal="24dp"
                     app:rippleColor="#34D399" />
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:indeterminate="true"
+                    android:layout_marginTop="16dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </RelativeLayout>
