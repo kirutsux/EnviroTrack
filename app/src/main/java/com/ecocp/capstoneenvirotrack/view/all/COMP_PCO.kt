@@ -9,13 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.PCO
 import com.ecocp.capstoneenvirotrack.view.businesses.adapters.PCOAdapter
 import com.ecocp.capstoneenvirotrack.view.businesses.dialogs.PCODetailsDialog
-import com.ecocp.capstoneenvirotrack.view.businesses.pcoacc.COMP_PCOAccreditation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -28,7 +28,6 @@ class COMP_PCO : Fragment() {
     private lateinit var etSearch: EditText
     private lateinit var spinnerStatus: Spinner
     private lateinit var adapter: PCOAdapter
-    private val list = mutableListOf<PCO>()
     private lateinit var backButton: ImageView
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -55,9 +54,17 @@ class COMP_PCO : Fragment() {
 
         setupSearch()
         setupSpinner()
-        setupButtons(newApplicationButton)
-        fetchAccreditations()
 
+        // ✅ Navigation buttons now use NavController directly
+        backButton.setOnClickListener {
+            findNavController().navigate(R.id.action_COMP_PCO_to_pcoDashboard)
+        }
+
+        newApplicationButton.setOnClickListener {
+            findNavController().navigate(R.id.action_COMP_PCO_to_COMP_PCOAccreditation)
+        }
+
+        fetchAccreditations()
         return view
     }
 
@@ -78,50 +85,25 @@ class COMP_PCO : Fragment() {
         spinnerStatus.adapter = spinnerAdapter
 
         spinnerStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 adapter.filterByStatus(statuses[position])
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
-    private fun setupButtons(newApplicationButton: FloatingActionButton) {
-        backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
-
-        newApplicationButton.setOnClickListener {
-            val newFragment = COMP_PCOAccreditation()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, newFragment)
-                .addToBackStack(null)
-                .commit()
-        }
-    }
-
     private fun fetchAccreditations() {
-        Log.d("COMP_PCO", "Fetching all accreditations...")
-
         firestore.collection("accreditations")
             .get()
             .addOnSuccessListener { documents ->
-                Log.d("COMP_PCO", "Fetched ${documents.size()} documents")
                 val fetchedList = mutableListOf<PCO>()
-
                 for (doc in documents) {
                     val accreditationId = doc.getString("accreditationId") ?: "N/A"
-                    val shortId = if (accreditationId.length >= 4)
-                        "ID: ${accreditationId.take(4)}"
-                    else "ID: $accreditationId"
-
+                    val shortId = if (accreditationId.length >= 4) "ID: ${accreditationId.take(4)}" else "ID: $accreditationId"
                     val fullName = doc.getString("fullName") ?: "N/A"
                     val company = doc.getString("companyAffiliation") ?: "N/A"
                     val status = doc.getString("status") ?: "Submitted"
                     val timestamp = doc.getLong("timestamp") ?: 0L
-
                     val formattedDate = if (timestamp > 0)
                         SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
                     else "N/A"
@@ -162,12 +144,6 @@ class COMP_PCO : Fragment() {
             .addOnSuccessListener { docs ->
                 if (!docs.isEmpty) {
                     val doc = docs.documents.first()
-
-                    // Extract the file URLs
-                    val governmentIdUrl = doc.getString("governmentIdUrl")
-                    val certificateUrl = doc.getString("certificateUrl")
-                    val trainingCertificateUrl = doc.getString("trainingCertificateUrl")
-
                     val dialog = PCODetailsDialog.newInstance(
                         doc.getString("fullName") ?: "N/A",
                         doc.getString("positionDesignation") ?: "N/A",
@@ -175,11 +151,10 @@ class COMP_PCO : Fragment() {
                         doc.getString("companyAffiliation") ?: "N/A",
                         doc.getString("educationalBackground") ?: "N/A",
                         doc.getString("experienceInEnvManagement") ?: "N/A",
-                        governmentIdUrl,
-                        certificateUrl,
-                        trainingCertificateUrl
+                        doc.getString("governmentIdUrl"),
+                        doc.getString("certificateUrl"),
+                        doc.getString("trainingCertificateUrl")
                     )
-
                     dialog.show(parentFragmentManager, "PCODetailsDialog")
                 }
             }
@@ -187,5 +162,4 @@ class COMP_PCO : Fragment() {
                 Log.e("COMP_PCO", "Error fetching details: ${e.message}", e)
             }
     }
-
 }
