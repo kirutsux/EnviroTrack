@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:padding="16dp">
 
     <LinearLayout
@@ -9,82 +10,124 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:text="Step 3: Payment of Fees"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"
+        <!-- Header Section -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:text="Please review the fee details and proceed with payment."
-            android:textSize="14sp"
-            android:textColor="#666"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="Back"
+                android:tint="#2E7D32" />
 
-        <!-- Fee Summary -->
-        <TextView
-            android:text="Processing Fee: ₱1,000.00"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/titleHeader"
+                android:text="Step 3: Payment of Fees"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="#2E7D32"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
-        <TextView
-            android:text="Environmental Fee: ₱500.00"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:text="Total: ₱1,500.00"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- Payment Method -->
-        <TextView
-            android:text="Select Payment Method:"
-            android:textStyle="bold"
-            android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <RadioGroup
-            android:id="@+id/paymentMethodGroup"
+        <!-- Info Section -->
+        <LinearLayout
             android:orientation="vertical"
-            android:layout_marginTop="8dp"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <RadioButton
-                android:id="@+id/paymentGcash"
-                android:text="GCash"
-                android:layout_width="wrap_content"
+            <TextView
+                android:text="Please review the fee details and proceed with payment."
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginBottom="12dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <RadioButton
-                android:id="@+id/paymentCard"
-                android:text="Credit/Debit Card"
-                android:layout_width="wrap_content"
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Fees -->
+            <TextView
+                android:text="Processing Fee"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:text="₱1,000.00"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <RadioButton
-                android:id="@+id/paymentBank"
-                android:text="Bank Transfer"
-                android:layout_width="wrap_content"
+            <TextView
+                android:text="Environmental Fee"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-        </RadioGroup>
+            <TextView
+                android:text="₱500.00"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        <!-- Proceed Button -->
-        <Button
-            android:id="@+id/btnProceedPayment"
-            android:text="Proceed to Payment"
+            <TextView
+                android:text="Total"
+                android:textStyle="bold"
+                android:textColor="#2E7D32"
+                android:textSize="15sp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:text="₱1,500.00"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#000000"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Payment Button Section -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp" />
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnPayWithStripe"
+                android:text="Pay with Card (Stripe)"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2E7D32"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:radius="12dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

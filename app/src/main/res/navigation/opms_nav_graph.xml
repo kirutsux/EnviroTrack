@@ -15,6 +15,11 @@
         <action
             android:id="@+id/action_dashboard_to_dischargePermitForm"
             app:destination="@id/dischargePermitFormFragment" />
+
+        <!-- ✅ NEW: Navigate to Discharge Permit Details -->
+        <action
+            android:id="@+id/action_dashboard_to_dischargePermitDetails"
+            app:destination="@id/dischargePermitDetailsFragment" />
     </fragment>
 
     <!-- Discharge Permit Application -->
@@ -39,6 +44,11 @@
         <action
             android:id="@+id/action_payment_to_review"
             app:destination="@id/dischargePermitReviewFragment" />
+
+        <!-- Back to Discharge Permit Form -->
+        <action
+            android:id="@+id/action_payment_to_dischargePermitForm"
+            app:destination="@id/dischargePermitFormFragment" />
     </fragment>
 
     <!-- Review and Submit -->
@@ -47,5 +57,12 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitReviewFragment"
         android:label="Review and Submit"
         tools:layout="@layout/fragment_discharge_permit_review" />
+
+    <!-- ✅ NEW: Discharge Permit Details -->
+    <fragment
+        android:id="@+id/dischargePermitDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitDetailsFragment"
+        android:label="Discharge Permit Details"
+        tools:layout="@layout/fragment_discharge_permit_details" />
 
 </navigation>

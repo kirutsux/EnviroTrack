@@ -1,0 +1,268 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:dividerPadding="8dp"
+        android:showDividers="none">
+
+        <!-- Title -->
+        <TextView
+            android:text="Discharge Permit Details"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#2E7D32"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Company Info Card -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Company Name"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtCompanyName"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Company Address"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtCompanyAddress"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="PCO Name"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtPcoName"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="PCO Accreditation No."
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtAccreditation"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Contact Number"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtContactNumber"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Email"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtEmail"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Environmental Info Card -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Body of Water"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtBodyOfWater"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Source of Wastewater"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtSourceWastewater"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Volume (m³)"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtVolume"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Treatment Method"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtTreatment"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Operation Start Date"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtOperationDate"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Status"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtStatus"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Payment Info Card -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Payment Information"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/txtPayment"
+                android:text="₱0.00 PHP\nPaid on: -"
+                android:textSize="16sp"
+                android:singleLine="false"
+                android:ellipsize="none"
+                android:scrollHorizontally="false"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:inputType="textMultiLine"
+                android:lines="2"
+                android:maxLines="5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
