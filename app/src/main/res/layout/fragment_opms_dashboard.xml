@@ -65,16 +65,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnApplySwm"
-                android:text="Apply for Solid Waste Management Permit"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#2E7D32"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <!-- Submitted Applications -->
@@ -105,10 +95,11 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerSubmittedApplications"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            android:background="@drawable/card_border"
-            android:padding="8dp"
-            android:elevation="3dp" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp"
+            android:overScrollMode="never"
+            android:scrollbars="vertical" />
     </LinearLayout>
 </ScrollView>

@@ -16,5 +16,6 @@ data class SubmittedApplication(
     val fileLinks: List<String> = emptyList(),
     val status: String = "Pending",
     val paymentInfo: String = "",
-    val timestamp: String = ""
+    val timestamp: String = "",
+    val applicationType: String = ""
 )

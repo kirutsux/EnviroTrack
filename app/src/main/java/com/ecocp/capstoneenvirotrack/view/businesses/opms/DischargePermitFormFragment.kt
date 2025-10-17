@@ -173,7 +173,8 @@ class DischargePermitFormFragment : Fragment() {
                 "sourceWastewater" to sourceWastewater,
                 "volume" to volume,
                 "treatmentMethod" to treatmentMethod,
-                "operationStartDate" to operationStartDate
+                "operationStartDate" to operationStartDate,
+                "applicationType" to "Discharge Permit"
             )
         )
     }

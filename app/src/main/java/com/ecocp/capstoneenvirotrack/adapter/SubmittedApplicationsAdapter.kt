@@ -36,7 +36,11 @@ class SubmittedApplicationsAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = applications[position]
-        holder.txtPermitType.text = "Discharge Permit"
+
+        // ✅ Use the actual application type instead of hardcoding
+        val permitType = app.applicationType.ifEmpty { "Unknown Type" }
+        holder.txtPermitType.text = permitType
+
         holder.txtPermitStatus.text = "Status: ${app.status}"
         holder.txtSubmittedAt.text = "Submitted: ${app.timestamp}"
     }

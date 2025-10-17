@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
@@ -14,6 +15,7 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.*
 
 class COMP_Dashboard : Fragment() {
 
@@ -26,6 +28,7 @@ class COMP_Dashboard : Fragment() {
     private lateinit var hazewasteCard: CardView
     private lateinit var pcoCard: CardView
     private lateinit var crsCard: CardView
+    private lateinit var greetingTextView: TextView
 
     private var isAccredited = false
 
@@ -45,8 +48,45 @@ class COMP_Dashboard : Fragment() {
         hazewasteCard = view.findViewById(R.id.hazewaste_card)
         pcoCard = view.findViewById(R.id.pco_card)
         crsCard = view.findViewById(R.id.crs_card)
+        greetingTextView = view.findViewById(R.id.greeting_message)
 
+        fetchGreetingMessage()
         checkUserAccreditation()
+    }
+
+    private fun fetchGreetingMessage() {
+        val user = auth.currentUser
+        if (user == null) {
+            Log.e("COMP_Dashboard", "No logged-in user.")
+            return
+        }
+
+        val userId = user.uid
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val firstName = document.getString("firstName") ?: "User"
+                    val greeting = getTimeBasedGreeting()
+                    greetingTextView.text = "Hi $firstName! $greeting"
+                } else {
+                    greetingTextView.text = "Hi there! ${getTimeBasedGreeting()}"
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("COMP_Dashboard", "Error fetching user name: ", e)
+                greetingTextView.text = "Hi there! ${getTimeBasedGreeting()}"
+            }
+    }
+
+    private fun getTimeBasedGreeting(): String {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+
+        return when (hour) {
+            in 0..11 -> "Good Morning"
+            in 12..17 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
     }
 
     private fun setupCardListeners() {
