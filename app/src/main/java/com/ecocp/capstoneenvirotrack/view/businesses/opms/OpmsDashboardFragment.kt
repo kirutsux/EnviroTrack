@@ -14,7 +14,6 @@ import com.ecocp.capstoneenvirotrack.model.SubmittedApplication
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -38,112 +37,130 @@ class OpmsDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Buttons navigation
+        // Navigation buttons
         binding.btnApplyDischargePermit.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_dischargePermitForm)
         }
 
         binding.btnApplyPto.setOnClickListener {
-            // TODO: Add PTO form
-        }
-
-        binding.btnApplySwm.setOnClickListener {
-            // TODO: Add SWM form
+            findNavController().navigate(R.id.action_dashboard_to_ptoForm)
         }
 
         // Setup RecyclerView
         binding.recyclerSubmittedApplications.layoutManager = LinearLayoutManager(requireContext())
         adapter = SubmittedApplicationsAdapter(applications) { selectedApp ->
-            val bundle = Bundle().apply {
-                putString("applicationId", selectedApp.id)
-                putString("companyName", selectedApp.companyName)
-                putString("companyAddress", selectedApp.companyAddress)
-                putString("pcoName", selectedApp.pcoName)
-                putString("pcoAccreditation", selectedApp.pcoAccreditation)
-                putString("contactNumber", selectedApp.contactNumber)
-                putString("email", selectedApp.email)
-                putString("bodyOfWater", selectedApp.bodyOfWater)
-                putString("sourceWastewater", selectedApp.sourceWastewater)
-                putString("volume", selectedApp.volume)
-                putString("treatmentMethod", selectedApp.treatmentMethod)
-                putString("operationStartDate", selectedApp.operationStartDate)
-                putString("status", selectedApp.status)
-                putString("paymentInfo", selectedApp.paymentInfo)
-                putString("timestamp", selectedApp.timestamp)
-                putString("fileLinks", selectedApp.fileLinks.joinToString("\n"))
+            val bundle = Bundle().apply { putString("applicationId", selectedApp.id) }
+
+            when (selectedApp.applicationType) {
+                "Discharge Permit" -> findNavController().navigate(
+                    R.id.action_dashboard_to_dischargePermitDetails,
+                    bundle
+                )
+                "Permit to Operate" -> findNavController().navigate(
+                    R.id.action_dashboard_to_ptoDetails,
+                    bundle
+                )
             }
-
-            findNavController().navigate(
-                R.id.action_dashboard_to_dischargePermitDetails,
-                bundle
-            )
         }
-
         binding.recyclerSubmittedApplications.adapter = adapter
 
-        // Load Firestore data (real-time listener)
-        listenToSubmittedApplications()
+        // Load all applications
+        listenToApplications()
     }
 
     /**
-     * Loads the list of submitted applications in real-time.
+     * Loads both Discharge Permit and PTO applications for the logged-in user.
      */
-    private fun listenToSubmittedApplications() {
+    private fun listenToApplications() {
         val uid = auth.currentUser?.uid ?: return
+        applications.clear()
 
-        // ✅ Use orderBy("timestamp") only (Firestore requires index if combining where+orderBy)
+        // ✅ Discharge Permit applications
         db.collection("opms_discharge_permits")
             .whereEqualTo("uid", uid)
-            .whereEqualTo("status", "Submitted")
             .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    error.printStackTrace()
-                    return@addSnapshotListener
+                if (error != null) return@addSnapshotListener
+                snapshot?.documents?.forEach { doc ->
+                    val app = mapToApplication(doc.id, doc.data, "Discharge Permit")
+                    addOrUpdateApplication(app)
                 }
-
-                if (snapshot == null || snapshot.isEmpty) {
-                    applications.clear()
-                    adapter.notifyDataSetChanged()
-                    return@addSnapshotListener
-                }
-
-                applications.clear()
-                for (doc in snapshot.documents) {
-                    val timestampValue = doc.get("timestamp")
-                    val formattedTimestamp = when (timestampValue) {
-                        is Timestamp -> {
-                            val date = timestampValue.toDate()
-                            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(date)
-                        }
-                        is String -> timestampValue
-                        else -> "N/A"
-                    }
-
-                    val app = SubmittedApplication(
-                        id = doc.id,
-                        companyName = doc.getString("companyName") ?: "",
-                        companyAddress = doc.getString("companyAddress") ?: "",
-                        pcoName = doc.getString("pcoName") ?: "",
-                        pcoAccreditation = doc.getString("pcoAccreditationNumber") ?: "",
-                        contactNumber = doc.getString("contactNumber") ?: "",
-                        email = doc.getString("email") ?: "",
-                        bodyOfWater = doc.getString("receivingBody") ?: "",
-                        sourceWastewater = doc.getString("sourceWastewater") ?: "",
-                        volume = doc.getString("dischargeVolume") ?: "",
-                        treatmentMethod = doc.getString("dischargeMethod") ?: "",
-                        operationStartDate = doc.getString("operationStartDate") ?: "",
-                        fileLinks = doc.getString("uploadedFiles")?.split(",") ?: emptyList(),
-                        status = doc.getString("status") ?: "Submitted",
-                        paymentInfo = doc.getString("paymentInfo") ?: "",
-                        timestamp = formattedTimestamp
-                    )
-                    applications.add(app)
-                }
-
-                // Sort manually by timestamp (descending)
-                applications.sortByDescending { it.timestamp }
                 adapter.notifyDataSetChanged()
             }
+
+        // ✅ Permit to Operate applications
+        db.collection("opms_pto_applications")
+            .whereEqualTo("uid", uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) return@addSnapshotListener
+                snapshot?.documents?.forEach { doc ->
+                    val app = mapToApplication(doc.id, doc.data, "Permit to Operate")
+                    addOrUpdateApplication(app)
+                }
+                adapter.notifyDataSetChanged()
+            }
+    }
+
+    /**
+     * Maps Firestore data to SubmittedApplication model
+     */
+    private fun mapToApplication(id: String, data: MutableMap<String, Any>?, defaultType: String): SubmittedApplication {
+        val timestampValue = data?.get("timestamp")
+        val formattedTimestamp = when (timestampValue) {
+            is Timestamp -> SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(timestampValue.toDate())
+            is String -> timestampValue
+            else -> "N/A"
+        }
+
+        // ✅ Prefer Firestore "applicationType" if available
+        val appType = (data?.get("applicationType") ?: defaultType) as String
+
+        return SubmittedApplication(
+            id = id,
+            companyName = (data?.get("establishmentName") ?: data?.get("companyName") ?: "") as String,
+            companyAddress = (data?.get("mailingAddress") ?: data?.get("companyAddress") ?: "") as String,
+            pcoName = (data?.get("pcoName") ?: "") as String,
+            pcoAccreditation = (data?.get("pcoAccreditation") ?: data?.get("pcoAccreditationNumber") ?: "") as String,
+            contactNumber = (data?.get("contactNumber") ?: "-") as String,
+            email = (data?.get("email") ?: "-") as String,
+            bodyOfWater = (data?.get("bodyOfWater") ?: data?.get("receivingBody") ?: "") as String,
+            sourceWastewater = (data?.get("sourceWastewater") ?: "") as String,
+            volume = (data?.get("volume") ?: data?.get("dischargeVolume") ?: "") as String,
+            treatmentMethod = (data?.get("treatmentMethod") ?: data?.get("dischargeMethod") ?: "") as String,
+            operationStartDate = (data?.get("operationStartDate") ?: "") as String,
+            fileLinks = (data?.get("fileLinks") as? String)?.split("\n") ?: emptyList(),
+            status = (data?.get("status") ?: "Pending") as String,
+            paymentInfo = buildPaymentInfo(data),
+            timestamp = formattedTimestamp,
+            applicationType = appType
+        )
+    }
+
+    /**
+     * Builds formatted payment info
+     */
+    private fun buildPaymentInfo(data: MutableMap<String, Any>?): String {
+        val amount = (data?.get("amount") as? Number)?.toDouble() ?: 0.0
+        val currency = data?.get("currency") as? String ?: "PHP"
+        val paymentTimestamp = (data?.get("paymentTimestamp") as? Timestamp)?.toDate()
+
+        val formattedDate = paymentTimestamp?.let {
+            SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault()).format(it)
+        } ?: "Not Paid"
+
+        return "₱%.2f %s\nPaid on: %s".format(amount, currency, formattedDate)
+    }
+
+    /**
+     * Adds or updates application in list (avoids duplicates)
+     */
+    private fun addOrUpdateApplication(app: SubmittedApplication) {
+        val index = applications.indexOfFirst { it.id == app.id }
+        if (index >= 0) {
+            applications[index] = app
+        } else {
+            applications.add(app)
+        }
+        applications.sortByDescending { it.timestamp }
     }
 
     override fun onDestroyView() {

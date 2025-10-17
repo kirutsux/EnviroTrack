@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.databinding.FragmentDischargePermitReviewBinding
+import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoReviewBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,9 +16,9 @@ import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.*
 
-class DischargePermitReviewFragment : Fragment() {
+class PtoReviewFragment : Fragment() {
 
-    private var _binding: FragmentDischargePermitReviewBinding? = null
+    private var _binding: FragmentPtoReviewBinding? = null
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
     private val uid = FirebaseAuth.getInstance().currentUser?.uid
@@ -28,17 +28,16 @@ class DischargePermitReviewFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentDischargePermitReviewBinding.inflate(inflater, container, false)
+        _binding = FragmentPtoReviewBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        fetchPermitDetails()
+        fetchPtoDetails()
 
         binding.btnEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.dischargePermitFormFragment, false)
+            findNavController().popBackStack(R.id.ptoFormFragment, false)
         }
 
         binding.btnSubmitApplication.setOnClickListener {
@@ -46,92 +45,90 @@ class DischargePermitReviewFragment : Fragment() {
         }
     }
 
-    private fun fetchPermitDetails() {
+    private fun fetchPtoDetails() {
         if (uid == null) {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
             return
         }
 
-        db.collection("opms_discharge_permits")
+        db.collection("opms_pto_applications")
             .whereEqualTo("uid", uid)
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .limit(1)
             .get()
             .addOnSuccessListener { result ->
                 if (result.isEmpty) {
-                    Toast.makeText(requireContext(), "No permit data found.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "No PTO data found.", Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
                 val doc = result.documents.first()
                 currentDocId = doc.id
 
-                // --- Fetch main permit info ---
-                val companyName = doc.getString("companyName") ?: "-"
-                val companyAddress = doc.getString("companyAddress") ?: "-"
-                val pcoName = doc.getString("pcoName") ?: "-"
-                val pcoAccreditationNumber = doc.getString("pcoAccreditation") ?: "-"
-                val receivingBody = doc.getString("bodyOfWater") ?: "-"
-                val dischargeVolume = doc.getString("volume") ?: "-"
-                val dischargeMethod = doc.getString("treatmentMethod") ?: "-"
-                val uploadedFiles = doc.getString("fileLinks") ?: "No files uploaded"
-                val status = doc.getString("status") ?: "Pending"
+                // --- Company Info ---
+                val ownerName = doc.getString("ownerName") ?: "-"
+                val establishmentName = doc.getString("establishmentName") ?: "-"
+                val mailingAddress = doc.getString("mailingAddress") ?: "-"
+                val plantAddress = doc.getString("plantAddress") ?: "-"
+                val tin = doc.getString("tin") ?: "-"
+                val ownershipType = doc.getString("ownershipType") ?: "-"
+                val natureOfBusiness = doc.getString("natureOfBusiness") ?: "-"
 
-                // --- Fetch payment info (if exists) ---
+                // --- Facility Info ---
+                val pcoName = doc.getString("pcoName") ?: "-"
+                val pcoAccreditation = doc.getString("pcoAccreditation") ?: "-"
+                val operatingHours = doc.getString("operatingHours") ?: "-"
+                val totalEmployees = doc.getString("totalEmployees") ?: "-"
+                val landArea = doc.getString("landArea") ?: "-"
+
+                // --- Equipment Info ---
+                val equipmentName = doc.getString("equipmentName") ?: "-"
+                val fuelType = doc.getString("fuelType") ?: "-"
+                val emissions = doc.getString("emissions") ?: "-"
+
+                // --- Payment Info ---
                 val amount = doc.getDouble("amount") ?: 0.0
-                val currency = doc.getString("currency") ?: "PHP"
                 val paymentMethod = doc.getString("paymentMethod") ?: "-"
-                val paymentStatus = doc.getString("status") ?: "Pending"
+                val paymentStatus = doc.getString("paymentStatus") ?: "Pending"
                 val paymentTimestamp = doc.getTimestamp("paymentTimestamp")
 
-                // Format timestamp nicely if available
                 val formattedDate = paymentTimestamp?.toDate()?.let {
                     SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(it)
                 } ?: "-"
 
-                // --- Update UI ---
+                // --- Bind to UI ---
                 binding.txtCompanyReview.text =
-                    "$companyName\n$companyAddress\nPCO: $pcoName ($pcoAccreditationNumber)"
+                    "👤 Owner: $ownerName\n🏢 Establishment: $establishmentName\n🧾 TIN: $tin\n🏠 Ownership: $ownershipType\n🌿 Nature: $natureOfBusiness\n📬 Mailing: $mailingAddress\n🏭 Plant: $plantAddress"
 
-                binding.txtDischargeReview.text =
-                    "Receiving Body: $receivingBody\nVolume: $dischargeVolume\nTreatment: $dischargeMethod"
+                binding.txtFacilityReview.text =
+                    "🧑‍🔬 PCO: $pcoName (Accreditation: $pcoAccreditation)\n⏱ Operating Hours: $operatingHours\n👥 Total Employees: $totalEmployees\n📏 Land Area: $landArea"
 
-                // --- Payment Display ---
-                val paymentDisplay = if (paymentStatus.equals("Paid", ignoreCase = true)) {
-                    "✅ Payment Completed\nAmount: ₱$amount $currency\nMethod: $paymentMethod\nDate: $formattedDate"
+                binding.txtEquipmentReview.text =
+                    "⚙ Equipment: $equipmentName\n⛽ Fuel Type: $fuelType\n💨 Emissions: $emissions"
+
+                binding.txtPaymentReview.text = if (paymentStatus.equals("Paid", true)) {
+                    "✅ Payment Completed\n💰 Amount: ₱$amount\n💳 Method: $paymentMethod\n📅 Date: $formattedDate"
                 } else {
                     "❌ Payment Pending"
                 }
-
-                binding.txtPaymentReview.text = paymentDisplay
-
-                // --- Status Display (optional) ---
-//                binding.txtStatusReview.text = "Status: $status"
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to fetch data.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to fetch PTO data.", Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun submitApplication() {
-        if (uid == null) {
-            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+        if (uid == null || currentDocId == null) {
+            Toast.makeText(requireContext(), "No application found to submit.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (currentDocId == null) {
-            Toast.makeText(requireContext(), "No application found to update.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Update same document status to Submitted
         val updateData = mapOf(
-            "status" to "Submitted",
+            "status" to "Pending", // EMB will review later
             "submittedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_discharge_permits")
-            .document(currentDocId!!)
+        db.collection("opms_pto_applications").document(currentDocId!!)
             .update(updateData)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()

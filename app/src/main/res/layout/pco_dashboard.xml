@@ -72,19 +72,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <!-- Greeting Message -->
-                <TextView
-                    android:id="@+id/greeting_message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/greeting_message"
-                    android:textSize="18sp"
-                    android:textColor="@color/text_highlight"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    tools:text="Hi Iandane! Good Evening" />
+            <!-- Greeting Message -->
+            <TextView
+                android:id="@+id/greeting_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Hi"
+                android:textSize="18sp"
+                android:textColor="@color/text_highlight"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
                 <!-- Search Bar -->
                 <EditText

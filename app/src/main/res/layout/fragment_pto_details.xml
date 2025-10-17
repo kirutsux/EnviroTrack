@@ -13,7 +13,7 @@
 
         <!-- Title -->
         <TextView
-            android:text="Discharge Permit Details"
+            android:text="Permit to Operate Details"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#445B6C"
@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Company Info Card -->
+        <!-- Company Information -->
         <LinearLayout
             android:orientation="vertical"
             android:background="@drawable/bordered_box"
@@ -32,36 +32,125 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="Company Name"
+                android:text="Owner Name"
                 android:textStyle="bold"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtCompanyName"
+                android:id="@+id/txtOwnerName"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:text="Company Address"
+                android:text="Establishment Name"
                 android:textStyle="bold"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtCompanyAddress"
+                android:id="@+id/txtEstablishmentName"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="Nature of Business"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtNatureOfBusiness"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="TIN"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtTin"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="Ownership Type"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtOwnershipType"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="Mailing Address"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtMailingAddress"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="Plant Address"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtPlantAddress"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Facility Information -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:text="PCO Name"
@@ -69,7 +158,7 @@
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/txtPcoName"
@@ -77,7 +166,7 @@
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:text="PCO Accreditation No."
@@ -85,50 +174,65 @@
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtAccreditation"
+                android:id="@+id/txtPcoAccreditation"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:text="Contact Number"
+                android:text="Operating Hours"
                 android:textStyle="bold"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtContactNumber"
+                android:id="@+id/txtOperatingHours"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:text="Email"
+                android:text="Total Employees"
                 android:textStyle="bold"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtEmail"
+                android:id="@+id/txtTotalEmployees"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="Land Area"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtLandArea"
+                android:text="-"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Environmental Info Card -->
+        <!-- Equipment Info -->
         <LinearLayout
             android:orientation="vertical"
             android:background="@drawable/bordered_box"
@@ -138,102 +242,54 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="Body of Water"
+                android:text="Equipment Name"
                 android:textStyle="bold"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtBodyOfWater"
+                android:id="@+id/txtEquipmentName"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:text="Source of Wastewater"
+                android:text="Fuel Type"
                 android:textStyle="bold"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtSourceWastewater"
+                android:id="@+id/txtFuelType"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:text="Volume (m³)"
+                android:text="Emissions Summary"
                 android:textStyle="bold"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
-                android:id="@+id/txtVolume"
-                android:text="-"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="Treatment Method"
-                android:textStyle="bold"
-                android:textColor="#555555"
-                android:textSize="14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/txtTreatment"
-                android:text="-"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="Operation Start Date"
-                android:textStyle="bold"
-                android:textColor="#555555"
-                android:textSize="14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/txtOperationDate"
-                android:text="-"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="Status"
-                android:textStyle="bold"
-                android:textColor="#555555"
-                android:textSize="14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/txtStatus"
+                android:id="@+id/txtEmissionsSummary"
                 android:text="-"
                 android:textSize="16sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Payment Info Card -->
+        <!-- Payment Info -->
         <LinearLayout
             android:orientation="vertical"
             android:background="@drawable/bordered_box"
@@ -247,7 +303,7 @@
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/txtPayment"
@@ -262,7 +318,17 @@
                 android:lines="2"
                 android:maxLines="5"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/txtStatus"
+                android:text="Status: Pending"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#2E7D32"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

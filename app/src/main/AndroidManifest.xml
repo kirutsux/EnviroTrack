@@ -16,9 +16,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".view.businesses.cnc.CncActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapstoneEnviroTrack" />
+        <activity
             android:name=".view.businesses.opms.OpmsActivity"
-            android:exported="false" />
-        <!-- MainActivity is NOW THE LAUNCHER and hosts the NavGraph -->
+            android:exported="false" /> <!-- MainActivity is NOW THE LAUNCHER and hosts the NavGraph -->
         <!-- Its layout (e.g., activity_main.xml) will contain the NavHostFragment -->
         <!-- The NavHostFragment's graph will have WelcomeFragment as its startDestination -->
         <activity

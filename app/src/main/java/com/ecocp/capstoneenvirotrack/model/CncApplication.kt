@@ -1,0 +1,42 @@
+package com.ecocp.capstoneenvirotrack.model
+
+import com.google.firebase.Timestamp
+
+data class CncApplication(
+    val applicationId: String? = null,
+    val uid: String? = null,
+    val companyName: String? = null,
+    val businessName: String? = null,
+    val projectTitle: String? = null,
+    val natureOfBusiness: String? = null,
+    val projectLocation: String? = null,
+    val email: String? = null,
+    val managingHead: String? = null,
+    val pcoName: String? = null,
+    val pcoAccreditation: String? = null,
+    val dateEstablished: String? = null,
+    val numEmployees: String? = null,
+    val psicCode: String? = null,
+    val projectType: String? = null,
+    val projectScale: String? = null,
+    val projectCost: String? = null,
+    val landArea: String? = null,
+    val rawMaterials: String? = null,
+    val productionCapacity: String? = null,
+    val utilitiesUsed: String? = null,
+    val wasteGenerated: String? = null,
+    val coordinates: String? = null,
+    val nearbyWaters: String? = null,
+    val residentialProximity: String? = null,
+    val envFeatures: String? = null,
+    val zoning: String? = null,
+    val amount: Double? = null,
+    val currency: String? = null,
+    val paymentMethod: String? = null,
+    val paymentStatus: String? = null,
+    val paymentTimestamp: Timestamp? = null,
+    val submittedTimestamp: Timestamp? = null,
+    val status: String? = null,
+    val fileLinks: List<String>? = null,
+    val timestamp: Timestamp? = null
+)
