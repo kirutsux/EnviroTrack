@@ -6,14 +6,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.ecocp.capstoneenvirotrack.R
 import com.google.firebase.auth.FirebaseAuth
@@ -31,6 +30,7 @@ class COMP_Account : Fragment() {
     private lateinit var btnUploadPhoto: Button
     private lateinit var btnSaveChanges: Button
     private lateinit var ivBack: ImageView
+    private lateinit var showPassword: ImageView
     private lateinit var progressBar: ProgressBar
 
     private val auth = FirebaseAuth.getInstance()
@@ -40,6 +40,7 @@ class COMP_Account : Fragment() {
     private val PICK_IMAGE_REQUEST = 1001
     private var imageUri: Uri? = null
     private var originalData: Map<String, String> = emptyMap()
+    private var isPasswordVisible = false  // 👁️ password visibility state
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,6 +57,7 @@ class COMP_Account : Fragment() {
         btnUploadPhoto = view.findViewById(R.id.btnUploadPhoto)
         btnSaveChanges = view.findViewById(R.id.btnSaveChanges)
         ivBack = view.findViewById(R.id.ivBack)
+        showPassword = view.findViewById(R.id.showPassword)
         progressBar = view.findViewById(R.id.progressBar)
 
         // Disable email editing
@@ -63,13 +65,19 @@ class COMP_Account : Fragment() {
         etEmail.isFocusable = false
         etEmail.isClickable = false
 
-        // Disable save button by default
+        // Disable save button initially
         btnSaveChanges.isEnabled = false
         btnSaveChanges.alpha = 0.5f
 
-        ivBack.setOnClickListener { findNavController().navigateUp() }
+        ivBack.setOnClickListener { requireActivity().onBackPressed() }
         btnUploadPhoto.setOnClickListener { openImagePicker() }
         btnSaveChanges.setOnClickListener { saveUserChanges() }
+
+        // 👁️ Password visibility toggle setup
+        showPassword.setOnClickListener {
+            isPasswordVisible = !isPasswordVisible
+            togglePasswordVisibility(etPassword, showPassword, isPasswordVisible)
+        }
 
         fetchUserDetails()
         setupTextWatchers()
@@ -77,16 +85,25 @@ class COMP_Account : Fragment() {
         return view
     }
 
-    // 🔹 Monitor if user edits anything
+    // 👁️ Toggle password visibility
+    private fun togglePasswordVisibility(editText: EditText, toggleIcon: ImageView, isVisible: Boolean) {
+        if (isVisible) {
+            editText.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            toggleIcon.setImageResource(R.drawable.ic_visibility_on)
+        } else {
+            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            toggleIcon.setImageResource(R.drawable.ic_visibility_off)
+        }
+        editText.setSelection(editText.text.length)
+    }
+
+    // 📝 Monitor text changes
     private fun setupTextWatchers() {
         val watcher = object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                checkForChanges()
-            }
+            override fun afterTextChanged(s: Editable?) = checkForChanges()
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         }
-
         etName.addTextChangedListener(watcher)
         etPassword.addTextChangedListener(watcher)
         etContact.addTextChangedListener(watcher)
@@ -98,19 +115,18 @@ class COMP_Account : Fragment() {
             "password" to etPassword.text.toString().trim(),
             "contact" to etContact.text.toString().trim()
         )
-
         val hasChanges = currentData != originalData
         btnSaveChanges.isEnabled = hasChanges
-        btnSaveChanges.alpha = if (hasChanges) 1.0f else 0.5f
+        btnSaveChanges.alpha = if (hasChanges) 1f else 0.5f
     }
 
-    // 🔹 Open Image Picker
+    // 📸 Open gallery
     private fun openImagePicker() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(intent, PICK_IMAGE_REQUEST)
     }
 
-    // 🔹 Handle Image Selection Result
+    // 📸 Handle image selection
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
@@ -125,10 +141,10 @@ class COMP_Account : Fragment() {
 
     private fun enableSaveButtonTemporarily() {
         btnSaveChanges.isEnabled = true
-        btnSaveChanges.alpha = 1.0f
+        btnSaveChanges.alpha = 1f
     }
 
-    // 🔹 Upload Image to Firebase Storage
+    // ☁️ Upload profile image
     private fun uploadImageToFirebase(imageUri: Uri) {
         val currentUser = auth.currentUser ?: return
         val uid = currentUser.uid
@@ -153,25 +169,24 @@ class COMP_Account : Fragment() {
             }
     }
 
-    // 🔹 Fetch User Details
+    // 🔹 Fetch user data
     private fun fetchUserDetails() {
         val uid = auth.currentUser?.uid ?: return
         firestore.collection("users").document(uid).get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    val firstName = document.getString("firstName") ?: ""
-                    val lastName = document.getString("lastName") ?: ""
-                    val email = document.getString("email") ?: ""
-                    val password = document.getString("password") ?: ""
-                    val phoneNumber = document.getString("phoneNumber") ?: ""
-                    val profileImageUrl = document.getString("profileImageUrl") ?: ""
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val firstName = doc.getString("firstName") ?: ""
+                    val lastName = doc.getString("lastName") ?: ""
+                    val email = doc.getString("email") ?: ""
+                    val password = doc.getString("password") ?: ""
+                    val phoneNumber = doc.getString("phoneNumber") ?: ""
+                    val profileImageUrl = doc.getString("profileImageUrl") ?: ""
 
                     etName.setText("$firstName $lastName")
                     etEmail.setText(email)
                     etPassword.setText(password)
                     etContact.setText(phoneNumber)
 
-                    // Save original data for change detection
                     originalData = mapOf(
                         "name" to "$firstName $lastName",
                         "password" to password,
@@ -179,13 +194,10 @@ class COMP_Account : Fragment() {
                     )
 
                     if (profileImageUrl.isNotEmpty()) {
-                        Glide.with(this)
-                            .load(profileImageUrl)
+                        Glide.with(this).load(profileImageUrl)
                             .placeholder(R.drawable.sample_profile)
                             .into(ivProfilePic)
-                    } else {
-                        ivProfilePic.setImageResource(R.drawable.sample_profile)
-                    }
+                    } else ivProfilePic.setImageResource(R.drawable.sample_profile)
 
                     checkForChanges()
                 } else {
@@ -197,7 +209,7 @@ class COMP_Account : Fragment() {
             }
     }
 
-    // 🔹 Save Changes (Firestore only)
+    // 💾 Save changes
     private fun saveUserChanges() {
         val user = auth.currentUser ?: return
 
@@ -228,14 +240,17 @@ class COMP_Account : Fragment() {
 
         userRef.update(updates)
             .addOnSuccessListener {
-                progressBar.visibility = View.GONE
-                Toast.makeText(requireContext(), "Account updated successfully!", Toast.LENGTH_SHORT).show()
-                originalData = mapOf(
-                    "name" to fullName,
-                    "password" to password,
-                    "contact" to contact
-                )
-                checkForChanges()
+                user.updatePassword(password)
+                    .addOnSuccessListener {
+                        progressBar.visibility = View.GONE
+                        Toast.makeText(requireContext(), "Account updated successfully!", Toast.LENGTH_SHORT).show()
+                        originalData = mapOf("name" to fullName, "password" to password, "contact" to contact)
+                        checkForChanges()
+                    }
+                    .addOnFailureListener { e ->
+                        progressBar.visibility = View.GONE
+                        Toast.makeText(requireContext(), "Failed to update Auth password: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
             .addOnFailureListener { e ->
                 progressBar.visibility = View.GONE

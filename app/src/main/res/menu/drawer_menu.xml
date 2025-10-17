@@ -21,10 +21,6 @@
         android:icon="@drawable/serviceprovider"
         android:title="Service Providers" />
 
-    <item
-        android:id="@+id/nav_reports"
-        android:icon="@drawable/report"
-        android:title="Reports" />
 
     <item
         android:id="@+id/nav_about_us"
