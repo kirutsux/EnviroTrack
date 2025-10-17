@@ -21,6 +21,9 @@ class COMP_Profile : Fragment() {
     private lateinit var tvEmail: TextView
     private lateinit var ivProfilePic: CircleImageView
 
+    private lateinit var btnAccount: LinearLayout
+    private lateinit var btnLogout: LinearLayout
+
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
@@ -30,16 +33,16 @@ class COMP_Profile : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_comp__profile, container, false)
 
-        // Initialize UI elements
+        // Initialize UI
         tvName = view.findViewById(R.id.tvName)
         tvEmail = view.findViewById(R.id.tvEmail)
         ivProfilePic = view.findViewById(R.id.ivProfilePic)
+        btnAccount = view.findViewById(R.id.btnAccount)
+        btnLogout = view.findViewById(R.id.btnLogout)
 
-        // Load user data from Firebase
         loadUserData()
 
-        // 🔹 Navigate to Account Fragment
-        val btnAccount = view.findViewById<LinearLayout>(R.id.btnAccount)
+        // Navigate to Account Fragment
         btnAccount.setOnClickListener {
             try {
                 findNavController().navigate(R.id.action_COMP_Profile_to_COMP_Account)
@@ -48,10 +51,13 @@ class COMP_Profile : Fragment() {
             }
         }
 
+        // Logout button
+        btnLogout.setOnClickListener { logoutUser() }
+
         return view
     }
 
-    // 👤 Load user info from Firestore
+    // 👤 Load user data
     private fun loadUserData() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -81,6 +87,20 @@ class COMP_Profile : Fragment() {
         } else {
             tvName.text = "Guest"
             tvEmail.text = "Not signed in"
+        }
+    }
+
+    // 🚪 Logout user and navigate to LoginFragment
+    private fun logoutUser() {
+        try {
+            auth.signOut()
+            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            // Navigate safely to login screen via nav_graph
+            findNavController().navigate(R.id.action_COMP_Profile_to_loginFragment)
+
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error logging out: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 }
