@@ -67,4 +67,5 @@
     <color name="nav_item_tint">#445B6C</color>
     <color name="nav_item_text">#333333</color>
 
+    <color name="purple_500">#6200EE</color>
 </resources>
