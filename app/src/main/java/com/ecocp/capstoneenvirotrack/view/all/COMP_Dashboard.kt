@@ -6,14 +6,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncActivity
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
@@ -29,6 +33,9 @@ class COMP_Dashboard : Fragment() {
     private lateinit var hazewasteCard: CardView
     private lateinit var pcoCard: CardView
     private lateinit var crsCard: CardView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navView: NavigationView
+    private lateinit var drawerMenu: ImageView
     private lateinit var greetingTextView: TextView
 
     private var isAccredited = false
@@ -43,6 +50,7 @@ class COMP_Dashboard : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Initialize views
         cncCard = view.findViewById(R.id.cnc_card)
         smrCard = view.findViewById(R.id.smr_card)
         opmsCard = view.findViewById(R.id.opms_card)
@@ -50,8 +58,24 @@ class COMP_Dashboard : Fragment() {
         pcoCard = view.findViewById(R.id.pco_card)
         crsCard = view.findViewById(R.id.crs_card)
         greetingTextView = view.findViewById(R.id.greeting_message)
+        drawerLayout = view.findViewById(R.id.drawer_layout)
+        navView = view.findViewById(R.id.nav_view)
+        drawerMenu = view.findViewById(R.id.drawerMenu)
+
+        // Setup drawer menu toggle
+        drawerMenu.setOnClickListener {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START)
+            }
+        }
 
         fetchGreetingMessage()
+        // Setup navigation view
+        setupNavigationView()
+
+        // Check user accreditation
         checkUserAccreditation()
     }
 
@@ -87,6 +111,44 @@ class COMP_Dashboard : Fragment() {
             in 0..11 -> "Good Morning"
             in 12..17 -> "Good Afternoon"
             else -> "Good Evening"
+        }
+    }
+
+    private fun setupNavigationView() {
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_modules -> {
+                    // Navigate to Modules fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_modulesFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_inbox -> {
+                    // Navigate to Inbox fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_inboxFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_feedback -> {
+                    // Navigate to Feedback fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_feedbackFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_service_providers -> {
+                    // Navigate to Service Providers fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_serviceProvidersFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_about_us -> {
+                    // Navigate to About Us fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_aboutUsFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                else -> false
+            }
         }
     }
 
