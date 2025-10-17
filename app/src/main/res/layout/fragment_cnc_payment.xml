@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#FFFFFF"
     android:padding="20dp"
-    tools:context=".view.businesses.opms.PtoPaymentFragment">
+    tools:context=".view.businesses.cnc.CncPaymentFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,35 +14,33 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        <!-- Header Section -->
+        <!-- Header -->
         <LinearLayout
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_marginBottom="16dp">
 
             <ImageButton
                 android:id="@+id/btnBack"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginEnd="8dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_arrow_back"
-                android:contentDescription="Back"
                 app:tint="#445B6C" />
 
-            <!-- Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Permit to Operate - Payment"
+                android:text="CNC - Payment"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="#445B6C" />
+                android:textColor="#445B6C"
+                android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- Payment Information -->
+        <!-- Payment Info -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +60,7 @@
                 android:id="@+id/txtFeeAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="₱500.00"
+                android:text="₱1,200.00"
                 android:textSize="20sp"
                 android:textColor="#445B6C"
                 android:layout_marginTop="5dp" />
@@ -83,6 +81,7 @@
             android:layout_height="wrap_content"
             android:text="Pay with Card (Stripe)"
             android:textColor="#FFFFFF"
+            android:backgroundTint="#445B6C"
             android:textSize="16sp"
             android:padding="12dp" />
     </LinearLayout>

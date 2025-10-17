@@ -63,4 +63,7 @@
     <color name="red_rejected">#E53935</color> <!-- Rejected -->
     <color name="orange_submitted">#FB8C00</color> <!-- Submitted -->
     <color name="blue_pending">#1E88E5</color> <!-- Pending -->
+
+    <color name="purple_500">#6200EE</color>
+
 </resources>

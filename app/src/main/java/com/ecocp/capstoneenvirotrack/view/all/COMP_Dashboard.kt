@@ -12,6 +12,7 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncActivity
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -98,7 +99,10 @@ class COMP_Dashboard : Fragment() {
         }
 
         if (isAccredited) {
-            cncCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_CNC) }
+            cncCard.setOnClickListener {
+                val intent = Intent(requireContext(), CncActivity::class.java)
+                startActivity(intent)
+            }
             smrCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_SMR) }
             opmsCard.setOnClickListener {
                 val intent = Intent(requireContext(), OpmsActivity::class.java)

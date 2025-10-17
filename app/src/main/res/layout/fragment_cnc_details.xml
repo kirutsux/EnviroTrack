@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:dividerPadding="8dp"
+        android:showDividers="none">
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/tvHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Certificate of Non-Coverage Details"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#445B6C"
+            android:gravity="center"
+            android:layout_marginBottom="12dp" />
+
+        <!-- A. Basic Information -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="A. Basic Information"
+                android:textStyle="bold"
+                android:textColor="#445B6C"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:text="Company Name"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtCompanyName"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Business Name"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtBusinessName"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Project Title"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtProjectTitle"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Nature of Business"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtNatureOfBusiness"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Project Location"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtProjectLocation"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Email"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtEmail"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Managing Head"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtManagingHead"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="PCO Name"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtPcoName"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="PCO Accreditation No."
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtPcoAccreditation"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Date of Establishment"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtDateEstablished"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Number of Employees"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtNumEmployees"
+                android:text="-"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="PSIC Code / Industry Classification"
+                android:textStyle="bold"
+                android:textColor="#555"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtPsicCode"
+                android:text="-"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- B. Project Description -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView android:text="B. Project Description" android:textStyle="bold" android:textColor="#445B6C" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Project Type" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtProjectType" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Project Scale" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtProjectScale" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Project Cost / Capital Investment" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtProjectCost" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Land Area" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtLandArea" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Raw Materials Used" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtRawMaterials" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Production Capacity" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtProductionCapacity" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Utilities Used" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtUtilitiesUsed" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Waste Generated" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtWasteGenerated" android:text="-" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- C. Location and Environmental Setting -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView android:text="C. Location and Environmental Setting" android:textStyle="bold" android:textColor="#445B6C" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Coordinates (Lat, Long)" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtCoordinates" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Nearby Bodies of Water" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtNearbyWaters" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Proximity to Residential Areas" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtResidentialProximity" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Environmental Features Nearby" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtEnvFeatures" android:text="-" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:text="Zoning Classification" android:textStyle="bold" android:textColor="#555" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtZoning" android:text="-" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Payment & Status -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView android:text="Payment Information" android:textStyle="bold" android:textColor="#445B6C" android:layout_marginBottom="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+            <TextView android:id="@+id/txtAmount" android:text="₱0.00" android:textSize="16sp" android:layout_marginBottom="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtPaymentMethod" android:text="Method: -" android:layout_marginBottom="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtPaymentStatus" android:text="Status: -" android:layout_marginBottom="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtPaymentTimestamp" android:text="Paid on: -" android:layout_marginBottom="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/txtSubmittedTimestamp" android:text="Submitted on: -" android:textStyle="bold" android:textColor="#2E7D32" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

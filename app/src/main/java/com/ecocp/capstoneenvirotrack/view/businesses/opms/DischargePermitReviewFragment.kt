@@ -96,8 +96,6 @@ class DischargePermitReviewFragment : Fragment() {
                 binding.txtDischargeReview.text =
                     "Receiving Body: $receivingBody\nVolume: $dischargeVolume\nTreatment: $dischargeMethod"
 
-                binding.txtFilesReview.text = uploadedFiles
-
                 // --- Payment Display ---
                 val paymentDisplay = if (paymentStatus.equals("Paid", ignoreCase = true)) {
                     "✅ Payment Completed\nAmount: ₱$amount $currency\nMethod: $paymentMethod\nDate: $formattedDate"

@@ -7,7 +7,7 @@
 
     <!-- NavHost for OPMS -->
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/opms_nav_host_fragment"
+        android:id="@+id/cnc_nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"

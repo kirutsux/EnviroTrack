@@ -12,10 +12,10 @@
 
         <!-- Header -->
         <TextView
-            android:text="Step 4: Review and Submit"
+            android:text="Review and Submit"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#2E7D32"
+            android:textColor="#445B6C"
             android:gravity="center"
             android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
@@ -83,33 +83,6 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Uploaded Files -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:background="@drawable/bordered_box"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:text="Uploaded Files"
-                android:textStyle="bold"
-                android:textColor="#555555"
-                android:textSize="14sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/txtFilesReview"
-                android:text="List of uploaded files..."
-                android:textSize="16sp"
-                android:textColor="#000000"
-                android:layout_marginTop="4dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
         <!-- Payment Info -->
         <LinearLayout
             android:orientation="vertical"
@@ -161,7 +134,6 @@
                 android:text="Submit Application"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:backgroundTint="#2E7D32"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:radius="12dp" />
