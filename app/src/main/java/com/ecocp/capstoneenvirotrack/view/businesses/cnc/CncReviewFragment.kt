@@ -142,12 +142,45 @@ class CncReviewFragment : Fragment() {
             .update(updateData)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "CNC Application submitted successfully!", Toast.LENGTH_SHORT).show()
+
+                // Add notification for the current PCO (the submitter)
+                addNotificationForSubmission(uid!!, "PCO", "CNC")
+
+                // Add notification for EMB (later, replace with actual EMB user ID)
+                addNotificationForSubmission("emb_user_id", "EMB", "CNC")
+
                 findNavController().navigate(R.id.cncDashboardFragment)
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit CNC application.", Toast.LENGTH_SHORT).show()
             }
     }
+
+
+    private fun addNotificationForSubmission(receiverId: String, receiverType: String, appType: String) {
+        val notification = hashMapOf(
+            "receiverId" to receiverId,
+            "receiverType" to receiverType,
+            "title" to "$appType Submission",
+            "message" to "You have successfully submitted a $appType application.",
+            "type" to "submission",
+            "isRead" to false,
+            "timestamp" to com.google.firebase.Timestamp.now()
+        )
+
+        db.collection("notifications")
+            .add(notification)
+            .addOnSuccessListener {
+                // Optional: Log or toast for debugging
+                // Log.d("Notification", "Notification added for $receiverType")
+            }
+            .addOnFailureListener { e ->
+                // Log.e("Notification", "Error adding notification", e)
+            }
+    }
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

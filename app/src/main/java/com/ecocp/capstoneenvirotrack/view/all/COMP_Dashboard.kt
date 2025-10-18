@@ -3,12 +3,17 @@ package com.ecocp.capstoneenvirotrack.view.all
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+<<<<<<< HEAD
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+=======
+import android.view.*
+import android.widget.*
+>>>>>>> c04e7a0 (notifs cor cnc submm)
 import androidx.cardview.widget.CardView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -37,6 +42,7 @@ class COMP_Dashboard : Fragment() {
     private lateinit var navView: NavigationView
     private lateinit var drawerMenu: ImageView
     private lateinit var greetingTextView: TextView
+    private lateinit var notificationIcon: ImageView
 
     private var isAccredited = false
 
@@ -58,6 +64,7 @@ class COMP_Dashboard : Fragment() {
         pcoCard = view.findViewById(R.id.pco_card)
         crsCard = view.findViewById(R.id.crs_card)
         greetingTextView = view.findViewById(R.id.greeting_message)
+<<<<<<< HEAD
         drawerLayout = view.findViewById(R.id.drawer_layout)
         navView = view.findViewById(R.id.nav_view)
         drawerMenu = view.findViewById(R.id.drawerMenu)
@@ -70,6 +77,9 @@ class COMP_Dashboard : Fragment() {
                 drawerLayout.openDrawer(GravityCompat.START)
             }
         }
+=======
+        notificationIcon = view.findViewById(R.id.pco_notification_icon)
+>>>>>>> c04e7a0 (notifs cor cnc submm)
 
         fetchGreetingMessage()
         // Setup navigation view
@@ -77,25 +87,18 @@ class COMP_Dashboard : Fragment() {
 
         // Check user accreditation
         checkUserAccreditation()
+        setupNotificationIcon()
     }
 
+    // ---------------- GREETING -----------------
     private fun fetchGreetingMessage() {
-        val user = auth.currentUser
-        if (user == null) {
-            Log.e("COMP_Dashboard", "No logged-in user.")
-            return
-        }
-
+        val user = auth.currentUser ?: return
         val userId = user.uid
+
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val firstName = document.getString("firstName") ?: "User"
-                    val greeting = getTimeBasedGreeting()
-                    greetingTextView.text = "Hi $firstName! $greeting"
-                } else {
-                    greetingTextView.text = "Hi there! ${getTimeBasedGreeting()}"
-                }
+                val firstName = document.getString("firstName") ?: "User"
+                greetingTextView.text = "Hi $firstName! ${getTimeBasedGreeting()}"
             }
             .addOnFailureListener { e ->
                 Log.e("COMP_Dashboard", "Error fetching user name: ", e)
@@ -104,9 +107,7 @@ class COMP_Dashboard : Fragment() {
     }
 
     private fun getTimeBasedGreeting(): String {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         return when (hour) {
             in 0..11 -> "Good Morning"
             in 12..17 -> "Good Afternoon"
@@ -114,6 +115,7 @@ class COMP_Dashboard : Fragment() {
         }
     }
 
+<<<<<<< HEAD
     private fun setupNavigationView() {
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -152,26 +154,77 @@ class COMP_Dashboard : Fragment() {
         }
     }
 
+=======
+    // ---------------- NOTIFICATIONS -----------------
+    private fun setupNotificationIcon() {
+        notificationIcon.setOnClickListener {
+            openNotificationsFragment()
+        }
+    }
+
+    private fun openNotificationsFragment() {
+        val fragment = com.ecocp.capstoneenvirotrack.view.businesses.notifications.NotificationsFragment()
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_left,  // enter
+                R.anim.slide_out_right, // exit
+                R.anim.slide_in_right,  // pop enter
+                R.anim.slide_out_left   // pop exit
+            )
+            .replace(R.id.nav_host_fragment, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    // ---------------- ACCREDITATION -----------------
+    private fun checkUserAccreditation() {
+        val user = auth.currentUser ?: return
+        val userId = user.uid
+
+        db.collection("accreditations")
+            .whereEqualTo("uid", userId)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                isAccredited = !querySnapshot.isEmpty
+                if (!isAccredited) {
+                    val dialog = PCOVerificationDialogFragment()
+                    dialog.show(childFragmentManager, "PCOVerificationDialog")
+                }
+                setupCardListeners()
+            }
+            .addOnFailureListener { e ->
+                Log.e("COMP_Dashboard", "Error checking accreditation: ", e)
+                Toast.makeText(requireContext(), "Failed to verify accreditation.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // ---------------- CARD LISTENERS -----------------
+>>>>>>> c04e7a0 (notifs cor cnc submm)
     private fun setupCardListeners() {
         val navController = findNavController()
 
-        // PCO card is always accessible
         pcoCard.setOnClickListener {
             navController.navigate(R.id.action_pcoDashboard_to_COMP_PCO)
         }
 
         if (isAccredited) {
             cncCard.setOnClickListener {
-                val intent = Intent(requireContext(), CncActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(requireContext(), CncActivity::class.java))
             }
-            smrCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_SMR) }
+            smrCard.setOnClickListener {
+                navController.navigate(R.id.action_pcoDashboard_to_COMP_SMR)
+            }
             opmsCard.setOnClickListener {
-                val intent = Intent(requireContext(), OpmsActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(requireContext(), OpmsActivity::class.java))
             }
-            hazewasteCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_HWMSDashboardFragment) }
-            crsCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_CRS) }
+            hazewasteCard.setOnClickListener {
+                navController.navigate(R.id.action_pcoDashboard_to_HWMSDashboardFragment)
+            }
+            crsCard.setOnClickListener {
+                navController.navigate(R.id.action_pcoDashboard_to_COMP_CRS)
+            }
         } else {
             val lockMessage = "Please complete your accreditation first via the PCO section."
             val showToast = { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
@@ -183,6 +236,7 @@ class COMP_Dashboard : Fragment() {
             crsCard.setOnClickListener { showToast() }
         }
     }
+<<<<<<< HEAD
 
     private fun checkUserAccreditation() {
         val user = auth.currentUser
@@ -214,3 +268,6 @@ class COMP_Dashboard : Fragment() {
             }
     }
 }
+=======
+}
+>>>>>>> c04e7a0 (notifs cor cnc submm)
