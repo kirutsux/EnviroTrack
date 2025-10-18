@@ -143,11 +143,30 @@ class CncReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "CNC Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // Add notification for the current PCO (the submitter)
-                addNotificationForSubmission(uid!!, "PCO", "CNC")
+                // ✅ Notify PCO (self)
+                sendNotification(
+                    receiverId = uid,
+                    receiverType = "PCO",
+                    title = "CNC Submission",
+                    message = "You have successfully submitted a Certificate of Non-Coverage application.",
+                    type = "submission"
+                )
 
-                // Add notification for EMB (later, replace with actual EMB user ID)
-                addNotificationForSubmission("emb_user_id", "EMB", "CNC")
+                // ✅ Notify EMB admin(s)
+                db.collection("users")
+                    .whereEqualTo("role", "emb")
+                    .get()
+                    .addOnSuccessListener { embUsers ->
+                        for (emb in embUsers) {
+                            sendNotification(
+                                receiverId = emb.id,
+                                receiverType = "EMB",
+                                title = "New CNC Application",
+                                message = "A new Certificate of Non-Coverage has been submitted by a PCO.",
+                                type = "alert"
+                            )
+                        }
+                    }
 
                 findNavController().navigate(R.id.cncDashboardFragment)
             }
@@ -157,25 +176,30 @@ class CncReviewFragment : Fragment() {
     }
 
 
-    private fun addNotificationForSubmission(receiverId: String, receiverType: String, appType: String) {
-        val notification = hashMapOf(
+    private fun sendNotification(
+        receiverId: String,
+        receiverType: String,
+        title: String,
+        message: String,
+        type: String
+    ) {
+        val notificationData = hashMapOf(
             "receiverId" to receiverId,
             "receiverType" to receiverType,
-            "title" to "$appType Submission",
-            "message" to "You have successfully submitted a $appType application.",
-            "type" to "submission",
+            "title" to title,
+            "message" to message,
+            "type" to type,
             "isRead" to false,
-            "timestamp" to com.google.firebase.Timestamp.now()
+            "timestamp" to Timestamp.now()
         )
 
         db.collection("notifications")
-            .add(notification)
+            .add(notificationData)
             .addOnSuccessListener {
-                // Optional: Log or toast for debugging
-                // Log.d("Notification", "Notification added for $receiverType")
+                // Optional: log success
             }
             .addOnFailureListener { e ->
-                // Log.e("Notification", "Error adding notification", e)
+                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
