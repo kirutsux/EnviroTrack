@@ -3,17 +3,12 @@ package com.ecocp.capstoneenvirotrack.view.all
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-<<<<<<< HEAD
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-=======
-import android.view.*
-import android.widget.*
->>>>>>> c04e7a0 (notifs cor cnc submm)
 import androidx.cardview.widget.CardView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -64,7 +59,6 @@ class COMP_Dashboard : Fragment() {
         pcoCard = view.findViewById(R.id.pco_card)
         crsCard = view.findViewById(R.id.crs_card)
         greetingTextView = view.findViewById(R.id.greeting_message)
-<<<<<<< HEAD
         drawerLayout = view.findViewById(R.id.drawer_layout)
         navView = view.findViewById(R.id.nav_view)
         drawerMenu = view.findViewById(R.id.drawerMenu)
@@ -77,9 +71,7 @@ class COMP_Dashboard : Fragment() {
                 drawerLayout.openDrawer(GravityCompat.START)
             }
         }
-=======
         notificationIcon = view.findViewById(R.id.pco_notification_icon)
->>>>>>> c04e7a0 (notifs cor cnc submm)
 
         fetchGreetingMessage()
         // Setup navigation view
@@ -115,7 +107,6 @@ class COMP_Dashboard : Fragment() {
         }
     }
 
-<<<<<<< HEAD
     private fun setupNavigationView() {
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -154,7 +145,6 @@ class COMP_Dashboard : Fragment() {
         }
     }
 
-=======
     // ---------------- NOTIFICATIONS -----------------
     private fun setupNotificationIcon() {
         notificationIcon.setOnClickListener {
@@ -177,31 +167,7 @@ class COMP_Dashboard : Fragment() {
             .commit()
     }
 
-    // ---------------- ACCREDITATION -----------------
-    private fun checkUserAccreditation() {
-        val user = auth.currentUser ?: return
-        val userId = user.uid
-
-        db.collection("accreditations")
-            .whereEqualTo("uid", userId)
-            .limit(1)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                isAccredited = !querySnapshot.isEmpty
-                if (!isAccredited) {
-                    val dialog = PCOVerificationDialogFragment()
-                    dialog.show(childFragmentManager, "PCOVerificationDialog")
-                }
-                setupCardListeners()
-            }
-            .addOnFailureListener { e ->
-                Log.e("COMP_Dashboard", "Error checking accreditation: ", e)
-                Toast.makeText(requireContext(), "Failed to verify accreditation.", Toast.LENGTH_SHORT).show()
-            }
-    }
-
     // ---------------- CARD LISTENERS -----------------
->>>>>>> c04e7a0 (notifs cor cnc submm)
     private fun setupCardListeners() {
         val navController = findNavController()
 
@@ -236,7 +202,6 @@ class COMP_Dashboard : Fragment() {
             crsCard.setOnClickListener { showToast() }
         }
     }
-<<<<<<< HEAD
 
     private fun checkUserAccreditation() {
         val user = auth.currentUser
@@ -268,6 +233,3 @@ class COMP_Dashboard : Fragment() {
             }
     }
 }
-=======
-}
->>>>>>> c04e7a0 (notifs cor cnc submm)

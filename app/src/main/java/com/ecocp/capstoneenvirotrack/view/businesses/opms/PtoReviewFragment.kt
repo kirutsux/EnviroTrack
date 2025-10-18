@@ -132,12 +132,67 @@ class PtoReviewFragment : Fragment() {
             .update(updateData)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
+
+                // ✅ Notify PCO (self)
+                sendNotification(
+                    receiverId = uid,
+                    receiverType = "PCO",
+                    title = "PTO Submission",
+                    message = "You have successfully submitted a Permit to Operate application.",
+                    type = "submission"
+                )
+
+                // ✅ Notify EMB admin(s)
+                db.collection("users")
+                    .whereEqualTo("role", "emb")
+                    .get()
+                    .addOnSuccessListener { embUsers ->
+                        for (emb in embUsers) {
+                            sendNotification(
+                                receiverId = emb.id,
+                                receiverType = "EMB",
+                                title = "New PTO Application",
+                                message = "A new Permit to Operate has been submitted by a PCO.",
+                                type = "alert"
+                            )
+                        }
+                    }
+
                 findNavController().navigate(R.id.opmsDashboardFragment)
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
             }
     }
+
+
+    private fun sendNotification(
+        receiverId: String,
+        receiverType: String,
+        title: String,
+        message: String,
+        type: String
+    ) {
+        val notificationData = hashMapOf(
+            "receiverId" to receiverId,
+            "receiverType" to receiverType,
+            "title" to title,
+            "message" to message,
+            "type" to type,
+            "isRead" to false,
+            "timestamp" to Timestamp.now()
+        )
+
+        db.collection("notifications")
+            .add(notificationData)
+            .addOnSuccessListener {
+                // Optional: log success
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

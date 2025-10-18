@@ -64,14 +64,9 @@
     <color name="orange_submitted">#FB8C00</color> <!-- Submitted -->
     <color name="blue_pending">#1E88E5</color> <!-- Pending -->
 
-<<<<<<< HEAD
     <color name="nav_item_tint">#445B6C</color>
     <color name="nav_item_text">#333333</color>
-=======
-    <color name="purple_500">#6200EE</color>
     <color name="background_lighty">#FFFFFF</color>
     <color name="divider_light">#E0E0E0</color>
->>>>>>> c04e7a0 (notifs cor cnc submm)
-
     <color name="purple_500">#6200EE</color>
 </resources>

@@ -94,6 +94,8 @@ dependencies {
 
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.filament.android)
+    implementation(libs.google.material)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // Stripe

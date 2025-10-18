@@ -35,8 +35,8 @@
         <item>Rejected</item>
     </string-array>
     <!-- CRS LABELS -->
-    <string name="company_registration_title">Company Registration System</string>
-    <string name="company_registration_title_description">Company Registration System Title</string>
+    <string name="company_registration_title">Company Registration</string>
+    <string name="company_registration_title_description">Company Registration itle</string>
     <string name="company_registration_subheader">Please fill out all required fields accurately before submitting your company registration.</string>
     <string name="company_registration_subheader_description">Company registration instructions</string>
     <string name="company_info_section">A. Company Information</string>
@@ -118,13 +118,13 @@
     <string name="cnc_icon_description">CNC Icon</string>
     <string name="smr_card_title">Self-Monitoring \nReport (SMR) Management</string>
     <string name="smr_icon_description">SMR Icon</string>
-    <string name="opms_card_title">Online Monitoring \nSystem (OMS)</string>
+    <string name="opms_card_title">Online Permitting and \nMonitoring (OPM)</string>
     <string name="opms_icon_description">OMS Icon</string>
     <string name="hazewaste_card_title">Hazardous Waste \nManifest</string>
     <string name="hazewaste_icon_description">Hazardous Waste Icon</string>
-    <string name="pco_card_title">Pollution Control Officer</string>
+    <string name="pco_card_title">Pollution Control Officer \nAccreditation</string>
     <string name="pco_icon_description">PCO Icon</string>
-    <string name="crs_card_title">Company Registration \nSystem (CRS)</string>
+    <string name="crs_card_title">Company Registration \n (CRS)</string>
     <string name="crs_icon_description">CRS Icon</string>
     <string name="nav_header_title">Capstone Envirotrack</string>
     <string name="nav_header_subtitle">User Dashboard</string>
