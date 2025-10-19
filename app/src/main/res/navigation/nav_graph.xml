@@ -43,15 +43,6 @@
             app:destination="@id/pcoDashboard"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_loginFragment_to_SP_ChangepasswordFragment"
-            app:destination="@id/SP_ChangepasswordFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="false" />
-        <action
-            android:id="@+id/action_loginFragment_to_SP_RegistrationFragment"
-            app:destination="@id/SP_RegistrationFragment" />
-
     </fragment>
 
     <!-- 📝 Registration -->
@@ -114,18 +105,99 @@
     <!-- 🏢 Business: PCO Accreditation -->
     <fragment
         android:id="@+id/COMP_PCOAccreditation"
-        android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_PCOAccreditation"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.pcoacc.COMP_PCOAccreditation"
         tools:layout="@layout/pco_accreditation">
         <action
             android:id="@+id/action_COMP_PCOAccreditation_to_COMP_PCO"
-            app:destination="@id/COMP_PCO" />
+            app:destination="@id/COMP_PCO"
+            app:popUpTo="@id/COMP_PCO"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- 🗂️ Business: PCO Table/List -->
     <fragment
         android:id="@+id/COMP_PCO"
         android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_PCO"
-        tools:layout="@layout/fragment_comp_pco" />
+        tools:layout="@layout/fragment_comp_pco">
+        <action
+            android:id="@+id/action_COMP_PCO_to_pcoDashboard"
+            app:destination="@id/pcoDashboard"
+            app:popUpTo="@id/pcoDashboard"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_COMP_PCO_to_COMP_PCOAccreditation"
+            app:destination="@id/COMP_PCOAccreditation" />
+    </fragment>
+
+    <!-- 🏠 PCO Dashboard -->
+    <fragment
+        android:id="@+id/pcoDashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Dashboard"
+        tools:layout="@layout/pco_dashboard">
+        <action
+            android:id="@+id/action_pcoDashboard_to_COMP_PCO"
+            app:destination="@id/COMP_PCO" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_COMP_PCOAccreditation"
+            app:destination="@id/COMP_PCOAccreditation" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_COMP_CNC"
+            app:destination="@id/COMP_CNC" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_COMP_SMR"
+            app:destination="@id/COMP_SMR" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_COMP_CRS"
+            app:destination="@id/COMP_CRS" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_inboxFragment"
+            app:destination="@id/inboxFragment" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_feedbackFragment"
+            app:destination="@id/feedbackFragment" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_serviceProvidersFragment"
+            app:destination="@id/serviceProvidersFragment" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_aboutUsFragment"
+            app:destination="@id/aboutUsFragment" />
+        <action
+            android:id="@+id/action_pcoDashboard_to_modulesFragment"
+            app:destination="@id/modulesFragment" />
+    </fragment>
+
+    <!-- 📋 Modules -->
+    <fragment
+        android:id="@+id/modulesFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Modules"
+        tools:layout="@layout/pco_smr_modules" />
+
+    <!-- 💬 Inbox -->
+    <fragment
+        android:id="@+id/inboxFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.messaging.Inbox"
+        tools:layout="@layout/fragment_inbox" />
+
+    <!-- 📝 Feedback -->
+    <fragment
+        android:id="@+id/feedbackFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.Feedback"
+        tools:layout="@layout/fragment_feedback" />
+
+    <!-- 🛠️ Service Providers Directory -->
+    <fragment
+        android:id="@+id/serviceProvidersFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_SP_Directory"
+        tools:layout="@layout/pco_spdirectory" />
+
+    <!-- ℹ️ About Us -->
+    <fragment
+        android:id="@+id/aboutUsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.AboutUs"
+        tools:layout="@layout/fragment_about_us" />
 
     <!-- 🌍 EMB Modules -->
     <fragment android:id="@+id/embCNCFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CNC" tools:layout="@layout/emb_cnc" />
@@ -135,20 +207,10 @@
     <fragment android:id="@+id/embCRSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CRS" tools:layout="@layout/emb_crs" />
     <fragment android:id="@+id/embPCOFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_PCO" tools:layout="@layout/emb_pco" />
 
-    <!-- 🏠 PCO Dashboard -->
-    <fragment
-        android:id="@+id/pcoDashboard"
-        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Dashboard"
-        tools:layout="@layout/pco_dashboard">
-        <action
-            android:id="@+id/action_COMP_Dashboard_to_COMP_PCOAccreditation"
-            app:destination="@id/COMP_PCOAccreditation" />
-    </fragment>
-
     <!-- 💬 Chat -->
     <fragment
         android:id="@+id/chatFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.all.ChatFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.messaging.ChatFragment"
         tools:layout="@layout/fragment_chat" />
 
     <!-- 🤖 AI FAQ Bot -->
@@ -166,6 +228,11 @@
         <action
             android:id="@+id/action_COMP_Profile_to_COMP_Account"
             app:destination="@id/pco_Account" />
+        <action
+            android:id="@+id/action_COMP_Profile_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- ⚙️ Account -->
@@ -175,32 +242,39 @@
         android:label="Account"
         tools:layout="@layout/pco_account" />
 
+    <!-- 🧾 CNC Management -->
     <fragment
-        android:id="@+id/SP_ChangepasswordFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
-        tools:layout="@layout/sp_changepassword_fragment">
+        android:id="@+id/COMP_CNC"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC"
+        tools:layout="@layout/pco_cnc" />
 
-        <!-- Navigate to service provider dashboard after password change -->
-        <action
-            android:id="@+id/action_SP_ChangepasswordFragment_to_serviceProviderDashboard"
-            app:destination="@id/serviceProviderDashboard"
-            app:popUpTo="@id/SP_ChangepasswordFragment"
-            app:popUpToInclusive="true" />
-
-        <!-- Optional: back to login if needed -->
-        <action
-            android:id="@+id/action_SP_ChangepasswordFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
-    </fragment>
+    <!-- 📊 SMR Management -->
     <fragment
-        android:id="@+id/SP_RegistrationFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_RegistrationFragment"
-        tools:layout="@layout/fragment_sp__registration">
+        android:id="@+id/COMP_SMR"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR"
+        tools:layout="@layout/pco_smr" />
 
+    <!-- ☣️ Hazardous Waste Management -->
+    <fragment
+        android:id="@+id/HWMSDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment"
+        tools:layout="@layout/fragment_hwms_dashboard" />
+
+    <!-- 📋 Compliance Reporting System (CRS) -->
+    <fragment
+        android:id="@+id/COMP_CRS"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.crs.COMP_CRS"
+        android:label="Company CRS"
+        tools:layout="@layout/fragment_comp_crs">
         <action
-            android:id="@+id/action_SP_RegistrationFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/SP_RegistrationFragment"
-            app:popUpToInclusive="true" />
+            android:id="@+id/action_COMP_CRS_to_COMP_CRSApplication"
+            app:destination="@id/COMP_CRSApplication" />
     </fragment>
+
+    <fragment
+        android:id="@+id/COMP_CRSApplication"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.crs.COMP_CRSApplication"
+        android:label="Add Company"
+        tools:layout="@layout/fragment_comp_crs_application" />
+
 </navigation>

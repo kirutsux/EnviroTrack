@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.opms
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.net.Uri
 import android.os.Bundle
@@ -12,66 +13,111 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import java.util.Calendar
 import com.ecocp.capstoneenvirotrack.R
 
 class DischargePermitFormFragment : Fragment() {
 
-    private lateinit var binding: FragmentDischargePermitFormBinding
+    private var _binding: FragmentDischargePermitFormBinding? = null
+    private val binding get() = _binding!!
+
     private var fileUris = mutableListOf<Uri>()
     private val storage = FirebaseStorage.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    private val REQUIRED_FILE_COUNT = 4 // Adjust based on required documents
-    private val MAX_FILE_COUNT = 10 // Optional: max files
+    private val REQUIRED_FILE_COUNT = 4
+    private val MAX_FILE_COUNT = 10
 
-    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
-        if (!uris.isNullOrEmpty()) {
-            fileUris.addAll(uris)
+    private val filePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+            if (!uris.isNullOrEmpty()) {
+                fileUris.addAll(uris.distinctBy { it.toString() })
 
-            // Remove duplicates
-            val uniqueUris = fileUris.distinctBy { it.toString() }
-            fileUris.clear()
-            fileUris.addAll(uniqueUris)
+                if (fileUris.size > MAX_FILE_COUNT) {
+                    fileUris = fileUris.take(MAX_FILE_COUNT).toMutableList()
+                    Toast.makeText(requireContext(), "Limited to $MAX_FILE_COUNT files max.", Toast.LENGTH_SHORT).show()
+                }
 
-            // Limit to max files
-            if (fileUris.size > MAX_FILE_COUNT) {
-                fileUris.clear()
-                fileUris.addAll(uniqueUris.take(MAX_FILE_COUNT))
-                Toast.makeText(requireContext(), "Limited to $MAX_FILE_COUNT files max.", Toast.LENGTH_SHORT).show()
+                val filesList = fileUris.mapIndexed { index, uri -> "${index + 1}. ${uri.lastPathSegment}" }
+                    .joinToString("\n")
+                binding.txtFileName.text = "Selected ${fileUris.size} file(s):\n$filesList"
+
+                binding.btnSubmitPermit.isEnabled = fileUris.size >= REQUIRED_FILE_COUNT
             }
-
-            val filesList = fileUris.mapIndexed { index, uri -> "${index + 1}. ${uri.lastPathSegment}" }.joinToString("\n")
-            binding.txtFileName.text = "Selected ${fileUris.size} file(s):\n$filesList"
-
-            // Enable submit button only when required files uploaded
-            binding.btnSubmitPermit.isEnabled = fileUris.size >= REQUIRED_FILE_COUNT
         }
-    }
 
     override fun onCreateView(
         inflater: android.view.LayoutInflater,
         container: android.view.ViewGroup?,
         savedInstanceState: Bundle?
     ): android.view.View {
-        binding = FragmentDischargePermitFormBinding.inflate(inflater, container, false)
+
+        _binding = FragmentDischargePermitFormBinding.inflate(inflater, container, false)
+
+        binding.btnBack.setOnClickListener { findNavController().navigateUp() }
 
         binding.btnSubmitPermit.isEnabled = false
 
-        // File upload button
+        checkPendingDischargePermit() // Check if user already has a pending application
+
         binding.btnUploadFile.setOnClickListener {
             val mimeTypes = arrayOf("application/pdf", "image/*")
             filePickerLauncher.launch(mimeTypes)
         }
 
-        // Date picker
         binding.inputOperationStartDate.setOnClickListener { showDatePickerDialog() }
 
-        // Submit button
         binding.btnSubmitPermit.setOnClickListener { validateAndSubmitForm() }
 
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // ✅ Function to check pending discharge permit
+    private fun checkPendingDischargePermit() {
+        val userUid = auth.currentUser?.uid ?: return
+        firestore.collection("opms_discharge_permits")
+            .whereEqualTo("uid", userUid)
+            .whereEqualTo("status", "Pending")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    // Pending permit found — show dialog
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Pending Application Found")
+                        .setMessage("You have a pending Discharge Permit application. Do you want to continue to payment?")
+                        .setPositiveButton("Yes") { _, _ ->
+                            val doc = querySnapshot.documents.first()
+                            val formData = doc.data ?: return@setPositiveButton
+
+                            val bundle = Bundle().apply {
+                                putString("documentId", doc.id) // ✅ pass the doc ID
+                                putString("companyName", formData["companyName"] as? String)
+                                putString("companyAddress", formData["companyAddress"] as? String)
+                                putString("pcoName", formData["pcoName"] as? String)
+                                putString("pcoAccreditationNumber", formData["pcoAccreditation"] as? String)
+                                putString("receivingBody", formData["bodyOfWater"] as? String)
+                                putString("dischargeVolume", formData["volume"] as? String)
+                                putString("dischargeMethod", formData["treatmentMethod"] as? String)
+                                putString("uploadedFiles", formData["fileLinks"] as? String)
+                                putString("paymentInfo", "₱1,500 - Pending")
+                            }
+
+                            findNavController().navigate(R.id.action_application_to_payment, bundle)
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to check pending application.", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun showDatePickerDialog() {
@@ -127,7 +173,8 @@ class DischargePermitFormFragment : Fragment() {
                 "sourceWastewater" to sourceWastewater,
                 "volume" to volume,
                 "treatmentMethod" to treatmentMethod,
-                "operationStartDate" to operationStartDate
+                "operationStartDate" to operationStartDate,
+                "applicationType" to "Discharge Permit"
             )
         )
     }
@@ -147,23 +194,42 @@ class DischargePermitFormFragment : Fragment() {
                 saveFormToFirestore(formData, fileLinks)
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "File upload failed. Check permissions/network.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "File upload failed. Check network.", Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun saveFormToFirestore(formData: Map<String, String>, fileLinks: List<String>) {
-        val dataToSave = formData.toMutableMap()
+        val userUid = auth.currentUser?.uid ?: return
+
+        val docId = "${userUid}_${System.currentTimeMillis()}" // ✅ One document per submission
+        val dataToSave = mutableMapOf<String, Any>()
+        dataToSave.putAll(formData)
         dataToSave["fileLinks"] = fileLinks.joinToString(",")
         dataToSave["status"] = "Pending"
-        dataToSave["timestamp"] = Timestamp.now().toString()
+        dataToSave["timestamp"] = FieldValue.serverTimestamp()
+        dataToSave["uid"] = userUid
 
         firestore.collection("opms_discharge_permits")
-            .add(dataToSave)
+            .document(docId) // ✅ Create with a known ID
+            .set(dataToSave)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Discharge Permit submitted successfully!", Toast.LENGTH_LONG).show()
+
+                val bundle = Bundle().apply {
+                    putString("documentId", docId) // ✅ pass to payment
+                    putString("companyName", formData["companyName"])
+                    putString("companyAddress", formData["companyAddress"])
+                    putString("pcoName", formData["pcoName"])
+                    putString("pcoAccreditationNumber", formData["pcoAccreditation"])
+                    putString("receivingBody", formData["bodyOfWater"])
+                    putString("dischargeVolume", formData["volume"])
+                    putString("dischargeMethod", formData["treatmentMethod"])
+                    putString("uploadedFiles", fileLinks.joinToString("\n"))
+                    putString("paymentInfo", "₱1,500 - Pending")
+                }
+
                 clearForm()
-                // ✅ Navigate to Payment Fragment
-                findNavController().navigate(R.id.action_application_to_payment)
+                findNavController().navigate(R.id.action_application_to_payment, bundle)
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error submitting permit. Try again.", Toast.LENGTH_SHORT).show()

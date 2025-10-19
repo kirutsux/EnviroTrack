@@ -1,465 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient_purple_blue"
-    tools:context=".view.businesses.COMP_CRS">
+    tools:context=".view.businesses.crs.COMP_CRS">
 
-    <!-- 🔹 Top Bar -->
     <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:id="@+id/backButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:src="@drawable/backbtn"
-            android:contentDescription="Back Button"
-            android:padding="4dp"
-            android:layout_marginEnd="8dp"
-            app:tint="@color/white" />
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:cardBackgroundColor="@android:color/transparent">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="8dp"
-                android:background="@drawable/bg_title_gradient"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/tvTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Company Registration"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:contentDescription="Company Registration Title" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:fillViewport="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/header"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:clipToPadding="false">
 
+        <!-- 🔹 Top Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-            <!-- Company Information -->
-            <TextView
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/backButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/backbtn"
+                android:contentDescription="Back Button"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Company Information"
-                style="@style/FormLabel"
-                android:textColor="@color/primary"
-                android:layout_marginBottom="8dp"
-                android:contentDescription="Company Information Section" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etCompanyName_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCompanyName"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Company Name"
-                    android:inputType="text"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Company Name" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etCompanyType_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Company Type"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <AutoCompleteTextView
-                    android:id="@+id/etCompanyType"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:padding="12dp"
-                    android:dropDownSelector="@color/input_field_background"
-                    android:contentDescription="Select Company Type" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etNatureOfBusiness_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Nature of Business"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <AutoCompleteTextView
-                    android:id="@+id/etNatureOfBusiness"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:padding="12dp"
-                    android:dropDownSelector="@color/input_field_background"
-                    android:contentDescription="Select Nature of Business" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etTIN_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etTIN"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="TIN (Tax Identification Number)"
-                    android:inputType="number"
-                    android:padding="12dp"
-                    android:contentDescription="Enter TIN" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etEMBID_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background"
-                android:hint="EMB ID (if applicable)">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                android:padding="8dp"
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/etEMBID"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Upload EMB ID Document"
-                        android:textColor="@color/text_primary"
-                        app:backgroundTint="@color/secondary_container"
-                        app:strokeColor="@color/primary"
-                        app:strokeWidth="1dp"
-                        app:cornerRadius="8dp"
-                        android:contentDescription="Upload EMB ID Document" />
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
+                    android:background="@drawable/bg_title_gradient"
+                    android:gravity="center_vertical">
 
                     <TextView
-                        android:id="@+id/tvEMBIDFileName"
-                        android:layout_width="match_parent"
+                        android:id="@+id/tvTitle"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="No file selected"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
-                        android:contentDescription="Selected EMB ID file name" />
+                        android:text="Company Dashboard"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white" />
                 </LinearLayout>
-            </com.google.android.material.textfield.TextInputLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
-            <!-- Company Address -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Company Address"
-                style="@style/FormLabel"
-                android:textColor="@color/primary"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:contentDescription="Company Address Section" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etAddress_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etStreet"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Full Address (Street, Barangay, City, Province, Region, ZIP)"
-                    android:inputType="textPostalAddress|textMultiLine"
-                    android:minLines="3"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Full Address" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Contact Details -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contact Details"
-                style="@style/FormLabel"
-                android:textColor="@color/primary"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:contentDescription="Contact Details Section" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etContactNumber_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etTelephone"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Contact Number (Telephone or Mobile)"
-                    android:inputType="phone"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Contact Number" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etEmail_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmail"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Email Address"
-                    android:inputType="textEmailAddress"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Email Address" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etWebsite_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etWebsite"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Website (Optional)"
-                    android:inputType="textUri"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Website" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Authorized Representative -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Authorized Representative"
-                style="@style/FormLabel"
-                android:textColor="@color/primary"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:contentDescription="Authorized Representative Section" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etRepName_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRepName"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Full Name"
-                    android:inputType="textPersonName"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Representative Full Name" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etRepPosition_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRepPosition"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Designation / Position"
-                    android:inputType="text"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Representative Position" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etRepEmail_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRepEmail"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Email Address"
-                    android:inputType="textEmailAddress"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Representative Email Address" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/etRepContact_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxStrokeColor="@color/input_field_border"
-                app:hintTextColor="@color/text_secondary"
-                app:boxBackgroundColor="@color/input_field_background">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRepContact"
-                    style="@style/InputField"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Contact Number"
-                    android:inputType="phone"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Representative Contact Number" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp">
+                android:orientation="vertical">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSubmit"
-                    style="@style/Widget.MaterialComponents.Button"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                <!-- ✅ Approved Establishments -->
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Submit"
+                    android:text="Approved Establishments"
                     android:textColor="@color/white"
-                    app:backgroundTint="@color/green_approved"
-                    app:cornerRadius="12dp"
-                    app:strokeColor="@color/primary"
-                    app:strokeWidth="1dp"
-                    android:paddingVertical="12dp"
-                    android:contentDescription="Submit Registration" />
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:paddingVertical="8dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnClear"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerApproved"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Clear Fields"
-                    android:textColor="@color/text_primary"
-                    app:backgroundTint="@color/secondary_container"
-                    app:cornerRadius="12dp"
-                    app:strokeColor="@color/primary"
-                    app:strokeWidth="1dp"
-                    android:paddingVertical="12dp"
-                    android:contentDescription="Clear Fields" />
-            </LinearLayout>
+                    android:nestedScrollingEnabled="false"
+                    android:paddingBottom="12dp" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="60dp" />
-        </LinearLayout>
-    </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- ⏳ Pending Establishments -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Pending Establishments"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:paddingVertical="8dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerPending"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- ➕ Floating Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnAddCompany"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add"
+        android:contentDescription="Add Establishment"
+        app:backgroundTint="@color/teal_700"
+        app:tint="@android:color/white" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

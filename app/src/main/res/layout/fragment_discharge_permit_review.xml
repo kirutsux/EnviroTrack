@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:padding="16dp">
 
     <LinearLayout
@@ -9,88 +10,134 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Header -->
         <TextView
-            android:text="Step 4: Review and Submit"
-            android:textSize="18sp"
+            android:text="Review and Submit"
+            android:textSize="20sp"
             android:textStyle="bold"
+            android:textColor="#445B6C"
+            android:gravity="center"
             android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
             android:text="Please review all details before submitting your discharge permit application."
-            android:textColor="#666"
+            android:textColor="#666666"
             android:textSize="14sp"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Review Details -->
-        <TextView
-            android:text="Company Information"
-            android:textStyle="bold"
+        <!-- Company Info -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/txtCompanyReview"
-            android:text="Company Name, Address, PCO Info..."
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            <TextView
+                android:text="Company Information"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        <TextView
-            android:text="Discharge Details"
-            android:textStyle="bold"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/txtCompanyReview"
+                android:text="Company Name, Address, PCO Info..."
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txtDischargeReview"
-            android:text="Receiving Body, Volume, Method..."
+        <!-- Discharge Info -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:text="Uploaded Files"
-            android:textStyle="bold"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:text="Discharge Details"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/txtFilesReview"
-            android:text="List of uploaded files..."
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            <TextView
+                android:id="@+id/txtDischargeReview"
+                android:text="Receiving Body, Volume, Method..."
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
-        <TextView
-            android:text="Payment Information"
-            android:textStyle="bold"
+        <!-- Payment Info -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/txtPaymentReview"
-            android:text="₱1,500 - GCash - Pending"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
+            <TextView
+                android:text="Payment Information"
+                android:textStyle="bold"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        <!-- Submit Buttons -->
-        <Button
-            android:id="@+id/btnEditInfo"
-            android:text="Edit Information"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/txtPaymentReview"
+                android:text="₱1,500 - Stripe - Pending"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/btnSubmitApplication"
-            android:text="Submit Application"
+        <!-- Buttons -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnEditInfo"
+                android:text="Edit Information"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#9E9E9E"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="12dp"
+                android:radius="12dp" />
+
+            <Button
+                android:id="@+id/btnSubmitApplication"
+                android:text="Submit Application"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:radius="12dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

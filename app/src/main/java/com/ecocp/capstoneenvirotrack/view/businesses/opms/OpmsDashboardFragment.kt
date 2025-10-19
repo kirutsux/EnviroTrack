@@ -4,18 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.adapter.SubmittedApplicationsAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentOpmsDashboardBinding
+import com.ecocp.capstoneenvirotrack.model.SubmittedApplication
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class OpmsDashboardFragment : Fragment() {
 
     private var _binding: FragmentOpmsDashboardBinding? = null
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+    private val applications = mutableListOf<SubmittedApplication>()
+    private lateinit var adapter: SubmittedApplicationsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,45 +37,130 @@ class OpmsDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 🔹 Discharge Permit
+        // Navigation buttons
         binding.btnApplyDischargePermit.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_dischargePermitForm)
         }
 
-        // 🔹 Permit to Operate (PTO)
         binding.btnApplyPto.setOnClickListener {
-            Toast.makeText(requireContext(), "PTO application feature coming soon.", Toast.LENGTH_SHORT).show()
-            // findNavController().navigate(R.id.action_dashboard_to_ptoForm) // later when you create it
+            findNavController().navigate(R.id.action_dashboard_to_ptoForm)
         }
 
-        // 🔹 Solid Waste Management Permit
-        binding.btnApplySwm.setOnClickListener {
-            Toast.makeText(requireContext(), "Solid Waste Management application feature coming soon.", Toast.LENGTH_SHORT).show()
-            // findNavController().navigate(R.id.action_dashboard_to_swmForm) // later when you create it
-        }
+        // Setup RecyclerView
+        binding.recyclerSubmittedApplications.layoutManager = LinearLayoutManager(requireContext())
+        adapter = SubmittedApplicationsAdapter(applications) { selectedApp ->
+            val bundle = Bundle().apply { putString("applicationId", selectedApp.id) }
 
-        // Load existing applications
-        loadSubmittedApplications()
+            when (selectedApp.applicationType) {
+                "Discharge Permit" -> findNavController().navigate(
+                    R.id.action_dashboard_to_dischargePermitDetails,
+                    bundle
+                )
+                "Permit to Operate" -> findNavController().navigate(
+                    R.id.action_dashboard_to_ptoDetails,
+                    bundle
+                )
+            }
+        }
+        binding.recyclerSubmittedApplications.adapter = adapter
+
+        // Load all applications
+        listenToApplications()
     }
 
-    private fun loadSubmittedApplications() {
+    /**
+     * Loads both Discharge Permit and PTO applications for the logged-in user.
+     */
+    private fun listenToApplications() {
+        val uid = auth.currentUser?.uid ?: return
+        applications.clear()
+
+        // ✅ Discharge Permit applications
         db.collection("opms_discharge_permits")
-            .get()
-            .addOnSuccessListener { result ->
-                if (result.isEmpty) {
-                    binding.txtSubmittedList.text = "You have no submitted applications yet."
-                } else {
-                    val builder = StringBuilder()
-                    for (doc in result) {
-                        val status = doc.getString("status") ?: "Unknown"
-                        builder.append("• Discharge Permit – Status: $status\n")
-                    }
-                    binding.txtSubmittedList.text = builder.toString()
+            .whereEqualTo("uid", uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) return@addSnapshotListener
+                snapshot?.documents?.forEach { doc ->
+                    val app = mapToApplication(doc.id, doc.data, "Discharge Permit")
+                    addOrUpdateApplication(app)
                 }
+                adapter.notifyDataSetChanged()
             }
-            .addOnFailureListener {
-                binding.txtSubmittedList.text = "Failed to load applications."
+
+        // ✅ Permit to Operate applications
+        db.collection("opms_pto_applications")
+            .whereEqualTo("uid", uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) return@addSnapshotListener
+                snapshot?.documents?.forEach { doc ->
+                    val app = mapToApplication(doc.id, doc.data, "Permit to Operate")
+                    addOrUpdateApplication(app)
+                }
+                adapter.notifyDataSetChanged()
             }
+    }
+
+    /**
+     * Maps Firestore data to SubmittedApplication model
+     */
+    private fun mapToApplication(id: String, data: MutableMap<String, Any>?, defaultType: String): SubmittedApplication {
+        val timestampValue = data?.get("timestamp")
+        val formattedTimestamp = when (timestampValue) {
+            is Timestamp -> SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(timestampValue.toDate())
+            is String -> timestampValue
+            else -> "N/A"
+        }
+
+        // ✅ Prefer Firestore "applicationType" if available
+        val appType = (data?.get("applicationType") ?: defaultType) as String
+
+        return SubmittedApplication(
+            id = id,
+            companyName = (data?.get("establishmentName") ?: data?.get("companyName") ?: "") as String,
+            companyAddress = (data?.get("mailingAddress") ?: data?.get("companyAddress") ?: "") as String,
+            pcoName = (data?.get("pcoName") ?: "") as String,
+            pcoAccreditation = (data?.get("pcoAccreditation") ?: data?.get("pcoAccreditationNumber") ?: "") as String,
+            contactNumber = (data?.get("contactNumber") ?: "-") as String,
+            email = (data?.get("email") ?: "-") as String,
+            bodyOfWater = (data?.get("bodyOfWater") ?: data?.get("receivingBody") ?: "") as String,
+            sourceWastewater = (data?.get("sourceWastewater") ?: "") as String,
+            volume = (data?.get("volume") ?: data?.get("dischargeVolume") ?: "") as String,
+            treatmentMethod = (data?.get("treatmentMethod") ?: data?.get("dischargeMethod") ?: "") as String,
+            operationStartDate = (data?.get("operationStartDate") ?: "") as String,
+            fileLinks = (data?.get("fileLinks") as? String)?.split("\n") ?: emptyList(),
+            status = (data?.get("status") ?: "Pending") as String,
+            paymentInfo = buildPaymentInfo(data),
+            timestamp = formattedTimestamp,
+            applicationType = appType
+        )
+    }
+
+    /**
+     * Builds formatted payment info
+     */
+    private fun buildPaymentInfo(data: MutableMap<String, Any>?): String {
+        val amount = (data?.get("amount") as? Number)?.toDouble() ?: 0.0
+        val currency = data?.get("currency") as? String ?: "PHP"
+        val paymentTimestamp = (data?.get("paymentTimestamp") as? Timestamp)?.toDate()
+
+        val formattedDate = paymentTimestamp?.let {
+            SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault()).format(it)
+        } ?: "Not Paid"
+
+        return "₱%.2f %s\nPaid on: %s".format(amount, currency, formattedDate)
+    }
+
+    /**
+     * Adds or updates application in list (avoids duplicates)
+     */
+    private fun addOrUpdateApplication(app: SubmittedApplication) {
+        val index = applications.indexOfFirst { it.id == app.id }
+        if (index >= 0) {
+            applications[index] = app
+        } else {
+            applications.add(app)
+        }
+        applications.sortByDescending { it.timestamp }
     }
 
     override fun onDestroyView() {

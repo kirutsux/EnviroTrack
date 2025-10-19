@@ -6,18 +6,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
+import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.view.businesses.cnc.COMP_CNC
-import com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment
+import com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncActivity
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
-import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsDashboardFragment
-import com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.*
 
 class COMP_Dashboard : Fragment() {
 
@@ -29,8 +32,13 @@ class COMP_Dashboard : Fragment() {
     private lateinit var opmsCard: CardView
     private lateinit var hazewasteCard: CardView
     private lateinit var pcoCard: CardView
+    private lateinit var crsCard: CardView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navView: NavigationView
+    private lateinit var drawerMenu: ImageView
+    private lateinit var greetingTextView: TextView
+    private lateinit var notificationIcon: ImageView
 
-    // Tracks whether user has accreditation
     private var isAccredited = false
 
     override fun onCreateView(
@@ -43,40 +51,155 @@ class COMP_Dashboard : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize cards
+        // Initialize views
         cncCard = view.findViewById(R.id.cnc_card)
         smrCard = view.findViewById(R.id.smr_card)
         opmsCard = view.findViewById(R.id.opms_card)
         hazewasteCard = view.findViewById(R.id.hazewaste_card)
         pcoCard = view.findViewById(R.id.pco_card)
+        crsCard = view.findViewById(R.id.crs_card)
+        greetingTextView = view.findViewById(R.id.greeting_message)
+        drawerLayout = view.findViewById(R.id.drawer_layout)
+        navView = view.findViewById(R.id.nav_view)
+        drawerMenu = view.findViewById(R.id.drawerMenu)
 
-        // Check if user already has an accreditation record
+        // Setup drawer menu toggle
+        drawerMenu.setOnClickListener {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START)
+            }
+        }
+        notificationIcon = view.findViewById(R.id.pco_notification_icon)
+
+        fetchGreetingMessage()
+        // Setup navigation view
+        setupNavigationView()
+
+        // Check user accreditation
         checkUserAccreditation()
+        setupNotificationIcon()
     }
 
+    // ---------------- GREETING -----------------
+    private fun fetchGreetingMessage() {
+        val user = auth.currentUser ?: return
+        val userId = user.uid
+
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                val firstName = document.getString("firstName") ?: "User"
+                greetingTextView.text = "Hi $firstName! ${getTimeBasedGreeting()}"
+            }
+            .addOnFailureListener { e ->
+                Log.e("COMP_Dashboard", "Error fetching user name: ", e)
+                greetingTextView.text = "Hi there! ${getTimeBasedGreeting()}"
+            }
+    }
+
+    private fun getTimeBasedGreeting(): String {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        return when (hour) {
+            in 0..11 -> "Good Morning"
+            in 12..17 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
+    }
+
+    private fun setupNavigationView() {
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_modules -> {
+                    // Navigate to Modules fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_modulesFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_inbox -> {
+                    // Navigate to Inbox fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_inboxFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_feedback -> {
+                    // Navigate to Feedback fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_feedbackFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_service_providers -> {
+                    // Navigate to Service Providers fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_serviceProvidersFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                R.id.nav_about_us -> {
+                    // Navigate to About Us fragment
+                    findNavController().navigate(R.id.action_pcoDashboard_to_aboutUsFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    // ---------------- NOTIFICATIONS -----------------
+    private fun setupNotificationIcon() {
+        notificationIcon.setOnClickListener {
+            openNotificationsFragment()
+        }
+    }
+
+    private fun openNotificationsFragment() {
+        val fragment = com.ecocp.capstoneenvirotrack.view.businesses.notifications.NotificationsFragment()
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_left,  // enter
+                R.anim.slide_out_right, // exit
+                R.anim.slide_in_right,  // pop enter
+                R.anim.slide_out_left   // pop exit
+            )
+            .replace(R.id.nav_host_fragment, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    // ---------------- CARD LISTENERS -----------------
     private fun setupCardListeners() {
-        // PCO card is always available (used to complete accreditation)
+        val navController = findNavController()
+
         pcoCard.setOnClickListener {
-            navigateToFragment(COMP_PCO())
+            navController.navigate(R.id.action_pcoDashboard_to_COMP_PCO)
         }
 
         if (isAccredited) {
-            // ✅ User has accreditation — unlock all cards
-            cncCard.setOnClickListener { navigateToFragment(COMP_CNC()) }
-            smrCard.setOnClickListener { navigateToFragment(COMP_SMR()) }
-            opmsCard.setOnClickListener {
-                val intent = Intent(requireContext(), OpmsActivity::class.java)
-                startActivity(intent)
+            cncCard.setOnClickListener {
+                startActivity(Intent(requireContext(), CncActivity::class.java))
             }
-            hazewasteCard.setOnClickListener { navigateToFragment(HWMSDashboardFragment()) }
+            smrCard.setOnClickListener {
+                navController.navigate(R.id.action_pcoDashboard_to_COMP_SMR)
+            }
+            opmsCard.setOnClickListener {
+                startActivity(Intent(requireContext(), OpmsActivity::class.java))
+            }
+            hazewasteCard.setOnClickListener {
+                navController.navigate(R.id.action_pcoDashboard_to_HWMSDashboardFragment)
+            }
+            crsCard.setOnClickListener {
+                navController.navigate(R.id.action_pcoDashboard_to_COMP_CRS)
+            }
         } else {
-            // 🚫 User not accredited — disable other cards
             val lockMessage = "Please complete your accreditation first via the PCO section."
+            val showToast = { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
 
-            cncCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
-            smrCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
-            opmsCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
-            hazewasteCard.setOnClickListener { Toast.makeText(requireContext(), lockMessage, Toast.LENGTH_SHORT).show() }
+            cncCard.setOnClickListener { showToast() }
+            smrCard.setOnClickListener { showToast() }
+            opmsCard.setOnClickListener { showToast() }
+            hazewasteCard.setOnClickListener { showToast() }
+            crsCard.setOnClickListener { showToast() }
         }
     }
 
@@ -88,8 +211,6 @@ class COMP_Dashboard : Fragment() {
         }
 
         val userId = user.uid
-
-        // 🔍 Query the "accreditations" collection to find if any document has this UID
         db.collection("accreditations")
             .whereEqualTo("uid", userId)
             .limit(1)
@@ -104,20 +225,11 @@ class COMP_Dashboard : Fragment() {
                     val dialog = PCOVerificationDialogFragment()
                     dialog.show(childFragmentManager, "PCOVerificationDialog")
                 }
-
-                // Always set up the correct behavior for cards after check
                 setupCardListeners()
             }
             .addOnFailureListener { e ->
                 Log.e("COMP_Dashboard", "Error checking accreditation: ", e)
                 Toast.makeText(requireContext(), "Failed to verify accreditation.", Toast.LENGTH_SHORT).show()
             }
-    }
-
-    private fun navigateToFragment(fragment: Fragment) {
-        requireActivity().supportFragmentManager.commit {
-            replace(R.id.nav_host_fragment, fragment)
-            addToBackStack(null)
-        }
     }
 }

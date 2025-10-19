@@ -30,7 +30,7 @@ class PCOVerificationDialogFragment : DialogFragment() {
         buttonOkay.setOnClickListener {
             Toast.makeText(requireContext(), "Proceeding to PCO accreditation", Toast.LENGTH_SHORT).show()
             dismiss()
-            findNavController().navigate(R.id.action_COMP_Dashboard_to_COMP_PCOAccreditation)
+            findNavController().navigate(R.id.action_pcoDashboard_to_COMP_PCOAccreditation)
         }
     }
 

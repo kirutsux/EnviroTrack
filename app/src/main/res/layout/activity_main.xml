@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".view.all.MainActivity">
 
-    <!-- NavHostFragment fills all space above the BottomNavigationView -->
+    <!-- ✅ Corrected NavHostFragment -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -21,7 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Bottom Navigation fixed to bottom -->
+    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="0dp"

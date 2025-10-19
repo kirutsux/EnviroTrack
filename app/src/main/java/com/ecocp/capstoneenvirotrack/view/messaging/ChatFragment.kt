@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view.all
+package com.ecocp.capstoneenvirotrack.view.messaging
 
 import android.os.Bundle
 import android.view.LayoutInflater

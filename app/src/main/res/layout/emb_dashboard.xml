@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/emb_dashboard_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -36,12 +37,13 @@
             android:gravity="center" />
 
         <ImageView
-            android:id="@+id/notification_icon"
+            android:id="@+id/emb_notification_icon"
             android:layout_width="61dp"
             android:layout_height="47dp"
             android:layout_marginTop="25dp"
             android:contentDescription="Notification Icon"
-            android:src="@drawable/ic_notifications" />
+            android:src="@drawable/ic_notifications"
+            app:tint="@color/white"/>
     </LinearLayout>
 
     <!-- Scrollable Content -->

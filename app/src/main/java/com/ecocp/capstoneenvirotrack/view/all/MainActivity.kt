@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.ecocp.capstoneenvirotrack.R
@@ -12,6 +15,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ✅ Firebase App Check
+        // ✅ Firebase App Check setup
         FirebaseApp.initializeApp(this)
         val appCheck = FirebaseAppCheck.getInstance()
         appCheck.installAppCheckProviderFactory(PlayIntegrityAppCheckProviderFactory.getInstance())
@@ -35,20 +40,87 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView = findViewById(R.id.bottom_navigation)
         bottomNavigationView.setupWithNavController(navController)
 
-        // ✅ Show bottom nav only on specific screens
+        // ✅ Bottom nav item handling
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            val destinationId = when (item.itemId) {
+                R.id.pcoDashboard -> R.id.pcoDashboard
+                R.id.chatFragment -> R.id.chatFragment
+                R.id.aiFaqBotFragment -> R.id.aiFaqBotFragment
+                R.id.comp_Profile -> R.id.comp_Profile
+                else -> return@setOnItemSelectedListener false
+            }
+
+            safeNavigate(destinationId)
+            true
+        }
+
+        // ✅ Show bottom nav only on certain fragments
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.pcoDashboard,
                 R.id.chatFragment,
                 R.id.aiFaqBotFragment,
-                R.id.comp_Profile -> {
-                    bottomNavigationView.visibility = View.VISIBLE
+                R.id.comp_Profile -> bottomNavigationView.visibility = View.VISIBLE
+                else -> bottomNavigationView.visibility = View.GONE
+            }
+
+            logCurrentDestination(destination)
+        }
+    }
+
+    // ✅ Lifecycle-safe navigation with retry
+    private fun safeNavigate(destinationId: Int) {
+        lifecycleScope.launch {
+            try {
+                val current = navController.currentDestination?.id
+                Log.d("MainActivity", "Navigating from $current to $destinationId")
+
+                if (current != destinationId) {
+                    val navOptions = NavOptions.Builder()
+                        .setLaunchSingleTop(true)
+                        .setPopUpTo(
+                            R.id.pcoDashboard, // Keeps dashboard as base
+                            inclusive = false
+                        )
+                        .build()
+
+                    navController.navigate(destinationId, null, navOptions)
+                } else {
+                    Log.d("MainActivity", "Already on destination: $destinationId")
                 }
-                else -> {
-                    bottomNavigationView.visibility = View.GONE
-                }
+
+            } catch (e: IllegalStateException) {
+                Log.w("MainActivity", "Navigation failed: ${e.message}. Retrying...")
+                delay(200)
+                retryNavigate(destinationId)
             }
         }
+    }
+
+    // ✅ Retry with extra safety
+    private fun retryNavigate(destinationId: Int) {
+        lifecycleScope.launchWhenResumed {
+            try {
+                val navOptions = NavOptions.Builder()
+                    .setLaunchSingleTop(true)
+                    .setPopUpTo(R.id.pcoDashboard, false)
+                    .build()
+                navController.navigate(destinationId, null, navOptions)
+                Log.d("MainActivity", "Retry navigation successful: $destinationId")
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Retry navigation failed: ${e.message}")
+            }
+        }
+    }
+
+    // ✅ Log current destination only (instead of backstack)
+    private fun logCurrentDestination(destination: NavDestination) {
+        val destName = try {
+            resources.getResourceEntryName(destination.id)
+        } catch (e: Exception) {
+            destination.id.toString()
+        }
+        Log.d("MainActivity", "Now on destination: $destName (${destination.id})")
     }
 
     override fun onSupportNavigateUp(): Boolean {

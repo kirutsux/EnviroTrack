@@ -15,37 +15,96 @@
         <action
             android:id="@+id/action_dashboard_to_dischargePermitForm"
             app:destination="@id/dischargePermitFormFragment" />
+
+        <action
+            android:id="@+id/action_dashboard_to_dischargePermitDetails"
+            app:destination="@id/dischargePermitDetailsFragment" />
+
+        <!-- ✅ PTO navigation from Dashboard -->
+        <action
+            android:id="@+id/action_dashboard_to_ptoForm"
+            app:destination="@id/ptoFormFragment" />
+
+        <action
+            android:id="@+id/action_dashboard_to_ptoDetails"
+            app:destination="@id/ptoDetailsFragment" />
     </fragment>
 
-    <!-- Discharge Permit Application -->
+    <fragment
+        android:id="@+id/ptoDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.PtoDetailsFragment"
+        android:label="Permit to Operate"
+        tools:layout="@layout/fragment_pto_form">
+
+    </fragment>
+
+    <!-- ✅ PTO Form -->
+    <fragment
+        android:id="@+id/ptoFormFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.PtoFormFragment"
+        android:label="Permit to Operate"
+        tools:layout="@layout/fragment_pto_form">
+
+        <!-- ✅ This is the missing action -->
+        <action
+            android:id="@+id/action_form_to_ptoPayment"
+            app:destination="@id/ptoPaymentFragment" />
+    </fragment>
+
+    <!-- ✅ PTO Payment -->
+    <fragment
+        android:id="@+id/ptoPaymentFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.PtoPaymentFragment"
+        android:label="Payment of Fees"
+        tools:layout="@layout/fragment_pto_payment">
+
+        <action
+            android:id="@+id/action_payment_to_ptoReview"
+            app:destination="@id/ptoReviewFragment" />
+
+        <!-- Optional back navigation -->
+        <action
+            android:id="@+id/action_payment_to_ptoForm"
+            app:destination="@id/ptoFormFragment" />
+    </fragment>
+
+    <!-- ✅ PTO Review -->
+    <fragment
+        android:id="@+id/ptoReviewFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.PtoReviewFragment"
+        android:label="Review and Submit"
+        tools:layout="@layout/fragment_pto_review" />
+
+    <!-- Existing Discharge Permit stuff... -->
     <fragment
         android:id="@+id/dischargePermitFormFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitFormFragment"
         android:label="Discharge Permit Application"
         tools:layout="@layout/fragment_discharge_permit_form">
-
         <action
             android:id="@+id/action_application_to_payment"
             app:destination="@id/dischargePermitPaymentFragment" />
     </fragment>
 
-    <!-- Payment of Fees -->
     <fragment
         android:id="@+id/dischargePermitPaymentFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitPaymentFragment"
         android:label="Payment of Fees"
         tools:layout="@layout/fragment_discharge_permit_payment">
-
         <action
             android:id="@+id/action_payment_to_review"
             app:destination="@id/dischargePermitReviewFragment" />
     </fragment>
 
-    <!-- Review and Submit -->
     <fragment
         android:id="@+id/dischargePermitReviewFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitReviewFragment"
         android:label="Review and Submit"
         tools:layout="@layout/fragment_discharge_permit_review" />
 
+    <fragment
+        android:id="@+id/dischargePermitDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitDetailsFragment"
+        android:label="Discharge Permit Details"
+        tools:layout="@layout/fragment_discharge_permit_details" />
 </navigation>

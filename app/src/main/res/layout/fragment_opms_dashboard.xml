@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:padding="16dp">
 
     <LinearLayout
@@ -9,58 +10,94 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Header -->
         <TextView
             android:text="Online Permitting and Monitoring System (OPMS)"
             android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"
+            android:textSize="20sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="12dp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
             android:text="Select which permit you want to apply for:"
             android:textSize="14sp"
-            android:layout_marginBottom="12dp"
+            android:textColor="#555"
+            android:background="@drawable/text_border"
+            android:padding="10dp"
+            android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <!-- Permit Buttons -->
-        <Button
-            android:id="@+id/btnApplyDischargePermit"
-            android:text="Apply for Discharge Permit"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            android:background="@drawable/card_border"
+            android:padding="16dp"
+            android:elevation="3dp"
+            android:layout_marginBottom="20dp">
 
-        <Button
-            android:id="@+id/btnApplyPto"
-            android:text="Apply for Permit to Operate (PTO)"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
+            <Button
+                android:id="@+id/btnApplyDischargePermit"
+                android:text="Apply for Discharge Permit"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp" />
 
-        <Button
-            android:id="@+id/btnApplySwm"
-            android:text="Apply for Solid Waste Management Permit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp" />
+            <Button
+                android:id="@+id/btnApplyPto"
+                android:text="Apply for Permit to Operate (PTO)"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp" />
+        </LinearLayout>
 
-        <!-- Submitted Applications Section -->
+        <!-- Submitted Applications -->
         <TextView
             android:text="Your Submitted Applications"
             android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"
+            android:textSize="18sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="10dp"
+            android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/txtSubmittedList"
+            android:id="@+id/txtNoApplications"
             android:text="You have no submitted applications yet."
             android:textColor="#666"
             android:textSize="14sp"
+            android:background="@drawable/text_border"
+            android:padding="8dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Applications List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSubmittedApplications"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp"
+            android:overScrollMode="never"
+            android:scrollbars="vertical" />
     </LinearLayout>
 </ScrollView>

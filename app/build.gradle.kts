@@ -1,9 +1,9 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.android.application") // do NOT specify version
+    id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("androidx.navigation.safeargs.kotlin")
-    id("kotlin-kapt") // ✅ Use this instead of org.jetbrains.kotlin.kapt
+    id("kotlin-kapt")
 }
 
 
@@ -36,11 +36,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packaging {
@@ -75,32 +76,37 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
-    // ✅ Retrofit (correct version)
+    // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
-    // ✅ Firebase BOM keeps all Firebase libs aligned
+    // Firebase (BOM manages versions)
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.firebase:firebase-storage")
-    implementation ("com.google.firebase:firebase-appcheck-playintegrity")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
-    // ✅ Glide for image loading
+
+    // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.filament.android)
+    implementation(libs.google.material)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
+    // Stripe
+    implementation("com.stripe:stripe-android:21.18.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-// ✅ Global exclusions to prevent duplicate classes
+// Global exclusions
 configurations.all {
     exclude(group = "com.google.protobuf", module = "protobuf-java")
     exclude(group = "com.google.api.grpc", module = "proto-google-common-protos")
