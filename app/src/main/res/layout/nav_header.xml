@@ -4,24 +4,52 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/header_background"
-    android:gravity="center_vertical">
+    android:gravity="center"
+    android:paddingTop="60dp"
+    android:paddingBottom="40dp"
+    android:background="@drawable/nav_header_gradient"
+    android:elevation="4dp">
 
+    <!-- 🌿 App Logo -->
+    <ImageView
+        android:id="@+id/appLogo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/logo"
+        android:contentDescription="EnviroTrack Logo"
+        android:scaleType="fitCenter"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/logo_bg_circle"
+        android:padding="10dp"
+        android:elevation="8dp" />
+
+    <!-- 🏷️ App Name -->
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/appName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/nav_header_title"
-        android:textColor="@color/white"
-        android:textSize="20sp"
+        android:text="EnviroTrack"
+        android:textColor="@android:color/white"
         android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:textSize="22sp"
+        android:fontFamily="sans-serif-medium"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="3"
+        android:letterSpacing="0.05"
+        android:layout_marginBottom="6dp" />
 
+    <!-- 📜 Subtitle -->
     <TextView
         android:id="@+id/nav_header_subtitle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/nav_header_subtitle"
-        android:textColor="@color/white"
-        android:textSize="14sp" />
+        android:text="An Online Compliance Platform"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:alpha="0.9"
+        android:gravity="center" />
+
 </LinearLayout>
