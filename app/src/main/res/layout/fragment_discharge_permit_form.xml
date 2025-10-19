@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@drawable/gradient_background"
     android:padding="16dp">
 
     <LinearLayout
@@ -11,22 +11,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="Back"
+            app:tint="#445B6C" />
+
         <!-- Header Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:background="@drawable/bg_title_gradient"
             android:layout_marginBottom="12dp">
-
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_arrow_back"
-                android:contentDescription="Back"
-                app:tint="#445B6C" />
 
             <TextView
                 android:id="@+id/titleHeader"
@@ -36,9 +37,8 @@
                 android:text="Discharge Permit Application Form"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="#445B6C"
+                android:textColor="@android:color/white"
                 android:gravity="center"
-                android:background="@drawable/text_border_green"
                 android:padding="10dp" />
         </LinearLayout>
 
@@ -67,7 +67,7 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:background="@drawable/card_border"
+            android:background="@drawable/card_background"
             android:padding="12dp"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
@@ -137,12 +137,13 @@
             android:textColor="#445B6C"
             android:background="@drawable/text_border_green"
             android:padding="8dp"
+            android:layout_marginBottom="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <LinearLayout
             android:orientation="vertical"
-            android:background="@drawable/card_border"
+            android:background="@drawable/card_background"
             android:padding="12dp"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
@@ -211,8 +212,8 @@
             android:id="@+id/fileHintText"
             android:text="Please prepare and upload the following documents (PDF or image files only):\n\n• DENR Clearance or Old Permit – Previous discharge permit if renewal\n• Water Analysis Report – Laboratory analysis of effluent\n• Process Flow Diagram – Shows wastewater flow\n• Location Map – For EMB review\n\nYou may select and upload multiple files in one go."
             android:textSize="14sp"
-            android:textColor="#555"
-            android:background="@drawable/text_border"
+            android:textColor="@android:color/white"
+            android:background="@drawable/card_background"
             android:padding="10dp"
             android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
@@ -241,7 +242,7 @@
 
         <Button
             android:id="@+id/btnSubmitPermit"
-            android:text="Submit Discharge Permit Application"
+            android:text="Save and Continue to Payment"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
