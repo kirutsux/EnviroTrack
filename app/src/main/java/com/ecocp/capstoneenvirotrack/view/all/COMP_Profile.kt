@@ -23,6 +23,10 @@ class COMP_Profile : Fragment() {
 
     private lateinit var btnAccount: LinearLayout
     private lateinit var btnLogout: LinearLayout
+    private lateinit var btnFeedback: LinearLayout
+    private lateinit var btnModules: LinearLayout
+    private lateinit var btnAboutUs: LinearLayout
+    private lateinit var btnFaqBot: LinearLayout
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
@@ -39,19 +43,39 @@ class COMP_Profile : Fragment() {
         ivProfilePic = view.findViewById(R.id.ivProfilePic)
         btnAccount = view.findViewById(R.id.btnAccount)
         btnLogout = view.findViewById(R.id.btnLogout)
+        btnFeedback = view.findViewById(R.id.btnFeedback)  // add ID in XML
+        btnModules = view.findViewById(R.id.btnModules)    // add ID in XML
+        btnAboutUs = view.findViewById(R.id.btnAboutUs)    // add ID in XML
+        btnFaqBot = view.findViewById(R.id.btnFaqBot)      // add ID in XML
 
         loadUserData()
 
-        // Navigate to Account Fragment
+        // 👤 Account
         btnAccount.setOnClickListener {
-            try {
-                findNavController().navigate(R.id.action_COMP_Profile_to_COMP_Account)
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+            findNavController().navigate(R.id.action_COMP_Profile_to_COMP_Account)
         }
 
-        // Logout button
+        // 💬 Feedback
+        btnFeedback.setOnClickListener {
+            findNavController().navigate(R.id.feedbackFragment)
+        }
+
+        // 📘 Modules
+        btnModules.setOnClickListener {
+            findNavController().navigate(R.id.modulesFragment)
+        }
+
+        // ℹ️ About Us
+        btnAboutUs.setOnClickListener {
+            findNavController().navigate(R.id.aboutUsFragment)
+        }
+
+        // 🤖 AI FAQ Bot
+        btnFaqBot.setOnClickListener {
+            findNavController().navigate(R.id.aiFaqBotFragment)
+        }
+
+        // 🚪 Logout
         btnLogout.setOnClickListener { logoutUser() }
 
         return view
@@ -90,15 +114,11 @@ class COMP_Profile : Fragment() {
         }
     }
 
-    // 🚪 Logout user and navigate to LoginFragment
     private fun logoutUser() {
         try {
             auth.signOut()
             Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
-
-            // Navigate safely to login screen via nav_graph
             findNavController().navigate(R.id.action_COMP_Profile_to_loginFragment)
-
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Error logging out: ${e.message}", Toast.LENGTH_SHORT).show()
         }

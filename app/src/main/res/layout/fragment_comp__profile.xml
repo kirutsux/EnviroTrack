@@ -104,6 +104,7 @@
 
             <!-- Feedback -->
             <LinearLayout
+                android:id="@+id/btnFeedback"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -163,35 +164,9 @@
                     android:src="@drawable/ic_arrow_right"/>
             </LinearLayout>
 
-            <!-- Reports -->
+            <!-- Ai Faq Bot -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:background="?android:attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_reports" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Reports"
-                    android:paddingStart="16dp"
-                    android:textSize="16sp"/>
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_arrow_right"/>
-            </LinearLayout>
-
-            <!-- Help & Support -->
-            <LinearLayout
+                android:id="@+id/btnFaqBot"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -207,7 +182,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Help &amp; Support"
+                    android:text="FAQ "
                     android:paddingStart="16dp"
                     android:textSize="16sp"/>
 
@@ -217,8 +192,9 @@
                     android:src="@drawable/ic_arrow_right"/>
             </LinearLayout>
 
-            <!-- Files -->
+            <!-- Modules -->
             <LinearLayout
+                android:id="@+id/btnModules"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -234,7 +210,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Files"
+                    android:text="Modules"
                     android:paddingStart="16dp"
                     android:textSize="16sp"/>
 
@@ -246,6 +222,7 @@
 
             <!-- About Us -->
             <LinearLayout
+                android:id="@+id/btnAboutUs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
