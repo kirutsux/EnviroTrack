@@ -18,6 +18,8 @@ class CrsAdapter(
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvCompanyId: TextView = view.findViewById(R.id.tvCompanyId)
         val tvEstablishment: TextView = view.findViewById(R.id.tvEstablishment)
+        val tvCompanyType: TextView = view.findViewById(R.id.tvCompanyType)
+        val tvCeoName: TextView = view.findViewById(R.id.tvCeoName)
         val tvAddress: TextView = view.findViewById(R.id.tvAddress)
         val tvStatus: TextView = view.findViewById(R.id.tvStatus)
         val tvDateSubmitted: TextView = view.findViewById(R.id.tvDateSubmitted)
@@ -34,10 +36,11 @@ class CrsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = list[position]
 
-        // show a short doc id as reference (first 8 chars) to keep UI tidy
         val shortRef = if (app.docId.length >= 8) app.docId.substring(0, 8) else app.docId
-        holder.tvCompanyId.text = "Company Ref: $shortRef"
+        holder.tvCompanyId.text = "Ref: $shortRef"
         holder.tvEstablishment.text = app.companyName
+        holder.tvCompanyType.text = "Type: ${app.companyType}"
+        holder.tvCeoName.text = "CEO: ${app.ceoName}"
         holder.tvAddress.text = app.address
         holder.tvStatus.text = "Status: ${app.status}"
         holder.tvDateSubmitted.text = app.dateSubmitted

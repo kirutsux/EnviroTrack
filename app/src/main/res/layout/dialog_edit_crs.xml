@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- 🏢 Company Information -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/company_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/etCompanyName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/company_name_hint"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <AutoCompleteTextView
+            android:id="@+id/etCompanyType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/company_type_hint"
+            android:inputType="none"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etTinNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/tin_hint"
+            android:inputType="number"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <!-- 🧑‍💼 CEO Information -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ceo_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:padding="8dp"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etCeoName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/ceo_name_hint"
+            android:inputType="textPersonName"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etCeoContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/ceo_contact_hint"
+            android:inputType="phone"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <!-- 🏭 Business Type -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/business_type_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:padding="8dp"
+            android:layout_marginTop="12dp" />
+
+        <AutoCompleteTextView
+            android:id="@+id/etNatureOfBusiness"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/business_nature_hint"
+            android:inputType="none"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etPsicNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/psic_no_hint"
+            android:inputType="number"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etIndustryDescriptor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/industry_descriptor_hint"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:maxLines="4"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <!-- 🏠 Address -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/address_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:padding="8dp"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/address_hint"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:maxLines="4"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <!-- ☎️ Contact Details -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_details_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:padding="8dp"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/phone_hint"
+            android:inputType="phone"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/email_hint"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etWebsite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/website_hint"
+            android:inputType="textUri"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <!-- 👤 Authorized Representative -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rep_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:padding="8dp"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/etRepName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/rep_name_hint"
+            android:inputType="textPersonName"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etRepPosition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/rep_position_hint"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etRepContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/rep_contact_hint"
+            android:inputType="phone"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <EditText
+            android:id="@+id/etRepEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/rep_email_hint"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field" />
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="cancel"
+                android:backgroundTint="@color/darker_gray"
+                android:textColor="@color/white"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/save_changes"
+                android:backgroundTint="#445B6C"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

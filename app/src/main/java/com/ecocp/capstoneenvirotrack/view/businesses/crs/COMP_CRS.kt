@@ -56,17 +56,13 @@ class COMP_CRS : Fragment() {
 
         adapterApproved = CrsAdapter(
             approvedList,
-            onEditClick = {
-                Toast.makeText(requireContext(), "Edit ${it.companyName}", Toast.LENGTH_SHORT).show()
-            },
+            onEditClick = { showEditDialog(it, true) },
             onDeleteClick = { deleteApplication(it, true) }
         )
 
         adapterPending = CrsAdapter(
             pendingList,
-            onEditClick = {
-                Toast.makeText(requireContext(), "Edit ${it.companyName}", Toast.LENGTH_SHORT).show()
-            },
+            onEditClick = { showEditDialog(it, false) },
             onDeleteClick = { deleteApplication(it, false) }
         )
 
@@ -96,17 +92,35 @@ class COMP_CRS : Fragment() {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
                 for (doc in result) {
-                    // dateSubmitted may be a Timestamp (recommended) or already a String.
                     val dateSubmittedFormatted = when (val dateValue = doc.get("dateSubmitted")) {
                         is Timestamp -> dateFormat.format(dateValue.toDate())
                         is String -> dateValue
                         else -> "Unknown"
                     }
 
+                    val contactDetails = doc.get("contactDetails") as? Map<String, String> ?: emptyMap()
+                    val representative = doc.get("representative") as? Map<String, String> ?: emptyMap()
+                    val fileUrls = doc.get("fileUrls") as? List<String> ?: emptyList()
+
                     val app = Crs(
                         docId = doc.id,
                         companyName = doc.getString("companyName") ?: "Unknown",
+                        companyType = doc.getString("companyType") ?: "Unknown",
+                        tinNumber = doc.getString("tinNumber") ?: "",
+                        ceoName = doc.getString("ceoName") ?: "",
+                        ceoContact = doc.getString("ceoContact") ?: "",
+                        natureOfBusiness = doc.getString("natureOfBusiness") ?: "",
+                        psicNo = doc.getString("psicNo") ?: "",
+                        industryDescriptor = doc.getString("industryDescriptor") ?: "",
                         address = doc.getString("address") ?: "No address",
+                        phone = contactDetails["phone"],
+                        email = contactDetails["email"],
+                        website = contactDetails["website"],
+                        repName = representative["name"],
+                        repPosition = representative["position"],
+                        repContact = representative["contact"],
+                        repEmail = representative["email"],
+                        fileUrls = fileUrls,
                         status = doc.getString("status") ?: "Pending",
                         dateSubmitted = dateSubmittedFormatted
                     )
@@ -130,8 +144,151 @@ class COMP_CRS : Fragment() {
             }
     }
 
+    private fun showEditDialog(app: Crs, isApproved: Boolean) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val view = layoutInflater.inflate(R.layout.dialog_edit_crs, null)
+        builder.setView(view)
+
+        // Initialize fields
+        val etCompanyName = view.findViewById<android.widget.EditText>(R.id.etCompanyName)
+        val etCompanyType = view.findViewById<android.widget.AutoCompleteTextView>(R.id.etCompanyType)
+        val etTinNumber = view.findViewById<android.widget.EditText>(R.id.etTinNumber)
+        val etCeoName = view.findViewById<android.widget.EditText>(R.id.etCeoName)
+        val etCeoContact = view.findViewById<android.widget.EditText>(R.id.etCeoContact)
+        val etNatureOfBusiness = view.findViewById<android.widget.AutoCompleteTextView>(R.id.etNatureOfBusiness)
+        val etPsicNo = view.findViewById<android.widget.EditText>(R.id.etPsicNo)
+        val etIndustryDescriptor = view.findViewById<android.widget.EditText>(R.id.etIndustryDescriptor)
+        val etAddress = view.findViewById<android.widget.EditText>(R.id.etAddress)
+        val etPhone = view.findViewById<android.widget.EditText>(R.id.etPhone)
+        val etEmail = view.findViewById<android.widget.EditText>(R.id.etEmail)
+        val etWebsite = view.findViewById<android.widget.EditText>(R.id.etWebsite)
+        val etRepName = view.findViewById<android.widget.EditText>(R.id.etRepName)
+        val etRepPosition = view.findViewById<android.widget.EditText>(R.id.etRepPosition)
+        val etRepContact = view.findViewById<android.widget.EditText>(R.id.etRepContact)
+        val etRepEmail = view.findViewById<android.widget.EditText>(R.id.etRepEmail)
+        val btnSave = view.findViewById<android.widget.Button>(R.id.btnSave)
+        val btnCancel = view.findViewById<android.widget.Button>(R.id.btnCancel)
+
+        // Set up dropdowns
+        val companyTypes = listOf("Single Proprietorship", "Partnership", "Corporation", "Cooperative", "Other")
+        val natureOfBusinessList = listOf("Manufacturing", "Service", "Trading", "Construction", "Other")
+        etCompanyType.setAdapter(android.widget.ArrayAdapter(requireContext(), R.layout.dropdown_item, companyTypes))
+        etNatureOfBusiness.setAdapter(android.widget.ArrayAdapter(requireContext(), R.layout.dropdown_item, natureOfBusinessList))
+
+        // Populate fields
+        etCompanyName.setText(app.companyName)
+        etCompanyType.setText(app.companyType, false)
+        etTinNumber.setText(app.tinNumber)
+        etCeoName.setText(app.ceoName)
+        etCeoContact.setText(app.ceoContact)
+        etNatureOfBusiness.setText(app.natureOfBusiness, false)
+        etPsicNo.setText(app.psicNo)
+        etIndustryDescriptor.setText(app.industryDescriptor)
+        etAddress.setText(app.address)
+        etPhone.setText(app.phone)
+        etEmail.setText(app.email)
+        etWebsite.setText(app.website)
+        etRepName.setText(app.repName)
+        etRepPosition.setText(app.repPosition)
+        etRepContact.setText(app.repContact)
+        etRepEmail.setText(app.repEmail)
+
+        val dialog = builder.create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+
+        btnSave.setOnClickListener {
+            val updatedCompanyName = etCompanyName.text.toString().trim()
+            val updatedCompanyType = etCompanyType.text.toString().trim()
+            val updatedTinNumber = etTinNumber.text.toString().trim()
+            val updatedCeoName = etCeoName.text.toString().trim()
+            val updatedCeoContact = etCeoContact.text.toString().trim()
+            val updatedNatureOfBusiness = etNatureOfBusiness.text.toString().trim()
+            val updatedPsicNo = etPsicNo.text.toString().trim()
+            val updatedIndustryDescriptor = etIndustryDescriptor.text.toString().trim()
+            val updatedAddress = etAddress.text.toString().trim()
+
+            // Required fields validation
+            if (listOf(updatedCompanyName, updatedCompanyType, updatedTinNumber, updatedCeoName,
+                    updatedCeoContact, updatedNatureOfBusiness, updatedPsicNo,
+                    updatedIndustryDescriptor, updatedAddress).any { it.isEmpty() }) {
+                Toast.makeText(requireContext(), "Please fill all required fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val updates = mapOf(
+                "companyName" to updatedCompanyName,
+                "companyType" to updatedCompanyType,
+                "tinNumber" to updatedTinNumber,
+                "ceoName" to updatedCeoName,
+                "ceoContact" to updatedCeoContact,
+                "natureOfBusiness" to updatedNatureOfBusiness,
+                "psicNo" to updatedPsicNo,
+                "industryDescriptor" to updatedIndustryDescriptor,
+                "address" to updatedAddress,
+                "contactDetails" to mapOf(
+                    "phone" to etPhone.text.toString().trim(),
+                    "email" to etEmail.text.toString().trim(),
+                    "website" to etWebsite.text.toString().trim()
+                ),
+                "representative" to mapOf(
+                    "name" to etRepName.text.toString().trim(),
+                    "position" to etRepPosition.text.toString().trim(),
+                    "contact" to etRepContact.text.toString().trim(),
+                    "email" to etRepEmail.text.toString().trim()
+                )
+            )
+
+            db.collection("crs_applications").document(app.docId)
+                .update(updates)
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "Updated successfully", Toast.LENGTH_SHORT).show()
+
+                    // Update list and refresh
+                    val updatedApp = app.copy(
+                        companyName = updatedCompanyName,
+                        companyType = updatedCompanyType,
+                        tinNumber = updatedTinNumber,
+                        ceoName = updatedCeoName,
+                        ceoContact = updatedCeoContact,
+                        natureOfBusiness = updatedNatureOfBusiness,
+                        psicNo = updatedPsicNo,
+                        industryDescriptor = updatedIndustryDescriptor,
+                        address = updatedAddress,
+                        phone = etPhone.text.toString().trim(),
+                        email = etEmail.text.toString().trim(),
+                        website = etWebsite.text.toString().trim(),
+                        repName = etRepName.text.toString().trim(),
+                        repPosition = etRepPosition.text.toString().trim(),
+                        repContact = etRepContact.text.toString().trim(),
+                        repEmail = etRepEmail.text.toString().trim()
+                    )
+
+                    if (isApproved) {
+                        val index = approvedList.indexOf(app)
+                        if (index != -1) {
+                            approvedList[index] = updatedApp
+                            adapterApproved.notifyItemChanged(index)
+                        }
+                    } else {
+                        val index = pendingList.indexOf(app)
+                        if (index != -1) {
+                            pendingList[index] = updatedApp
+                            adapterPending.notifyItemChanged(index)
+                        }
+                    }
+
+                    dialog.dismiss()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Failed to update: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+
+        dialog.show()
+    }
+
     private fun deleteApplication(app: Crs, isApproved: Boolean) {
-        // delete by document id (docId)
         db.collection("crs_applications").document(app.docId)
             .delete()
             .addOnSuccessListener {
