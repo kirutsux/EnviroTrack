@@ -99,7 +99,7 @@
     <string name="no_files_selected_description">No files selected text</string>
     <string name="clear_fields">Clear</string>
     <string name="clear_fields_description">Clear fields button</string>
-    <string name="save_changes">Save Changes</string>
+    <string name="save_changes">Submit Application</string>
     <string name="save_changes_description">Save changes button</string>
     <string name="back_button_description">Navigate back</string>
     <string name="address_hint">Full Address</string>
