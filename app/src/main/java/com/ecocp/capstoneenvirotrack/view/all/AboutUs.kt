@@ -22,20 +22,16 @@ class AboutUs : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Open Facebook profile link automatically
-        val facebookUrl = "https://www.facebook.com/kurtzyyy"
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(facebookUrl))
+        // 🌐 Open EnviroTrack website automatically
+        val websiteUrl = "https://envirotrackph.onhercules.app/"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(websiteUrl))
 
-        // Try to open it in Facebook app if installed, else fallback to browser
-        intent.setPackage("com.facebook.katana")
-        if (intent.resolveActivity(requireActivity().packageManager) == null) {
-            // Facebook app not installed, open in browser instead
-            intent.setPackage(null)
-        }
+        // Open in browser (no need for package check like Facebook)
+        intent.setPackage(null)
 
         startActivity(intent)
 
-        // Optionally, you can close the fragment afterward
+        // Optionally close the fragment after opening
         requireActivity().onBackPressedDispatcher.onBackPressed()
     }
 }

@@ -85,10 +85,12 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-common-ktx") // ✅ add this
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
+
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
@@ -96,7 +98,6 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.filament.android)
     implementation(libs.google.material)
-    implementation(libs.firebase.messaging)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // Stripe

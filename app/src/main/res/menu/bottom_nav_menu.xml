@@ -7,7 +7,7 @@
         android:title="Dashboard" />
 
     <item
-        android:id="@+id/chatFragment"
+        android:id="@+id/inboxFragment"
         android:icon="@drawable/chat"
         android:title="Inbox" />
 
