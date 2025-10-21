@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/embcnc_nav_host_fragment"
+    app:startDestination="@id/cncEmbDashboardFragment">
+
+    <!-- CNC DASHBOARD -->
+    <fragment
+        android:id="@+id/cncEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment"
+        android:label="EMB CNC Dashboard"
+        tools:layout="@layout/fragment_cnc_emb_dashboard">
+
+        <action
+            android:id="@+id/action_cncEmbDashboardFragment_to_cncReviewDetailsFragment"
+            app:destination="@id/cncReviewDetailsFragment" />
+    </fragment>
+
+    <!-- CNC REVIEW DETAILS -->
+    <fragment
+        android:id="@+id/cncReviewDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncReviewDetailsFragment"
+        android:label="CNC Review Details"
+        tools:layout="@layout/fragment_cnc_review_details">
+
+        <!-- ✅ NEW BACK ACTION -->
+        <action
+            android:id="@+id/action_cncReviewDetailsFragment_to_cncEmbDashboardFragment"
+            app:destination="@id/cncEmbDashboardFragment" />
+    </fragment>
+
+</navigation>
