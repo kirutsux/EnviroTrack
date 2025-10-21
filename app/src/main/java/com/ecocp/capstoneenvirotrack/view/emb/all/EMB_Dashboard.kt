@@ -16,6 +16,7 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.cnc.embcncactivity
 import com.ecocp.capstoneenvirotrack.view.emb.notifications.EMBNotificationsFragment
+import com.ecocp.capstoneenvirotrack.view.emb.opms.EmbopmsActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -77,7 +78,7 @@ class EMB_Dashboard : Fragment() {
         }
 
         opmsCard.setOnClickListener {
-            startActivity(Intent(requireContext(), OpmsActivity::class.java))
+            startActivity(Intent(requireContext(), EmbopmsActivity::class.java))
         }
 
         hazewasteCard.setOnClickListener {

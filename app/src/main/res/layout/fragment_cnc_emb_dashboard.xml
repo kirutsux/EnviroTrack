@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@drawable/bg_gradient_purple_blue"
@@ -59,7 +60,7 @@
                 android:layout_height="20dp"
                 android:src="@drawable/ic_search"
                 android:contentDescription="Search"
-                android:tint="@color/black" />
+                app:tint="@color/black" />
 
             <EditText
                 android:id="@+id/etSearch"

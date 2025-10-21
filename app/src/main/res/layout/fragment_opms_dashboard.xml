@@ -12,7 +12,7 @@
 
         <!-- Header -->
         <TextView
-            android:text="Online Permitting and Monitoring System (OPMS)"
+            android:text="Online Permitting and Monitoring"
             android:textStyle="bold"
             android:textSize="20sp"
             android:textColor="@android:color/white"
