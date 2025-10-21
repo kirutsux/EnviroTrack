@@ -1,16 +1,21 @@
 package com.ecocp.capstoneenvirotrack.adapter
 
+import android.content.Context
+import android.content.res.ColorStateList
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.EmbOpmsApplication
+import java.util.Locale
 
 class OpmsEmbAdapter(
-    private val applications: List<EmbOpmsApplication>,
-    private val onItemClick: (EmbOpmsApplication) -> Unit
+    private val applications: List<EmbOpmsApplication>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -42,23 +47,56 @@ class OpmsEmbAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val app = applications[position]
+        val bundle = Bundle().apply {
+            putString("applicationId", app.applicationId)
+        }
+
+        val context: Context = holder.itemView.context
+        val statusText = app.status ?: "Pending"
+        val normalizedStatus = statusText.lowercase(Locale.getDefault())
+
+        // ✅ Determine color dynamically based on status
+        val colorRes = when (normalizedStatus) {
+            "approved" -> R.color.status_approved
+            "rejected" -> R.color.status_rejected
+            "pending" -> R.color.status_pending
+            else -> R.color.status_pending
+        }
+
+        val color = ContextCompat.getColor(context, colorRes)
+
         if (holder is PTOViewHolder) {
             holder.tvEstablishmentName.text = app.companyName ?: "-"
             holder.tvOwnerName.text = app.ownerName ?: "-"
             holder.tvPlantAddress.text = app.plantAddress ?: "-"
-            holder.tvStatus.text = app.status ?: "Pending"
+            holder.tvStatus.text = statusText.replaceFirstChar { it.uppercase() }
+            holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
+            holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
             holder.tvApplicationType.text = app.applicationType ?: "Permit to Operate"
 
-            holder.itemView.setOnClickListener { onItemClick(app) }
+            holder.itemView.setOnClickListener {
+                it.findNavController().navigate(
+                    R.id.action_embDashboard_to_ptoDetailsFragment,
+                    bundle
+                )
+            }
+
         } else if (holder is DPViewHolder) {
             holder.tvCompanyName.text = app.companyName ?: "-"
             holder.tvCompanyAddress.text = app.companyAddress ?: "-"
             holder.tvReceivingBody.text = app.receivingBody ?: "-"
             holder.tvDischargeMethod.text = app.dischargeMethod ?: "-"
-            holder.tvStatus.text = app.status ?: "Pending"
+            holder.tvStatus.text = statusText.replaceFirstChar { it.uppercase() }
+            holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
+            holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
             holder.tvApplicationType.text = app.applicationType ?: "Discharge Permit"
 
-            holder.itemView.setOnClickListener { onItemClick(app) }
+            holder.itemView.setOnClickListener {
+                it.findNavController().navigate(
+                    R.id.action_embDashboard_to_dpDetailsFragment,
+                    bundle
+                )
+            }
         }
     }
 

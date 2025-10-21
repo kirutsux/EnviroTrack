@@ -46,14 +46,7 @@ class OpmsEmbDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = OpmsEmbAdapter(filteredList) { selectedApp ->
-            val bundle = Bundle().apply { putString("applicationId", selectedApp.applicationId) }
-            if (selectedApp.applicationType == "Permit to Operate") {
-                findNavController().navigate(R.id.action_embDashboard_to_ptoDetailsFragment, bundle)
-            } else {
-                findNavController().navigate(R.id.action_embDashboard_to_ptoDetailsFragment, bundle)
-            }
-        }
+        adapter = OpmsEmbAdapter(filteredList)
 
         binding.recyclerEmbOpmsList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEmbOpmsList.adapter = adapter

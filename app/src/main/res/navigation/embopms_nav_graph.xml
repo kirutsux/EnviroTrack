@@ -16,10 +16,10 @@
             android:id="@+id/action_embDashboard_to_ptoDetailsFragment"
             app:destination="@id/ptoDetailsFragment" />
 
-<!--        &lt;!&ndash; Action to DP Details &ndash;&gt;-->
-<!--        <action-->
-<!--            android:id="@+id/action_embDashboard_to_dpDetailsFragment"-->
-<!--            app:destination="@id/dpDetailsFragment" />-->
+        <!-- Action to DP Details -->
+        <action
+            android:id="@+id/action_embDashboard_to_dpDetailsFragment"
+            app:destination="@id/dpDetailsFragment" />
 
     </fragment>
 
@@ -30,11 +30,11 @@
         android:label="PTO Details"
         tools:layout="@layout/fragment_pto_details2" />
 
-<!--    &lt;!&ndash; Discharge Permit Details Fragment &ndash;&gt;-->
-<!--    <fragment-->
-<!--        android:id="@+id/dpDetailsFragment"-->
-<!--        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.DpDetailsFragment"-->
-<!--        android:label="DP Details"-->
-<!--        tools:layout="@layout/fragment_dp_details" />-->
+    <!-- Discharge Permit Details Fragment -->
+    <fragment
+        android:id="@+id/dpDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.DpDetailsFragment"
+        android:label="DP Details"
+        tools:layout="@layout/fragment_dp_details" />
 
 </navigation>

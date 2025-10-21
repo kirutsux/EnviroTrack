@@ -1,10 +1,13 @@
 package com.ecocp.capstoneenvirotrack.view.emb.opms
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -95,6 +98,20 @@ class PtoDetailsFragment : Fragment() {
                         txtFuelType.text = doc.getString("fuelType") ?: "-"
                         txtEmissionsSummary.text = doc.getString("emissionsSummary") ?: "-"
 
+                        // 🔹Uploaded Files
+                        val fileLinksField = doc.get("fileLinks")
+                        when (fileLinksField) {
+                            is List<*> -> {
+                                val fileLinks = fileLinksField.filterIsInstance<String>()
+                                if (fileLinks.isNotEmpty()) displayFileLinks(fileLinks) else addEmptyFileNotice()
+                            }
+                            is String -> {
+                                val fileLinks = fileLinksField.split(",").map { it.trim() }
+                                displayFileLinks(fileLinks)
+                            }
+                            else -> addEmptyFileNotice()
+                        }
+
                         // ✅ Update Payment Info Section
                         txtAmount.text = "₱%.2f %s".format(amount, currency)
                         txtPaymentMethod.text = "Method: $paymentMethod"
@@ -116,6 +133,42 @@ class PtoDetailsFragment : Fragment() {
                     binding.txtOwnerName.text = "Error loading PTO details: ${e.message}"
                 Log.e("PTO_DETAILS", "❌ Failed to load document", e)
             }
+    }
+
+    // 🔹 Show clickable file links
+    private fun displayFileLinks(fileLinks: List<String>) {
+        binding.layoutFileLinks.removeAllViews()
+
+        for ((index, link) in fileLinks.withIndex()) {
+            val textView = TextView(requireContext()).apply {
+                // Try to extract filename
+                val fileName = link.substringAfterLast('/').substringBefore('?')
+                text = if (fileName.isNotBlank()) fileName else "File ${index + 1}"
+                setTextColor(resources.getColor(android.R.color.holo_blue_dark))
+                textSize = 15f
+                setPadding(8, 8, 8, 8)
+                setOnClickListener { openFileLink(link) }
+            }
+            binding.layoutFileLinks.addView(textView)
+        }
+    }
+
+    private fun addEmptyFileNotice() {
+        val textView = TextView(requireContext()).apply {
+            text = "No files uploaded."
+            setTextColor(resources.getColor(android.R.color.darker_gray))
+            textSize = 14f
+        }
+        binding.layoutFileLinks.addView(textView)
+    }
+
+    private fun openFileLink(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Unable to open file", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
