@@ -164,37 +164,9 @@
                     android:src="@drawable/ic_arrow_right"/>
             </LinearLayout>
 
-            <!-- Ai Faq Bot -->
+            <!-- Files -->
             <LinearLayout
-                android:id="@+id/btnFaqBot"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:background="?android:attr/selectableItemBackground">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_help" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="FAQ "
-                    android:paddingStart="16dp"
-                    android:textSize="16sp"/>
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_arrow_right"/>
-            </LinearLayout>
-
-            <!-- Modules -->
-            <LinearLayout
-                android:id="@+id/btnModules"
+                android:id="@+id/btnFiles"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -210,7 +182,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Modules"
+                    android:text="Files"
                     android:paddingStart="16dp"
                     android:textSize="16sp"/>
 
