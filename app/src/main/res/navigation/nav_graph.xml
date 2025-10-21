@@ -43,6 +43,16 @@
             app:destination="@id/pcoDashboard"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
+
+        <!-- 🧰 Added: Service Provider Registration -->
+        <action
+            android:id="@+id/action_loginFragment_to_SP_RegistrationFragment"
+            app:destination="@id/SP_RegistrationFragment" />
+
+        <!-- 🔐 Added: SP Change Password -->
+        <action
+            android:id="@+id/action_loginFragment_to_SP_ChangepasswordFragment"
+            app:destination="@id/SP_ChangepasswordFragment" />
     </fragment>
 
     <!-- 📝 Registration -->
@@ -83,10 +93,37 @@
             app:destination="@id/pcoDashboard" />
     </fragment>
 
+    <!-- 🔐 Service Provider Change Password -->
+    <fragment
+        android:id="@+id/SP_ChangepasswordFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
+        tools:layout="@layout/sp_changepassword_fragment">
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_serviceProviderDashboard"
+            app:destination="@id/serviceProviderDashboard"
+            app:popUpTo="@id/SP_ChangepasswordFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- 🧰 Service Provider Registration -->
+    <fragment
+        android:id="@+id/SP_RegistrationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_RegistrationFragment"
+        tools:layout="@layout/sp_registration">
+        <action
+            android:id="@+id/action_SP_RegistrationFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
     <!-- 🌿 EMB Dashboard -->
     <fragment
         android:id="@+id/embDashboard"
-        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_Dashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
         tools:layout="@layout/emb_dashboard">
         <action android:id="@+id/action_embDashboard_to_embCNCFragment" app:destination="@id/embCNCFragment" />
         <action android:id="@+id/action_embDashboard_to_embSMRFragment" app:destination="@id/embSMRFragment" />
@@ -200,7 +237,7 @@
         tools:layout="@layout/fragment_about_us" />
 
     <!-- 🌍 EMB Modules -->
-    <fragment android:id="@+id/embCNCFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CNC" tools:layout="@layout/emb_cnc" />
+    <fragment android:id="@+id/embCNCFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment" tools:layout="@layout/fragment_cnc_emb_dashboard" />
     <fragment android:id="@+id/embSMRFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_SMR" tools:layout="@layout/emb_smr" />
     <fragment android:id="@+id/embOPMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_OPMS" tools:layout="@layout/emb_opms" />
     <fragment android:id="@+id/embHMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS" tools:layout="@layout/emb_hwms" />

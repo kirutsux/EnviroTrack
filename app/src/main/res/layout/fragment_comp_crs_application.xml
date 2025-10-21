@@ -5,13 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="?attr/colorSurface"
+    android:background="@drawable/gradient_background"
     android:padding="16dp">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="#445B6C"
+            android:contentDescription="@string/back_button_description"
+            tools:ignore="HardcodedText" />
 
         <!-- 🟩 Header -->
         <LinearLayout
@@ -20,17 +30,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingBottom="12dp">
+            android:background="@drawable/bg_title_gradient"
+            android:layout_marginBottom="12dp">
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_arrow_back"
-                app:tint="#445B6C"
-                android:contentDescription="@string/back_button_description"
-                tools:ignore="HardcodedText" />
 
             <TextView
                 android:layout_width="0dp"
@@ -39,9 +41,8 @@
                 android:text="@string/company_registration_title"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:textColor="#445B6C"
+                android:textColor="@android:color/white"
                 android:gravity="center"
-                android:background="@drawable/text_border_green"
                 android:padding="10dp"
                 android:contentDescription="@string/company_registration_title_description"
                 tools:text="Company Registration System" />
@@ -61,27 +62,27 @@
             android:contentDescription="@string/company_registration_subheader_description"
             tools:text="Please fill out all required fields accurately before submitting your company registration." />
 
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/company_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/company_info_section_description"
+            tools:text="A. Company Information" />
+
         <!-- 🧩 A. Company Information -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/card_background"
             android:orientation="vertical"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/FormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/company_info_section"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
-                android:contentDescription="@string/company_info_section_description"
-                tools:text="A. Company Information" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/etCompanyName_layout"
@@ -151,27 +152,28 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ceo_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/ceo_info_section_description"
+            tools:text="B. CEO / President / Owner" />
+
         <!-- 🧑‍💼 B. CEO / President / Owner -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/card_background"
             android:orientation="vertical"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
-            <TextView
-                style="@style/FormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/ceo_info_section"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
-                android:contentDescription="@string/ceo_info_section_description"
-                tools:text="B. CEO / President / Owner" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/etCeoName_layout"
@@ -218,27 +220,28 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/business_type_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/business_type_section_description"
+            tools:text="C. Type of Business / Industry Classification" />
+
         <!-- 🏢 C. Type of Business / Industry Classification -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/card_background"
             android:orientation="vertical"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
-            <TextView
-                style="@style/FormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/business_type_section"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
-                android:contentDescription="@string/business_type_section_description"
-                tools:text="C. Type of Business / Industry Classification" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/etNatureOfBusiness_layout"
@@ -310,27 +313,28 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/address_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/address_section_description"
+            tools:text="D. Address" />
+
         <!-- 🏠 D. Address -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/card_background"
             android:orientation="vertical"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
-            <TextView
-                style="@style/FormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/address_section"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
-                android:contentDescription="@string/address_section_description"
-                tools:text="D. Address" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/etAddress_layout"
@@ -357,27 +361,27 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_details_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/contact_details_section_description"
+            tools:text="E. Contact Details" />
+
         <!-- ☎️ E. Contact Details -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/card_background"
             android:orientation="vertical"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/FormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/contact_details_section"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
-                android:contentDescription="@string/contact_details_section_description"
-                tools:text="E. Contact Details" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/etPhone_layout"
@@ -446,27 +450,27 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rep_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/rep_info_section_description"
+            tools:text="F. Authorized Representative" />
+
         <!-- 👤 F. Authorized Representative -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/card_background"
             android:orientation="vertical"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/FormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/rep_info_section"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
-                android:contentDescription="@string/rep_info_section_description"
-                tools:text="F. Authorized Representative" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/etRepName_layout"
@@ -557,33 +561,33 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/attachments_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/attachments_section_description"
+            tools:text="G. Attachments / Uploads" />
+
         <!-- 📎 G. Attachments / Uploads -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/card_background"
             android:orientation="vertical"
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
             <TextView
-                style="@style/FormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/attachments_section"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
-                android:contentDescription="@string/attachments_section_description"
-                tools:text="G. Attachments / Uploads" />
-
-            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/attachments_info"
-                android:textColor="#666"
+                android:textColor="@android:color/white"
                 android:layout_marginTop="8dp"
                 android:padding="4dp"
                 android:contentDescription="@string/attachments_info_description"
@@ -605,7 +609,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/no_files_selected"
                 android:textStyle="italic"
-                android:textColor="#666"
+                android:textColor="@android:color/white"
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/no_files_selected_description"
                 tools:text="No files selected" />
@@ -624,7 +628,7 @@
                 android:id="@+id/btnClear"
                 style="@style/OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="52dp"
                 android:layout_weight="1"
                 android:text="@string/clear_fields"
                 android:contentDescription="@string/clear_fields_description"
@@ -638,14 +642,14 @@
                 android:id="@+id/btnSaveChanges"
                 style="@style/PrimaryButton"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="52dp"
                 android:layout_weight="1"
                 android:text="@string/save_changes"
                 android:textColor="#FFFFFF"
                 android:backgroundTint="#445B6C"
                 android:enabled="false"
                 android:contentDescription="@string/save_changes_description"
-                tools:text="Save Changes"
+                tools:text="Submit Application"
                 tools:enabled="true" />
         </LinearLayout>
     </LinearLayout>

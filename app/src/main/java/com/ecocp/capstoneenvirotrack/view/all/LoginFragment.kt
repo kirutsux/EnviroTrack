@@ -42,6 +42,10 @@ class LoginFragment : Fragment() {
         val etPassword: EditText = view.findViewById(R.id.etPassword)
         val tvGoToRegister: TextView = view.findViewById(R.id.tvGoToRegister)
         val showPassword: ImageView = view.findViewById(R.id.showPassword)
+        val tvRequestAccess: TextView = view.findViewById(R.id.tvRegister)
+        tvRequestAccess.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_SP_RegistrationFragment)
+        }
 
         // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -149,34 +153,144 @@ class LoginFragment : Fragment() {
     }
 
     // ✅ Check user type from Firestore and navigate to the correct dashboard
+    // ✅ Check user type from Firestore and navigate accordingly
     private fun checkUserType(email: String) {
-        Log.d("LoginFragment", "Checking user type for email: $email")
+        val firestore = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
 
+        if (currentUser == null) {
+            Toast.makeText(requireContext(), "No authenticated user found.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 1️⃣ Check if user exists in `users` first
         firestore.collection("users")
             .whereEqualTo("email", email)
             .get()
-            .addOnSuccessListener { documents ->
-                if (!documents.isEmpty) {
-                    val userDoc = documents.documents[0]
-                    val userType = userDoc.getString("userType")
-                    Log.d("LoginFragment", "Firestore userType: $userType")
+            .addOnSuccessListener { userDocs ->
+                if (!userDocs.isEmpty) {
+                    val userDoc = userDocs.documents[0]
+                    val userType = userDoc.getString("userType")?.lowercase()
 
-                    if (userType != null) {
-                        navigateToDashboard(userType)
-                    } else {
-                        Toast.makeText(requireContext(), "User type not found in Firestore!", Toast.LENGTH_SHORT).show()
-                        Log.e("LoginFragment", "User type is null for email: $email")
+                    Log.d("LoginFragment", "User found in users: $email ($userType)")
+
+                    when (userType) {
+                        "emb" -> findNavController().navigate(R.id.action_loginFragment_to_embDashboard)
+                        "pco" -> findNavController().navigate(R.id.action_loginFragment_to_pcoDashboard)
+                        else -> Toast.makeText(
+                            requireContext(),
+                            "Unknown user type: $userType",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "User not found!", Toast.LENGTH_SHORT).show()
-                    Log.w("LoginFragment", "User not found for email: $email")
+                    // 2️⃣ Not found in users → check service_providers
+                    firestore.collection("service_providers")
+                        .whereEqualTo("email", email)
+                        .get()
+                        .addOnSuccessListener { spDocs ->
+                            if (!spDocs.isEmpty) {
+                                val spDoc = spDocs.documents[0]
+                                val status = spDoc.getString("status") ?: "pending"
+                                val mustChangePassword = spDoc.getBoolean("mustChangePassword") ?: true
+
+                                Log.d(
+                                    "LoginFragment",
+                                    "Service Provider found: $email, status=$status, mustChangePassword=$mustChangePassword"
+                                )
+
+                                if (status != "approved") {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Your account is not yet approved.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    return@addOnSuccessListener
+                                }
+
+                                if (mustChangePassword) {
+                                    findNavController().navigate(R.id.action_loginFragment_to_SP_ChangepasswordFragment)
+                                } else {
+                                    findNavController().navigate(R.id.action_loginFragment_to_serviceProviderDashboard)
+                                }
+                            } else {
+                                // 3️⃣ Not found → check if there's an approved service request for this email
+                                firestore.collection("service_requests")
+                                    .whereEqualTo("email", email)
+                                    .whereEqualTo("status", "approved")
+                                    .get()
+                                    .addOnSuccessListener { reqDocs ->
+                                        if (!reqDocs.isEmpty) {
+                                            // ✅ Auto-create service_provider record
+                                            val uid = currentUser.uid
+                                            val newProvider = hashMapOf(
+                                                "email" to email,
+                                                "status" to "approved",
+                                                "mustChangePassword" to true,
+                                                "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                            )
+
+                                            firestore.collection("service_providers")
+                                                .document(uid)
+                                                .set(newProvider)
+                                                .addOnSuccessListener {
+                                                    Log.d("LoginFragment", "Auto-created service provider for $email")
+                                                    Toast.makeText(
+                                                        requireContext(),
+                                                        "Welcome! Please change your password to complete setup.",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                    findNavController().navigate(R.id.action_loginFragment_to_SP_ChangepasswordFragment)
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Log.e("LoginFragment", "Error creating service provider", e)
+                                                    Toast.makeText(
+                                                        requireContext(),
+                                                        "Error saving provider data.",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                        } else {
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "No account found with this email.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            Log.w("LoginFragment", "No user, service provider, or approved service request found for $email")
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("LoginFragment", "Error checking service_requests", e)
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Error checking requests: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(
+                                requireContext(),
+                                "Error checking service provider: ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("LoginFragment", "Error checking user type", e)
-                Toast.makeText(requireContext(), "Error checking user type: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Error checking users: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
+
+
+
+
 
     // ✅ Navigate to the correct dashboard based on Firestore userType
     private fun navigateToDashboard(userType: String) {

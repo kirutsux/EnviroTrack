@@ -21,7 +21,7 @@
             android:id="@+id/tvCompanyId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Company Ref: CRS-12345"
+            android:text="Ref: CRS-12345"
             android:textStyle="bold"
             android:textColor="@color/teal_700"
             android:textSize="14sp" />
@@ -36,6 +36,26 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:layout_marginBottom="2dp" />
+
+        <!-- 🏭 Company Type -->
+        <TextView
+            android:id="@+id/tvCompanyType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Type: Corporation"
+            android:textSize="13sp"
+            android:textColor="@color/darker_gray"
+            android:layout_marginBottom="2dp" />
+
+        <!-- 👤 CEO Name -->
+        <TextView
+            android:id="@+id/tvCeoName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CEO: John Doe"
+            android:textSize="13sp"
+            android:textColor="@color/darker_gray"
+            android:layout_marginBottom="6dp" />
 
         <!-- 📍 Address -->
         <TextView

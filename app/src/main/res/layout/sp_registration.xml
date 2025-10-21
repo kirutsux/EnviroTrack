@@ -3,14 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/sp_bg_gradient"
     tools:context=".view.serviceprovider.SP_RegistrationFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/sp_bg_gradient"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <!-- Back Button -->
         <ImageView
@@ -20,157 +20,75 @@
             android:src="@drawable/backbtn"
             android:contentDescription="Back"
             android:padding="4dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp" />
 
         <!-- Title -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Register"
-            android:textSize="24sp"
+            android:text="Service Provider Access Request"
+            android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:layout_gravity="center"/>
+            android:gravity="center"
+            android:layout_marginBottom="6dp" />
 
         <!-- Subtitle -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create Your Account"
-            android:textSize="16sp"
+            android:text="Enter your email to request an account"
             android:textColor="@color/text_secondary"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp"/>
+            android:textSize="15sp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
 
-        <!-- Input Fields -->
+        <!-- Email Input -->
         <EditText
+            android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Username:"
+            android:hint="Email Address"
+            android:inputType="textEmailAddress"
             android:background="@drawable/input_field"
             android:padding="12dp"
-            android:textColorHint="@color/text_secondary"/>
+            android:textColorHint="@color/text_secondary" />
 
-        <EditText
+        <!-- Request Access Button -->
+        <Button
+            android:id="@+id/btnRequestAccess"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:hint="Password:"
-            android:inputType="textPassword"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"/>
+            android:text="Request Access"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/white" />
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Confirm Password:"
-            android:inputType="textPassword"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Email Address:"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Business Name:"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Business Address:"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Contact Number:"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"/>
-
-        <Spinner
-            android:id="@+id/spinnerServiceCategory"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"
-            android:spinnerMode="dropdown"
-            android:entries="@array/service_categories" />
-
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Business Permit Number:"
-            android:background="@drawable/input_field"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"/>
-
-        <!-- File Uploads -->
+        <!-- Info Message -->
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvInfo"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Upload Business Permit:"
-            android:layout_marginTop="12dp"/>
+            android:text="Note: Once approved by the admin, your default password (123456) will be sent to your email."
+            android:textSize="13sp"
+            android:textColor="@color/text_secondary"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:padding="8dp" />
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Choose File"
-            android:layout_marginTop="4dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Upload Any Accreditation Documents:"
-            android:layout_marginTop="12dp"/>
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Choose File"
-            android:layout_marginTop="4dp"/>
-
-        <!-- Sign Up & Google Sign Up -->
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Sign up"
-            android:layout_marginTop="16dp"/>
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Continue with Google"
-            android:layout_marginTop="8dp"/>
-
-        <!-- Login Redirect -->
+        <!-- Already have account -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="20dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Already have an account? "
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tvLogin"
@@ -178,7 +96,8 @@
                 android:layout_height="wrap_content"
                 android:text="Login Here"
                 android:textSize="14sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textColor="@color/primary" />
         </LinearLayout>
 
     </LinearLayout>
