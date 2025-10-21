@@ -123,7 +123,7 @@
     <!-- 🌿 EMB Dashboard -->
     <fragment
         android:id="@+id/embDashboard"
-        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_Dashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
         tools:layout="@layout/emb_dashboard">
         <action android:id="@+id/action_embDashboard_to_embCNCFragment" app:destination="@id/embCNCFragment" />
         <action android:id="@+id/action_embDashboard_to_embSMRFragment" app:destination="@id/embSMRFragment" />
@@ -237,7 +237,7 @@
         tools:layout="@layout/fragment_about_us" />
 
     <!-- 🌍 EMB Modules -->
-    <fragment android:id="@+id/embCNCFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CNC" tools:layout="@layout/emb_cnc" />
+    <fragment android:id="@+id/embCNCFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment" tools:layout="@layout/fragment_cnc_emb_dashboard" />
     <fragment android:id="@+id/embSMRFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_SMR" tools:layout="@layout/emb_smr" />
     <fragment android:id="@+id/embOPMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_OPMS" tools:layout="@layout/emb_opms" />
     <fragment android:id="@+id/embHMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS" tools:layout="@layout/emb_hwms" />
