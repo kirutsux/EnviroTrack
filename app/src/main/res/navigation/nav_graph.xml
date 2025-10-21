@@ -255,22 +255,38 @@
         android:id="@+id/aiFaqBotFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.all.AiFaqBotFragment"
         tools:layout="@layout/fragment_ai_faq_bot" />
-
-    <!-- 👤 Profile -->
+    <!-- Profile -->
     <fragment
         android:id="@+id/comp_Profile"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_Profile"
-        android:label="Profile"
         tools:layout="@layout/fragment_comp__profile">
+
         <action
             android:id="@+id/action_COMP_Profile_to_COMP_Account"
             app:destination="@id/pco_Account" />
+
+        <action
+            android:id="@+id/action_COMP_Profile_to_feedbackFragment"
+            app:destination="@id/feedbackFragment" />
+        <action
+            android:id="@+id/action_COMP_Profile_to_filesFragment"
+            app:destination="@id/filesFragment" />
+
+        <action
+            android:id="@+id/action_COMP_Profile_to_aboutUsFragment"
+            app:destination="@id/aboutUsFragment" />
+
         <action
             android:id="@+id/action_COMP_Profile_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/filesFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.Files"
+        tools:layout="@layout/fragment_files" />
 
     <!-- ⚙️ Account -->
     <fragment
@@ -313,5 +329,6 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.crs.COMP_CRSApplication"
         android:label="Add Company"
         tools:layout="@layout/fragment_comp_crs_application" />
+
 
 </navigation>

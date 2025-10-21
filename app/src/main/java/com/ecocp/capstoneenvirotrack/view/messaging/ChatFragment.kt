@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -18,6 +18,8 @@ import com.ecocp.capstoneenvirotrack.model.Message
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ChatFragment : Fragment() {
 
@@ -32,11 +34,10 @@ class ChatFragment : Fragment() {
 
     private lateinit var chatAdapter: ChatAdapter
     private val messageList = mutableListOf<Message>()
-    private var chatId: String = ""
+
     private var providerId: String = ""
     private var providerImageUrl: String = ""
     private var providerDisplayName: String = ""
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,20 +45,17 @@ class ChatFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_chat, container, false)
 
-        val backButton: ImageButton = view.findViewById(R.id.btnBack)
-        backButton.setOnClickListener {
-            findNavController().navigateUp()
-        }
-
-        // ✅ Hide BottomNavigationView while in chat
-        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav?.visibility = View.GONE
+        // Hide bottom nav while chatting
+        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.GONE
 
         providerImage = view.findViewById(R.id.providerImage)
         providerName = view.findViewById(R.id.providerName)
         messageInput = view.findViewById(R.id.messageInput)
         sendButton = view.findViewById(R.id.sendButton)
         chatRecyclerView = view.findViewById(R.id.chatRecyclerView)
+
+        val backButton: ImageButton = view.findViewById(R.id.btnBack)
+        backButton.setOnClickListener { findNavController().navigateUp() }
 
         providerId = arguments?.getString("providerId") ?: ""
         providerImageUrl = arguments?.getString("providerImage") ?: ""
@@ -71,22 +69,11 @@ class ChatFragment : Fragment() {
                 .into(providerImage)
         }
 
-        setupChat()
         setupRecyclerView()
         setupSendButton()
+        listenForMessages()
 
         return view
-    }
-
-    private fun setupChat() {
-        val currentUserId = auth.currentUser?.uid ?: return
-        chatId = if (currentUserId < providerId) {
-            "${currentUserId}_${providerId}"
-        } else {
-            "${providerId}_${currentUserId}"
-        }
-
-        listenForMessages()
     }
 
     private fun setupRecyclerView() {
@@ -101,31 +88,38 @@ class ChatFragment : Fragment() {
         sendButton.setOnClickListener {
             val messageText = messageInput.text.toString().trim()
             val senderId = auth.currentUser?.uid ?: return@setOnClickListener
+            if (messageText.isEmpty()) return@setOnClickListener
 
-            if (messageText.isNotEmpty()) {
-                val message = Message(
-                    senderId = senderId,
-                    receiverId = providerId,
-                    message = messageText,
-                    timestamp = System.currentTimeMillis()
-                )
+            val timestamp = SimpleDateFormat("MM-dd-yy", Locale.getDefault()).format(Date())
+            val message = Message(
+                senderId = senderId,
+                receiverId = providerId,
+                message = messageText,
+                timestamp = timestamp
+            )
 
-                // Push to chat
-                dbRef.child(chatId).child("messages").push().setValue(message)
-                    .addOnSuccessListener {
-                        messageInput.text.clear()
-                        chatRecyclerView.scrollToPosition(messageList.size - 1)
-                    }
+            // References for both sender and receiver
+            val senderChatRef = dbRef.child(senderId).child(providerId)
+            val receiverChatRef = dbRef.child(providerId).child(senderId)
 
-                // Update last message info
-                dbRef.child(chatId).child("lastMessage").setValue(messageText)
-                dbRef.child(chatId).child("timestamp").setValue(System.currentTimeMillis())
-            }
+            // Push message for both sides
+            val newMsgKey = senderChatRef.child("messages").push().key ?: return@setOnClickListener
+            senderChatRef.child("messages").child(newMsgKey).setValue(message)
+            receiverChatRef.child("messages").child(newMsgKey).setValue(message)
+
+            // Update lastMessage
+            senderChatRef.child("lastMessage").setValue(messageText)
+            receiverChatRef.child("lastMessage").setValue(messageText)
+
+            messageInput.text.clear()
         }
     }
 
     private fun listenForMessages() {
-        dbRef.child(chatId).child("messages").addValueEventListener(object : ValueEventListener {
+        val currentUserId = auth.currentUser?.uid ?: return
+        val chatRef = dbRef.child(currentUserId).child(providerId).child("messages")
+
+        chatRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 messageList.clear()
                 for (msgSnapshot in snapshot.children) {
@@ -143,9 +137,6 @@ class ChatFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // ✅ Show BottomNavigationView again when leaving chat
-        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav?.visibility = View.VISIBLE
-
+        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.VISIBLE
     }
 }

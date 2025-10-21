@@ -29,7 +29,6 @@ class Inbox : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Handle system back button
         requireActivity().onBackPressedDispatcher.addCallback(this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
@@ -44,7 +43,6 @@ class Inbox : Fragment() {
     ): View {
         binding = FragmentInboxBinding.inflate(inflater, container, false)
 
-        // Back button in header
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
         }
@@ -61,40 +59,40 @@ class Inbox : Fragment() {
         binding.inboxRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.inboxRecyclerView.adapter = adapter
 
-        loadProviders()
+        loadInbox()
         return binding.root
     }
 
-    private fun loadProviders() {
+    private fun loadInbox() {
         val currentUserId = auth.currentUser?.uid ?: return
+        val userChatsRef = realtimeDb.child(currentUserId)
 
-        firestore.collection("accredited_providers")
-            .get()
-            .addOnSuccessListener { result ->
+        userChatsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
                 providerList.clear()
-                for (doc in result) {
-                    val provider = doc.toObject<Provider>().copy(id = doc.id)
-                    val chatId = if (currentUserId < provider.id) {
-                        "${currentUserId}_${provider.id}"
-                    } else {
-                        "${provider.id}_${currentUserId}"
-                    }
 
-                    realtimeDb.child(chatId)
-                        .addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                val lastMsg = snapshot.child("lastMessage").getValue(String::class.java)
-                                val updatedProvider = provider.copy(
-                                    description = lastMsg ?: "No messages yet"
-                                )
-                                val index = providerList.indexOfFirst { it.id == provider.id }
-                                if (index >= 0) providerList[index] = updatedProvider else providerList.add(updatedProvider)
-                                adapter.notifyDataSetChanged()
+                for (providerChatSnapshot in snapshot.children) {
+                    val providerId = providerChatSnapshot.key ?: continue
+                    val lastMsg = providerChatSnapshot.child("lastMessage").getValue(String::class.java) ?: "No messages yet"
+
+                    firestore.collection("accredited_providers").document(providerId)
+                        .get()
+                        .addOnSuccessListener { doc ->
+                            val provider = doc.toObject<Provider>()?.copy(
+                                id = providerId,
+                                description = lastMsg
+                            )
+                            provider?.let {
+                                if (providerList.none { p -> p.id == providerId }) {
+                                    providerList.add(it)
+                                    adapter.notifyDataSetChanged()
+                                }
                             }
-
-                            override fun onCancelled(error: DatabaseError) {}
-                        })
+                        }
                 }
             }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 }

@@ -20,7 +20,10 @@ class COMP_Profile : Fragment() {
     private lateinit var tvName: TextView
     private lateinit var tvEmail: TextView
     private lateinit var ivProfilePic: CircleImageView
+    private lateinit var btnFeedback: LinearLayout
+    private lateinit var btnAboutUs: LinearLayout
 
+    private lateinit var btnFiles: LinearLayout
     private lateinit var btnAccount: LinearLayout
     private lateinit var btnLogout: LinearLayout
 
@@ -37,7 +40,10 @@ class COMP_Profile : Fragment() {
         tvName = view.findViewById(R.id.tvName)
         tvEmail = view.findViewById(R.id.tvEmail)
         ivProfilePic = view.findViewById(R.id.ivProfilePic)
+        btnFeedback = view.findViewById(R.id.btnFeedback)
         btnAccount = view.findViewById(R.id.btnAccount)
+        btnFiles = view.findViewById(R.id.btnFiles)
+        btnAboutUs = view.findViewById(R.id.btnAboutUs)
         btnLogout = view.findViewById(R.id.btnLogout)
 
         loadUserData()
@@ -46,6 +52,28 @@ class COMP_Profile : Fragment() {
         btnAccount.setOnClickListener {
             try {
                 findNavController().navigate(R.id.action_COMP_Profile_to_COMP_Account)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+        btnFeedback.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_COMP_Profile_to_feedbackFragment)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+        btnAboutUs.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_COMP_Profile_to_aboutUsFragment)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnFiles.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_COMP_Profile_to_filesFragment)
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
