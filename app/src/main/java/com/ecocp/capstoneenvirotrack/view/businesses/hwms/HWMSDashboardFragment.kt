@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.HWMSAdapter
@@ -45,8 +46,9 @@ class HWMSDashboardFragment : Fragment() {
 
     private fun setupListeners() {
         binding.btnAddApplication.setOnClickListener {
-            navigateToFragment(HwmsStep1Fragment())
+            findNavController().navigate(R.id.HwmsStep1Fragment)
         }
+
     }
 
     private fun navigateToFragment(fragment: Fragment) {

@@ -40,10 +40,10 @@ class ServiceProviderAdapter(
         fun bind(provider: ServiceProvider) {
             tvName.text = provider.name
             tvCompany.text = provider.companyName
-            tvType.text = "Type: ${provider.type}"
+            tvType.text = "Type: ${provider.role}"
             tvContact.text = "Contact: ${provider.contactNumber}"
             tvEmail.text = "Email: ${provider.email}"
-            tvAddress.text = "Address: ${provider.address}"
+            tvAddress.text = "Address: ${provider.location}"
         }
     }
 }
