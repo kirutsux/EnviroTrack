@@ -26,7 +26,6 @@ class COMP_Profile : Fragment() {
     private lateinit var btnAccount: LinearLayout
     private lateinit var btnLogout: LinearLayout
     private lateinit var btnFeedback: LinearLayout
-    private lateinit var btnModules: LinearLayout
     private lateinit var btnAboutUs: LinearLayout
     private lateinit var btnFaqBot: LinearLayout
 
@@ -47,9 +46,7 @@ class COMP_Profile : Fragment() {
         btnAccount = view.findViewById(R.id.btnAccount)
         btnFiles = view.findViewById(R.id.btnFiles)
         btnAboutUs = view.findViewById(R.id.btnAboutUs)
-        btnLogout = view.findViewById(R.id.btnLogout)
-        btnFeedback = view.findViewById(R.id.btnFeedback)  // add ID in XML
-        btnAboutUs = view.findViewById(R.id.btnAboutUs)    // add ID in XML
+        btnLogout = view.findViewById(R.id.btnLogout)  // add ID in XML
 
         loadUserData()
 
@@ -80,25 +77,6 @@ class COMP_Profile : Fragment() {
             }
         }
 
-        // 💬 Feedback
-        btnFeedback.setOnClickListener {
-            findNavController().navigate(R.id.feedbackFragment)
-        }
-
-        // 📘 Modules
-        btnModules.setOnClickListener {
-            findNavController().navigate(R.id.modulesFragment)
-        }
-
-        // ℹ️ About Us
-        btnAboutUs.setOnClickListener {
-            findNavController().navigate(R.id.aboutUsFragment)
-        }
-
-        // 🤖 AI FAQ Bot
-        btnFaqBot.setOnClickListener {
-            findNavController().navigate(R.id.aiFaqBotFragment)
-        }
 
         // 🚪 Logout
         btnLogout.setOnClickListener { logoutUser() }
