@@ -21,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -280,10 +281,62 @@ class COMP_CRSApplication : Fragment() {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
                 clearFields()
                 findNavController().navigateUp()
+
+                // ✅ Notify PCO (self)
+                sendNotification(
+                    receiverId = uid,
+                    receiverType = "PCO",
+                    title = "CRS Submission",
+                    message = "You have successfully submitted a Company Registration application.",
+                    type = "submission"
+                )
+
+                // ✅ Notify EMB admin(s)
+                db.collection("users")
+                    .whereEqualTo("userType", "emb")
+                    .get()
+                    .addOnSuccessListener { embUsers ->
+                        for (emb in embUsers) {
+                            sendNotification(
+                                receiverId = emb.id,
+                                receiverType = "EMB",
+                                title = "New CRS Application",
+                                message = "A new Company Registration System application has been submitted by a PCO.",
+                                type = "alert"
+                            )
+                        }
+                    }
             }
             .addOnFailureListener { e ->
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Error submitting: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    private fun sendNotification(
+        receiverId: String,
+        receiverType: String,
+        title: String,
+        message: String,
+        type: String
+    ) {
+        val notificationData = hashMapOf(
+            "receiverId" to receiverId,
+            "receiverType" to receiverType,
+            "title" to title,
+            "message" to message,
+            "type" to type,
+            "isRead" to false,
+            "timestamp" to Timestamp.now()
+        )
+
+        db.collection("notifications")
+            .add(notificationData)
+            .addOnSuccessListener {
+                // Optional: log success
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
