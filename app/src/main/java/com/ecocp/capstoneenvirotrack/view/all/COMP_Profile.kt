@@ -20,8 +20,7 @@ class COMP_Profile : Fragment() {
     private lateinit var tvName: TextView
     private lateinit var tvEmail: TextView
     private lateinit var ivProfilePic: CircleImageView
-    private lateinit var btnFeedback: LinearLayout
-    private lateinit var btnAboutUs: LinearLayout
+
 
     private lateinit var btnFiles: LinearLayout
     private lateinit var btnAccount: LinearLayout
@@ -50,9 +49,7 @@ class COMP_Profile : Fragment() {
         btnAboutUs = view.findViewById(R.id.btnAboutUs)
         btnLogout = view.findViewById(R.id.btnLogout)
         btnFeedback = view.findViewById(R.id.btnFeedback)  // add ID in XML
-        btnModules = view.findViewById(R.id.btnModules)    // add ID in XML
         btnAboutUs = view.findViewById(R.id.btnAboutUs)    // add ID in XML
-        btnFaqBot = view.findViewById(R.id.btnFaqBot)      // add ID in XML
 
         loadUserData()
 
