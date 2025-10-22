@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView.setOnItemSelectedListener { item ->
             val destinationId = when (item.itemId) {
                 R.id.pcoDashboard -> R.id.pcoDashboard
-                R.id.chatFragment -> R.id.chatFragment
+                R.id.inboxFragment -> R.id.inboxFragment
                 R.id.aiFaqBotFragment -> R.id.aiFaqBotFragment
                 R.id.comp_Profile -> R.id.comp_Profile
                 else -> return@setOnItemSelectedListener false
