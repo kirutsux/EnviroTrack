@@ -51,8 +51,9 @@ class TransporterStep2Fragment : Fragment() {
 
     private fun fetchTransporters() {
         progressDialog.show()
-        db.collection("serviceproviders")
-            .whereEqualTo("type", "Transporter")
+        db.collection("service_providers")
+            .whereEqualTo("role", "Transporter")
+            .whereEqualTo("status", "approved")
             .get()
             .addOnSuccessListener { snap ->
                 progressDialog.dismiss()
@@ -65,6 +66,7 @@ class TransporterStep2Fragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to load service providers: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
+
 
     private fun showBookingDialog(provider: ServiceProvider) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_transporter_booking, null)
@@ -150,7 +152,7 @@ class TransporterStep2Fragment : Fragment() {
                 "generatorId" to (generatorId ?: ""),
                 "serviceProviderName" to provider.name,
                 "serviceProviderCompany" to provider.companyName,
-                "providerType" to provider.type,
+                "providerType" to provider.role,
                 "providerContact" to provider.contactNumber,
                 "wasteType" to wasteType,
                 "quantity" to quantity,

@@ -313,6 +313,26 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment"
         tools:layout="@layout/fragment_hwms_dashboard" />
 
+    <!-- ☣️ HWMS Add Application -->
+    <fragment
+        android:id="@+id/HwmsStep1Fragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.HwmsStep1Fragment"
+        tools:layout="@layout/fragment_hwms_step1">
+        <action
+            android:id="@+id/action_HwmsStep1Fragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+    </fragment>
+
+    <!-- ☣️ HWMS Step 2: Transporter Selection -->
+    <fragment
+        android:id="@+id/TransporterStep2Fragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TransporterStep2Fragment"
+        tools:layout="@layout/fragment_transporter_step2">
+        <action
+            android:id="@+id/action_TransporterStep2Fragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+    </fragment>
+
     <!-- 📋 Compliance Reporting System (CRS) -->
     <fragment
         android:id="@+id/COMP_CRS"
