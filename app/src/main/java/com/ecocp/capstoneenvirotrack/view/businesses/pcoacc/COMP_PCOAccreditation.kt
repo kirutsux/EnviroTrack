@@ -215,7 +215,31 @@ class COMP_PCOAccreditation : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()
 
-                // ✅ Navigate back to PCO fragment
+                // ✅ Send notifications after successful submission
+                sendNotification(
+                    receiverId = uid,
+                    receiverType = "PCO",
+                    title = "PCO Accreditation Submitted",
+                    message = "You have successfully submitted your PCO accreditation application.",
+                    type = "submission"
+                )
+
+                firestore.collection("users")
+                    .whereEqualTo("userType", "emb")
+                    .get()
+                    .addOnSuccessListener { embUsers ->
+                        for (emb in embUsers) {
+                            sendNotification(
+                                receiverId = emb.id,
+                                receiverType = "EMB",
+                                title = "New PCO Accreditation Application",
+                                message = "A new PCO Accreditation application has been submitted by ${fullName.text}.",
+                                type = "alert"
+                            )
+                        }
+                    }
+
+                // ✅ Navigate back to PCO dashboard
                 val compPCOFragment = COMP_PCO()
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.nav_host_fragment, compPCOFragment)
@@ -227,4 +251,31 @@ class COMP_PCOAccreditation : Fragment() {
                 Toast.makeText(requireContext(), "Failed to save application: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
+    private fun sendNotification(
+        receiverId: String,
+        receiverType: String,
+        title: String,
+        message: String,
+        type: String
+    ) {
+        val notificationData = hashMapOf(
+            "receiverId" to receiverId,
+            "receiverType" to receiverType,
+            "title" to title,
+            "message" to message,
+            "type" to type,
+            "isRead" to false,
+            "timestamp" to com.google.firebase.Timestamp.now()
+        )
+
+        firestore.collection("notifications")
+            .add(notificationData)
+            .addOnSuccessListener {
+                // Optional: debug or log
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
 }

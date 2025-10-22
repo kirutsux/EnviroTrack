@@ -29,6 +29,16 @@ data class PaymentResponse(
     val clientSecret: String
 )
 
+// ----------------- AI FAQ Assistant -----------------
+data class AskRequest(
+    val question: String,
+    val module: String
+)
+
+data class AskResponse(
+    val answer: String
+)
+
 interface ApiService {
     // Send email
     @Headers("Content-Type: application/json")
@@ -39,6 +49,11 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     @POST("/create-payment-intent")
     fun createPaymentIntent(@Body request: PaymentRequest): Call<PaymentResponse>
+
+    // Ask AI FAQ Assistant
+    @Headers("Content-Type: application/json")
+    @POST("/ask")
+    fun askAI(@Body request: AskRequest): Call<AskResponse>
 
     @GET("discharge-permit/pending-payment")
     fun getPendingDischargePermit(

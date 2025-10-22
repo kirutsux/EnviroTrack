@@ -5,6 +5,7 @@ data class ServiceProvider(
     val companyName: String = "",
     val contactNumber: String = "",
     val email: String = "",
-    val address: String = "",
-    val type: String = "" // e.g. "Transporter" or "TSD Facility"
+    val location: String = "",
+    val role: String = "", // e.g. "Transporter" or "TSD Facility"
+    val status: String = "" // Add this if you also want to show approved status
 )
