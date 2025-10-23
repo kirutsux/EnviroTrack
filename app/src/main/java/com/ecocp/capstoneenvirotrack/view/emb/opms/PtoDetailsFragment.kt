@@ -120,6 +120,40 @@ class PtoDetailsFragment : Fragment() {
                         txtSubmittedTimestamp.text = "Submitted on: $formattedSubmittedDate"
 
                         txtStatus.text = "Status: ${doc.getString("status") ?: "Pending"}"
+
+                        // 🔹 Review Status & Feedback Handling
+                        val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
+                        val feedback = doc.getString("feedback") ?: ""
+
+                        when (status) {
+                            "approved" -> {
+                                binding.btnApprove.visibility = View.GONE
+                                binding.btnReject.visibility = View.GONE
+                                binding.inputFeedback.visibility = View.VISIBLE
+                                binding.inputFeedback.setText(
+                                    feedback.ifBlank { "No feedback provided." }
+                                )
+                                binding.inputFeedback.isEnabled = false
+                                binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            }
+                            "rejected" -> {
+                                binding.btnApprove.visibility = View.GONE
+                                binding.btnReject.visibility = View.GONE
+                                binding.inputFeedback.visibility = View.VISIBLE
+                                binding.inputFeedback.setText(
+                                    feedback.ifBlank { "No feedback provided." }
+                                )
+                                binding.inputFeedback.isEnabled = false
+                                binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            }
+                            else -> {
+                                binding.btnApprove.visibility = View.VISIBLE
+                                binding.btnReject.visibility = View.VISIBLE
+                                binding.inputFeedback.visibility = View.VISIBLE
+                                binding.inputFeedback.isEnabled = true
+                                binding.inputFeedback.setText(feedback)
+                            }
+                        }
                     }
 
                     Log.d("PTO_DETAILS", "💰 Payment updated: ₱$amount $currency, Method: $paymentMethod, Status: $paymentStatus, Paid on: $formattedPaymentDate")

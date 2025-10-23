@@ -16,6 +16,7 @@ import com.ecocp.capstoneenvirotrack.databinding.FragmentDpDetailsBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Locale
 
 class DpDetailsFragment : Fragment() {
 
@@ -89,6 +90,40 @@ class DpDetailsFragment : Fragment() {
                     txtPaymentStatus.text = "Status: Paid"
                     txtPaymentTimestamp.text = "Paid on: $paidOn"
                     txtSubmittedTimestamp.text = "Submitted on: $submittedOn"
+
+                    // 🔹 Review Status & Feedback Handling
+                    val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
+                    val feedback = doc.getString("feedback") ?: ""
+
+                    when (status) {
+                        "approved" -> {
+                            binding.btnApprove.visibility = View.GONE
+                            binding.btnReject.visibility = View.GONE
+                            binding.inputFeedback.visibility = View.VISIBLE
+                            binding.inputFeedback.setText(
+                                feedback.ifBlank { "No feedback provided." }
+                            )
+                            binding.inputFeedback.isEnabled = false
+                            binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                        }
+                        "rejected" -> {
+                            binding.btnApprove.visibility = View.GONE
+                            binding.btnReject.visibility = View.GONE
+                            binding.inputFeedback.visibility = View.VISIBLE
+                            binding.inputFeedback.setText(
+                                feedback.ifBlank { "No feedback provided." }
+                            )
+                            binding.inputFeedback.isEnabled = false
+                            binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                        }
+                        else -> {
+                            binding.btnApprove.visibility = View.VISIBLE
+                            binding.btnReject.visibility = View.VISIBLE
+                            binding.inputFeedback.visibility = View.VISIBLE
+                            binding.inputFeedback.isEnabled = true
+                            binding.inputFeedback.setText(feedback)
+                        }
+                    }
 
                     // 🔹Uploaded Files
                     val fileLinksField = doc.get("fileLinks")

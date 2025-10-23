@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view.emb
+package com.ecocp.capstoneenvirotrack.view.emb.all
 
 import android.content.Context
 import android.view.LayoutInflater

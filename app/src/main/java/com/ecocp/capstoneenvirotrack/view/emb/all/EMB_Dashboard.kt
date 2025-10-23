@@ -15,8 +15,10 @@ import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.cnc.embcncactivity
+import com.ecocp.capstoneenvirotrack.view.emb.crs.EmbcrsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.notifications.EMBNotificationsFragment
 import com.ecocp.capstoneenvirotrack.view.emb.opms.EmbopmsActivity
+import com.ecocp.capstoneenvirotrack.view.emb.pcoacc.EmbpcoActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -73,6 +75,10 @@ class EMB_Dashboard : Fragment() {
             startActivity(Intent(requireContext(), embcncactivity::class.java))
         }
 
+        pcoCard.setOnClickListener {
+            startActivity(Intent(requireContext(), EmbpcoActivity::class.java))
+        }
+
         smrCard.setOnClickListener {
             navController.navigate(R.id.action_embDashboard_to_embSMRFragment)
         }
@@ -86,7 +92,7 @@ class EMB_Dashboard : Fragment() {
         }
 
         crsCard.setOnClickListener {
-            navController.navigate(R.id.action_embDashboard_to_embPCOFragment)
+            startActivity(Intent(requireContext(), EmbcrsActivity::class.java))
         }
     }
 
