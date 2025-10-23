@@ -27,7 +27,6 @@ class COMP_Profile : Fragment() {
     private lateinit var btnLogout: LinearLayout
     private lateinit var btnFeedback: LinearLayout
     private lateinit var btnAboutUs: LinearLayout
-    private lateinit var btnFaqBot: LinearLayout
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()

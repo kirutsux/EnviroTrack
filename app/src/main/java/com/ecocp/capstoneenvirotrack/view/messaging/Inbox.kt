@@ -64,35 +64,37 @@ class Inbox : Fragment() {
     }
 
     private fun loadInbox() {
-        val currentUserId = auth.currentUser?.uid ?: return
-        val userChatsRef = realtimeDb.child(currentUserId)
-
-        userChatsRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
+        firestore.collection("service_providers")
+            .whereEqualTo("status", "approved")
+            .get()
+            .addOnSuccessListener { result ->
                 providerList.clear()
 
-                for (providerChatSnapshot in snapshot.children) {
-                    val providerId = providerChatSnapshot.key ?: continue
-                    val lastMsg = providerChatSnapshot.child("lastMessage").getValue(String::class.java) ?: "No messages yet"
+                for (doc in result) {
+                    val data = doc.data
 
-                    firestore.collection("accredited_providers").document(providerId)
-                        .get()
-                        .addOnSuccessListener { doc ->
-                            val provider = doc.toObject<Provider>()?.copy(
-                                id = providerId,
-                                description = lastMsg
-                            )
-                            provider?.let {
-                                if (providerList.none { p -> p.id == providerId }) {
-                                    providerList.add(it)
-                                    adapter.notifyDataSetChanged()
-                                }
-                            }
-                        }
+                    val provider = Provider(
+                        id = doc.id,
+                        name = data["name"] as? String ?: "",
+                        description = "", // can be replaced later with last message
+                        imageUrl = "", // default, since not in Firestore yet
+                        status = data["status"] as? String ?: "",
+                        contact = data["contactNumber"] as? String ?: "",
+                        email = data["email"] as? String ?: "",
+                        address = data["location"] as? String ?: ""
+                    )
+
+                    // ✅ Optional filter: only show approved ones
+                    if (provider.status == "approved") {
+                        providerList.add(provider)
+                    }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {}
-        })
+                adapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+            }
     }
+
 }

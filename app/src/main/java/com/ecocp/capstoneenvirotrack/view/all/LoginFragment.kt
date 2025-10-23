@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.all
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
@@ -15,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.serviceprovider.SPMainActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -212,7 +214,10 @@ class LoginFragment : Fragment() {
                                 if (mustChangePassword) {
                                     findNavController().navigate(R.id.action_loginFragment_to_SP_ChangepasswordFragment)
                                 } else {
-                                    findNavController().navigate(R.id.action_loginFragment_to_serviceProviderDashboard)
+                                    val intent =
+                                        Intent(requireContext(), SPMainActivity::class.java)
+                                    startActivity(intent)
+                                    requireActivity().finish() // so they can’t go back to login
                                 }
                             } else {
                                 // 3️⃣ Not found → check if there's an approved service request for this email
