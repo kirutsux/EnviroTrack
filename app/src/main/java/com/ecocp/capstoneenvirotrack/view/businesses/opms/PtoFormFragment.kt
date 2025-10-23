@@ -13,8 +13,8 @@ import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoFormBinding
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
@@ -95,34 +95,27 @@ class PtoFormFragment : Fragment() {
     }
 
     private fun validateAndSave() {
-        val ownerName = binding.inputOwnerName.text.toString().trim()
-        val establishmentName = binding.inputEstablishmentName.text.toString().trim()
-        val mailingAddress = binding.inputMailingAddress.text.toString().trim()
-        val plantAddress = binding.inputPlantAddress.text.toString().trim()
-        val tin = binding.inputTin.text.toString().trim()
-        val ownershipType = binding.inputOwnershipType.text.toString().trim()
-        val natureOfBusiness = binding.inputNatureOfBusiness.text.toString().trim()
-        val pcoName = binding.inputPcoName.text.toString().trim()
-        val pcoAccreditation = binding.inputPcoAccreditation.text.toString().trim()
-        val operatingHours = binding.inputOperatingHours.text.toString().trim()
-        val totalEmployees = binding.inputTotalEmployees.text.toString().trim()
-        val landArea = binding.inputLandArea.text.toString().trim()
-        val equipmentName = binding.inputEquipmentName.text.toString().trim()
-        val fuelType = binding.inputFuelType.text.toString().trim()
-        val emissions = binding.inputEmissions.text.toString().trim()
+        val formData = mapOf(
+            "ownerName" to binding.inputOwnerName.text.toString().trim(),
+            "establishmentName" to binding.inputEstablishmentName.text.toString().trim(),
+            "mailingAddress" to binding.inputMailingAddress.text.toString().trim(),
+            "plantAddress" to binding.inputPlantAddress.text.toString().trim(),
+            "tin" to binding.inputTin.text.toString().trim(),
+            "ownershipType" to binding.inputOwnershipType.text.toString().trim(),
+            "natureOfBusiness" to binding.inputNatureOfBusiness.text.toString().trim(),
+            "pcoName" to binding.inputPcoName.text.toString().trim(),
+            "pcoAccreditation" to binding.inputPcoAccreditation.text.toString().trim(),
+            "operatingHours" to binding.inputOperatingHours.text.toString().trim(),
+            "totalEmployees" to binding.inputTotalEmployees.text.toString().trim(),
+            "landArea" to binding.inputLandArea.text.toString().trim(),
+            "equipmentName" to binding.inputEquipmentName.text.toString().trim(),
+            "fuelType" to binding.inputFuelType.text.toString().trim(),
+            "emissionsSummary" to binding.inputEmissions.text.toString().trim(),
+            "applicationType" to "Permit to Operate"
+        )
 
-        if (ownerName.isEmpty() || establishmentName.isEmpty() || mailingAddress.isEmpty() ||
-            plantAddress.isEmpty() || tin.isEmpty() || ownershipType.isEmpty() ||
-            natureOfBusiness.isEmpty() || pcoName.isEmpty() || pcoAccreditation.isEmpty() ||
-            operatingHours.isEmpty() || totalEmployees.isEmpty() || landArea.isEmpty() ||
-            equipmentName.isEmpty() || fuelType.isEmpty() || emissions.isEmpty()
-        ) {
+        if (formData.values.any { it.isEmpty() }) {
             Toast.makeText(requireContext(), "Please fill out all required fields", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val uid = auth.currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "User not authenticated", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -134,52 +127,83 @@ class PtoFormFragment : Fragment() {
         binding.btnSubmitPto.isEnabled = false
         Toast.makeText(requireContext(), "Uploading files, please wait...", Toast.LENGTH_SHORT).show()
 
+        uploadFilesAndSave(formData)
+    }
+
+    private fun uploadFilesAndSave(formData: Map<String, String>) {
+        val userUid = auth.currentUser?.uid ?: return
         val uploadTasks = fileUris.map { uri ->
-            val ref = storage.reference.child("opms_pto_applications/$uid/${System.currentTimeMillis()}_${uri.lastPathSegment}")
+            val ref = storage.reference.child("opms_pto_applications/$userUid/${System.currentTimeMillis()}_${uri.lastPathSegment}")
             ref.putFile(uri).continueWithTask { ref.downloadUrl }
         }
 
         Tasks.whenAllSuccess<Uri>(uploadTasks)
             .addOnSuccessListener { urls ->
                 val fileLinks = urls.map { it.toString() }
-                val data = mutableMapOf<String, Any>(
-                    "uid" to uid,
-                    "ownerName" to ownerName,
-                    "establishmentName" to establishmentName,
-                    "mailingAddress" to mailingAddress,
-                    "plantAddress" to plantAddress,
-                    "tin" to tin,
-                    "ownershipType" to ownershipType,
-                    "natureOfBusiness" to natureOfBusiness,
-                    "pcoName" to pcoName,
-                    "pcoAccreditation" to pcoAccreditation,
-                    "operatingHours" to operatingHours,
-                    "totalEmployees" to totalEmployees,
-                    "landArea" to landArea,
-                    "equipmentName" to equipmentName,
-                    "fuelType" to fuelType,
-                    "emissionsSummary" to emissions,
-                    "fileLinks" to fileLinks.joinToString(","),
-                    "status" to "Pending",
-                    "timestamp" to Timestamp.now(),
-                    "applicationType" to "Permit to Operate"
-                )
-
-                firestore.collection("opms_pto_applications")
-                    .add(data)
-                    .addOnSuccessListener { docRef ->
-                        Toast.makeText(requireContext(), "Application saved successfully. Proceeding to Payment...", Toast.LENGTH_SHORT).show()
-                        val bundle = Bundle().apply { putString("applicationId", docRef.id) }
-                        findNavController().navigate(R.id.action_form_to_ptoPayment, bundle)
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(requireContext(), "Failed to save: ${e.message}", Toast.LENGTH_LONG).show()
-                        binding.btnSubmitPto.isEnabled = true
-                    }
+                saveFormToFirestore(formData, fileLinks)
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "File upload failed. Please check your network.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "File upload failed. Please check your connection.", Toast.LENGTH_SHORT).show()
                 binding.btnSubmitPto.isEnabled = true
             }
+    }
+
+    private fun saveFormToFirestore(formData: Map<String, String>, fileLinks: List<String>) {
+        val userUid = auth.currentUser?.uid ?: return
+        val docId = "${userUid}_${System.currentTimeMillis()}"
+
+        val dataToSave = mutableMapOf<String, Any>()
+        dataToSave.putAll(formData)
+        dataToSave["fileLinks"] = fileLinks.joinToString(",")
+        dataToSave["status"] = "Pending"
+        dataToSave["timestamp"] = FieldValue.serverTimestamp()
+        dataToSave["uid"] = userUid
+
+        firestore.collection("opms_pto_applications")
+            .document(docId)
+            .set(dataToSave)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "PTO submitted successfully!", Toast.LENGTH_LONG).show()
+
+                val bundle = Bundle().apply {
+                    putString("applicationId", docId)
+                    putString("ownerName", formData["ownerName"])
+                    putString("establishmentName", formData["establishmentName"])
+                    putString("pcoName", formData["pcoName"])
+                    putString("pcoAccreditationNumber", formData["pcoAccreditation"])
+                    putString("uploadedFiles", fileLinks.joinToString("\n"))
+                    putString("paymentInfo", "₱1,500 - Pending")
+                }
+
+                clearForm()
+                findNavController().navigate(R.id.action_form_to_ptoPayment, bundle)
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Error submitting PTO. Try again.", Toast.LENGTH_SHORT).show()
+                binding.btnSubmitPto.isEnabled = true
+            }
+    }
+
+    private fun clearForm() {
+        binding.apply {
+            inputOwnerName.text?.clear()
+            inputEstablishmentName.text?.clear()
+            inputMailingAddress.text?.clear()
+            inputPlantAddress.text?.clear()
+            inputTin.text?.clear()
+            inputOwnershipType.text?.clear()
+            inputNatureOfBusiness.text?.clear()
+            inputPcoName.text?.clear()
+            inputPcoAccreditation.text?.clear()
+            inputOperatingHours.text?.clear()
+            inputTotalEmployees.text?.clear()
+            inputLandArea.text?.clear()
+            inputEquipmentName.text?.clear()
+            inputFuelType.text?.clear()
+            inputEmissions.text?.clear()
+            txtFileName.text = ""
+        }
+        fileUris.clear()
+        binding.btnSubmitPto.isEnabled = false
     }
 }

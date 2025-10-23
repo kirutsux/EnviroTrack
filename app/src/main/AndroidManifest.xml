@@ -16,6 +16,14 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".view.emb.crs.EmbcrsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapstoneEnviroTrack" />
+        <activity
+            android:name=".view.emb.pcoacc.EmbpcoActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapstoneEnviroTrack" />
+        <activity
             android:name=".view.serviceprovider.SPMainActivity"
             android:exported="false" />
         <activity

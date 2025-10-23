@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollViewCrsEmbReviewDetails"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/layoutRoot"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:dividerPadding="8dp"
+        android:showDividers="none">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Company Registration Details"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#445B6C"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- A. Basic Company Information -->
+        <LinearLayout
+            android:id="@+id/layoutCompanyInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Company Name" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtCompanyName" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Company Type" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtCompanyType" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Nature of Business" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtNatureOfBusiness" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Industry Descriptor" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtIndustryDescriptor" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Address" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtAddress" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="TIN Number" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtTinNumber" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+        </LinearLayout>
+
+        <!-- B. CEO Details -->
+        <LinearLayout
+            android:id="@+id/layoutCeoDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="CEO Name" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtCeoName" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="CEO Contact" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtCeoContact" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+        </LinearLayout>
+
+        <!-- C. Representative Information -->
+        <LinearLayout
+            android:id="@+id/layoutRepresentative"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Representative Name" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtRepName" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Representative Email" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtRepEmail" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Representative Contact" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtRepContact" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Representative Position" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtRepPosition" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+        </LinearLayout>
+
+        <!-- D. Contact Information -->
+        <LinearLayout
+            android:id="@+id/layoutContactInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Company Email" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtEmail" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Company Phone" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtPhone" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Company Website" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtWebsite" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+        </LinearLayout>
+
+        <!-- E. Date & Status -->
+        <LinearLayout
+            android:id="@+id/layoutDateStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Date Submitted" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtDateSubmitted" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="-" android:textSize="16sp" android:layout_marginBottom="8dp" />
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Status" android:textStyle="bold" android:textColor="#555555" />
+            <TextView android:id="@+id/txtStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Pending" android:textSize="16sp" android:layout_marginBottom="8dp" />
+        </LinearLayout>
+
+        <!-- F. Uploaded Files -->
+        <LinearLayout
+            android:id="@+id/layoutUploadedFiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bordered_box"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Uploaded Files"
+                android:textStyle="bold"
+                android:textColor="#445B6C"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/linkFiles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:dividerPadding="4dp"
+                android:showDividers="middle" />
+        </LinearLayout>
+
+        <!-- G. Feedback Section -->
+        <EditText
+            android:id="@+id/inputFeedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Enter feedback"
+            android:padding="8dp"
+            android:background="@drawable/text_border"
+            android:minHeight="80dp" />
+
+        <!-- H. Buttons -->
+        <LinearLayout
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="20dp">
+
+            <Button
+                android:id="@+id/btnApprove"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Approve"
+                android:backgroundTint="#00FF00" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btnReject"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Reject"
+                android:backgroundTint="#FF0000" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

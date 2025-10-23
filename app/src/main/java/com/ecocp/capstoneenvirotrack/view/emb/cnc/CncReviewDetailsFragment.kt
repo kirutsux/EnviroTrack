@@ -153,9 +153,6 @@ class CncReviewDetailsFragment : Fragment() {
             }
     }
 
-
-
-
     // 🔹 Show clickable file links
     private fun displayFileLinks(fileLinks: List<String>) {
         binding.layoutFileLinks.removeAllViews()

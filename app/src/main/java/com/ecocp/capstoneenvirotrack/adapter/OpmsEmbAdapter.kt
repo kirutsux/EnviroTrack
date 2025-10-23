@@ -66,7 +66,7 @@ class OpmsEmbAdapter(
         val color = ContextCompat.getColor(context, colorRes)
 
         if (holder is PTOViewHolder) {
-            holder.tvEstablishmentName.text = app.companyName ?: "-"
+            holder.tvEstablishmentName.text = app.establishmentName ?: "-"
             holder.tvOwnerName.text = app.ownerName ?: "-"
             holder.tvPlantAddress.text = app.plantAddress ?: "-"
             holder.tvStatus.text = statusText.replaceFirstChar { it.uppercase() }
