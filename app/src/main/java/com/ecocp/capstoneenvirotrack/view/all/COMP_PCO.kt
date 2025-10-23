@@ -93,7 +93,15 @@ class COMP_PCO : Fragment() {
     }
 
     private fun fetchAccreditations() {
+        val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Assuming each accreditation has a field "userId" equal to Firebase UID of the submitter
         firestore.collection("accreditations")
+            .whereEqualTo("uid", currentUser.uid)
             .get()
             .addOnSuccessListener { documents ->
                 val fetchedList = mutableListOf<PCO>()
@@ -105,7 +113,7 @@ class COMP_PCO : Fragment() {
                     val status = doc.getString("status") ?: "Submitted"
                     val timestamp = doc.getLong("timestamp") ?: 0L
                     val formattedDate = if (timestamp > 0)
-                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
+                        java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(timestamp))
                     else "N/A"
 
                     fetchedList.add(
@@ -136,6 +144,7 @@ class COMP_PCO : Fragment() {
                 tvNoData.visibility = View.VISIBLE
             }
     }
+
 
     private fun showDetails(selectedItem: PCO) {
         firestore.collection("accreditations")
