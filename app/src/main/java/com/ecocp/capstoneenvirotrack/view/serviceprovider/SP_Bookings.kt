@@ -67,7 +67,7 @@ class SP_Bookings : Fragment() {
                         if (!result.isEmpty) {
                             val doc = result.documents[0]
                             val company = doc.getString("companyName")
-                            val name = doc.getString("fullName")
+                            val name = doc.getString("serviceProviderName")
 
                             if (!company.isNullOrEmpty() && !name.isNullOrEmpty()) {
                                 Log.d("SP_Bookings", "✅ Fetched company=$company name=$name")
