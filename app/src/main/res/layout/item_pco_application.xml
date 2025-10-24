@@ -15,22 +15,38 @@
         android:orientation="vertical"
         android:padding="14dp">
 
-        <!-- 🔹 Header -->
+        <!-- Header Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvAppId"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="ID: 0591 (R11)"
-                android:textColor="#2980B9"
                 android:textStyle="bold"
-                android:textSize="13sp" />
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- STATUS BADGE -->
+            <TextView
+                android:id="@+id/tvStatus"
+                android:text="Pending"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="10dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_status_badge"
+                android:textColor="@android:color/white"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
         </LinearLayout>
 
         <!-- 🏢 Application Name -->
@@ -88,16 +104,6 @@
                 android:textColor="#2980B9"
                 android:textSize="13sp"
                 android:paddingVertical="4dp" />
-
-            <TextView
-                android:id="@+id/tvStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Status: Submitted"
-                android:textColor="#A8DADC"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:padding="10dp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

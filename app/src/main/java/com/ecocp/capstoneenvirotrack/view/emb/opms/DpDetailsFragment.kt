@@ -1,8 +1,10 @@
 package com.ecocp.capstoneenvirotrack.view.emb.opms
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +18,8 @@ import com.ecocp.capstoneenvirotrack.databinding.FragmentDpDetailsBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 class DpDetailsFragment : Fragment() {
@@ -23,7 +27,14 @@ class DpDetailsFragment : Fragment() {
     private var _binding: FragmentDpDetailsBinding? = null
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
     private var applicationId: String? = null
+    private var selectedFileUri: Uri? = null
+    private var uploadedCertificateUrl: String? = null
+
+    companion object {
+        private const val PICK_FILE_REQUEST = 1001
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,8 +43,6 @@ class DpDetailsFragment : Fragment() {
         _binding = FragmentDpDetailsBinding.inflate(inflater, container, false)
         applicationId = arguments?.getString("applicationId")
 
-        // ✅ Retrieve applicationId passed from dashboard
-        applicationId = arguments?.getString("applicationId")
         if (applicationId.isNullOrEmpty()) {
             Toast.makeText(requireContext(), "No Application ID provided", Toast.LENGTH_SHORT).show()
             Log.e("DP_DETAILS", "❌ applicationId is null or empty")
@@ -42,13 +51,96 @@ class DpDetailsFragment : Fragment() {
             loadDischargePermitDetails()
         }
 
-        binding.btnApprove.setOnClickListener { updateStatus("Approved") }
+        // Approve / Reject buttons
+        binding.btnApprove.setOnClickListener {
+            // require certificate before approving
+            if (uploadedCertificateUrl.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "Please upload a certificate before approving.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            updateStatus("Approved")
+        }
         binding.btnReject.setOnClickListener { updateStatus("Rejected") }
+
+        // Upload certificate button click
+        binding.btnUploadCertificate.setOnClickListener {
+            openFileChooser()
+        }
 
         return binding.root
     }
 
-    // ✅ Load Discharge Permit details
+    // Open system file chooser (PDF)
+    private fun openFileChooser() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "application/pdf"
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        startActivityForResult(Intent.createChooser(intent, "Select Certificate"), PICK_FILE_REQUEST)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_FILE_REQUEST && resultCode == Activity.RESULT_OK) {
+            selectedFileUri = data?.data
+            selectedFileUri?.let { uri ->
+                // show selected file name
+                val fileName = getFileNameFromUri(uri) ?: uri.lastPathSegment?.substringAfterLast('/') ?: "selected_file.pdf"
+                binding.tvSelectedFile.text = "Selected: $fileName"
+                // upload
+                uploadCertificateToFirebase(uri)
+            }
+        }
+    }
+
+    // Upload certificate and save certificateUrl to Firestore under this DP doc
+    private fun uploadCertificateToFirebase(fileUri: Uri) {
+        val id = applicationId ?: return
+        // Save under certificates/discharge_permits/{applicationId}_{timestamp}.pdf
+        val storageFileName = "discharge_permit_${id}_${System.currentTimeMillis()}.pdf"
+        val storageRef = storage.reference.child("certificates/discharge_permits/$storageFileName")
+
+        val uploadTask = storageRef.putFile(fileUri)
+        uploadTask.addOnSuccessListener {
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                val downloadUrl = uri.toString()
+                // Save URL to document and set local variable
+                db.collection("opms_discharge_permits").document(id)
+                    .update("certificateUrl", downloadUrl)
+                    .addOnSuccessListener {
+                        uploadedCertificateUrl = downloadUrl
+                        Toast.makeText(requireContext(), "Certificate uploaded successfully!", Toast.LENGTH_SHORT).show()
+                        // reflect change in UI (filename already shown)
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Failed to save certificate URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }.addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to get download URL: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }.addOnFailureListener { e ->
+            Toast.makeText(requireContext(), "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String? {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    result = it.getString(it.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != null && cut != -1) result = result?.substring(cut + 1)
+        }
+        return result
+    }
+
+    // Load DP details and set visibility of upload button (upload should be visible while pending)
     private fun loadDischargePermitDetails() {
         val id = applicationId ?: return
 
@@ -75,7 +167,7 @@ class DpDetailsFragment : Fragment() {
                     txtOperationDate.text = doc.getString("operationStartDate") ?: "-"
                     txtStatus.text = doc.getString("status") ?: "-"
 
-                    // ✅ Payment Info
+                    // Payment info
                     val amount = doc.getDouble("amount") ?: 0.0
                     val currency = doc.getString("currency") ?: "PHP"
                     val paymentMethod = doc.getString("paymentMethod") ?: "-"
@@ -85,47 +177,66 @@ class DpDetailsFragment : Fragment() {
                     val paidOn = paymentTimestamp?.toDate()?.toString() ?: "-"
                     val submittedOn = submittedTimestamp?.toDate()?.toString() ?: "-"
 
-                    txtAmount.text = "₱%.2f".format(amount)
+                    txtAmount.text = "₱%.2f %s".format(amount, currency)
                     txtPaymentMethod.text = "Method: $paymentMethod"
                     txtPaymentStatus.text = "Status: Paid"
                     txtPaymentTimestamp.text = "Paid on: $paidOn"
                     txtSubmittedTimestamp.text = "Submitted on: $submittedOn"
 
-                    // 🔹 Review Status & Feedback Handling
                     val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
                     val feedback = doc.getString("feedback") ?: ""
+                    val certificateUrl = doc.getString("certificateUrl")
+
+                    // populate local var if certificate was already uploaded earlier
+                    uploadedCertificateUrl = certificateUrl
 
                     when (status) {
                         "approved" -> {
-                            binding.btnApprove.visibility = View.GONE
-                            binding.btnReject.visibility = View.GONE
-                            binding.inputFeedback.visibility = View.VISIBLE
-                            binding.inputFeedback.setText(
-                                feedback.ifBlank { "No feedback provided." }
-                            )
-                            binding.inputFeedback.isEnabled = false
-                            binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            btnApprove.visibility = View.GONE
+                            btnReject.visibility = View.GONE
+                            // EMB can still view upload button only if no certificate exists (but as per your request upload visible while pending,
+                            // so for approved we hide upload if cert exists, otherwise leave it visible)
+                            inputFeedback.visibility = View.VISIBLE
+                            inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
+                            inputFeedback.isEnabled = false
+                            inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+
+                            if (certificateUrl.isNullOrBlank()) {
+                                // in rare case approved but no certificate yet -> allow upload
+                                btnUploadCertificate.visibility = View.VISIBLE
+                                tvSelectedFile.text = "No file selected"
+                            } else {
+                                btnUploadCertificate.visibility = View.GONE
+                                tvSelectedFile.text = "Uploaded: ${certificateUrl.substringAfterLast("/").substringBefore("?")}"
+                            }
                         }
                         "rejected" -> {
-                            binding.btnApprove.visibility = View.GONE
-                            binding.btnReject.visibility = View.GONE
-                            binding.inputFeedback.visibility = View.VISIBLE
-                            binding.inputFeedback.setText(
-                                feedback.ifBlank { "No feedback provided." }
-                            )
-                            binding.inputFeedback.isEnabled = false
-                            binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            btnApprove.visibility = View.GONE
+                            btnReject.visibility = View.GONE
+                            btnUploadCertificate.visibility = View.GONE
+                            inputFeedback.visibility = View.VISIBLE
+                            inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
+                            inputFeedback.isEnabled = false
+                            inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            tvSelectedFile.text = "No file selected"
                         }
-                        else -> {
-                            binding.btnApprove.visibility = View.VISIBLE
-                            binding.btnReject.visibility = View.VISIBLE
-                            binding.inputFeedback.visibility = View.VISIBLE
-                            binding.inputFeedback.isEnabled = true
-                            binding.inputFeedback.setText(feedback)
+                        else -> { // pending -> show upload button (EMB can upload while pending)
+                            btnApprove.visibility = View.VISIBLE
+                            btnReject.visibility = View.VISIBLE
+                            btnUploadCertificate.visibility = View.VISIBLE
+                            inputFeedback.visibility = View.VISIBLE
+                            inputFeedback.isEnabled = true
+                            inputFeedback.setText(feedback)
+                            // show filename if already uploaded, otherwise default text
+                            if (!certificateUrl.isNullOrBlank()) {
+                                tvSelectedFile.text = "Uploaded: ${certificateUrl.substringAfterLast("/").substringBefore("?")}"
+                            } else {
+                                tvSelectedFile.text = "No file selected"
+                            }
                         }
                     }
 
-                    // 🔹Uploaded Files
+                    // Display uploaded application files (fileLinks) if any
                     val fileLinksField = doc.get("fileLinks")
                     when (fileLinksField) {
                         is List<*> -> {
@@ -146,13 +257,11 @@ class DpDetailsFragment : Fragment() {
             }
     }
 
-    // 🔹 Show clickable file links
+    // Show clickable file links
     private fun displayFileLinks(fileLinks: List<String>) {
         binding.layoutFileLinks.removeAllViews()
-
         for ((index, link) in fileLinks.withIndex()) {
             val textView = TextView(requireContext()).apply {
-                // Try to extract filename
                 val fileName = link.substringAfterLast('/').substringBefore('?')
                 text = if (fileName.isNotBlank()) fileName else "File ${index + 1}"
                 setTextColor(resources.getColor(android.R.color.holo_blue_dark))
@@ -182,7 +291,7 @@ class DpDetailsFragment : Fragment() {
         }
     }
 
-    // ✅ Approve / Reject + Notifications
+    // Approve / Reject + Notifications
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
@@ -202,12 +311,16 @@ class DpDetailsFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
+                // Reload details so upload button and filename update immediately
+                loadDischargePermitDetails()
+
+                // Optionally navigate back to dashboard (kept behavior from your previous code)
                 if (isAdded) {
                     val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // ✅ Send Notifications to PCO & EMB
+                // Send Notifications
                 db.collection("opms_discharge_permits").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener

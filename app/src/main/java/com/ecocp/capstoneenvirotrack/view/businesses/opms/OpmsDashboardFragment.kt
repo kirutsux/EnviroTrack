@@ -1,9 +1,11 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.opms
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,22 +48,70 @@ class OpmsDashboardFragment : Fragment() {
             findNavController().navigate(R.id.action_dashboard_to_ptoForm)
         }
 
-        // Setup RecyclerView
+        // ✅ Setup RecyclerView with click + long click
         binding.recyclerSubmittedApplications.layoutManager = LinearLayoutManager(requireContext())
-        adapter = SubmittedApplicationsAdapter(applications) { selectedApp ->
-            val bundle = Bundle().apply { putString("applicationId", selectedApp.id) }
+        adapter = SubmittedApplicationsAdapter(
+            applications,
+            onItemClick = { selectedApp ->
+                val bundle = Bundle().apply { putString("applicationId", selectedApp.id) }
 
-            when (selectedApp.applicationType) {
-                "Discharge Permit" -> findNavController().navigate(
-                    R.id.action_dashboard_to_dischargePermitDetails,
-                    bundle
-                )
-                "Permit to Operate" -> findNavController().navigate(
-                    R.id.action_dashboard_to_ptoDetails,
-                    bundle
-                )
+                when (selectedApp.applicationType) {
+                    "Discharge Permit" -> findNavController().navigate(
+                        R.id.action_dashboard_to_dischargePermitDetails,
+                        bundle
+                    )
+                    "Permit to Operate" -> findNavController().navigate(
+                        R.id.action_dashboard_to_ptoDetails,
+                        bundle
+                    )
+                }
+            },
+            onItemLongClick = onItemLongClick@{ app ->
+                // ✅ Check if status is pending first
+                if (app.status != "Pending") {
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Cannot Delete")
+                        .setMessage("Only pending applications can be deleted.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                    return@onItemLongClick
+                }
+
+                // ✅ Ask confirmation before deleting
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Application")
+                    .setMessage("Are you sure you want to delete this submitted ${app.applicationType} application?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        val collectionName = when (app.applicationType) {
+                            "Discharge Permit" -> "opms_discharge_permits"
+                            "Permit to Operate" -> "opms_pto_applications"
+                            else -> return@setPositiveButton
+                        }
+
+                        db.collection(collectionName).document(app.id)
+                            .delete()
+                            .addOnSuccessListener {
+                                applications.remove(app)
+                                adapter.notifyDataSetChanged()
+
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Application deleted successfully.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to delete application: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
             }
-        }
+        )
         binding.recyclerSubmittedApplications.adapter = adapter
 
         // Load all applications

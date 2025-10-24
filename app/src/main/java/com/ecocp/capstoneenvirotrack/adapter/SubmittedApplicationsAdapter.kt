@@ -1,16 +1,23 @@
 package com.ecocp.capstoneenvirotrack.adapter
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.model.CncApplication
 import com.ecocp.capstoneenvirotrack.model.SubmittedApplication
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class SubmittedApplicationsAdapter(
     private val applications: List<SubmittedApplication>,
-    private val onItemClick: (SubmittedApplication) -> Unit
+    private val onItemClick: (SubmittedApplication) -> Unit,
+    private val onItemLongClick: (SubmittedApplication) -> Unit // ✅ added
 ) : RecyclerView.Adapter<SubmittedApplicationsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -19,11 +26,20 @@ class SubmittedApplicationsAdapter(
         val txtSubmittedAt: TextView = view.findViewById(R.id.txtSubmittedAt)
 
         init {
+            // ✅ Click + Long Click listeners
             view.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onItemClick(applications[position])
                 }
+            }
+
+            view.setOnLongClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemLongClick(applications[position])
+                }
+                true
             }
         }
     }
@@ -37,13 +53,35 @@ class SubmittedApplicationsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = applications[position]
 
-        // ✅ Use the actual application type instead of hardcoding
+        // ✅ Permit type
         val permitType = app.applicationType.ifEmpty { "Unknown Type" }
         holder.txtPermitType.text = permitType
 
-        holder.txtPermitStatus.text = "Status: ${app.status}"
-        holder.txtSubmittedAt.text = "Submitted: ${app.timestamp}"
+        // ✅ Handle Timestamp safely
+        val formattedDate = when (val ts = app.timestamp) {
+            is Timestamp -> {
+                val date = ts.toDate()
+                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(date)
+            }
+            else -> app.timestamp?.toString() ?: "Unknown Date"
+        }
+        holder.txtSubmittedAt.text = "Submitted: $formattedDate"
+
+        // ✅ Dynamic status badge
+        val status = app.status?.lowercase(Locale.getDefault()) ?: "pending"
+        holder.txtPermitStatus.text = status.replaceFirstChar { it.uppercase() }
+        holder.txtPermitStatus.setBackgroundResource(R.drawable.bg_status_badge)
+
+        val colorRes = when (status) {
+            "approved" -> R.color.status_approved
+            "rejected" -> R.color.status_rejected
+            "pending" -> R.color.status_pending
+            else -> R.color.status_pending
+        }
+
+        val color = ContextCompat.getColor(holder.itemView.context, colorRes)
+        holder.txtPermitStatus.backgroundTintList = ColorStateList.valueOf(color)
     }
 
-    override fun getItemCount() = applications.size
+    override fun getItemCount(): Int = applications.size
 }

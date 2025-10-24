@@ -3,6 +3,7 @@ package com.ecocp.capstoneenvirotrack.view.emb.cnc
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewDetailsBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ecocp.capstoneenvirotrack.R
+import com.google.firebase.storage.FirebaseStorage
 
 class CncReviewDetailsFragment : Fragment() {
 
@@ -26,6 +27,7 @@ class CncReviewDetailsFragment : Fragment() {
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
     private var applicationId: String? = null
+    private var uploadedCertificateUrl: String? = null  // 🟩 store the uploaded certificate link
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -153,13 +155,11 @@ class CncReviewDetailsFragment : Fragment() {
             }
     }
 
-    // 🔹 Show clickable file links
+    // 🔹 Show file links
     private fun displayFileLinks(fileLinks: List<String>) {
         binding.layoutFileLinks.removeAllViews()
-
         for ((index, link) in fileLinks.withIndex()) {
             val textView = TextView(requireContext()).apply {
-                // Try to extract filename
                 val fileName = link.substringAfterLast('/').substringBefore('?')
                 text = if (fileName.isNotBlank()) fileName else "File ${index + 1}"
                 setTextColor(resources.getColor(android.R.color.holo_blue_dark))
@@ -182,69 +182,127 @@ class CncReviewDetailsFragment : Fragment() {
 
     private fun openFileLink(url: String) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Unable to open file", Toast.LENGTH_SHORT).show()
         }
     }
 
+    // 🔹 BUTTONS
     private fun setupButtons() {
-        binding.btnApprove.setOnClickListener {
-            updateStatus("Approved", "Application approved by EMB.")
+        // ✅ Upload certificate first
+        binding.btnUploadCertificate.setOnClickListener {
+            val filePicker = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/pdf" }
+            startActivityForResult(Intent.createChooser(filePicker, "Select CNC Certificate PDF"), 1001)
         }
 
+        // ✅ Approve after upload
+        binding.btnApprove.setOnClickListener {
+            if (uploadedCertificateUrl.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), "Please upload a CNC certificate first.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            updateStatus("Approved", "Application approved by EMB.", uploadedCertificateUrl!!)
+        }
+
+        // ✅ Reject
         binding.btnReject.setOnClickListener {
             val feedback = binding.inputFeedback.text.toString().trim()
             if (feedback.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter feedback before rejecting.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            updateStatus("Rejected", feedback)
+            updateStatus("Rejected", feedback, null)
         }
     }
 
-    private fun updateStatus(status: String, feedback: String) {
-        val id = applicationId ?: return
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
+    // 🔹 Handle certificate upload
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1001 && resultCode == android.app.Activity.RESULT_OK && data != null) {
+            val fileUri = data.data ?: return
+            val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        val updateData = mapOf(
+            val fileName = getFileNameFromUri(fileUri)
+            binding.tvSelectedFile.text = fileName ?: "Unknown file"
+
+            // Upload to Storage
+            db.collection("cnc_applications").document(applicationId!!)
+                .get()
+                .addOnSuccessListener { doc ->
+                    val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
+                    val storageFileName = "CNC_Certificate_${System.currentTimeMillis()}.pdf"
+                    val storageRef = FirebaseStorage.getInstance()
+                        .reference.child("certificates/$pcoUid/$storageFileName")
+
+                    storageRef.putFile(fileUri)
+                        .addOnSuccessListener {
+                            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                                uploadedCertificateUrl = uri.toString()
+
+                                db.collection("cnc_applications").document(applicationId!!)
+                                    .update("certificateUrl", uploadedCertificateUrl)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(requireContext(), "Certificate uploaded successfully! You can now approve.", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(requireContext(), "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+        }
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String? {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    result = it.getString(it.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != null && cut != -1) result = result?.substring(cut + 1)
+        }
+        return result
+    }
+
+    // 🔹 Update CNC status + notifications
+    private fun updateStatus(status: String, feedback: String, certificateUrl: String?) {
+        val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
+        certificateUrl?.let { updateData["certificateUrl"] = it }
 
-        // 1️⃣ Update CNC application status
         db.collection("cnc_applications").document(id)
             .update(updateData)
             .addOnSuccessListener {
-                // ✅ Toast + immediate navigation
                 Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
-                if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embcnc_nav_host_fragment)
-                    navController.popBackStack(R.id.cncEmbDashboardFragment, false)
-                }
 
-                // 2️⃣ Fire off notifications asynchronously
+                // 🔔 Notifications
                 db.collection("cnc_applications").document(id).get()
                     .addOnSuccessListener { doc ->
-                        val pcoId = doc.getString("uid") ?: run {
-                            Log.e("CNC_REVIEW", "❌ PCO ID not found for notification")
-                            return@addOnSuccessListener
-                        }
+                        val pcoId = doc.getString("uid") ?: return@addOnSuccessListener
                         val companyName = doc.getString("companyName") ?: "Unknown Company"
                         val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notificationForPCO = hashMapOf(
+                        val notifPCO = hashMapOf(
                             "receiverId" to pcoId,
                             "receiverType" to "pco",
                             "senderId" to embUid,
                             "title" to if (isApproved) "Application Approved" else "Application Rejected",
                             "message" to if (isApproved)
-                                "Your CNC application has been approved."
+                                "Your CNC application has been approved. Certificate is now available."
                             else
                                 "Your CNC application has been rejected. Please review the feedback.",
                             "timestamp" to Timestamp.now(),
@@ -252,7 +310,7 @@ class CncReviewDetailsFragment : Fragment() {
                             "applicationId" to id
                         )
 
-                        val notificationForEMB = hashMapOf(
+                        val notifEMB = hashMapOf(
                             "receiverId" to embUid,
                             "receiverType" to "emb",
                             "senderId" to embUid,
@@ -263,25 +321,17 @@ class CncReviewDetailsFragment : Fragment() {
                             "applicationId" to id
                         )
 
-                        // ✅ Add notifications individually with proper logging
-                        db.collection("notifications").add(notificationForPCO)
-                            .addOnSuccessListener { Log.d("CNC_REVIEW", "✅ Notification sent to PCO") }
-                            .addOnFailureListener { e -> Log.e("CNC_REVIEW", "❌ Failed to notify PCO", e) }
+                        db.collection("notifications").add(notifPCO)
+                        db.collection("notifications").add(notifEMB)
+                    }
 
-                        db.collection("notifications").add(notificationForEMB)
-                            .addOnSuccessListener { Log.d("CNC_REVIEW", "✅ Notification sent to EMB") }
-                            .addOnFailureListener { e -> Log.e("CNC_REVIEW", "❌ Failed to notify EMB", e) }
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("CNC_REVIEW", "❌ Failed to fetch CNC document for notifications", e)
-                    }
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("CNC_REVIEW", "❌ Failed to update CNC status", e)
+                // ✅ Return to dashboard
+                if (isAdded) {
+                    val navController = requireActivity().findNavController(R.id.embcnc_nav_host_fragment)
+                    navController.popBackStack(R.id.cncEmbDashboardFragment, false)
+                }
             }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
