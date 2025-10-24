@@ -51,7 +51,7 @@ class SP_Bookings : Fragment() {
         docRef.get().addOnSuccessListener { document ->
             if (document.exists()) {
                 val company = document.getString("companyName")
-                val name = document.getString("serviceProviderName")
+                val name = document.getString("serviceProviderName") ?: document.getString("name")
 
                 if (!company.isNullOrEmpty() && !name.isNullOrEmpty()) {
                     Log.d("SP_Bookings", "SP company=$company name=$name")
@@ -60,7 +60,6 @@ class SP_Bookings : Fragment() {
                     Toast.makeText(requireContext(), "Service Provider info missing", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                // Try lookup by email if doc not found
                 db.collection("service_providers")
                     .whereEqualTo("email", currentUser.email)
                     .get()
@@ -68,7 +67,7 @@ class SP_Bookings : Fragment() {
                         if (!result.isEmpty) {
                             val doc = result.documents[0]
                             val company = doc.getString("companyName")
-                            val name = doc.getString("serviceProviderName")
+                            val name = doc.getString("serviceProviderName") ?: doc.getString("name")
 
                             if (!company.isNullOrEmpty() && !name.isNullOrEmpty()) {
                                 Log.d("SP_Bookings", "✅ Fetched company=$company name=$name")
@@ -83,9 +82,8 @@ class SP_Bookings : Fragment() {
                         }
                     }
             }
-        }.addOnFailureListener {
-            Toast.makeText(requireContext(), "Failed to get Service Provider info", Toast.LENGTH_SHORT).show()
         }
+
     }
 
 
