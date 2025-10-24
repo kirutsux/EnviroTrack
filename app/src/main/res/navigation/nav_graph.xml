@@ -125,12 +125,24 @@
         android:id="@+id/embDashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
         tools:layout="@layout/emb_dashboard">
-        <action android:id="@+id/action_embDashboard_to_embCNCFragment" app:destination="@id/embCNCFragment" />
-        <action android:id="@+id/action_embDashboard_to_embSMRFragment" app:destination="@id/embSMRFragment" />
-        <action android:id="@+id/action_embDashboard_to_embOPMSFragment" app:destination="@id/embOPMSFragment" />
-        <action android:id="@+id/action_embDashboard_to_embHMSFragment" app:destination="@id/embHMSFragment" />
-        <action android:id="@+id/action_embDashboard_to_embCRSFragment" app:destination="@id/embCRSFragment" />
-        <action android:id="@+id/action_embDashboard_to_embPCOFragment" app:destination="@id/embPCOFragment" />
+        <action
+            android:id="@+id/action_embDashboard_to_embCNCFragment"
+            app:destination="@id/embCNCFragment" />
+<!--        <action -->
+<!--            android:id="@+id/action_embDashboard_to_embSMRFragment" -->
+<!--            app:destination="@id/embSMRFragment" />-->
+        <action
+            android:id="@+id/action_embDashboard_to_embOPMSFragment"
+            app:destination="@id/embOPMSFragment" />
+<!--        <action -->
+<!--            android:id="@+id/action_embDashboard_to_embHMSFragment"-->
+<!--            app:destination="@id/embHMSFragment" />-->
+        <action
+            android:id="@+id/action_embDashboard_to_embCRSFragment"
+            app:destination="@id/embCRSFragment" />
+        <action
+            android:id="@+id/action_embDashboard_to_embPCOFragment"
+            app:destination="@id/embPCOFragment" />
     </fragment>
 
     <!-- 🧰 Service Provider Dashboard -->
@@ -237,12 +249,30 @@
         tools:layout="@layout/fragment_about_us" />
 
     <!-- 🌍 EMB Modules -->
-    <fragment android:id="@+id/embCNCFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment" tools:layout="@layout/fragment_cnc_emb_dashboard" />
-    <fragment android:id="@+id/embSMRFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_SMR" tools:layout="@layout/emb_smr" />
-    <fragment android:id="@+id/embOPMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_OPMS" tools:layout="@layout/emb_opms" />
-    <fragment android:id="@+id/embHMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS" tools:layout="@layout/emb_hwms" />
-    <fragment android:id="@+id/embCRSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CRS" tools:layout="@layout/emb_crs" />
-    <fragment android:id="@+id/embPCOFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_PCO" tools:layout="@layout/emb_pco" />
+    <fragment
+        android:id="@+id/embCNCFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment"
+        tools:layout="@layout/fragment_cnc_emb_dashboard" />
+<!--    <fragment -->
+<!--        android:id="@+id/embSMRFragment" -->
+<!--        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_SMR" -->
+<!--        tools:layout="@layout/emb_smr" />-->
+    <fragment
+        android:id="@+id/embOPMSFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.OpmsEmbDashboardFragment"
+        tools:layout="@layout/fragment_opms_emb_dashboard" />
+<!--    <fragment -->
+<!--        android:id="@+id/embHMSFragment" -->
+<!--        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS"-->
+<!--        tools:layout="@layout/emb_hwms" />-->
+    <fragment
+        android:id="@+id/embCRSFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.crs.CrsEmbDashboardFragment"
+        tools:layout="@layout/fragment_crs_emb_dashboard" />
+    <fragment
+        android:id="@+id/embPCOFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.pcoacc.PcoEmbDashboardFragment"
+        tools:layout="@layout/fragment_pco_emb_dashboard" />
 
     <!-- 💬 Chat -->
     <fragment

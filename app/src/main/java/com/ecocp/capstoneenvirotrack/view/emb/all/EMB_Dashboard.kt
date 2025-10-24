@@ -79,17 +79,17 @@ class EMB_Dashboard : Fragment() {
             startActivity(Intent(requireContext(), EmbpcoActivity::class.java))
         }
 
-        smrCard.setOnClickListener {
-            navController.navigate(R.id.action_embDashboard_to_embSMRFragment)
-        }
+//        smrCard.setOnClickListener {
+//            navController.navigate(R.id.action_embDashboard_to_embSMRFragment)
+//        }
 
         opmsCard.setOnClickListener {
             startActivity(Intent(requireContext(), EmbopmsActivity::class.java))
         }
 
-        hazewasteCard.setOnClickListener {
-            navController.navigate(R.id.action_embDashboard_to_embHMSFragment)
-        }
+//        hazewasteCard.setOnClickListener {
+//            navController.navigate(R.id.action_embDashboard_to_embHMSFragment)
+//        }
 
         crsCard.setOnClickListener {
             startActivity(Intent(requireContext(), EmbcrsActivity::class.java))

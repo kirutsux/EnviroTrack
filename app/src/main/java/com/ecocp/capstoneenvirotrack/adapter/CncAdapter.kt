@@ -1,10 +1,12 @@
 package com.ecocp.capstoneenvirotrack.adapter
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.CncApplication
@@ -41,7 +43,20 @@ class CncAdapter(
         } ?: "Not submitted"
         holder.tvDateSubmitted.text = "Submitted: $formattedDate"
 
-        holder.tvStatus.text = "Status: ${cnc.status ?: "Pending"}"
+        // ✅ Dynamic status badge color
+        val status = cnc.status?.lowercase(Locale.getDefault()) ?: "pending"
+        holder.tvStatus.text = status.replaceFirstChar { it.uppercase() }
+        holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
+
+        val colorRes = when (status) {
+            "approved" -> R.color.status_approved
+            "rejected" -> R.color.status_rejected
+            "pending" -> R.color.status_pending
+            else -> R.color.status_pending
+        }
+
+        val color = ContextCompat.getColor(context, colorRes)
+        holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
 
         holder.itemView.setOnClickListener {
             onItemClick(cnc)

@@ -1,11 +1,13 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.adapters
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.PCO
@@ -37,48 +39,38 @@ class PCOAdapter(
     override fun getItemCount(): Int = filteredList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = filteredList[position]
+        val app = filteredList[position]
+        val context = holder.itemView.context
 
-        holder.tvAppId.text = item.appId
-        holder.tvAppName.text = item.appName
-        holder.tvApplicant.text = item.applicant
-        holder.tvForwardedTo.text = item.forwardedTo
-        holder.tvUpdated.text = item.updatedDate
-        holder.tvType.text = item.type
-        holder.tvStatus.text = item.status
+        holder.tvAppId.text = app.appId
+        holder.tvAppName.text = app.appName
+        holder.tvApplicant.text = app.applicant
+        holder.tvForwardedTo.text = app.forwardedTo
+        holder.tvUpdated.text = app.updatedDate
+        holder.tvType.text = app.type
 
-        applyStatusStyle(holder.tvStatus, item.status)
+        // ✅ Dynamic status badge color
+        val status = app.status?.lowercase(Locale.getDefault()) ?: "pending"
+        holder.tvStatus.text = status.replaceFirstChar { it.uppercase() }
+        holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
+
+        val colorRes = when (status) {
+            "approved" -> R.color.status_approved
+            "rejected" -> R.color.status_rejected
+            "pending" -> R.color.status_pending
+            "submitted" -> R.color.status_submitted
+            else -> R.color.status_pending
+        }
+
+        val color = ContextCompat.getColor(context, colorRes)
+        holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
 
         holder.itemView.setOnClickListener {
-            onItemClick(item)
+            onItemClick(app)
         }
     }
 
-    private fun applyStatusStyle(tv: TextView, status: String) {
-        when (status.lowercase()) {
-            "approved" -> {
-                tv.setTextColor(tv.context.getColor(R.color.white))
-                tv.setBackgroundResource(R.drawable.bg_badge_green)
-            }
-            "rejected" -> {
-                tv.setTextColor(tv.context.getColor(R.color.white))
-                tv.setBackgroundResource(R.drawable.bg_badge_red)
-            }
-            "submitted" -> {
-                tv.setTextColor(tv.context.getColor(R.color.white))
-                tv.setBackgroundResource(R.drawable.bg_badge_orange)
-            }
-            "pending" -> {
-                tv.setTextColor(tv.context.getColor(R.color.white))
-                tv.setBackgroundResource(R.drawable.bg_badge_blue)
-            }
-            else -> {
-                tv.setTextColor(tv.context.getColor(R.color.black))
-                tv.setBackgroundResource(R.drawable.bg_badge_gray)
-            }
-        }
-    }
-
+    // ✅ Filtering logic retained
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {

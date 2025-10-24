@@ -15,15 +15,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Project Title -->
-        <TextView
-            android:id="@+id/tvProjectTitle"
-            android:text="Project Title"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="@color/black"
+        <!-- Header Row -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvProjectTitle"
+                android:text="Project Title"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- STATUS BADGE -->
+            <TextView
+                android:id="@+id/tvStatus"
+                android:text="Pending"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="10dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_status_badge"
+                android:textColor="@android:color/white"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
+        </LinearLayout>
 
         <!-- Company Name -->
         <TextView
@@ -52,17 +76,6 @@
             android:textSize="13sp"
             android:textColor="@color/black"
             android:layout_marginTop="2dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- Status -->
-        <TextView
-            android:id="@+id/tvStatus"
-            android:text="Status: Pending"
-            android:textStyle="italic"
-            android:textSize="13sp"
-            android:textColor="@color/gray"
-            android:layout_marginTop="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
