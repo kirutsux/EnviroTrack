@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.all
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
@@ -214,11 +215,19 @@ class LoginFragment : Fragment() {
                                 if (mustChangePassword) {
                                     findNavController().navigate(R.id.action_loginFragment_to_SP_ChangepasswordFragment)
                                 } else {
-                                    val intent =
-                                        Intent(requireContext(), SPMainActivity::class.java)
+                                    // ✅ Save login session for SP user
+                                    val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                                    prefs.edit()
+                                        .putBoolean("isLoggedIn", true)
+                                        .putString("userType", "service_provider")
+                                        .apply()
+
+                                    // ✅ Redirect to SP dashboard
+                                    val intent = Intent(requireContext(), SPMainActivity::class.java)
                                     startActivity(intent)
-                                    requireActivity().finish() // so they can’t go back to login
+                                    requireActivity().finish()
                                 }
+
                             } else {
                                 // 3️⃣ Not found → check if there's an approved service request for this email
                                 firestore.collection("service_requests")
