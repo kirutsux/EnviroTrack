@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.model.CncApplication
 import com.ecocp.capstoneenvirotrack.model.SubmittedApplication
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -15,7 +16,8 @@ import java.util.Locale
 
 class SubmittedApplicationsAdapter(
     private val applications: List<SubmittedApplication>,
-    private val onItemClick: (SubmittedApplication) -> Unit
+    private val onItemClick: (SubmittedApplication) -> Unit,
+    private val onItemLongClick: (SubmittedApplication) -> Unit // ✅ added
 ) : RecyclerView.Adapter<SubmittedApplicationsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -24,11 +26,20 @@ class SubmittedApplicationsAdapter(
         val txtSubmittedAt: TextView = view.findViewById(R.id.txtSubmittedAt)
 
         init {
+            // ✅ Click + Long Click listeners
             view.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onItemClick(applications[position])
                 }
+            }
+
+            view.setOnLongClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemLongClick(applications[position])
+                }
+                true
             }
         }
     }

@@ -16,7 +16,8 @@ import java.util.Locale
 class CncAdapter(
     private val cncList: List<CncApplication>,
     private val context: Context,
-    private val onItemClick: (CncApplication) -> Unit
+    private val onItemClick: (CncApplication) -> Unit,
+    private val onItemLongClick: (CncApplication) -> Unit // ✅ added
 ) : RecyclerView.Adapter<CncAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -58,8 +59,14 @@ class CncAdapter(
         val color = ContextCompat.getColor(context, colorRes)
         holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
 
+        // ✅ Click + Long Click listeners
         holder.itemView.setOnClickListener {
             onItemClick(cnc)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick(cnc)
+            true
         }
     }
 

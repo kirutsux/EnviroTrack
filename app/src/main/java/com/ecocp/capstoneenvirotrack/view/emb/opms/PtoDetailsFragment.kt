@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.emb.opms
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -16,6 +17,7 @@ import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoDetails2Binding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -25,7 +27,13 @@ class PtoDetailsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var db: FirebaseFirestore
+    private lateinit var storage: FirebaseStorage
     private var applicationId: String? = null
+    private var selectedFileUri: Uri? = null
+
+    companion object {
+        private const val PICK_FILE_REQUEST = 1001
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,20 +41,23 @@ class PtoDetailsFragment : Fragment() {
     ): View {
         _binding = FragmentPtoDetails2Binding.inflate(inflater, container, false)
         db = FirebaseFirestore.getInstance()
+        storage = FirebaseStorage.getInstance()
 
-        // ✅ Retrieve applicationId passed from dashboard
         applicationId = arguments?.getString("applicationId")
+
         if (applicationId.isNullOrEmpty()) {
             Toast.makeText(requireContext(), "No Application ID provided", Toast.LENGTH_SHORT).show()
-            Log.e("PTO_DETAILS", "❌ applicationId is null or empty")
         } else {
-            Log.d("PTO_DETAILS", "🔍 Loading details for ID: $applicationId")
             loadApplicationDetails()
         }
 
-        // ✅ Approve / Reject button listeners
         binding.btnApprove.setOnClickListener { updateStatus("Approved") }
         binding.btnReject.setOnClickListener { updateStatus("Rejected") }
+
+        // ✅ Upload Certificate button logic
+        binding.btnUploadCertificate.setOnClickListener {
+            openFilePicker()
+        }
 
         return binding.root
     }
@@ -60,7 +71,7 @@ class PtoDetailsFragment : Fragment() {
         db.collection("opms_pto_applications").document(id)
             .get()
             .addOnSuccessListener { doc ->
-                if (!isAdded || _binding == null) return@addOnSuccessListener // 🧱 Prevent crash
+                if (!isAdded || _binding == null) return@addOnSuccessListener
 
                 if (doc.exists()) {
                     Log.d("PTO_DETAILS", "✅ Document data: ${doc.data}")
@@ -69,19 +80,16 @@ class PtoDetailsFragment : Fragment() {
                     val currency = doc.getString("currency") ?: "PHP"
                     val paymentMethod = doc.getString("paymentMethod") ?: "-"
                     val paymentStatus = doc.getString("paymentStatus") ?: "Pending"
-                    val paymentTimestamp = doc.getTimestamp("paymentTimestamp")
-                    val submittedTimestamp = doc.getTimestamp("submittedTimestamp")
+                    val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' h:mm a", Locale.getDefault())
+                    val paymentTs = doc.getTimestamp("paymentTimestamp")?.toDate()
+                    val submittedTs = doc.getTimestamp("submittedTimestamp")?.toDate()
+                        ?: doc.getTimestamp("timestamp")?.toDate()
 
-                    val formattedPaymentDate = paymentTimestamp?.toDate()?.let {
-                        SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault()).format(it)
-                    } ?: "-"
+                    val status = doc.getString("status") ?: "Pending"
+                    val feedback = doc.getString("feedback") ?: ""
 
-                    val formattedSubmittedDate = submittedTimestamp?.toDate()?.let {
-                        SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault()).format(it)
-                    } ?: "-"
-
-                    // ✅ Safely update binding only if fragment is still active
                     binding.apply {
+                        // 🔹 Basic Info
                         txtOwnerName.text = doc.getString("ownerName") ?: "-"
                         txtEstablishmentName.text = doc.getString("establishmentName") ?: "-"
                         txtNatureOfBusiness.text = doc.getString("natureOfBusiness") ?: "-"
@@ -98,7 +106,14 @@ class PtoDetailsFragment : Fragment() {
                         txtFuelType.text = doc.getString("fuelType") ?: "-"
                         txtEmissionsSummary.text = doc.getString("emissionsSummary") ?: "-"
 
-                        // 🔹Uploaded Files
+                        // 🔹 Payment Display
+                        txtAmount.text = "₱%.2f %s".format(amount, currency)
+                        txtPaymentMethod.text = "Method: $paymentMethod"
+                        txtPaymentStatus.text = "Status: $paymentStatus"
+                        txtPaymentTimestamp.text = "Paid on: ${paymentTs?.let { dateFormat.format(it) } ?: "Not paid"}"
+                        txtSubmittedTimestamp.text = "Submitted on: ${submittedTs?.let { dateFormat.format(it) } ?: "Not submitted"}"
+
+                        // 🔹 Uploaded Files
                         val fileLinksField = doc.get("fileLinks")
                         when (fileLinksField) {
                             is List<*> -> {
@@ -112,54 +127,33 @@ class PtoDetailsFragment : Fragment() {
                             else -> addEmptyFileNotice()
                         }
 
-                        // ✅ Update Payment Info Section
-                        txtAmount.text = "₱%.2f %s".format(amount, currency)
-                        txtPaymentMethod.text = "Method: $paymentMethod"
-                        txtPaymentStatus.text = "Status: $paymentStatus"
-                        txtPaymentTimestamp.text = "Paid on: $formattedPaymentDate"
-                        txtSubmittedTimestamp.text = "Submitted on: $formattedSubmittedDate"
+                        txtStatus.text = "Status: $status"
 
-                        txtStatus.text = "Status: ${doc.getString("status") ?: "Pending"}"
+                        // ✅ Show upload button only if Pending
+                        btnUploadCertificate.visibility = if (status.equals("Pending", ignoreCase = true)) View.VISIBLE else View.GONE
 
-                        // 🔹 Review Status & Feedback Handling
-                        val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
-                        val feedback = doc.getString("feedback") ?: ""
-
-                        when (status) {
-                            "approved" -> {
-                                binding.btnApprove.visibility = View.GONE
-                                binding.btnReject.visibility = View.GONE
-                                binding.inputFeedback.visibility = View.VISIBLE
-                                binding.inputFeedback.setText(
-                                    feedback.ifBlank { "No feedback provided." }
-                                )
-                                binding.inputFeedback.isEnabled = false
-                                binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
-                            }
-                            "rejected" -> {
-                                binding.btnApprove.visibility = View.GONE
-                                binding.btnReject.visibility = View.GONE
-                                binding.inputFeedback.visibility = View.VISIBLE
-                                binding.inputFeedback.setText(
-                                    feedback.ifBlank { "No feedback provided." }
-                                )
-                                binding.inputFeedback.isEnabled = false
-                                binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                        // ✅ Feedback visibility
+                        when (status.lowercase(Locale.getDefault())) {
+                            "approved", "rejected" -> {
+                                btnApprove.visibility = View.GONE
+                                btnReject.visibility = View.GONE
+                                inputFeedback.visibility = View.VISIBLE
+                                inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
+                                inputFeedback.isEnabled = false
+                                inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
                             }
                             else -> {
-                                binding.btnApprove.visibility = View.VISIBLE
-                                binding.btnReject.visibility = View.VISIBLE
-                                binding.inputFeedback.visibility = View.VISIBLE
-                                binding.inputFeedback.isEnabled = true
-                                binding.inputFeedback.setText(feedback)
+                                btnApprove.visibility = View.VISIBLE
+                                btnReject.visibility = View.VISIBLE
+                                inputFeedback.visibility = View.VISIBLE
+                                inputFeedback.isEnabled = true
+                                inputFeedback.setText(feedback)
                             }
                         }
                     }
 
-                    Log.d("PTO_DETAILS", "💰 Payment updated: ₱$amount $currency, Method: $paymentMethod, Status: $paymentStatus, Paid on: $formattedPaymentDate")
                 } else {
-                    if (isAdded && _binding != null)
-                        binding.txtOwnerName.text = "No details found for this PTO."
+                    binding.txtOwnerName.text = "No details found for this PTO."
                 }
             }
             .addOnFailureListener { e ->
@@ -169,13 +163,14 @@ class PtoDetailsFragment : Fragment() {
             }
     }
 
-    // 🔹 Show clickable file links
+    // ------------------------------------------------------------
+    // FILE LINK DISPLAY
+    // ------------------------------------------------------------
     private fun displayFileLinks(fileLinks: List<String>) {
         binding.layoutFileLinks.removeAllViews()
 
         for ((index, link) in fileLinks.withIndex()) {
             val textView = TextView(requireContext()).apply {
-                // Try to extract filename
                 val fileName = link.substringAfterLast('/').substringBefore('?')
                 text = if (fileName.isNotBlank()) fileName else "File ${index + 1}"
                 setTextColor(resources.getColor(android.R.color.holo_blue_dark))
@@ -205,9 +200,97 @@ class PtoDetailsFragment : Fragment() {
         }
     }
 
+    // ------------------------------------------------------------
+    // FILE PICKER
+    // ------------------------------------------------------------
+    private fun openFilePicker() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "application/pdf"
+        startActivityForResult(Intent.createChooser(intent, "Select Certificate PDF"), PICK_FILE_REQUEST)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_FILE_REQUEST && resultCode == Activity.RESULT_OK) {
+            selectedFileUri = data?.data
+            selectedFileUri?.let { uri ->
+                // Show selected file name
+                val fileName = getFileNameFromUri(uri)
+                    ?: uri.lastPathSegment?.substringAfterLast('/') ?: "selected_file.pdf"
+                binding.tvSelectedFile.text = "Selected: $fileName"
+                // Upload to Firebase
+                uploadCertificateToFirebase(uri)
+            }
+        }
+    }
+
+    // Upload certificate and save certificateUrl to Firestore under this PTO doc
+    private fun uploadCertificateToFirebase(fileUri: Uri) {
+        val id = applicationId ?: return
+        // Save under certificates/pto/{applicationId}_{timestamp}.pdf
+        val storageFileName = "pto_${id}_${System.currentTimeMillis()}.pdf"
+        val storageRef = storage.reference.child("certificates/pto/$storageFileName")
+
+        storageRef.putFile(fileUri)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val downloadUrl = uri.toString()
+                    // Save URL to Firestore
+                    db.collection("opms_pto_applications").document(id)
+                        .update("certificateUrl", downloadUrl)
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Certificate uploaded successfully!", Toast.LENGTH_SHORT).show()
+                            // Optional: hide button or update UI
+                            binding.btnUploadCertificate.visibility = View.GONE
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(requireContext(), "Failed to save certificate URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }.addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Failed to get download URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // Helper function to get file name from Uri (optional)
+    private fun getFileNameFromUri(uri: Uri): String? {
+        var name: String? = null
+        requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex("_display_name")
+                if (index != -1) name = cursor.getString(index)
+            }
+        }
+        return name
+    }
+
+
+    private fun saveCertificateLinkToFirestore(downloadUrl: String) {
+        val id = applicationId ?: return
+
+        db.collection("opms_pto_applications").document(id)
+            .update(
+                mapOf(
+                    "certificateUrl" to downloadUrl,
+                    "status" to "Approved",
+                    "reviewedTimestamp" to Timestamp.now()
+                )
+            )
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Certificate uploaded successfully!", Toast.LENGTH_SHORT).show()
+                binding.btnUploadCertificate.visibility = View.GONE
+                binding.txtStatus.text = "Status: Approved"
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to save certificate: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
 
     // ------------------------------------------------------------
-    // UPDATE STATUS (APPROVE / REJECT)
+    // APPROVE / REJECT STATUS UPDATE
     // ------------------------------------------------------------
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
@@ -233,7 +316,7 @@ class PtoDetailsFragment : Fragment() {
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // ✅ Send Notifications to PCO and EMB
+                // ✅ Notifications
                 db.collection("opms_pto_applications").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
@@ -275,9 +358,6 @@ class PtoDetailsFragment : Fragment() {
             }
     }
 
-    // ------------------------------------------------------------
-    // CLEANUP BINDING
-    // ------------------------------------------------------------
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
