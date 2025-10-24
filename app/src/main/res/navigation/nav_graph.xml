@@ -103,11 +103,6 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_SP_ChangepasswordFragment_to_serviceProviderDashboard"
-            app:destination="@id/serviceProviderDashboard"
-            app:popUpTo="@id/SP_ChangepasswordFragment"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- 🧰 Service Provider Registration -->

@@ -34,5 +34,15 @@
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Account"
         android:label="Account"
         tools:layout="@layout/fragment_sp_account" />
+    <fragment
+        android:id="@+id/SP_ChangepasswordFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
+        tools:layout="@layout/sp_changepassword_fragment">
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_serviceProviderDashboard"
+            app:destination="@id/serviceProviderDashboard"
+            app:popUpTo="@id/SP_ChangepasswordFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>
