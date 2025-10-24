@@ -92,17 +92,10 @@
             android:id="@+id/action_verificationFragment_to_pcoDashboard"
             app:destination="@id/pcoDashboard" />
     </fragment>
-
-    <!-- 🔐 Service Provider Change Password -->
     <fragment
         android:id="@+id/SP_ChangepasswordFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
         tools:layout="@layout/sp_changepassword_fragment">
-        <action
-            android:id="@+id/action_SP_ChangepasswordFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/nav_graph"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- 🧰 Service Provider Registration -->

@@ -1,17 +1,17 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.Timestamp
 
 class SP_ChangepasswordFragment : Fragment() {
 
@@ -64,7 +64,7 @@ class SP_ChangepasswordFragment : Fragment() {
         )
         spinnerRole.adapter = spinnerAdapter
 
-        // Pre-fill email
+        // Pre-fill email if logged in
         auth.currentUser?.email?.let { etEmail.setText(it) }
 
         btnUpdatePassword.setOnClickListener {
@@ -92,7 +92,9 @@ class SP_ChangepasswordFragment : Fragment() {
         }
 
         tvLogin.setOnClickListener {
-            findNavController().navigate(R.id.action_SP_ChangepasswordFragment_to_loginFragment)
+            val intent = Intent(requireContext(), SPMainActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
         }
     }
 
@@ -109,28 +111,43 @@ class SP_ChangepasswordFragment : Fragment() {
             .addOnSuccessListener {
                 user.updatePassword(newPassword)
                     .addOnSuccessListener {
-                        val spData = mapOf(
-                            "uid" to user.uid,
-                            "name" to etName.text.toString().trim(),
-                            "companyName" to etCompanyName.text.toString().trim(),
-                            "contactNumber" to etContactNumber.text.toString().trim(),
-                            "email" to email,
-                            "location" to etAddress.text.toString().trim(),
-                            "role" to selectedRole,
-                            "password" to newPassword,
-                            "status" to "approved",
-                            "mustChangePassword" to false,
-                            "createdAt" to Timestamp.now()
-                        )
-
                         firestore.collection("service_providers").document(user.uid)
-                            .set(spData)
+                            .update(
+                                mapOf(
+                                    "password" to newPassword,
+                                    "mustChangePassword" to false
+                                )
+                            )
                             .addOnSuccessListener {
-                                Toast.makeText(requireContext(), "Password updated and profile saved!", Toast.LENGTH_SHORT).show()
-                                findNavController().navigate(R.id.action_SP_ChangepasswordFragment_to_serviceProviderDashboard)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Password changed successfully!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                // ✅ Save login session so MainActivity won't reopen welcomeFragment
+                                val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                                prefs.edit()
+                                    .putBoolean("isLoggedIn", true)
+                                    .putString("userType", "service_provider")
+                                    .apply()
+
+                                // ✅ Launch SP dashboard (main activity)
+                                val intent = Intent(requireContext(), SPMainActivity::class.java)
+                                intent.addFlags(
+                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                )
+                                startActivity(intent)
+                                requireActivity().finish()
                             }
                             .addOnFailureListener { e ->
-                                Toast.makeText(requireContext(), "Error saving profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Error updating Firestore: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                     }
                     .addOnFailureListener { e ->

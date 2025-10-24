@@ -51,9 +51,10 @@ class SP_Bookings : Fragment() {
         docRef.get().addOnSuccessListener { document ->
             if (document.exists()) {
                 val company = document.getString("companyName")
-                val name = document.getString("fullName")
+                val name = document.getString("serviceProviderName")
 
                 if (!company.isNullOrEmpty() && !name.isNullOrEmpty()) {
+                    Log.d("SP_Bookings", "SP company=$company name=$name")
                     fetchBookings(company, name)
                 } else {
                     Toast.makeText(requireContext(), "Service Provider info missing", Toast.LENGTH_SHORT).show()
@@ -89,6 +90,7 @@ class SP_Bookings : Fragment() {
 
 
     private fun fetchBookings(company: String, name: String) {
+        Log.d("SP_Bookings", "Querying for company=$company name=$name")
         db.collection("transport_bookings")
             .whereEqualTo("serviceProviderCompany", company)
             .whereEqualTo("serviceProviderName", name)
