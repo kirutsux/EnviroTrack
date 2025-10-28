@@ -9,7 +9,8 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.NotificationModel
 
 class NotificationAdapter(
-    private val notificationList: List<NotificationModel>
+    private val notificationList: List<NotificationModel>,
+    private val onItemLongClick: ((NotificationModel) -> Unit)? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -44,6 +45,11 @@ class NotificationAdapter(
             holder.message.text = notif.message
             holder.time.text = notif.timestamp?.toDate()?.toLocaleString() ?: ""
         }
+        // Set long click listener
+                holder.itemView.setOnLongClickListener {
+                    onItemLongClick?.invoke(notif)
+                    true
+                }
     }
 
     inner class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {

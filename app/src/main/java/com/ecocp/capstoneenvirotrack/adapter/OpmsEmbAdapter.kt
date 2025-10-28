@@ -15,7 +15,8 @@ import com.ecocp.capstoneenvirotrack.model.EmbOpmsApplication
 import java.util.Locale
 
 class OpmsEmbAdapter(
-    private val applications: List<EmbOpmsApplication>
+    private val applications: List<EmbOpmsApplication>,
+    private val onItemLongClick: (EmbOpmsApplication) -> Unit // ✅ Added callback
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -102,6 +103,12 @@ class OpmsEmbAdapter(
                     R.id.action_embDashboard_to_ptoDetailsFragment,
                     bundle
                 )
+            }
+
+            // ✅ Added long click
+            holder.itemView.setOnLongClickListener {
+                onItemLongClick(app)
+                true
             }
 
             // ===== DP HOLDER =====
