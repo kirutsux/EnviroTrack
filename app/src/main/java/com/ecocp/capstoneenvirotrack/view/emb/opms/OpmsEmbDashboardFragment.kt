@@ -105,7 +105,9 @@ class OpmsEmbDashboardFragment : Fragment() {
                         dischargeMethod = data["treatmentMethod"] as? String,
                         uploadedFiles = data["fileLinks"] as? String,
                         status = data["status"] as? String ?: "Pending",
-                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp
+                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp,
+                        issueDate = data["issueDate"] as? Timestamp,
+                        expiryDate = data["expiryDate"] as? Timestamp
                     )
                     addOrUpdateApplication(app)
                 }
@@ -141,7 +143,9 @@ class OpmsEmbDashboardFragment : Fragment() {
                         fuelType = data["fuelType"] as? String,
                         emissions = data["emissions"] as? String,
                         status = data["status"] as? String ?: "Pending",
-                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp
+                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp,
+                        issueDate = data["issueDate"] as? Timestamp,
+                        expiryDate = data["expiryDate"] as? Timestamp
                     )
                     addOrUpdateApplication(app)
                 }

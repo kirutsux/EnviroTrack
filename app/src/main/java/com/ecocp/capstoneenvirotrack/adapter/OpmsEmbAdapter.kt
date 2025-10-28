@@ -55,16 +55,27 @@ class OpmsEmbAdapter(
         val statusText = app.status ?: "Pending"
         val normalizedStatus = statusText.lowercase(Locale.getDefault())
 
-        // ✅ Determine color dynamically based on status
         val colorRes = when (normalizedStatus) {
             "approved" -> R.color.status_approved
             "rejected" -> R.color.status_rejected
             "pending" -> R.color.status_pending
             else -> R.color.status_pending
         }
-
         val color = ContextCompat.getColor(context, colorRes)
 
+        // ✅ Format dates
+        val issueDateFormatted = app.issueDate?.toDate()?.let {
+            android.text.format.DateFormat.format("MMM dd, yyyy", it)
+        } ?: "-"
+        val expiryDateFormatted = app.expiryDate?.toDate()?.let {
+            android.text.format.DateFormat.format("MMM dd, yyyy", it)
+        } ?: "-"
+
+        val submittedDateFormatted = app.submittedTimestamp?.toDate()?.let {
+            android.text.format.DateFormat.format("MMM dd, yyyy", it)
+        } ?: "-"
+
+        // ===== PTO HOLDER =====
         if (holder is PTOViewHolder) {
             holder.tvEstablishmentName.text = app.establishmentName ?: "-"
             holder.tvOwnerName.text = app.ownerName ?: "-"
@@ -73,6 +84,18 @@ class OpmsEmbAdapter(
             holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
             holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
             holder.tvApplicationType.text = app.applicationType ?: "Permit to Operate"
+            holder.tvDateSubmitted.text = "Submitted: $submittedDateFormatted"
+
+            // ✅ Show or hide issue/expiry date depending on status
+            if (normalizedStatus == "approved") {
+                holder.tvIssueDate.visibility = View.VISIBLE
+                holder.tvExpiryDate.visibility = View.VISIBLE
+                holder.tvIssueDate.text = "Issued: $issueDateFormatted"
+                holder.tvExpiryDate.text = "Expires: $expiryDateFormatted"
+            } else {
+                holder.tvIssueDate.visibility = View.GONE
+                holder.tvExpiryDate.visibility = View.GONE
+            }
 
             holder.itemView.setOnClickListener {
                 it.findNavController().navigate(
@@ -81,6 +104,7 @@ class OpmsEmbAdapter(
                 )
             }
 
+            // ===== DP HOLDER =====
         } else if (holder is DPViewHolder) {
             holder.tvCompanyName.text = app.companyName ?: "-"
             holder.tvCompanyAddress.text = app.companyAddress ?: "-"
@@ -90,6 +114,18 @@ class OpmsEmbAdapter(
             holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
             holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
             holder.tvApplicationType.text = app.applicationType ?: "Discharge Permit"
+            holder.tvDateSubmitted.text = "Submitted: $submittedDateFormatted"
+
+            // ✅ Show or hide issue/expiry date depending on status
+            if (normalizedStatus == "approved") {
+                holder.tvIssueDate.visibility = View.VISIBLE
+                holder.tvExpiryDate.visibility = View.VISIBLE
+                holder.tvIssueDate.text = "Issued: $issueDateFormatted"
+                holder.tvExpiryDate.text = "Expires: $expiryDateFormatted"
+            } else {
+                holder.tvIssueDate.visibility = View.GONE
+                holder.tvExpiryDate.visibility = View.GONE
+            }
 
             holder.itemView.setOnClickListener {
                 it.findNavController().navigate(
@@ -106,6 +142,9 @@ class OpmsEmbAdapter(
         val tvPlantAddress: TextView = view.findViewById(R.id.tvPlantAddress)
         val tvStatus: TextView = view.findViewById(R.id.tvStatus)
         val tvApplicationType: TextView = view.findViewById(R.id.PermitType)
+        val tvIssueDate: TextView = view.findViewById(R.id.tvIssueDate)
+        val tvExpiryDate: TextView = view.findViewById(R.id.tvExpiryDate)
+        val tvDateSubmitted: TextView = view.findViewById(R.id.tvDateSubmitted)
     }
 
     inner class DPViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -115,5 +154,8 @@ class OpmsEmbAdapter(
         val tvDischargeMethod: TextView = view.findViewById(R.id.tvDischargeMethod)
         val tvStatus: TextView = view.findViewById(R.id.tvStatus)
         val tvApplicationType: TextView = view.findViewById(R.id.PermitType)
+        val tvIssueDate: TextView = view.findViewById(R.id.tvIssueDate)
+        val tvExpiryDate: TextView = view.findViewById(R.id.tvExpiryDate)
+        val tvDateSubmitted: TextView = view.findViewById(R.id.tvDateSubmitted)
     }
 }

@@ -21,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.*
 
 class DpDetailsFragment : Fragment() {
 
@@ -292,6 +293,7 @@ class DpDetailsFragment : Fragment() {
     }
 
     // Approve / Reject + Notifications
+    // Approve / Reject + Notifications
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
@@ -300,27 +302,38 @@ class DpDetailsFragment : Fragment() {
             return
         }
 
-        val updateData = mapOf(
+        // ✅ Common fields for update
+        val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
+
+        // ✅ If approved → add issueDate and expiryDate
+        if (status.equals("Approved", ignoreCase = true)) {
+            val issueDate = Timestamp.now()
+            val calendar = Calendar.getInstance().apply { time = issueDate.toDate() }
+            calendar.add(Calendar.YEAR, 5)
+            val expiryDate = Timestamp(calendar.time)
+            updateData["issueDate"] = issueDate
+            updateData["expiryDate"] = expiryDate
+        }
 
         db.collection("opms_discharge_permits").document(id)
             .update(updateData)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // Reload details so upload button and filename update immediately
+                // Reload details to refresh UI
                 loadDischargePermitDetails()
 
-                // Optionally navigate back to dashboard (kept behavior from your previous code)
+                // Navigate back to dashboard
                 if (isAdded) {
                     val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // Send Notifications
+                // ✅ Notifications
                 db.collection("opms_discharge_permits").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
@@ -361,6 +374,7 @@ class DpDetailsFragment : Fragment() {
                 Log.e("DP_REVIEW", "❌ Failed to update DP status", e)
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

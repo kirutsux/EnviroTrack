@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.model.CncApplication
 import com.ecocp.capstoneenvirotrack.model.SubmittedApplication
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -17,16 +16,17 @@ import java.util.Locale
 class SubmittedApplicationsAdapter(
     private val applications: List<SubmittedApplication>,
     private val onItemClick: (SubmittedApplication) -> Unit,
-    private val onItemLongClick: (SubmittedApplication) -> Unit // ✅ added
+    private val onItemLongClick: (SubmittedApplication) -> Unit
 ) : RecyclerView.Adapter<SubmittedApplicationsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtPermitType: TextView = view.findViewById(R.id.txtPermitType)
         val txtPermitStatus: TextView = view.findViewById(R.id.txtPermitStatus)
         val txtSubmittedAt: TextView = view.findViewById(R.id.txtSubmittedAt)
+        val txtIssueDate: TextView = view.findViewById(R.id.tvIssueDate)
+        val txtExpiryDate: TextView = view.findViewById(R.id.tvExpiryDate)
 
         init {
-            // ✅ Click + Long Click listeners
             view.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
@@ -52,22 +52,38 @@ class SubmittedApplicationsAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = applications[position]
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
-        // ✅ Permit type
+        // ✅ Permit Type
         val permitType = app.applicationType.ifEmpty { "Unknown Type" }
         holder.txtPermitType.text = permitType
 
-        // ✅ Handle Timestamp safely
-        val formattedDate = when (val ts = app.timestamp) {
-            is Timestamp -> {
-                val date = ts.toDate()
-                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(date)
-            }
-            else -> app.timestamp?.toString() ?: "Unknown Date"
-        }
-        holder.txtSubmittedAt.text = "Submitted: $formattedDate"
+        // ✅ Handle visibility and text for issue/expiry/submission date
+        if (app.status.equals("approved", ignoreCase = true)) {
+            holder.txtIssueDate.visibility = View.VISIBLE
+            holder.txtExpiryDate.visibility = View.VISIBLE
+            holder.txtSubmittedAt.visibility = View.GONE // hide "Submitted" line if showing issue/expiry
 
-        // ✅ Dynamic status badge
+            val issuedDate = (app.issueDate as? Timestamp)?.toDate()
+            val expiryDate = (app.expiryDate as? Timestamp)?.toDate()
+
+            holder.txtIssueDate.text = if (issuedDate != null)
+                "Issued: ${dateFormat.format(issuedDate)}" else "Issued: N/A"
+            holder.txtExpiryDate.text = if (expiryDate != null)
+                "Expires: ${dateFormat.format(expiryDate)}" else "Expires: N/A"
+        } else {
+            holder.txtIssueDate.visibility = View.GONE
+            holder.txtExpiryDate.visibility = View.GONE
+            holder.txtSubmittedAt.visibility = View.VISIBLE
+
+            val formattedDate = when (val ts = app.timestamp) {
+                is Timestamp -> dateFormat.format(ts.toDate())
+                else -> app.timestamp?.toString() ?: "Unknown Date"
+            }
+            holder.txtSubmittedAt.text = "Submitted: $formattedDate"
+        }
+
+        // ✅ Dynamic Status Badge
         val status = app.status?.lowercase(Locale.getDefault()) ?: "pending"
         holder.txtPermitStatus.text = status.replaceFirstChar { it.uppercase() }
         holder.txtPermitStatus.setBackgroundResource(R.drawable.bg_status_badge)

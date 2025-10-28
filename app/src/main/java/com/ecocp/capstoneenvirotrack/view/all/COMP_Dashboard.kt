@@ -9,6 +9,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import android.media.RingtoneManager
+import android.media.Ringtone
+import android.net.Uri
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import androidx.cardview.widget.CardView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -26,6 +31,10 @@ class COMP_Dashboard : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private var notificationListener: ListenerRegistration? = null
+    private var lastNotificationCount = 0
+    private var isFirstLoad = true
+
 
     private lateinit var cncCard: CardView
     private lateinit var smrCard: CardView
@@ -145,6 +154,39 @@ class COMP_Dashboard : Fragment() {
         }
     }
 
+    private fun playNotificationSound() {
+        try {
+            val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            val r: Ringtone = RingtoneManager.getRingtone(requireContext(), notification)
+            r.play()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun listenForNewNotifications() {
+        val userId = auth.currentUser?.uid ?: return
+
+        notificationListener = db.collection("notifications")
+            .whereEqualTo("receiverId", userId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null || snapshot == null) return@addSnapshotListener
+
+                val notifications = snapshot.documents
+                val newCount = notifications.size
+
+                // ✅ Only play sound if not first load and new notifications were added
+                if (!isFirstLoad && newCount > lastNotificationCount) {
+                    playNotificationSound()
+                }
+
+                lastNotificationCount = newCount
+                isFirstLoad = false
+            }
+    }
+
+
     // ---------------- NOTIFICATIONS -----------------
     private fun setupNotificationIcon() {
         notificationIcon.setOnClickListener {
@@ -231,5 +273,14 @@ class COMP_Dashboard : Fragment() {
                 Log.e("COMP_Dashboard", "Error checking accreditation: ", e)
                 Toast.makeText(requireContext(), "Failed to verify accreditation.", Toast.LENGTH_SHORT).show()
             }
+    }
+    override fun onStart() {
+        super.onStart()
+        listenForNewNotifications()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        notificationListener?.remove()
     }
 }
