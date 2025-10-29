@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.PCO
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
 import java.util.*
 
 class PCOAdapter(
@@ -26,8 +28,11 @@ class PCOAdapter(
         val tvApplicant: TextView = itemView.findViewById(R.id.tvApplicant)
         val tvForwardedTo: TextView = itemView.findViewById(R.id.tvForwardedTo)
         val tvUpdated: TextView = itemView.findViewById(R.id.tvUpdated)
-        val tvType: TextView = itemView.findViewById(R.id.tvType)
         val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
+
+        // ✅ Newly added fields for Issue/Expiry
+        val tvIssueDate: TextView = itemView.findViewById(R.id.tvIssueDate)
+        val tvExpiryDate: TextView = itemView.findViewById(R.id.tvExpiryDate)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -47,9 +52,7 @@ class PCOAdapter(
         holder.tvApplicant.text = app.applicant
         holder.tvForwardedTo.text = app.forwardedTo
         holder.tvUpdated.text = app.updatedDate
-        holder.tvType.text = app.type
 
-        // ✅ Dynamic status badge color
         val status = app.status?.lowercase(Locale.getDefault()) ?: "pending"
         holder.tvStatus.text = status.replaceFirstChar { it.uppercase() }
         holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
@@ -61,9 +64,30 @@ class PCOAdapter(
             "submitted" -> R.color.status_submitted
             else -> R.color.status_pending
         }
-
         val color = ContextCompat.getColor(context, colorRes)
         holder.tvStatus.backgroundTintList = ColorStateList.valueOf(color)
+
+        // ✅ Format Issue/Expiry Dates properly (Timestamp → formatted string)
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+
+        val issueDateStr = app.issueDate?.toDate()?.let {
+            dateFormat.format(it)
+        } ?: "N/A"
+
+        val expiryDateStr = app.expiryDate?.toDate()?.let {
+            dateFormat.format(it)
+        } ?: "N/A"
+
+        // ✅ Only show Issue/Expiry if approved
+        if (status == "approved") {
+            holder.tvIssueDate.visibility = View.VISIBLE
+            holder.tvExpiryDate.visibility = View.VISIBLE
+            holder.tvIssueDate.text = "Issued: $issueDateStr"
+            holder.tvExpiryDate.text = "Expires: $expiryDateStr"
+        } else {
+            holder.tvIssueDate.visibility = View.GONE
+            holder.tvExpiryDate.visibility = View.GONE
+        }
 
         holder.itemView.setOnClickListener {
             onItemClick(app)

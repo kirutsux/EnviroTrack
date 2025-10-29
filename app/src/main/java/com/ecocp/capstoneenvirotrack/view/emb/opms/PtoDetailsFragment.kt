@@ -85,7 +85,7 @@ class PtoDetailsFragment : Fragment() {
                     val submittedTs = doc.getTimestamp("submittedTimestamp")?.toDate()
                         ?: doc.getTimestamp("timestamp")?.toDate()
 
-                    val status = doc.getString("status") ?: "Pending"
+                    val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
                     val feedback = doc.getString("feedback") ?: ""
 
                     binding.apply {
@@ -127,22 +127,48 @@ class PtoDetailsFragment : Fragment() {
                             else -> addEmptyFileNotice()
                         }
 
-                        txtStatus.text = "Status: $status"
+                        txtStatus.text = "Status: ${status.replaceFirstChar { it.uppercase() }}"
 
-                        // ✅ Show upload button only if Pending
-                        btnUploadCertificate.visibility = if (status.equals("Pending", ignoreCase = true)) View.VISIBLE else View.GONE
+                        // 🔹 Handle visibility based on status
+                        when (status) {
+                            "approved" -> {
+                                // Hide upload section
+                                btnUploadCertificate.visibility = View.GONE
+                                tvSelectedFile.visibility = View.GONE
 
-                        // ✅ Feedback visibility
-                        when (status.lowercase(Locale.getDefault())) {
-                            "approved", "rejected" -> {
+                                // Hide review buttons
                                 btnApprove.visibility = View.GONE
                                 btnReject.visibility = View.GONE
+
+                                // Feedback readonly
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                                 inputFeedback.isEnabled = false
                                 inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
                             }
-                            else -> {
+
+                            "rejected" -> {
+                                // Hide upload section
+                                btnUploadCertificate.visibility = View.GONE
+                                tvSelectedFile.visibility = View.GONE
+
+                                // Hide review buttons
+                                btnApprove.visibility = View.GONE
+                                btnReject.visibility = View.GONE
+
+                                // Feedback readonly
+                                inputFeedback.visibility = View.VISIBLE
+                                inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
+                                inputFeedback.isEnabled = false
+                                inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            }
+
+                            else -> { // Pending
+                                // Show upload section only for pending
+                                btnUploadCertificate.visibility = View.VISIBLE
+                                tvSelectedFile.visibility = View.VISIBLE
+
+                                // Show review controls
                                 btnApprove.visibility = View.VISIBLE
                                 btnReject.visibility = View.VISIBLE
                                 inputFeedback.visibility = View.VISIBLE
@@ -162,6 +188,7 @@ class PtoDetailsFragment : Fragment() {
                 Log.e("PTO_DETAILS", "❌ Failed to load document", e)
             }
     }
+
 
     // ------------------------------------------------------------
     // FILE LINK DISPLAY
@@ -268,27 +295,6 @@ class PtoDetailsFragment : Fragment() {
     }
 
 
-    private fun saveCertificateLinkToFirestore(downloadUrl: String) {
-        val id = applicationId ?: return
-
-        db.collection("opms_pto_applications").document(id)
-            .update(
-                mapOf(
-                    "certificateUrl" to downloadUrl,
-                    "status" to "Approved",
-                    "reviewedTimestamp" to Timestamp.now()
-                )
-            )
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Certificate uploaded successfully!", Toast.LENGTH_SHORT).show()
-                binding.btnUploadCertificate.visibility = View.GONE
-                binding.txtStatus.text = "Status: Approved"
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to save certificate: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
     // ------------------------------------------------------------
     // APPROVE / REJECT STATUS UPDATE
     // ------------------------------------------------------------
@@ -300,11 +306,25 @@ class PtoDetailsFragment : Fragment() {
             return
         }
 
-        val updateData = mapOf(
+        // 🔹 Prepare base data to update
+        val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
+
+        // 🔹 If approved, set issueDate and expiryDate (+5 years)
+        if (status.equals("Approved", ignoreCase = true)) {
+            val issueDate = Date()
+            val calendar = Calendar.getInstance().apply {
+                time = issueDate
+                add(Calendar.YEAR, 5) // Add 5 years for expiry
+            }
+            val expiryDate = calendar.time
+
+            updateData["issueDate"] = Timestamp(issueDate)
+            updateData["expiryDate"] = Timestamp(expiryDate)
+        }
 
         db.collection("opms_pto_applications").document(id)
             .update(updateData)
@@ -316,7 +336,7 @@ class PtoDetailsFragment : Fragment() {
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // ✅ Notifications
+                // ✅ Notifications after update
                 db.collection("opms_pto_applications").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
@@ -329,7 +349,7 @@ class PtoDetailsFragment : Fragment() {
                             "senderId" to embUid,
                             "title" to if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
                             "message" to if (isApproved)
-                                "Your Permit to Operate application has been approved."
+                                "Your Permit to Operate application has been approved. Valid for 5 years."
                             else
                                 "Your Permit to Operate application has been rejected. Please review the feedback.",
                             "timestamp" to Timestamp.now(),
@@ -357,6 +377,7 @@ class PtoDetailsFragment : Fragment() {
                 Log.e("PTO_REVIEW", "❌ Failed to update PTO status", e)
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

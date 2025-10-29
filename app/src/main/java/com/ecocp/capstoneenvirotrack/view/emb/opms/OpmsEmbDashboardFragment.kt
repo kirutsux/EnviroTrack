@@ -46,16 +46,80 @@ class OpmsEmbDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = OpmsEmbAdapter(filteredList)
+        adapter = OpmsEmbAdapter(
+            filteredList,
+            onItemLongClick = onItemLongClick@{ app ->
+                val status = app.status ?: "Pending"
+
+                // 🚫 Prevent deleting approved applications
+                if (status.equals("Approved", ignoreCase = true)) {
+                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Cannot Delete")
+                        .setMessage("Approved applications cannot be deleted.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                    return@onItemLongClick
+                }
+
+                // ✅ Only allow deletion for Pending or Rejected
+                if (!status.equals("Pending", ignoreCase = true) &&
+                    !status.equals("Rejected", ignoreCase = true)) {
+                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Cannot Delete")
+                        .setMessage("Only pending or rejected applications can be deleted.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                    return@onItemLongClick
+                }
+
+                // 🗑️ Confirm deletion dialog
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Application")
+                    .setMessage("Are you sure you want to delete this submitted application?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        val appId = app.applicationId ?: return@setPositiveButton
+                        val collection = when (app.applicationType) {
+                            "Discharge Permit" -> "opms_discharge_permits"
+                            "Permit to Operate" -> "opms_pto_applications"
+                            else -> return@setPositiveButton
+                        }
+
+                        db.collection(collection).document(appId)
+                            .delete()
+                            .addOnSuccessListener {
+                                val updatedList = filteredList.toMutableList()
+                                updatedList.remove(app)
+                                filteredList.clear()
+                                filteredList.addAll(updatedList)
+                                adapter.notifyDataSetChanged()
+
+                                android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Application deleted successfully.",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            .addOnFailureListener { e ->
+                                android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Failed to delete application: ${e.message}",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+        )
 
         binding.recyclerEmbOpmsList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEmbOpmsList.adapter = adapter
 
         setupSpinner()
         setupSearchBar()
-
         loadApplications()
     }
+
 
     private fun setupSpinner() {
         val statusOptions = listOf("All", "Pending", "Approved", "Rejected")
@@ -105,7 +169,9 @@ class OpmsEmbDashboardFragment : Fragment() {
                         dischargeMethod = data["treatmentMethod"] as? String,
                         uploadedFiles = data["fileLinks"] as? String,
                         status = data["status"] as? String ?: "Pending",
-                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp
+                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp,
+                        issueDate = data["issueDate"] as? Timestamp,
+                        expiryDate = data["expiryDate"] as? Timestamp
                     )
                     addOrUpdateApplication(app)
                 }
@@ -141,7 +207,9 @@ class OpmsEmbDashboardFragment : Fragment() {
                         fuelType = data["fuelType"] as? String,
                         emissions = data["emissions"] as? String,
                         status = data["status"] as? String ?: "Pending",
-                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp
+                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp,
+                        issueDate = data["issueDate"] as? Timestamp,
+                        expiryDate = data["expiryDate"] as? Timestamp
                     )
                     addOrUpdateApplication(app)
                 }

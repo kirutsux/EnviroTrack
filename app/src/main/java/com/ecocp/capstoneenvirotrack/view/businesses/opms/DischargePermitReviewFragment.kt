@@ -97,8 +97,11 @@ class DischargePermitReviewFragment : Fragment() {
                     "Receiving Body: $receivingBody\nVolume: $dischargeVolume\nTreatment: $dischargeMethod"
 
                 // --- Payment Display ---
-                val paymentDisplay = if (paymentStatus.equals("Paid", ignoreCase = true)) {
-                    "✅ Payment Completed\nAmount: ₱$amount $currency\nMethod: $paymentMethod\nDate: $formattedDate"
+                val isPaid = paymentTimestamp != null && paymentMethod != "-" && amount > 0
+
+                val paymentDisplay = if (isPaid) {
+                    val formattedAmount = String.format(Locale.getDefault(), "%.2f", amount)
+                    "✅ Payment Completed\nAmount: ₱$formattedAmount $currency\nMethod: $paymentMethod\nDate: $formattedDate"
                 } else {
                     "❌ Payment Pending"
                 }

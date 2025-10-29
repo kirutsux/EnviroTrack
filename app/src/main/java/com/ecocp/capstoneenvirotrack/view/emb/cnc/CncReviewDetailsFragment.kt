@@ -126,6 +126,9 @@ class CncReviewDetailsFragment : Fragment() {
 
                 when (status) {
                     "approved" -> {
+                        // Hide upload certificate section
+                        binding.btnUploadCertificate.visibility = View.GONE
+                        binding.tvSelectedFile.visibility = View.GONE
                         binding.btnApprove.visibility = View.GONE
                         binding.btnReject.visibility = View.GONE
                         binding.inputFeedback.visibility = View.GONE
@@ -133,6 +136,8 @@ class CncReviewDetailsFragment : Fragment() {
                     "rejected" -> {
                         binding.btnApprove.visibility = View.GONE
                         binding.btnReject.visibility = View.GONE
+                        binding.btnUploadCertificate.visibility = View.GONE
+                        binding.tvSelectedFile.visibility = View.GONE
 
                         // Show feedback as read-only for rejected applications
                         binding.inputFeedback.visibility = View.VISIBLE
@@ -144,6 +149,8 @@ class CncReviewDetailsFragment : Fragment() {
                         // Show normal input and buttons for pending applications
                         binding.btnApprove.visibility = View.VISIBLE
                         binding.btnReject.visibility = View.VISIBLE
+                        binding.btnUploadCertificate.visibility = View.VISIBLE
+                        binding.tvSelectedFile.visibility = View.VISIBLE
                         binding.inputFeedback.visibility = View.VISIBLE
                         binding.inputFeedback.isEnabled = true
                         binding.inputFeedback.setText("")
