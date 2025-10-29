@@ -96,14 +96,25 @@ class PcoEmbReviewDetailsFragment : Fragment() {
                 setupClickableLink(binding.linkGovernmentId, doc.getString("governmentIdUrl"))
                 setupClickableLink(binding.linkTrainingCertificate, doc.getString("trainingCertificateUrl"))
 
+                // ✅ Hide feedback if EMB didn't put any
+                val feedback = doc.getString("feedback")
+                if (feedback.isNullOrBlank()) {
+                    binding.inputFeedback.visibility = View.GONE
+                } else {
+                    binding.inputFeedback.visibility = View.VISIBLE
+                    binding.inputFeedback.setText(feedback)
+                }
+
                 if (status.equals("approved", true) || status.equals("rejected", true)) {
                     binding.btnApprove.visibility = View.GONE
                     binding.btnReject.visibility = View.GONE
                     binding.btnUploadCertificate.visibility = View.GONE
+                    binding.tvSelectedFile.visibility = View.GONE
                 } else {
                     binding.btnApprove.visibility = View.VISIBLE
                     binding.btnReject.visibility = View.VISIBLE
                     binding.btnUploadCertificate.visibility = View.VISIBLE
+                    binding.tvSelectedFile.visibility = View.VISIBLE
                 }
             }
             .addOnFailureListener { e ->
@@ -111,6 +122,7 @@ class PcoEmbReviewDetailsFragment : Fragment() {
                 Toast.makeText(requireContext(), "Error loading PCO details.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun setupClickableLink(textView: android.widget.TextView, url: String?) {
         if (!url.isNullOrEmpty()) {

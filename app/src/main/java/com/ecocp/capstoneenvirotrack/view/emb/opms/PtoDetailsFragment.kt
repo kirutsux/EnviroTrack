@@ -85,7 +85,7 @@ class PtoDetailsFragment : Fragment() {
                     val submittedTs = doc.getTimestamp("submittedTimestamp")?.toDate()
                         ?: doc.getTimestamp("timestamp")?.toDate()
 
-                    val status = doc.getString("status") ?: "Pending"
+                    val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
                     val feedback = doc.getString("feedback") ?: ""
 
                     binding.apply {
@@ -127,22 +127,48 @@ class PtoDetailsFragment : Fragment() {
                             else -> addEmptyFileNotice()
                         }
 
-                        txtStatus.text = "Status: $status"
+                        txtStatus.text = "Status: ${status.replaceFirstChar { it.uppercase() }}"
 
-                        // ✅ Show upload button only if Pending
-                        btnUploadCertificate.visibility = if (status.equals("Pending", ignoreCase = true)) View.VISIBLE else View.GONE
+                        // 🔹 Handle visibility based on status
+                        when (status) {
+                            "approved" -> {
+                                // Hide upload section
+                                btnUploadCertificate.visibility = View.GONE
+                                tvSelectedFile.visibility = View.GONE
 
-                        // ✅ Feedback visibility
-                        when (status.lowercase(Locale.getDefault())) {
-                            "approved", "rejected" -> {
+                                // Hide review buttons
                                 btnApprove.visibility = View.GONE
                                 btnReject.visibility = View.GONE
+
+                                // Feedback readonly
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                                 inputFeedback.isEnabled = false
                                 inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
                             }
-                            else -> {
+
+                            "rejected" -> {
+                                // Hide upload section
+                                btnUploadCertificate.visibility = View.GONE
+                                tvSelectedFile.visibility = View.GONE
+
+                                // Hide review buttons
+                                btnApprove.visibility = View.GONE
+                                btnReject.visibility = View.GONE
+
+                                // Feedback readonly
+                                inputFeedback.visibility = View.VISIBLE
+                                inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
+                                inputFeedback.isEnabled = false
+                                inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            }
+
+                            else -> { // Pending
+                                // Show upload section only for pending
+                                btnUploadCertificate.visibility = View.VISIBLE
+                                tvSelectedFile.visibility = View.VISIBLE
+
+                                // Show review controls
                                 btnApprove.visibility = View.VISIBLE
                                 btnReject.visibility = View.VISIBLE
                                 inputFeedback.visibility = View.VISIBLE
@@ -162,6 +188,7 @@ class PtoDetailsFragment : Fragment() {
                 Log.e("PTO_DETAILS", "❌ Failed to load document", e)
             }
     }
+
 
     // ------------------------------------------------------------
     // FILE LINK DISPLAY

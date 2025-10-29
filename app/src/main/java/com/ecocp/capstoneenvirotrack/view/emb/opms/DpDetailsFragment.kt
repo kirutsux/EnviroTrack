@@ -166,7 +166,6 @@ class DpDetailsFragment : Fragment() {
                     txtVolume.text = doc.getString("volume") ?: "-"
                     txtTreatment.text = doc.getString("treatmentMethod") ?: "-"
                     txtOperationDate.text = doc.getString("operationStartDate") ?: "-"
-                    txtStatus.text = doc.getString("status") ?: "-"
 
                     // Payment info
                     val amount = doc.getDouble("amount") ?: 0.0
@@ -188,47 +187,57 @@ class DpDetailsFragment : Fragment() {
                     val feedback = doc.getString("feedback") ?: ""
                     val certificateUrl = doc.getString("certificateUrl")
 
-                    // populate local var if certificate was already uploaded earlier
+                    // store uploaded certificate URL (if any)
                     uploadedCertificateUrl = certificateUrl
+
+                    txtStatus.text = "Status: ${status.replaceFirstChar { it.uppercase() }}"
 
                     when (status) {
                         "approved" -> {
-                            btnApprove.visibility = View.GONE
-                            btnReject.visibility = View.GONE
-                            // EMB can still view upload button only if no certificate exists (but as per your request upload visible while pending,
-                            // so for approved we hide upload if cert exists, otherwise leave it visible)
-                            inputFeedback.visibility = View.VISIBLE
-                            inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
-                            inputFeedback.isEnabled = false
-                            inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
-
-                            if (certificateUrl.isNullOrBlank()) {
-                                // in rare case approved but no certificate yet -> allow upload
-                                btnUploadCertificate.visibility = View.VISIBLE
-                                tvSelectedFile.text = "No file selected"
-                            } else {
-                                btnUploadCertificate.visibility = View.GONE
-                                tvSelectedFile.text = "Uploaded: ${certificateUrl.substringAfterLast("/").substringBefore("?")}"
-                            }
-                        }
-                        "rejected" -> {
-                            btnApprove.visibility = View.GONE
-                            btnReject.visibility = View.GONE
+                            // Hide upload section
                             btnUploadCertificate.visibility = View.GONE
+                            tvSelectedFile.visibility = View.GONE
+
+                            // Hide review buttons
+                            btnApprove.visibility = View.GONE
+                            btnReject.visibility = View.GONE
+
+                            // Feedback readonly
                             inputFeedback.visibility = View.VISIBLE
                             inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                             inputFeedback.isEnabled = false
                             inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
-                            tvSelectedFile.text = "No file selected"
                         }
-                        else -> { // pending -> show upload button (EMB can upload while pending)
+
+                        "rejected" -> {
+                            // Hide upload section
+                            btnUploadCertificate.visibility = View.GONE
+                            tvSelectedFile.visibility = View.GONE
+
+                            // Hide review buttons
+                            btnApprove.visibility = View.GONE
+                            btnReject.visibility = View.GONE
+
+                            // Feedback readonly
+                            inputFeedback.visibility = View.VISIBLE
+                            inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
+                            inputFeedback.isEnabled = false
+                            inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                        }
+
+                        else -> { // pending
+                            // Show upload section only for pending
+                            btnUploadCertificate.visibility = View.VISIBLE
+                            tvSelectedFile.visibility = View.VISIBLE
+
+                            // Show review controls
                             btnApprove.visibility = View.VISIBLE
                             btnReject.visibility = View.VISIBLE
-                            btnUploadCertificate.visibility = View.VISIBLE
                             inputFeedback.visibility = View.VISIBLE
                             inputFeedback.isEnabled = true
                             inputFeedback.setText(feedback)
-                            // show filename if already uploaded, otherwise default text
+
+                            // show filename if already uploaded
                             if (!certificateUrl.isNullOrBlank()) {
                                 tvSelectedFile.text = "Uploaded: ${certificateUrl.substringAfterLast("/").substringBefore("?")}"
                             } else {
@@ -237,7 +246,7 @@ class DpDetailsFragment : Fragment() {
                         }
                     }
 
-                    // Display uploaded application files (fileLinks) if any
+                    // Display uploaded application files (fileLinks)
                     val fileLinksField = doc.get("fileLinks")
                     when (fileLinksField) {
                         is List<*> -> {
@@ -257,6 +266,7 @@ class DpDetailsFragment : Fragment() {
                     binding.txtCompanyName.text = "Error loading details: ${e.message}"
             }
     }
+
 
     // Show clickable file links
     private fun displayFileLinks(fileLinks: List<String>) {
