@@ -73,35 +73,20 @@ class HWMSDashboardFragment : Fragment() {
                     return@addOnSuccessListener
                 }
 
-                // Fetch transport bookings for this user
+                // ✅ Fix: match correct user field from transport_bookings
                 db.collection("transport_bookings")
-                    .whereEqualTo("pcoId", userId)
+                    .whereEqualTo("generatorId", userId) // Change field name if needed
                     .get()
                     .addOnSuccessListener { bookingsSnap ->
-                        val bookingMap = mutableMapOf<String, String>()
+                        val allStatuses = bookingsSnap.documents.mapNotNull { it.getString("status") }
 
-                        for (b in bookingsSnap) {
-                            val wasteType = b.getString("wasteType") ?: ""
-                            val providerType = b.getString("providerType") ?: ""
-                            val status = b.getString("status") ?: "Unpaid"
-
-                            // Combine both wasteType and providerType as key to avoid mismatch
-                            if (wasteType.isNotEmpty() && providerType.isNotEmpty()) {
-                                bookingMap["${wasteType}_${providerType}"] = status
-                            }
-                        }
-
-                        // Build HWMSApplication list
                         for (doc in wasteList) {
                             val wasteDetailsList = doc.get("wasteDetails") as? List<Map<String, Any>> ?: emptyList()
                             val firstDetail = wasteDetailsList.firstOrNull()
 
                             val wasteType = firstDetail?.get("wasteName") as? String ?: ""
-                            // Try to find a matching booking by waste type (case-insensitive)
-                            val paymentStatus = bookingMap.entries.find {
-                                it.key.startsWith("${wasteType}_", ignoreCase = true)
-                            }?.value ?: "Unpaid"
 
+                            val paymentStatus = if (allStatuses.contains("Paid")) "Paid" else "Unpaid"
 
                             val app = HWMSApplication(
                                 id = doc.id,
@@ -109,7 +94,7 @@ class HWMSDashboardFragment : Fragment() {
                                 quantity = firstDetail?.get("quantity") as? String ?: "",
                                 storageLocation = firstDetail?.get("currentPractice") as? String ?: "",
                                 dateGenerated = doc.getTimestamp("timestamp")?.toDate().toString(),
-                                status = paymentStatus // ✅ uses booking status
+                                status = paymentStatus
                             )
 
                             applications.add(app)
@@ -125,4 +110,6 @@ class HWMSDashboardFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to load applications.", Toast.LENGTH_SHORT).show()
             }
     }
+
+
 }
