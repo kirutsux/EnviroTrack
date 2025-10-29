@@ -51,6 +51,16 @@
             android:hint="Destination (TSD facility) - optional" />
 
         <EditText
+            android:id="@+id/etAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Amount (PHP)"
+            android:inputType="numberDecimal"
+            android:layout_marginTop="8dp" />
+
+        <!-- Date selector -->
+
+        <EditText
             android:id="@+id/etSpecialInstructions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,7 +68,6 @@
             android:inputType="textMultiLine"
             android:minLines="2" />
 
-        <!-- Date selector -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

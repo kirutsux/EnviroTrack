@@ -1,12 +1,18 @@
 package com.ecocp.capstoneenvirotrack.adapter
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.Booking
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,6 +27,10 @@ class BookingAdapter(private val bookings: List<Booking>) :
         val tvDestination: TextView = view.findViewById(R.id.tvDestination)
         val tvQuantity: TextView = view.findViewById(R.id.tvQuantity)
         val tvDateBooked: TextView = view.findViewById(R.id.tvDateBooked)
+
+        // New quick message UI
+        val etQuickMessage: EditText? = view.findViewById(R.id.etQuickMessage)
+        val btnSendQuick: ImageButton? = view.findViewById(R.id.btnSendQuick)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookingViewHolder {
@@ -42,6 +52,42 @@ class BookingAdapter(private val bookings: List<Booking>) :
         val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val date = booking.dateBooked?.toDate()
         holder.tvDateBooked.text = "Date Booked: ${date?.let { dateFormat.format(it) } ?: "N/A"}"
+
+        // --- NEW: Quick message + navigation handling ---
+        holder.btnSendQuick?.setOnClickListener {
+            val message = holder.etQuickMessage?.text.toString().trim()
+            if (message.isNotEmpty()) {
+                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+                val receiverId = booking.generatorId ?: return@setOnClickListener
+                val receiverName = "Generator" // You can replace with actual name if available
+
+                // Create deterministic chatId
+                val chatId = listOf(currentUserId, receiverId).sorted().joinToString("_")
+
+                // Build message object
+                val messageObj = mapOf(
+                    "senderId" to currentUserId,
+                    "receiverId" to receiverId,
+                    "message" to message,
+                    "timestamp" to System.currentTimeMillis()
+                )
+
+                FirebaseDatabase.getInstance().getReference("Chats")
+                    .child(chatId)
+                    .push()
+                    .setValue(messageObj)
+
+                holder.etQuickMessage?.text?.clear()
+
+                // Navigate to chat screen
+                val navController = Navigation.findNavController(holder.itemView)
+                val bundle = Bundle().apply {
+                    putString("receiverId", receiverId)
+                    putString("receiverName", receiverName)
+                }
+                navController.navigate(R.id.action_SP_Bookings_to_SP_ChatFragment, bundle)
+            }
+        }
     }
 
     override fun getItemCount(): Int = bookings.size

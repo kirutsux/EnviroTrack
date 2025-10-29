@@ -15,7 +15,6 @@ import com.ecocp.capstoneenvirotrack.model.Provider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
 
 class Inbox : Fragment() {
 
@@ -59,11 +58,13 @@ class Inbox : Fragment() {
         binding.inboxRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.inboxRecyclerView.adapter = adapter
 
-        loadInbox()
+        loadProviders()
         return binding.root
     }
 
-    private fun loadInbox() {
+    private fun loadProviders() {
+        val currentUserId = auth.currentUser?.uid ?: return
+
         firestore.collection("service_providers")
             .whereEqualTo("status", "approved")
             .get()
@@ -71,23 +72,26 @@ class Inbox : Fragment() {
                 providerList.clear()
 
                 for (doc in result) {
-                    val data = doc.data
+                    val providerId = doc.getString("uid") ?: continue
+                    val providerName = doc.getString("name") ?: "Unknown"
+                    val imageUrl = doc.getString("profileImageUrl") ?: ""
+                    val contact = doc.getString("contactNumber") ?: ""
+                    val email = doc.getString("email") ?: ""
+                    val address = doc.getString("location") ?: ""
 
                     val provider = Provider(
-                        id = doc.id,
-                        name = data["name"] as? String ?: "",
-                        description = "", // can be replaced later with last message
-                        imageUrl = "", // default, since not in Firestore yet
-                        status = data["status"] as? String ?: "",
-                        contact = data["contactNumber"] as? String ?: "",
-                        email = data["email"] as? String ?: "",
-                        address = data["location"] as? String ?: ""
+                        id = providerId,
+                        name = providerName,
+                        description = "Loading last message...",
+                        imageUrl = imageUrl,
+                        status = "approved",
+                        contact = contact,
+                        email = email,
+                        address = address
                     )
 
-                    // ✅ Optional filter: only show approved ones
-                    if (provider.status == "approved") {
-                        providerList.add(provider)
-                    }
+                    providerList.add(provider)
+                    fetchLastMessage(currentUserId, provider)
                 }
 
                 adapter.notifyDataSetChanged()
@@ -97,4 +101,34 @@ class Inbox : Fragment() {
             }
     }
 
+    private fun fetchLastMessage(currentUserId: String, provider: Provider) {
+        // Check for both directions: currentUserId/providerId and providerId/currentUserId
+        val path1 = realtimeDb.child(currentUserId).child(provider.id)
+        val path2 = realtimeDb.child(provider.id).child(currentUserId)
+
+        path1.child("lastMessage").get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    updateProviderLastMessage(provider.id, snapshot.value.toString())
+                } else {
+                    // Try the reversed path
+                    path2.child("lastMessage").get()
+                        .addOnSuccessListener { reversedSnap ->
+                            if (reversedSnap.exists()) {
+                                updateProviderLastMessage(provider.id, reversedSnap.value.toString())
+                            } else {
+                                updateProviderLastMessage(provider.id, "No messages yet")
+                            }
+                        }
+                }
+            }
+    }
+
+    private fun updateProviderLastMessage(providerId: String, message: String) {
+        val index = providerList.indexOfFirst { it.id == providerId }
+        if (index != -1) {
+            providerList[index] = providerList[index].copy(description = message)
+            adapter.notifyItemChanged(index)
+        }
+    }
 }

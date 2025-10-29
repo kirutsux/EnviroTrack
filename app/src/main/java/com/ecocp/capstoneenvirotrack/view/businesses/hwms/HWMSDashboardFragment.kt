@@ -59,25 +59,67 @@ class HWMSDashboardFragment : Fragment() {
     }
 
     private fun fetchApplications() {
-        val pcoId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        db.collection("HazardousWasteManifest")
-            .whereEqualTo("pcoId", pcoId)
+        db.collection("HazardousWasteGenerator")
+            .whereEqualTo("userId", userId)
             .get()
             .addOnSuccessListener { result ->
                 applications.clear()
-                for (doc in result) {
-                    val app = HWMSApplication(
-                        id = doc.id,
-                        wasteType = doc.getString("wasteType") ?: "",
-                        quantity = doc.getString("quantity") ?: "",
-                        storageLocation = doc.getString("storageLocation") ?: "",
-                        dateGenerated = doc.getString("dateGenerated") ?: "",
-                        status = doc.getString("status") ?: ""
-                    )
-                    applications.add(app)
+                val wasteList = result.documents
+
+                if (wasteList.isEmpty()) {
+                    Toast.makeText(requireContext(), "No applications found.", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
                 }
-                adapter.notifyDataSetChanged()
+
+                // Fetch transport bookings for this user
+                db.collection("transport_bookings")
+                    .whereEqualTo("pcoId", userId)
+                    .get()
+                    .addOnSuccessListener { bookingsSnap ->
+                        val bookingMap = mutableMapOf<String, String>()
+
+                        for (b in bookingsSnap) {
+                            val wasteType = b.getString("wasteType") ?: ""
+                            val providerType = b.getString("providerType") ?: ""
+                            val status = b.getString("status") ?: "Unpaid"
+
+                            // Combine both wasteType and providerType as key to avoid mismatch
+                            if (wasteType.isNotEmpty() && providerType.isNotEmpty()) {
+                                bookingMap["${wasteType}_${providerType}"] = status
+                            }
+                        }
+
+                        // Build HWMSApplication list
+                        for (doc in wasteList) {
+                            val wasteDetailsList = doc.get("wasteDetails") as? List<Map<String, Any>> ?: emptyList()
+                            val firstDetail = wasteDetailsList.firstOrNull()
+
+                            val wasteType = firstDetail?.get("wasteName") as? String ?: ""
+                            // Try to find a matching booking by waste type (case-insensitive)
+                            val paymentStatus = bookingMap.entries.find {
+                                it.key.startsWith("${wasteType}_", ignoreCase = true)
+                            }?.value ?: "Unpaid"
+
+
+                            val app = HWMSApplication(
+                                id = doc.id,
+                                wasteType = wasteType,
+                                quantity = firstDetail?.get("quantity") as? String ?: "",
+                                storageLocation = firstDetail?.get("currentPractice") as? String ?: "",
+                                dateGenerated = doc.getTimestamp("timestamp")?.toDate().toString(),
+                                status = paymentStatus // ✅ uses booking status
+                            )
+
+                            applications.add(app)
+                        }
+
+                        adapter.notifyDataSetChanged()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Failed to load payment info.", Toast.LENGTH_SHORT).show()
+                    }
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to load applications.", Toast.LENGTH_SHORT).show()

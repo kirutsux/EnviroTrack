@@ -45,5 +45,22 @@
             app:popUpToInclusive="true" />
     </fragment>
 
+    <fragment
+        android:id="@+id/SP_ChatFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_sp_chat">
 
+        <argument
+            android:name="receiverId"
+            app:argType="string" />
+
+        <argument
+            android:name="receiverName"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_SP_Bookings_to_SP_ChatFragment"
+            app:destination="@id/SP_ChatFragment" />
+    </fragment>
 </navigation>
