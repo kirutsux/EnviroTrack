@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Permit to Transport (PTT) Application"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1) Select Approved Generator Application" />
+
+        <Spinner
+            android:id="@+id/spinnerGeneratorApps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2) Select Confirmed Transport Booking" />
+
+        <Spinner
+            android:id="@+id/spinnerTransportBookings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3) Select Confirmed TSD Booking" />
+
+        <Spinner
+            android:id="@+id/spinnerTsdBookings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload PTT Requirements" />
+
+        <Button
+            android:id="@+id/btnUploadGenCert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Generator Registration Certificate"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/tvGenCertStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No file selected"
+            android:textSize="12sp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnUploadTransportPlan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Transport Plan Document"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvTransportPlanStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No file selected"
+            android:textSize="12sp"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/etRemarks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Remarks (optional)"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnSubmitPTT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit PTT Application" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="12sp"
+            android:layout_marginTop="12dp" />
+    </LinearLayout>
+</ScrollView>

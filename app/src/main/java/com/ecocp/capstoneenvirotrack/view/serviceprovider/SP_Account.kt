@@ -23,6 +23,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 
 class SP_Account : Fragment() {
 
+    private lateinit var etName: EditText
     private lateinit var etCompanyName: EditText
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
@@ -52,6 +53,7 @@ class SP_Account : Fragment() {
         val view = inflater.inflate(R.layout.fragment_sp_account, container, false)
 
         // Initialize views
+        etName = view.findViewById(R.id.etName)
         etCompanyName = view.findViewById(R.id.etCompanyName)
         etEmail = view.findViewById(R.id.etEmail)
         etPassword = view.findViewById(R.id.etPassword)
@@ -65,11 +67,10 @@ class SP_Account : Fragment() {
         showPassword = view.findViewById(R.id.showPassword)
         progressBar = view.findViewById(R.id.progressBar)
 
-        // Hide bottom navigation
-        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.spBottomNavigation)
-        bottomNav?.visibility = View.GONE
+        // Hide bottom navigation safely
+        activity?.findViewById<BottomNavigationView>(R.id.spBottomNavigation)?.visibility = View.GONE
 
-        // Disable fields
+        // Disable uneditable fields
         etEmail.isEnabled = false
         etRole.isEnabled = false
 
@@ -77,12 +78,12 @@ class SP_Account : Fragment() {
         btnSaveChanges.isEnabled = false
         btnSaveChanges.alpha = 0.5f
 
+        // 🔙 Safe back navigation
         ivBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-            requireActivity().overridePendingTransition(
-                android.R.anim.fade_in,
-                android.R.anim.fade_out
-            )
+            activity?.let { act ->
+                act.onBackPressedDispatcher.onBackPressed()
+                act.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            }
         }
 
         btnUploadPhoto.setOnClickListener { openImagePicker() }
@@ -102,13 +103,11 @@ class SP_Account : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Show bottom navigation again when leaving
-        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.spBottomNavigation)
-        bottomNav?.visibility = View.VISIBLE
-        requireActivity().overridePendingTransition(
-            android.R.anim.fade_in,
-            android.R.anim.fade_out
-        )
+        // Safely show bottom navigation again when leaving
+        activity?.let { act ->
+            act.findViewById<BottomNavigationView>(R.id.spBottomNavigation)?.visibility = View.VISIBLE
+            act.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
     }
 
     private fun togglePasswordVisibility(editText: EditText, toggleIcon: ImageView, isVisible: Boolean) {
@@ -128,6 +127,7 @@ class SP_Account : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         }
+        etName.addTextChangedListener(watcher)
         etCompanyName.addTextChangedListener(watcher)
         etPassword.addTextChangedListener(watcher)
         etContact.addTextChangedListener(watcher)
@@ -136,6 +136,7 @@ class SP_Account : Fragment() {
 
     private fun checkForChanges() {
         val currentData = mapOf(
+            "name" to etName.text.toString().trim(),
             "companyName" to etCompanyName.text.toString().trim(),
             "password" to etPassword.text.toString().trim(),
             "contactNumber" to etContact.text.toString().trim(),
@@ -149,7 +150,7 @@ class SP_Account : Fragment() {
     private fun openImagePicker() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(intent, PICK_IMAGE_REQUEST)
-        requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        activity?.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -180,13 +181,17 @@ class SP_Account : Fragment() {
                     firestore.collection("service_providers").document(uid)
                         .update("profileImageUrl", uri.toString())
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Profile picture updated!", Toast.LENGTH_SHORT).show()
-                            fetchSPDetails()
+                            if (isAdded) {
+                                Toast.makeText(requireContext(), "Profile picture updated!", Toast.LENGTH_SHORT).show()
+                                fetchSPDetails()
+                            }
                         }
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
 
@@ -195,6 +200,7 @@ class SP_Account : Fragment() {
         firestore.collection("service_providers").document(uid).get()
             .addOnSuccessListener { doc ->
                 if (doc.exists()) {
+                    val name = doc.getString("name") ?: ""
                     val companyName = doc.getString("companyName") ?: ""
                     val email = doc.getString("email") ?: ""
                     val password = doc.getString("password") ?: ""
@@ -203,6 +209,7 @@ class SP_Account : Fragment() {
                     val role = doc.getString("role") ?: ""
                     val profileImageUrl = doc.getString("profileImageUrl") ?: ""
 
+                    etName.setText(name)
                     etCompanyName.setText(companyName)
                     etEmail.setText(email)
                     etPassword.setText(password)
@@ -211,38 +218,54 @@ class SP_Account : Fragment() {
                     etRole.setText(role)
 
                     originalData = mapOf(
+                        "name" to name,
                         "companyName" to companyName,
                         "password" to password,
                         "contactNumber" to contactNumber,
                         "location" to location
                     )
 
-                    if (profileImageUrl.isNotEmpty()) {
-                        Glide.with(this).load(profileImageUrl)
-                            .placeholder(R.drawable.sample_profile)
-                            .into(ivProfilePic)
-                    } else ivProfilePic.setImageResource(R.drawable.sample_profile)
+                    if (isAdded) {
+                        if (profileImageUrl.isNotEmpty()) {
+                            Glide.with(this)
+                                .load(profileImageUrl)
+                                .placeholder(R.drawable.sample_profile)
+                                .into(ivProfilePic)
+                        } else {
+                            ivProfilePic.setImageResource(R.drawable.sample_profile)
+                        }
+                    }
 
                     checkForChanges()
-                } else {
+                } else if (isAdded) {
                     Toast.makeText(requireContext(), "Service Provider data not found", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Error fetching data: ${e.message}", Toast.LENGTH_SHORT).show()
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "Error fetching data: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
 
     private fun saveUserChanges() {
         val user = auth.currentUser ?: return
-
+        val name = etName.text.toString().trim()
         val companyName = etCompanyName.text.toString().trim()
         val password = etPassword.text.toString().trim()
         val contact = etContact.text.toString().trim()
         val location = etLocation.text.toString().trim()
 
+        if (name.isEmpty() || companyName.isEmpty() || password.isEmpty()) {
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Name, company name, and password are required", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
         if (companyName.isEmpty() || password.isEmpty()) {
-            Toast.makeText(requireContext(), "Company name and password are required", Toast.LENGTH_SHORT).show()
+            if (isAdded) {
+                Toast.makeText(requireContext(), "Company name and password are required", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
@@ -252,34 +275,35 @@ class SP_Account : Fragment() {
 
         val userRef = firestore.collection("service_providers").document(user.uid)
         val updates = mapOf(
+            "name" to name,
             "companyName" to companyName,
             "password" to password,
             "contactNumber" to contact,
             "location" to location
         )
-
         userRef.update(updates)
             .addOnSuccessListener {
                 user.updatePassword(password)
                     .addOnSuccessListener {
                         progressBar.visibility = View.GONE
-                        Toast.makeText(requireContext(), "Account updated successfully!", Toast.LENGTH_SHORT).show()
-                        originalData = mapOf(
-                            "companyName" to companyName,
-                            "password" to password,
-                            "contactNumber" to contact,
-                            "location" to location
-                        )
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Account updated successfully!", Toast.LENGTH_SHORT).show()
+                        }
+                        originalData = updates
                         checkForChanges()
                     }
                     .addOnFailureListener { e ->
                         progressBar.visibility = View.GONE
-                        Toast.makeText(requireContext(), "Failed to update Auth password: ${e.message}", Toast.LENGTH_SHORT).show()
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Failed to update Auth password: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                     }
             }
             .addOnFailureListener { e ->
                 progressBar.visibility = View.GONE
-                Toast.makeText(requireContext(), "Failed to update account: ${e.message}", Toast.LENGTH_SHORT).show()
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "Failed to update account: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
                 checkForChanges()
             }
     }

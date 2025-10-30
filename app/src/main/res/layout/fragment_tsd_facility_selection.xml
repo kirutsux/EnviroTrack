@@ -1,0 +1,87 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select TSD Facility"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewTSD"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/tvSelectedFacility"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selected: None"
+            android:textStyle="bold"
+            android:textColor="@android:color/holo_green_dark"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etTreatmentInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type of Waste for Treatment" />
+
+        <EditText
+            android:id="@+id/etQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Quantity" />
+
+        <EditText
+            android:id="@+id/etPreferredDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Preferred Delivery Date"
+            android:focusable="false" />
+
+        <Button
+            android:id="@+id/btnUploadCertificate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Generator Registration Certificate" />
+
+        <TextView
+            android:id="@+id/tvCertificateStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No file uploaded"
+            android:textSize="12sp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnUploadPreviousRecord"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Previous Transport Record (optional)" />
+
+        <TextView
+            android:id="@+id/tvPrevRecordStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No file uploaded"
+            android:textSize="12sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnSubmitBooking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit Booking" />
+    </LinearLayout>
+</ScrollView>

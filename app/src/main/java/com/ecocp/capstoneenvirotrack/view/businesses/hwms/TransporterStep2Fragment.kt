@@ -9,12 +9,23 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ServiceProviderAdapter
 import com.ecocp.capstoneenvirotrack.model.ServiceProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,6 +37,13 @@ class TransporterStep2Fragment : Fragment() {
     private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var progressDialog: ProgressDialog
 
+    // Stripe variables
+    private lateinit var paymentSheet: PaymentSheet
+    private var clientSecret: String? = null
+    private var paymentAmount: Double = 0.0
+    private lateinit var selectedProvider: ServiceProvider
+    private lateinit var bookingData: HashMap<String, Any>
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,7 +53,6 @@ class TransporterStep2Fragment : Fragment() {
         recycler.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = ServiceProviderAdapter(providers) { provider ->
-            // provider clicked -> show booking dialog
             showBookingDialog(provider)
         }
         recycler.adapter = adapter
@@ -44,6 +61,13 @@ class TransporterStep2Fragment : Fragment() {
             setMessage("Loading...")
             setCancelable(false)
         }
+
+        // Stripe setup
+        PaymentConfiguration.init(
+            requireContext(),
+            "pk_test_51PF3r9J2KRREDP2eehrcDI42PVjLhtLQuEy55mabmKa63Etlh5DxHGupzcklVCnrEE0RF6SxYUQVEbJMNph0Zalf00Va9vwLxS"
+        )
+        paymentSheet = PaymentSheet(this, ::onPaymentResult)
 
         fetchTransporters()
         return v
@@ -63,10 +87,9 @@ class TransporterStep2Fragment : Fragment() {
             }
             .addOnFailureListener { e ->
                 progressDialog.dismiss()
-                Toast.makeText(requireContext(), "Failed to load service providers: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Failed to load transporters: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
-
 
     private fun showBookingDialog(provider: ServiceProvider) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_transporter_booking, null)
@@ -77,6 +100,7 @@ class TransporterStep2Fragment : Fragment() {
         val etOrigin = dialogView.findViewById<EditText>(R.id.etOrigin)
         val etDestination = dialogView.findViewById<EditText>(R.id.etDestination)
         val etSpecial = dialogView.findViewById<EditText>(R.id.etSpecialInstructions)
+        val etAmount = dialogView.findViewById<EditText>(R.id.etAmount)
         val btnPickDate = dialogView.findViewById<Button>(R.id.btnPickDate)
         val tvDateSelected = dialogView.findViewById<TextView>(R.id.tvDateSelected)
         val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirmBooking)
@@ -84,24 +108,21 @@ class TransporterStep2Fragment : Fragment() {
 
         tvProviderTitle.text = "Book with: ${provider.name} — ${provider.companyName}"
 
-        // default date string
         var selectedDateMillis: Long? = null
-
         btnPickDate.setOnClickListener {
             val cal = Calendar.getInstance()
-            val dp = DatePickerDialog(requireContext(),
-                { _, year, month, dayOfMonth ->
-                    val c = Calendar.getInstance()
-                    c.set(year, month, dayOfMonth, 0, 0, 0)
-                    selectedDateMillis = c.timeInMillis
-                    val formatted = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(c.time)
-                    tvDateSelected.text = formatted
-                },
+            val dp = DatePickerDialog(requireContext(), { _, year, month, day ->
+                val c = Calendar.getInstance()
+                c.set(year, month, day, 0, 0, 0)
+                selectedDateMillis = c.timeInMillis
+                val formatted = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(c.time)
+                tvDateSelected.text = formatted
+            },
                 cal.get(Calendar.YEAR),
                 cal.get(Calendar.MONTH),
                 cal.get(Calendar.DAY_OF_MONTH)
             )
-            dp.datePicker.minDate = System.currentTimeMillis() - 1000 // no past dates
+            dp.datePicker.minDate = System.currentTimeMillis() - 1000
             dp.show()
         }
 
@@ -112,44 +133,32 @@ class TransporterStep2Fragment : Fragment() {
         btnCancel.setOnClickListener { dialog.dismiss() }
 
         btnConfirm.setOnClickListener {
-            // validate
             val wasteType = etWasteType.text.toString().trim()
             val quantity = etQuantity.text.toString().trim()
             val packaging = etPackaging.text.toString().trim()
             val origin = etOrigin.text.toString().trim()
             val destination = etDestination.text.toString().trim()
             val special = etSpecial.text.toString().trim()
+            val amountText = etAmount.text.toString().trim()
 
-            if (wasteType.isEmpty() || quantity.isEmpty() || packaging.isEmpty() || origin.isEmpty() || selectedDateMillis == null) {
-                Toast.makeText(requireContext(), "Please fill required fields and select a booking date.", Toast.LENGTH_SHORT).show()
+            if (wasteType.isEmpty() || quantity.isEmpty() || packaging.isEmpty() ||
+                origin.isEmpty() || selectedDateMillis == null || amountText.isEmpty()
+            ) {
+                Toast.makeText(requireContext(), "Please fill all fields.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // build booking payload
-            val currentUser = FirebaseAuth.getInstance().currentUser
-            if (currentUser == null) {
-                Toast.makeText(requireContext(), "User not logged in.", Toast.LENGTH_SHORT).show()
+            paymentAmount = amountText.toDoubleOrNull() ?: 0.0
+            if (paymentAmount <= 0) {
+                Toast.makeText(requireContext(), "Invalid amount.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            btnConfirm.isEnabled = false
-            val pd = ProgressDialog(requireContext()).apply {
-                setMessage("Booking transporter...")
-                setCancelable(false)
-                show()
-            }
+            val currentUser = FirebaseAuth.getInstance().currentUser ?: return@setOnClickListener
+            selectedProvider = provider
 
-            // Use HwmsSession.generatorId if you stored it previously when creating the generator application
-            val generatorId = try {
-                // HwmsSession is used elsewhere in your project — if not present replace with the actual generatorId
-                HwmsSession.generatorId
-            } catch (t: Throwable) {
-                null
-            }
-
-            val booking = hashMapOf(
+            bookingData = hashMapOf(
                 "pcoId" to currentUser.uid,
-                "generatorId" to (generatorId ?: ""),
                 "serviceProviderName" to provider.name,
                 "serviceProviderCompany" to provider.companyName,
                 "providerType" to provider.role,
@@ -165,26 +174,132 @@ class TransporterStep2Fragment : Fragment() {
                 "status" to "Pending"
             )
 
-            db.collection("transport_bookings")
-                .add(booking)
-                .addOnSuccessListener { ref ->
-                    pd.dismiss()
-                    dialog.dismiss()
-                    Toast.makeText(requireContext(), "Appointment booked with ${provider.name}", Toast.LENGTH_LONG).show()
-
-//                    // optionally navigate to next step (step 3)
-//                    parentFragmentManager.beginTransaction()
-//                        .replace(R.id.nav_host_fragment, TransporterStep3Fragment())
-//                        .addToBackStack(null)
-//                        .commit()
-                }
-                .addOnFailureListener { e ->
-                    pd.dismiss()
-                    btnConfirm.isEnabled = true
-                    Toast.makeText(requireContext(), "Failed to book appointment: ${e.message}", Toast.LENGTH_LONG).show()
-                }
+            dialog.dismiss()
+            createPaymentIntent(paymentAmount)
         }
 
         dialog.show()
+    }
+
+    private fun createPaymentIntent(amount: Double) {
+        progressDialog.setMessage("Initializing payment...")
+        progressDialog.show()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL("http://10.0.2.2:8080/create-payment-intent")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+                conn.setRequestProperty("Accept", "application/json")
+                conn.doOutput = true
+
+                val jsonBody = JSONObject()
+                jsonBody.put("amount", amount)
+                val out = conn.outputStream
+                out.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
+                out.flush()
+                out.close()
+
+                val responseCode = conn.responseCode
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    throw Exception("Server responded with code $responseCode")
+                }
+
+                val response = conn.inputStream.bufferedReader().readText()
+                val json = JSONObject(response)
+                clientSecret = json.getString("clientSecret")
+
+                withContext(Dispatchers.Main) {
+                    progressDialog.dismiss()
+                    clientSecret?.let {
+                        paymentSheet.presentWithPaymentIntent(
+                            it,
+                            PaymentSheet.Configuration("EnviroTrack")
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    progressDialog.dismiss()
+                    Toast.makeText(
+                        requireContext(),
+                        "Payment initialization failed: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun onPaymentResult(paymentResult: PaymentSheetResult) {
+        when (paymentResult) {
+            is PaymentSheetResult.Completed -> {
+                Toast.makeText(requireContext(), "Payment successful!", Toast.LENGTH_SHORT).show()
+                saveBookingToFirestore("Paid")
+            }
+            is PaymentSheetResult.Failed -> {
+                Toast.makeText(requireContext(), "Payment failed: ${paymentResult.error.message}", Toast.LENGTH_SHORT).show()
+            }
+            PaymentSheetResult.Canceled -> {
+                Toast.makeText(requireContext(), "Payment canceled.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ✅ Updated: save with bookingId & link to HazardousWasteGenerator + navigate to Step 3
+    private fun saveBookingToFirestore(status: String) {
+        bookingData["status"] = status
+
+        val newDocRef = db.collection("transport_bookings").document()
+        val bookingId = newDocRef.id
+        bookingData["bookingId"] = bookingId
+
+        newDocRef.set(bookingData)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Booking saved successfully!", Toast.LENGTH_LONG).show()
+                linkBookingToHazardousWasteGenerator(bookingId)
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to save booking: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    // ✅ Link bookingId to HazardousWasteGenerator
+    private fun linkBookingToHazardousWasteGenerator(bookingId: String) {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val userId = currentUser.uid
+
+        db.collection("HazardousWasteGenerator")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.isEmpty) {
+                    Toast.makeText(requireContext(), "No HazardousWasteGenerator record found for this user.", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
+                }
+
+                for (doc in querySnapshot.documents) {
+                    db.collection("HazardousWasteGenerator")
+                        .document(doc.id)
+                        .update("bookingId", bookingId)
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Linked booking to HWMS application!", Toast.LENGTH_SHORT).show()
+
+                            // ✅ Navigate to Step 3 (TSD Facility Selection)
+                            try {
+                                findNavController().navigate(R.id.action_transporterStep2Fragment_to_tsdFacilitySelectionFragment)
+                            } catch (e: Exception) {
+                                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(requireContext(), "Failed to link booking: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Error fetching HWMS application: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }

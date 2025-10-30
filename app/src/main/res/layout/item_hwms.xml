@@ -1,67 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:padding="12dp"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#E0E0E0"
+    android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground">
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Waste Type (Title) -->
         <TextView
             android:id="@+id/tvWasteType"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Used Oil"
             android:textStyle="bold"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textColor="@android:color/black" />
 
+        <!-- Sub Info -->
         <TextView
             android:id="@+id/tvQuantity"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Quantity: 150 liters"
-            android:layout_marginTop="2dp" />
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            android:textColor="#555555" />
 
         <TextView
             android:id="@+id/tvTransporter"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Transporter: ABC Transport"
-            android:layout_marginTop="2dp" />
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"
+            android:textColor="#555555" />
 
         <TextView
             android:id="@+id/tvTsdFacility"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="TSD Facility: GreenCycle Co."
-            android:layout_marginTop="2dp" />
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"
+            android:textColor="#555555" />
 
         <TextView
             android:id="@+id/tvPermitNo"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Permit No: 12345"
-            android:layout_marginTop="2dp" />
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"
+            android:textColor="#555555" />
 
-        <TextView
-            android:id="@+id/tvPaymentStatuss"
-            android:layout_width="wrap_content"
+        <!-- Payment + Status Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Payment: Unpaid"
-            android:layout_marginTop="2dp" />
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pending"
-            android:textStyle="bold"
-            android:layout_marginTop="6dp" />
+            <TextView
+                android:id="@+id/tvPaymentStatuss"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Payment: Unpaid"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#D32F2F" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pending"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#FFA000" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

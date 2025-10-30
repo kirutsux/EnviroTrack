@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.all
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,12 +12,15 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.serviceprovider.SPMainActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.jvm.java
 
 class MainActivity : AppCompatActivity() {
 
@@ -122,6 +126,25 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d("MainActivity", "Now on destination: $destName (${destination.id})")
     }
+    override fun onStart() {
+        super.onStart()
+
+        val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("isLoggedIn", false)
+        val userType = prefs.getString("userType", null)
+
+        val user = FirebaseAuth.getInstance().currentUser
+        if (isLoggedIn && user != null) {
+            when (userType) {
+                "service_provider" -> {
+                    startActivity(Intent(this, SPMainActivity::class.java))
+                    finish()
+                }
+
+            }
+        }
+    }
+
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()

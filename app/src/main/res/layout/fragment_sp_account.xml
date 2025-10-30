@@ -75,6 +75,24 @@
                     android:textColor="#111827"
                     android:backgroundTint="#E5E7EB" />
 
+                <!-- Name -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Full Name"
+                    android:textSize="14sp"
+                    android:textColor="#6B7280"
+                    android:layout_marginTop="16dp" />
+
+                <EditText
+                    android:id="@+id/etName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#F3F4F6"
+                    android:padding="12dp"
+                    android:textColor="#111827" />
+
+
                 <!-- Company Name -->
                 <TextView
                     android:layout_width="wrap_content"
