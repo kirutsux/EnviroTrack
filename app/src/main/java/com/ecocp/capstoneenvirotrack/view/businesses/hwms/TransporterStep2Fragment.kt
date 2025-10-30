@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ServiceProviderAdapter
 import com.ecocp.capstoneenvirotrack.model.ServiceProvider
@@ -61,15 +62,14 @@ class TransporterStep2Fragment : Fragment() {
             setCancelable(false)
         }
 
-        // Initialize Stripe with publishable key
+        // Stripe setup
         PaymentConfiguration.init(
             requireContext(),
             "pk_test_51PF3r9J2KRREDP2eehrcDI42PVjLhtLQuEy55mabmKa63Etlh5DxHGupzcklVCnrEE0RF6SxYUQVEbJMNph0Zalf00Va9vwLxS"
         )
-
         paymentSheet = PaymentSheet(this, ::onPaymentResult)
-        fetchTransporters()
 
+        fetchTransporters()
         return v
     }
 
@@ -247,15 +247,59 @@ class TransporterStep2Fragment : Fragment() {
         }
     }
 
+    // ✅ Updated: save with bookingId & link to HazardousWasteGenerator + navigate to Step 3
     private fun saveBookingToFirestore(status: String) {
         bookingData["status"] = status
-        db.collection("transport_bookings")
-            .add(bookingData)
+
+        val newDocRef = db.collection("transport_bookings").document()
+        val bookingId = newDocRef.id
+        bookingData["bookingId"] = bookingId
+
+        newDocRef.set(bookingData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Booking saved!", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Booking saved successfully!", Toast.LENGTH_LONG).show()
+                linkBookingToHazardousWasteGenerator(bookingId)
             }
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(), "Failed to save booking: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    // ✅ Link bookingId to HazardousWasteGenerator
+    private fun linkBookingToHazardousWasteGenerator(bookingId: String) {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val userId = currentUser.uid
+
+        db.collection("HazardousWasteGenerator")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.isEmpty) {
+                    Toast.makeText(requireContext(), "No HazardousWasteGenerator record found for this user.", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
+                }
+
+                for (doc in querySnapshot.documents) {
+                    db.collection("HazardousWasteGenerator")
+                        .document(doc.id)
+                        .update("bookingId", bookingId)
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Linked booking to HWMS application!", Toast.LENGTH_SHORT).show()
+
+                            // ✅ Navigate to Step 3 (TSD Facility Selection)
+                            try {
+                                findNavController().navigate(R.id.action_transporterStep2Fragment_to_tsdFacilitySelectionFragment)
+                            } catch (e: Exception) {
+                                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(requireContext(), "Failed to link booking: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Error fetching HWMS application: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 }

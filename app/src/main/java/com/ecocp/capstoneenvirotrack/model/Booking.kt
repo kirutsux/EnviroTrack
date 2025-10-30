@@ -1,8 +1,11 @@
 package com.ecocp.capstoneenvirotrack.model
 
+import com.google.firebase.Timestamp
+
 data class Booking(
-    val bookingDate: com.google.firebase.Timestamp? = null,
-    val dateBooked: com.google.firebase.Timestamp? = null,
+    val bookingId: String? = null,
+    val bookingDate: Timestamp? = null,
+    val dateBooked: Timestamp? = null,
     val destination: String? = null,
     val generatorId: String? = null,
     val origin: String? = null,

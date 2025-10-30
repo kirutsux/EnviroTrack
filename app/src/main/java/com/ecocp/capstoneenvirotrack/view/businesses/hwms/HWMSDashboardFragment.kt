@@ -48,18 +48,12 @@ class HWMSDashboardFragment : Fragment() {
         binding.btnAddApplication.setOnClickListener {
             findNavController().navigate(R.id.HwmsStep1Fragment)
         }
-
-    }
-
-    private fun navigateToFragment(fragment: Fragment) {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.nav_host_fragment, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 
     private fun fetchApplications() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        binding.tvEmptyState.visibility = View.GONE
 
         db.collection("HazardousWasteGenerator")
             .whereEqualTo("userId", userId)
@@ -69,47 +63,90 @@ class HWMSDashboardFragment : Fragment() {
                 val wasteList = result.documents
 
                 if (wasteList.isEmpty()) {
-                    Toast.makeText(requireContext(), "No applications found.", Toast.LENGTH_SHORT).show()
+                    binding.tvEmptyState.visibility = View.VISIBLE
+                    adapter.notifyDataSetChanged()
                     return@addOnSuccessListener
                 }
 
-                // ✅ Fix: match correct user field from transport_bookings
+                // 🔹 Step 1: Fetch all transport bookings for this generator
                 db.collection("transport_bookings")
-                    .whereEqualTo("generatorId", userId) // Change field name if needed
+                    .whereEqualTo("pcoId", userId)
                     .get()
                     .addOnSuccessListener { bookingsSnap ->
-                        val allStatuses = bookingsSnap.documents.mapNotNull { it.getString("status") }
 
+                        // 🔹 Step 2: Build bookingId → status lookup map
+                        val bookingStatusMap = mutableMapOf<String, String>()
+                        for (booking in bookingsSnap) {
+                            val bookingId = booking.getString("bookingId") ?: booking.id
+                            val status = booking.getString("status") ?: "Unpaid"
+                            bookingStatusMap[bookingId] = status
+                        }
+
+                        // 🔹 Step 3: Build HWMS applications list
                         for (doc in wasteList) {
-                            val wasteDetailsList = doc.get("wasteDetails") as? List<Map<String, Any>> ?: emptyList()
+                            val wasteDetailsList =
+                                doc.get("wasteDetails") as? List<Map<String, Any>> ?: emptyList()
                             val firstDetail = wasteDetailsList.firstOrNull()
 
                             val wasteType = firstDetail?.get("wasteName") as? String ?: ""
+                            val quantity = firstDetail?.get("quantity") as? String ?: ""
+                            val storageLocation = firstDetail?.get("currentPractice") as? String ?: ""
+                            val dateGenerated = doc.getTimestamp("timestamp")?.toDate().toString()
 
-                            val paymentStatus = if (allStatuses.contains("Paid")) "Paid" else "Unpaid"
+                            // 🔹 Try to get bookingId from HWMS document
+                            val bookingId = doc.getString("bookingId")
+
+                            // 🔹 Step 4: Determine payment status
+                            val paymentStatus = when {
+                                // Match by bookingId (exact link)
+                                !bookingId.isNullOrEmpty() && bookingStatusMap.containsKey(bookingId) ->
+                                    bookingStatusMap[bookingId] ?: "Unpaid"
+
+                                // If not found, match by generatorId (fallback)
+                                bookingsSnap.any { it.getString("generatorId") == userId } -> {
+                                    bookingsSnap.firstOrNull {
+                                        it.getString("generatorId") == userId
+                                    }?.getString("status") ?: "Unpaid"
+                                }
+
+                                else -> "Unpaid"
+                            }
+
+                            // 🔹 EMB permit or processing status (placeholder)
+                            val embStatus = "Pending"
 
                             val app = HWMSApplication(
                                 id = doc.id,
                                 wasteType = wasteType,
-                                quantity = firstDetail?.get("quantity") as? String ?: "",
-                                storageLocation = firstDetail?.get("currentPractice") as? String ?: "",
-                                dateGenerated = doc.getTimestamp("timestamp")?.toDate().toString(),
-                                status = paymentStatus
+                                quantity = quantity,
+                                storageLocation = storageLocation,
+                                dateGenerated = dateGenerated,
+                                status = paymentStatus,
+                                embStatus = embStatus
                             )
 
                             applications.add(app)
                         }
 
                         adapter.notifyDataSetChanged()
+                        binding.tvEmptyState.visibility =
+                            if (applications.isEmpty()) View.VISIBLE else View.GONE
                     }
                     .addOnFailureListener {
-                        Toast.makeText(requireContext(), "Failed to load payment info.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to load transport booking info.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to load applications.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to load HWMS applications.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
-
 
 }

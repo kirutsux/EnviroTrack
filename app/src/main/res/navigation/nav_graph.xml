@@ -349,6 +349,33 @@
         <action
             android:id="@+id/action_TransporterStep2Fragment_to_HWMSDashboardFragment"
             app:destination="@id/HWMSDashboardFragment" />
+        <action
+            android:id="@+id/action_transporterStep2Fragment_to_tsdFacilitySelectionFragment"
+            app:destination="@id/tsdFacilitySelectionFragment" />
+
+    </fragment>
+
+    <!-- ☣️ HWMS Step 3: TSD Facility Selection -->
+    <fragment
+        android:id="@+id/tsdFacilitySelectionFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TsdFacilitySelectionFragment"
+        tools:layout="@layout/fragment_tsd_facility_selection">
+        <action
+            android:id="@+id/action_tsdFacilitySelectionFragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+        <action
+            android:id="@+id/action_tsdFacilitySelectionFragment_to_pttApplicationFragment"
+            app:destination="@id/pttApplicationFragment" />
+    </fragment>
+
+    <!-- ☣️ HWMS Step 4: PTT Application -->
+    <fragment
+        android:id="@+id/pttApplicationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.PttApplicationFragment"
+        tools:layout="@layout/fragment_ptt_application">
+        <action
+            android:id="@+id/action_pttApplicationFragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
     </fragment>
 
     <!-- 📋 Compliance Reporting System (CRS) -->

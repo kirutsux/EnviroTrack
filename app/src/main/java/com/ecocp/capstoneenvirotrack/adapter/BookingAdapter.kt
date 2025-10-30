@@ -28,7 +28,6 @@ class BookingAdapter(private val bookings: List<Booking>) :
         val tvQuantity: TextView = view.findViewById(R.id.tvQuantity)
         val tvDateBooked: TextView = view.findViewById(R.id.tvDateBooked)
 
-        // New quick message UI
         val etQuickMessage: EditText? = view.findViewById(R.id.etQuickMessage)
         val btnSendQuick: ImageButton? = view.findViewById(R.id.btnSendQuick)
     }
@@ -53,18 +52,16 @@ class BookingAdapter(private val bookings: List<Booking>) :
         val date = booking.dateBooked?.toDate()
         holder.tvDateBooked.text = "Date Booked: ${date?.let { dateFormat.format(it) } ?: "N/A"}"
 
-        // --- NEW: Quick message + navigation handling ---
+        // Quick chat function
         holder.btnSendQuick?.setOnClickListener {
             val message = holder.etQuickMessage?.text.toString().trim()
             if (message.isNotEmpty()) {
                 val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
                 val receiverId = booking.generatorId ?: return@setOnClickListener
-                val receiverName = "Generator" // You can replace with actual name if available
+                val receiverName = "Generator"
 
-                // Create deterministic chatId
                 val chatId = listOf(currentUserId, receiverId).sorted().joinToString("_")
 
-                // Build message object
                 val messageObj = mapOf(
                     "senderId" to currentUserId,
                     "receiverId" to receiverId,
@@ -79,7 +76,6 @@ class BookingAdapter(private val bookings: List<Booking>) :
 
                 holder.etQuickMessage?.text?.clear()
 
-                // Navigate to chat screen
                 val navController = Navigation.findNavController(holder.itemView)
                 val bundle = Bundle().apply {
                     putString("receiverId", receiverId)
