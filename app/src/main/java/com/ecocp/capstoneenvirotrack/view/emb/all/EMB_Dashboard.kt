@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -62,12 +63,13 @@ class EMB_Dashboard : Fragment() {
         notificationIcon = view.findViewById(R.id.emb_notification_icon)
         drawerLayout = view.findViewById(R.id.drawer_layout)
         navView = view.findViewById(R.id.nav_view)
-        drawerMenu = view.findViewById(R.id.drawerMenu)
+        drawerMenu = view.findViewById(R.id.embdrawerMenu)
 
         notificationIcon = view.findViewById(R.id.emb_notification_icon)
 
         fetchGreetingMessage()
         setupNotificationIcon()
+        setupDrawerMenu()
 
         val navController = findNavController()
 
@@ -93,6 +95,32 @@ class EMB_Dashboard : Fragment() {
 
         crsCard.setOnClickListener {
             startActivity(Intent(requireContext(), EmbcrsActivity::class.java))
+        }
+    }
+
+    // ---------------- DRAWER MENU -----------------
+    private fun setupDrawerMenu() {
+        drawerMenu.setOnClickListener {
+            drawerLayout.openDrawer(navView)
+        }
+
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_inbox -> {
+                    Toast.makeText(requireContext(), "Inbox tapped", Toast.LENGTH_SHORT).show()
+                }
+                R.id.nav_feedback -> {
+                    Toast.makeText(requireContext(), "Feedback tapped", Toast.LENGTH_SHORT).show()
+                }
+                R.id.companies -> {
+                    findNavController().navigate(R.id.action_embDashboard_to_companiesFragment)
+                }
+                R.id.nav_about_us -> {
+                    Toast.makeText(requireContext(), "About Us tapped", Toast.LENGTH_SHORT).show()
+                }
+            }
+            drawerLayout.closeDrawers()
+            true
         }
     }
 

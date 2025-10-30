@@ -20,6 +20,9 @@
         <action
             android:id="@+id/action_cncDashboardFragment_to_cncDetailsFragment"
             app:destination="@id/cncDetailsFragment" />
+        <action
+            android:id="@+id/action_cncDashboardFragment_to_pcoDashboardFragment"
+            app:destination="@id/pcoDashboardFragment" />
     </fragment>
 
     <!-- CNC FORM -->
@@ -52,6 +55,12 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncReviewFragment"
         android:label="CNC Review"
         tools:layout="@layout/fragment_cnc_review" />
+
+    <fragment
+        android:id="@+id/pcoDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Dashboard"
+        android:label="Pco Dashboard"
+        tools:layout="@layout/pco_dashboard" />
 
     <!-- CNC DETAILS -->
     <fragment

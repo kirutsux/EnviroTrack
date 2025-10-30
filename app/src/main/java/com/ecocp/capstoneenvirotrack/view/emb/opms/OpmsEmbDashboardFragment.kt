@@ -112,6 +112,10 @@ class OpmsEmbDashboardFragment : Fragment() {
             }
         )
 
+        binding.backButton.setOnClickListener {
+            findNavController().navigate(R.id.action_embopmsDashboardFragment_to_embDashboardFragment)
+        }
+
         binding.recyclerEmbOpmsList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEmbOpmsList.adapter = adapter
 

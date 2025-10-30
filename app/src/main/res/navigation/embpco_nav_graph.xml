@@ -15,7 +15,17 @@
         <action
             android:id="@+id/action_pcoEmbDashboardFragment_to_pcoEmbReviewDetailsFragment"
             app:destination="@id/pcoEmbReviewDetailsFragment" />
+
+        <action
+            android:id="@+id/action_embpcoDashboardFragment_to_embDashboardFragment"
+            app:destination="@id/embDashboardFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/embDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
+        android:label="EMB Dashboard"
+        tools:layout="@layout/emb_dashboard" />
 
     <!-- Review Details Fragment -->
     <fragment

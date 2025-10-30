@@ -106,6 +106,10 @@ class PcoEmbDashboardFragment : Fragment() {
         binding.recyclerEmbPcoList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEmbPcoList.adapter = adapter
 
+        binding.backButton.setOnClickListener {
+            findNavController().navigate(R.id.action_embpcoDashboardFragment_to_embDashboardFragment)
+        }
+
         setupSpinner()
         setupSearchBar()
         loadAllPcoApplications()

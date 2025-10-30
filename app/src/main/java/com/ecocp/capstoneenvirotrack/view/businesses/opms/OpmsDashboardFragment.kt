@@ -100,6 +100,9 @@ class OpmsDashboardFragment : Fragment() {
                     .show()
             }
         )
+        binding.backButton.setOnClickListener {
+            findNavController().navigate(R.id.action_opmsDashboardFragment_to_pcoDashboardFragment)
+        }
         binding.recyclerSubmittedApplications.adapter = adapter
 
         listenToApplications()
