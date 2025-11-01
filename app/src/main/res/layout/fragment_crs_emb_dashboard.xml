@@ -7,20 +7,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Header -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:text="Company Registration \nReview"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:textColor="@android:color/white"
-        android:background="@drawable/bg_title_gradient"
-        android:padding="12dp"
-        android:gravity="center"
-        android:layout_marginBottom="16dp"
-        android:elevation="2dp"
+    <!-- 🔹 Top Bar -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_title_gradient"
+        android:padding="8dp"
+        android:gravity="center_vertical">
+
+        <!-- 🔙 Back Button -->
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/backbtn"
+            android:contentDescription="Back Button"
+            android:padding="6dp"
+            android:layout_marginEnd="8dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:text="Company Registration Review"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
 
     <!-- Section Title -->
     <TextView

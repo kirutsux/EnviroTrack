@@ -21,7 +21,17 @@
             android:id="@+id/action_embDashboard_to_dpDetailsFragment"
             app:destination="@id/dpDetailsFragment" />
 
+        <action
+            android:id="@+id/action_embopmsDashboardFragment_to_embDashboardFragment"
+            app:destination="@id/embDashboardFragment" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/embDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
+        android:label="EMB Dashboard"
+        tools:layout="@layout/emb_dashboard" />
 
     <!-- Permit to Operate Details Fragment -->
     <fragment
