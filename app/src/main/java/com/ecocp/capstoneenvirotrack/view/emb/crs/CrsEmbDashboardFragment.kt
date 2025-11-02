@@ -57,10 +57,6 @@ class CrsEmbDashboardFragment : Fragment() {
         binding.recyclerEmbCrsList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEmbCrsList.adapter = adapter
 
-        binding.backButton.setOnClickListener {
-            findNavController().navigate(R.id.action_embcrsDashboardFragment_to_embDashboardFragment)
-        }
-
         setupSpinner()
         setupSearchBar()
         loadAllCrsApplications()

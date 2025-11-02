@@ -13,5 +13,3 @@
 .externalNativeBuild
 .cxx
 local.properties
-# Ignore Kotlin error logs
-.kotlin/errors/

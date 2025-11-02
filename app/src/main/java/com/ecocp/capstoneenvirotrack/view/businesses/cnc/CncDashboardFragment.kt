@@ -101,9 +101,6 @@ class CncDashboardFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = cncAdapter
         }
-        binding.backButton.setOnClickListener {
-            findNavController().navigate(R.id.action_cncDashboardFragment_to_pcoDashboardFragment)
-        }
 
         binding.btnAddCnc.setOnClickListener {
             findNavController().navigate(R.id.action_cncDashboardFragment_to_cncFormFragment)

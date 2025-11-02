@@ -9,7 +9,11 @@
         android:id="@+id/SP_Dashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Dashboard"
         android:label="Dashboard"
-        tools:layout="@layout/sp_dashboard" />
+        tools:layout="@layout/sp_dashboard">
+    <action
+        android:id="@+id/action_SP_Dashboard_to_SP_Servicerequest"
+        app:destination="@id/SP_Servicerequest"/>
+    </fragment>
 
     <fragment
         android:id="@+id/SP_Inbox"
@@ -44,5 +48,50 @@
             app:popUpTo="@id/SP_ChangepasswordFragment"
             app:popUpToInclusive="true" />
     </fragment>
+    <!-- Service Requests List Screen -->
+    <fragment
+        android:id="@+id/SP_Servicerequest"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Servicerequest"
+        android:label="Service Requests"
+        tools:layout="@layout/fragment_sp_servicerequest">
+
+        <action
+            android:id="@+id/action_SP_Servicerequest_to_SP_ServiceRequestDetails"
+            app:destination="@id/SP_ServiceRequestDetails" />
+    </fragment>
+
+    <!-- Service Request Details Screen -->
+    <fragment
+        android:id="@+id/SP_ServiceRequestDetails"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ServiceRequestDetails"
+        android:label="Service Request Details"
+        tools:layout="@layout/fragment_sp_service_request_details" />
+
+    <fragment
+        android:id="@+id/SP_ActiveTasks"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ActiveTasks"
+        android:label="Active Tasks"
+        tools:layout="@layout/fragment_sp_active_tasks" />
+
+    <fragment
+        android:id="@+id/SP_TaskUpdateDetails"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_TaskUpdateDetails"
+        android:label="Task Update Details"
+        tools:layout="@layout/fragment_sp_task_update_details" />
+
+    <fragment
+        android:id="@+id/SP_CompletedServices"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_CompletedServices"
+        android:label="Completed Services"
+        tools:layout="@layout/fragment_sp_completed_services" />
+    <action
+        android:id="@+id/action_SP_Dashboard_to_SP_CompletedServices"
+        app:destination="@id/SP_CompletedServices" />
+
+    <fragment
+        android:id="@+id/SP_ServiceReport"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ServiceReport"
+        android:label="Service Report"
+        tools:layout="@layout/fragment_sp_service_report" />
 
 </navigation>

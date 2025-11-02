@@ -15,17 +15,7 @@
         <action
             android:id="@+id/action_cncEmbDashboardFragment_to_cncReviewDetailsFragment"
             app:destination="@id/cncReviewDetailsFragment" />
-
-        <action
-            android:id="@+id/action_embcncDashboardFragment_to_embDashboardFragment"
-            app:destination="@id/embDashboardFragment" />
     </fragment>
-
-    <fragment
-        android:id="@+id/embDashboardFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
-        android:label="EMB Dashboard"
-        tools:layout="@layout/emb_dashboard" />
 
     <!-- CNC REVIEW DETAILS -->
     <fragment

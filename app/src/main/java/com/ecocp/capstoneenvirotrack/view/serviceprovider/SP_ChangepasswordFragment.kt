@@ -11,6 +11,7 @@ import com.ecocp.capstoneenvirotrack.R
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.Timestamp
 
 class SP_ChangepasswordFragment : Fragment() {
@@ -120,11 +121,11 @@ class SP_ChangepasswordFragment : Fragment() {
                             "password" to newPassword,
                             "status" to "approved",
                             "mustChangePassword" to false,
-                            "createdAt" to Timestamp.now()
+                            "lastUpdated" to Timestamp.now()
                         )
 
                         firestore.collection("service_providers").document(user.uid)
-                            .set(spData)
+                            .set(spData, SetOptions.merge())
                             .addOnSuccessListener {
                                 Toast.makeText(requireContext(), "Password updated and profile saved!", Toast.LENGTH_SHORT).show()
                                 findNavController().navigate(R.id.action_SP_ChangepasswordFragment_to_serviceProviderDashboard)

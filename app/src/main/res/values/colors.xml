@@ -6,8 +6,8 @@
 
 
     <!-- Primary Colors -->
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 
     <!-- Brand Colors -->
     <color name="primary">#2C3E50</color> <!-- Dark Blue-Grey -->
@@ -80,15 +80,6 @@
     <color name="status_approved">#4CAF50</color> <!-- Green -->
     <color name="status_rejected">#F44336</color> <!-- Red -->
     <color name="status_submitted">#FB8C00</color> <!-- Orange -->
-
-    <color name="success_green">#2E7D32</color>
-    <color name="error_red">#C62828</color>
-    <color name="lightt_gray">#E0E0E0</color>
-    <color name="darkerr_gray">#616161</color>
-
-    <color name="background_gray">#F5F6FA</color>
-
-
 
     <color name="link_blue">#0000FF</color>
 </resources>

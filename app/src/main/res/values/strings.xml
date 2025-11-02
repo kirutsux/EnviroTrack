@@ -34,6 +34,12 @@
         <item>Approved</item>
         <item>Rejected</item>
     </string-array>
+    <!-- Spinner options for Service Provider Request Overview -->
+    <string-array name="sort_options">
+        <item>Sort by Date</item>
+        <item>Sort by Status</item>
+        <item>Sort by Client</item>
+    </string-array>
     <!-- CRS LABELS -->
     <string name="company_registration_title">Company Registration</string>
     <string name="company_registration_title_description">Company Registration itle</string>

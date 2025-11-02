@@ -10,6 +10,4 @@ data class PcoAccreditation(
     val positionDesignation: String? = null,
     val status: String? = null,
     val submittedTimestamp: Timestamp? = null,
-    val issueDate: Timestamp? = null,   // ✅ Added
-    val expiryDate: Timestamp? = null // ✅ Added
 )

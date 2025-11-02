@@ -28,17 +28,7 @@
         <action
             android:id="@+id/action_dashboard_to_ptoDetails"
             app:destination="@id/ptoDetailsFragment" />
-
-        <action
-            android:id="@+id/action_opmsDashboardFragment_to_pcoDashboardFragment"
-            app:destination="@id/pcoDashboardFragment" />
     </fragment>
-
-    <fragment
-        android:id="@+id/pcoDashboardFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Dashboard"
-        android:label="Pco Dashboard"
-        tools:layout="@layout/pco_dashboard" />
 
     <fragment
         android:id="@+id/ptoDetailsFragment"

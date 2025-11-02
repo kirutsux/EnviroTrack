@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:backgroundTint="#D6EAF8"
+    android:radius="16dp"
+    android:elevation="3dp"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Profile Picture -->
+        <ImageView
+            android:id="@+id/imgClient"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/user"
+            android:layout_marginEnd="8dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/image_round_shape" />
+
+        <!-- Info -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtServiceTitle"
+                android:text="Waste Disposal for Client A"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtCompanyName"
+                android:text="McDonald's"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp" />
+
+            <!-- Status Row -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtStatus"
+                    android:text="Pending"
+                    android:textSize="13sp"
+                    android:padding="4dp"
+                    android:textColor="#ffffff"
+                    android:backgroundTint="#f39c12"
+                    android:background="@drawable/status_bg" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtCompliance"
+                    android:text="In Compliance"
+                    android:textSize="13sp"
+                    android:textColor="#ffffff"
+                    android:layout_marginStart="8dp"
+                    android:padding="4dp"
+                    android:background="@drawable/compliance_bg" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- View Button -->
+        <Button
+            android:id="@+id/btnView"
+            android:text="VIEW"
+            android:textSize="12sp"
+            android:padding="6dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#007AFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -10,8 +10,6 @@ data class EmbOpmsApplication(
     val companyName: String? = null,
     val status: String? = "Pending",
     val submittedTimestamp: Timestamp? = null,
-    val issueDate: Timestamp? = null,   // ✅ Added
-    val expiryDate: Timestamp? = null,  // ✅ Added
 
     // --- PTO-specific fields ---
     val ownerName: String? = null,
