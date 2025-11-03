@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -7,46 +8,143 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Step Header -->
+        <!-- Header -->
         <TextView
-            android:id="@+id/tvStepHeader"
-            android:text="Step 1: Waste Details"
-            android:textSize="20sp"
+            android:text="Step 1: Waste Generation"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="#1E1E1E"
-            android:layout_marginBottom="12dp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Container for all waste entries -->
+        <!-- Company Information -->
+        <EditText
+            android:id="@+id/etCompanyName"
+            android:hint="Company Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/etCompanyAddress"
+            android:hint="Company Address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
+
+        <EditText
+            android:id="@+id/etPCOName"
+            android:hint="PCO Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
+
+        <EditText
+            android:id="@+id/etPCOContact"
+            android:hint="PCO Contact Number"
+            android:inputType="phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
+
+        <EditText
+            android:id="@+id/etEmbRegNo"
+            android:hint="EMB Registration Number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="#DDDDDD" />
+
+        <!-- Waste Entries -->
         <LinearLayout
             android:id="@+id/llWastesContainer"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
 
-        <!-- Add Waste Button -->
         <Button
             android:id="@+id/btnAddWaste"
             android:text="Add Another Waste"
-            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/teal_700"
-            android:textColor="@color/white" />
+            android:layout_marginTop="8dp" />
+
+        <!-- File Upload Section -->
+        <TextView
+            android:text="Upload Required Documents:"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Inventory Report Upload -->
+        <Button
+            android:id="@+id/btnUploadInventory"
+            android:text="Upload Waste Inventory Report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvInventoryStatus"
+            android:text="No file selected"
+            android:textSize="12sp"
+            android:layout_marginBottom="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Storage Area Photo Upload -->
+        <Button
+            android:id="@+id/btnUploadStoragePhoto"
+            android:text="Upload Photo of Waste Storage Area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvStoragePhotoStatus"
+            android:text="No file selected"
+            android:textSize="12sp"
+            android:layout_marginBottom="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Laboratory Analysis Upload -->
+        <Button
+            android:id="@+id/btnUploadLabAnalysis"
+            android:text="Upload Laboratory Analysis (if applicable)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvLabAnalysisStatus"
+            android:text="No file selected"
+            android:textSize="12sp"
+            android:layout_marginBottom="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <!-- Submit Button -->
         <Button
             android:id="@+id/btnSubmitStep1"
-            android:text="Next Step"
+            android:text="Save and Proceed"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@color/white"
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white" />
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 </ScrollView>
