@@ -7,39 +7,43 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ServiceProviderAdapter
+import com.ecocp.capstoneenvirotrack.api.PaymentRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentResponse
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.databinding.FragmentTransporterStep2Binding
 import com.ecocp.capstoneenvirotrack.model.ServiceProvider
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
 
 class TransporterStep2Fragment : Fragment() {
 
+    private var _binding: FragmentTransporterStep2Binding? = null
+    private val binding get() = _binding!!
+
     private val db = FirebaseFirestore.getInstance()
     private val providers = mutableListOf<ServiceProvider>()
     private lateinit var adapter: ServiceProviderAdapter
-    private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var progressDialog: ProgressDialog
 
     // Stripe variables
     private lateinit var paymentSheet: PaymentSheet
-    private var clientSecret: String? = null
+    private var paymentIntentClientSecret: String? = null
     private var paymentAmount: Double = 0.0
     private lateinit var selectedProvider: ServiceProvider
     private lateinit var bookingData: HashMap<String, Any>
@@ -47,30 +51,36 @@ class TransporterStep2Fragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val v = inflater.inflate(R.layout.fragment_transporter_step2, container, false)
-        recycler = v.findViewById(R.id.recyclerViewTransporters)
-        recycler.layoutManager = LinearLayoutManager(requireContext())
+    ): View {
+        _binding = FragmentTransporterStep2Binding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        adapter = ServiceProviderAdapter(providers) { provider ->
-            showBookingDialog(provider)
-        }
-        recycler.adapter = adapter
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
+        // Initialize Stripe SDK (same publishable key as CNC)
+        PaymentConfiguration.init(
+            requireContext(),
+            "pk_test_51PF3r9J2KRREDP2eehrcDI42PVjLhtLQuEy55mabmKa63Etlh5DxHGupzcklVCnrEE0RF6SxYUQVEbJMNph0Zalf00Va9vwLxS"
+        )
+
+        paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
         progressDialog = ProgressDialog(requireContext()).apply {
             setMessage("Loading...")
             setCancelable(false)
         }
 
-        // Stripe setup
-        PaymentConfiguration.init(
-            requireContext(),
-            "pk_test_51PF3r9J2KRREDP2eehrcDI42PVjLhtLQuEy55mabmKa63Etlh5DxHGupzcklVCnrEE0RF6SxYUQVEbJMNph0Zalf00Va9vwLxS"
-        )
-        paymentSheet = PaymentSheet(this, ::onPaymentResult)
-
+        setupRecyclerView()
         fetchTransporters()
-        return v
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerViewTransporters.layoutManager = LinearLayoutManager(requireContext())
+        adapter = ServiceProviderAdapter(providers) { provider ->
+            showBookingDialog(provider)
+        }
+        binding.recyclerViewTransporters.adapter = adapter
     }
 
     private fun fetchTransporters() {
@@ -103,8 +113,6 @@ class TransporterStep2Fragment : Fragment() {
         val etAmount = dialogView.findViewById<EditText>(R.id.etAmount)
         val btnPickDate = dialogView.findViewById<Button>(R.id.btnPickDate)
         val tvDateSelected = dialogView.findViewById<TextView>(R.id.tvDateSelected)
-        val btnConfirm = dialogView.findViewById<Button>(R.id.btnConfirmBooking)
-        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelBooking)
 
         tvProviderTitle.text = "Book with: ${provider.name} — ${provider.companyName}"
 
@@ -113,26 +121,22 @@ class TransporterStep2Fragment : Fragment() {
             val cal = Calendar.getInstance()
             val dp = DatePickerDialog(requireContext(), { _, year, month, day ->
                 val c = Calendar.getInstance()
-                c.set(year, month, day, 0, 0, 0)
+                c.set(year, month, day)
                 selectedDateMillis = c.timeInMillis
-                val formatted = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(c.time)
-                tvDateSelected.text = formatted
-            },
-                cal.get(Calendar.YEAR),
-                cal.get(Calendar.MONTH),
-                cal.get(Calendar.DAY_OF_MONTH)
-            )
-            dp.datePicker.minDate = System.currentTimeMillis() - 1000
+                tvDateSelected.text = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(c.time)
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH))
+            dp.datePicker.minDate = System.currentTimeMillis()
             dp.show()
         }
 
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
+            .setCancelable(false)
             .create()
 
-        btnCancel.setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<Button>(R.id.btnCancelBooking).setOnClickListener { dialog.dismiss() }
 
-        btnConfirm.setOnClickListener {
+        dialogView.findViewById<Button>(R.id.btnConfirmBooking).setOnClickListener {
             val wasteType = etWasteType.text.toString().trim()
             val quantity = etQuantity.text.toString().trim()
             val packaging = etPackaging.text.toString().trim()
@@ -142,7 +146,7 @@ class TransporterStep2Fragment : Fragment() {
             val amountText = etAmount.text.toString().trim()
 
             if (wasteType.isEmpty() || quantity.isEmpty() || packaging.isEmpty() ||
-                origin.isEmpty() || selectedDateMillis == null || amountText.isEmpty()
+                origin.isEmpty() || destination.isEmpty() || amountText.isEmpty() || selectedDateMillis == null
             ) {
                 Toast.makeText(requireContext(), "Please fill all fields.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -182,74 +186,56 @@ class TransporterStep2Fragment : Fragment() {
     }
 
     private fun createPaymentIntent(amount: Double) {
-        progressDialog.setMessage("Initializing payment...")
-        progressDialog.show()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val url = URL("http://10.0.2.2:8080/create-payment-intent")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-                conn.setRequestProperty("Accept", "application/json")
-                conn.doOutput = true
-
-                val jsonBody = JSONObject()
-                jsonBody.put("amount", amount)
-                val out = conn.outputStream
-                out.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
-                out.flush()
-                out.close()
-
-                val responseCode = conn.responseCode
-                if (responseCode != HttpURLConnection.HTTP_OK) {
-                    throw Exception("Server responded with code $responseCode")
-                }
-
-                val response = conn.inputStream.bufferedReader().readText()
-                val json = JSONObject(response)
-                clientSecret = json.getString("clientSecret")
-
-                withContext(Dispatchers.Main) {
-                    progressDialog.dismiss()
-                    clientSecret?.let {
-                        paymentSheet.presentWithPaymentIntent(
-                            it,
-                            PaymentSheet.Configuration("EnviroTrack")
-                        )
+        RetrofitClient.instance.createPaymentIntent(PaymentRequest(amount.toInt()))
+            .enqueue(object : Callback<PaymentResponse> {
+                override fun onResponse(call: Call<PaymentResponse>, response: Response<PaymentResponse>) {
+                    if (response.isSuccessful && response.body() != null) {
+                        paymentIntentClientSecret = response.body()!!.clientSecret
+                        showPaymentSheet()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to create payment intent", Toast.LENGTH_SHORT).show()
                     }
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    progressDialog.dismiss()
-                    Toast.makeText(
-                        requireContext(),
-                        "Payment initialization failed: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+
+                override fun onFailure(call: Call<PaymentResponse>, t: Throwable) {
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
-            }
+            })
+    }
+
+    private fun showPaymentSheet() {
+        paymentIntentClientSecret?.let {
+            val config = PaymentSheet.Configuration(
+                merchantDisplayName = "EnviroTrack",
+                allowsDelayedPaymentMethods = true
+            )
+            paymentSheet.presentWithPaymentIntent(it, config)
         }
     }
 
-    private fun onPaymentResult(paymentResult: PaymentSheetResult) {
-        when (paymentResult) {
+    private fun onPaymentSheetResult(result: PaymentSheetResult) {
+        when (result) {
             is PaymentSheetResult.Completed -> {
                 Toast.makeText(requireContext(), "Payment successful!", Toast.LENGTH_SHORT).show()
                 saveBookingToFirestore("Paid")
             }
-            is PaymentSheetResult.Failed -> {
-                Toast.makeText(requireContext(), "Payment failed: ${paymentResult.error.message}", Toast.LENGTH_SHORT).show()
-            }
-            PaymentSheetResult.Canceled -> {
+            is PaymentSheetResult.Canceled -> {
                 Toast.makeText(requireContext(), "Payment canceled.", Toast.LENGTH_SHORT).show()
+            }
+            is PaymentSheetResult.Failed -> {
+                Toast.makeText(requireContext(), "Payment failed: ${result.error.localizedMessage}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    // ✅ Updated: save with bookingId & link to HazardousWasteGenerator + navigate to Step 3
     private fun saveBookingToFirestore(status: String) {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
         bookingData["status"] = status
+        bookingData["paymentStatus"] = "Paid"
+        bookingData["paymentMethod"] = "Stripe"
+        bookingData["paymentTimestamp"] = Timestamp.now()
+        bookingData["amount"] = paymentAmount
+        bookingData["currency"] = "PHP"
 
         val newDocRef = db.collection("transport_bookings").document()
         val bookingId = newDocRef.id
@@ -265,7 +251,6 @@ class TransporterStep2Fragment : Fragment() {
             }
     }
 
-    // ✅ Link bookingId to HazardousWasteGenerator
     private fun linkBookingToHazardousWasteGenerator(bookingId: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
         val userId = currentUser.uid
@@ -275,7 +260,7 @@ class TransporterStep2Fragment : Fragment() {
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (querySnapshot.isEmpty) {
-                    Toast.makeText(requireContext(), "No HazardousWasteGenerator record found for this user.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "No HWMS record found for this user.", Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
@@ -286,11 +271,11 @@ class TransporterStep2Fragment : Fragment() {
                         .addOnSuccessListener {
                             Toast.makeText(requireContext(), "Linked booking to HWMS application!", Toast.LENGTH_SHORT).show()
 
-                            // ✅ Navigate to Step 3 (TSD Facility Selection)
-                            try {
-                                findNavController().navigate(R.id.action_transporterStep2Fragment_to_tsdFacilitySelectionFragment)
-                            } catch (e: Exception) {
-                                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            // ✅ Safe navigation: only navigate if we're still in TransporterStep2Fragment
+                            val navController = findNavController()
+                            val currentDestId = navController.currentDestination?.id
+                            if (currentDestId == R.id.TransporterStep2Fragment) {
+                                navController.navigate(R.id.action_transporterStep2Fragment_to_tsdFacilitySelectionFragment)
                             }
                         }
                         .addOnFailureListener { e ->
@@ -301,5 +286,10 @@ class TransporterStep2Fragment : Fragment() {
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(), "Error fetching HWMS application: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -29,6 +29,7 @@ import java.util.*
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import androidx.core.content.ContextCompat
+import com.ecocp.capstoneenvirotrack.view.businesses.smr.SmrActivity
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 
@@ -204,8 +205,8 @@ class COMP_Dashboard : Fragment() {
         pcoCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_PCO) }
 
         if (isAccredited) {
+            smrCard.setOnClickListener { startActivity(Intent(requireContext(), SmrActivity::class.java)) }
             cncCard.setOnClickListener { startActivity(Intent(requireContext(), CncActivity::class.java)) }
-            smrCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_SMR) }
             opmsCard.setOnClickListener { startActivity(Intent(requireContext(), OpmsActivity::class.java)) }
             hazewasteCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_HWMSDashboardFragment) }
             crsCard.setOnClickListener { navController.navigate(R.id.action_pcoDashboard_to_COMP_CRS) }

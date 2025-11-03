@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/smr_nav_graph"
+    app:startDestination="@id/smrDashboardFragment">
+
+    <!-- 🟢 SMR Dashboard -->
+    <fragment
+        android:id="@+id/smrDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.SmrDashboardFragment"
+        android:label="SMR Dashboard"
+        tools:layout="@layout/fragment_smr_dashboard">
+
+        <!-- Existing action to Module 1 -->
+        <action
+            android:id="@+id/action_smrDashboardFragment_to_module1GeneralInfoFragment"
+            app:destination="@id/module1GeneralInfoFragment" />
+
+        <!-- NEW actions to other modules -->
+        <action
+            android:id="@+id/action_smrDashboardFragment_to_module2HazardousWasteFragment"
+            app:destination="@id/module2HazardousWasteFragment" />
+
+        <action
+            android:id="@+id/action_smrDashboardFragment_to_module3WaterPollutionFragment"
+            app:destination="@id/module3WaterPollutionFragment" />
+
+        <action
+            android:id="@+id/action_smrDashboardFragment_to_module4AirPollutionFragment"
+            app:destination="@id/module4AirPollutionFragment" />
+
+        <action
+            android:id="@+id/action_smrDashboardFragment_to_module5OthersFragment"
+            app:destination="@id/module5OthersFragment" />
+
+        <action
+            android:id="@+id/action_smrDashboardFragment_to_smrSummaryFragment"
+            app:destination="@id/smrSummaryFragment" />
+    </fragment>
+
+
+    <!-- 🟦 MODULE 1: General Info -->
+    <fragment
+        android:id="@+id/module1GeneralInfoFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.Module1GeneralInfoFragment"
+        android:label="Module 1 - General Info"
+        tools:layout="@layout/fragment_module1_general_info">
+        <action
+            android:id="@+id/action_module1GeneralInfoFragment_to_module2HazardousWasteFragment"
+            app:destination="@id/module2HazardousWasteFragment" />
+    </fragment>
+
+    <!-- 🟨 MODULE 2: Hazardous Waste -->
+    <fragment
+        android:id="@+id/module2HazardousWasteFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.Module2HazardousWasteFragment"
+        android:label="Module 2 - Hazardous Waste"
+        tools:layout="@layout/fragment_smr_module2_hazardous_waste">
+        <action
+            android:id="@+id/action_module2HazardousWasteFragment_to_module3WaterPollutionFragment"
+            app:destination="@id/module3WaterPollutionFragment" />
+    </fragment>
+
+    <!-- 🟩 MODULE 3: Water Pollution -->
+    <fragment
+        android:id="@+id/module3WaterPollutionFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.Module3WaterPollutionFragment"
+        android:label="Module 3 - Water Pollution"
+        tools:layout="@layout/fragment_module3_water_pollution">
+        <action
+            android:id="@+id/action_module3WaterPollutionFragment_to_module4AirPollutionFragment"
+            app:destination="@id/module4AirPollutionFragment" />
+    </fragment>
+
+    <!-- 🟧 MODULE 4: Air Pollution -->
+    <fragment
+        android:id="@+id/module4AirPollutionFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.Module4AirPollutionFragment"
+        android:label="Module 4 - Air Pollution"
+        tools:layout="@layout/fragment_module4_air_pollution">
+        <action
+            android:id="@+id/action_module4AirPollutionFragment_to_module5OthersFragment"
+            app:destination="@id/module5OthersFragment" />
+    </fragment>
+
+    <!-- 🟥 MODULE 5: Others -->
+    <fragment
+        android:id="@+id/module5OthersFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.Module5OthersFragment"
+        android:label="Module 5 - Others"
+        tools:layout="@layout/fragment_module5_others">
+        <action
+            android:id="@+id/action_module5OthersFragment_to_smrSummaryFragment"
+            app:destination="@id/smrSummaryFragment" />
+    </fragment>
+
+    <!-- ⚪ SMR Summary -->
+    <fragment
+        android:id="@+id/smrSummaryFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.SmrSummaryFragment"
+        android:label="SMR Summary"
+        tools:layout="@layout/fragment_smr_summary" />
+    <action
+        android:id="@+id/action_smrSummaryFragment_to_smrDashboardFragment"
+        app:destination="@id/smrDashboardFragment" />
+</navigation>

@@ -8,6 +8,7 @@
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/logo"
         android:label="@string/app_name"
@@ -15,8 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CapstoneEnviroTrack"
         android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
+        <activity
+            android:name=".view.businesses.smr.SmrActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapstoneEnviroTrack" />
         <activity
             android:name=".view.emb.crs.EmbcrsActivity"
             android:exported="false"
