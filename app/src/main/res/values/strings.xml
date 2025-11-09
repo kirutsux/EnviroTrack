@@ -1,83 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CapstoneEnviroTrack</string>
+    <string name="app_name">EnviroTrack</string>
     <string name="self_monitoring_report_smr_management">Self-Monitoring Report (SMR) Management</string>
     <string name="certificate_of_non_coverage_cnc_management">Certificate of Non-Coverage (CNC) Management</string>
     <string name="recent">Recent</string>
-    <string name="welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time">Welcome!\n Monitor document reviews efficiently and process compliance submissions on time.</string>
+    <string name="welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time">
+        Welcome!\n Monitor document reviews efficiently and process compliance submissions on time.
+    </string>
     <string name="search">Search</string>
     <string name="home">Home</string>
     <string name="online_permitting_and_monitoring_system">Online Permitting and Monitoring</string>
     <string name="company_registration">Company Registration</string>
     <string name="pco_accreditation">PCO Accreditation</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Registration and dropdown text -->
     <string name="select_prompt">Select</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="default_web_client_id">191944189574-hbtag9qvcdlhsqlq5m2gi8pafti4pvj2.apps.googleusercontent.com</string>
-    <string-array name="register_as_options">
-        <item>Service Provider</item>
-        <item>Pollution Control Officer</item>
-    </string-array>
-    <string-array name="service_categories">
-        <!-- Waste Disposal Services -->
-        <item>Waste Disposal Services</item>
-        <item>Hazardous Waste Collection</item>
-        <item>Non-Hazardous Waste Disposal</item>
 
-        <!-- Water Quality Services -->
-        <item>Water Testing &amp; Analysis</item>
-        <item>Wastewater Treatment</item>
-        <item>Drinking Water Purification</item>
-        <item>Industrial Water Treatment</item>
-
-        <!-- Air Quality & Pollution Control -->
-        <item>Air Emission Monitoring</item>
-        <item>Odor Control Solutions</item>
-        <item>Industrial Air Filtration</item>
-
-        <!-- Energy & Sustainability Services -->
-        <item>Renewable Energy Consulting</item>
-        <item>Carbon Footprint Reduction</item>
-    </string-array>
-    <!-- Strings used for fragments for navigation -->
+    <!-- Navigation labels -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
     <string name="lorem_ipsum">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
-        volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
-        dui nec risus. Maecenas non sodales nisi, vel dictum dolor. Class aptent taciti sociosqu ad
-        litora torquent per conubia nostra, per inceptos himenaeos. Suspendisse blandit eleifend
-        diam, vel rutrum tellus vulputate quis. Aliquam eget libero aliquet, imperdiet nisl a,
-        ornare ex. Sed rhoncus est ut libero porta lobortis. Fusce in dictum tellus.\n\n
-        Suspendisse interdum ornare ante. Aliquam nec cursus lorem. Morbi id magna felis. Vivamus
-        egestas, est a condimentum egestas, turpis nisl iaculis ipsum, in dictum tellus dolor sed
-        neque. Morbi tellus erat, dapibus ut sem a, iaculis tincidunt dui. Interdum et malesuada
-        fames ac ante ipsum primis in faucibus. Curabitur et eros porttitor, ultricies urna vitae,
-        molestie nibh. Phasellus at commodo eros, non aliquet metus. Sed maximus nisl nec dolor
-        bibendum, vel congue leo egestas.\n\n
-        Sed interdum tortor nibh, in sagittis risus mollis quis. Curabitur mi odio, condimentum sit
-        amet auctor at, mollis non turpis. Nullam pretium libero vestibulum, finibus orci vel,
-        molestie quam. Fusce blandit tincidunt nulla, quis sollicitudin libero facilisis et. Integer
-        interdum nunc ligula, et fermentum metus hendrerit id. Vestibulum lectus felis, dictum at
-        lacinia sit amet, tristique id quam. Cras eu consequat dui. Suspendisse sodales nunc ligula,
-        in lobortis sem porta sed. Integer id ultrices magna, in luctus elit. Sed a pellentesque
-        est.\n\n
-        Aenean nunc velit, lacinia sed dolor sed, ultrices viverra nulla. Etiam a venenatis nibh.
-        Morbi laoreet, tortor sed facilisis varius, nibh orci rhoncus nulla, id elementum leo dui
-        non lorem. Nam mollis ipsum quis auctor varius. Quisque elementum eu libero sed commodo. In
-        eros nisl, imperdiet vel imperdiet et, scelerisque a mauris. Pellentesque varius ex nunc,
-        quis imperdiet eros placerat ac. Duis finibus orci et est auctor tincidunt. Sed non viverra
-        ipsum. Nunc quis augue egestas, cursus lorem at, molestie sem. Morbi a consectetur ipsum, a
-        placerat diam. Etiam vulputate dignissim convallis. Integer faucibus mauris sit amet finibus
-        convallis.\n\n
-        Phasellus in aliquet mi. Pellentesque habitant morbi tristique senectus et netus et
-        malesuada fames ac turpis egestas. In volutpat arcu ut felis sagittis, in finibus massa
-        gravida. Pellentesque id tellus orci. Integer dictum, lorem sed efficitur ullamcorper,
-        libero justo consectetur ipsum, in mollis nisl ex sed nisl. Donec maximus ullamcorper
-        sodales. Praesent bibendum rhoncus tellus nec feugiat. In a ornare nulla. Donec rhoncus
-        libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
-        vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem...
     </string>
+    <!-- PCO STATUS -->
+    <string-array name="status_options">
+        <item>All</item>
+        <item>Pending</item>
+        <item>Approved</item>
+        <item>Rejected</item>
+    </string-array>
+    <!-- CRS LABELS -->
+    <string name="company_registration_title">Company Registration</string>
+    <string name="company_registration_title_description">Company Registration itle</string>
+    <string name="company_registration_subheader">Please fill out all required fields accurately before submitting your company registration.</string>
+    <string name="company_registration_subheader_description">Company registration instructions</string>
+    <string name="company_info_section">A. Company Information</string>
+    <string name="company_info_section_description">Company Information Section</string>
+    <string name="company_name_hint">Company Name</string>
+    <string name="company_name_description">Enter company name</string>
+    <string name="company_type_hint">Company Type</string>
+    <string name="company_type_description">Select company type</string>
+    <string name="tin_hint">TIN (Tax Identification Number)</string>
+    <string name="tin_description">Enter TIN</string>
+    <string name="ceo_info_section">B. CEO / President / Owner</string>
+    <string name="ceo_info_section_description">CEO / President / Owner Section</string>
+    <string name="ceo_name_hint">CEO / President / Owner Name</string>
+    <string name="ceo_name_description">Enter CEO or owner name</string>
+    <string name="ceo_contact_hint">CEO Contact Number</string>
+    <string name="ceo_contact_description">Enter CEO contact number</string>
+    <string name="business_type_section">C. Type of Business / Industry Classification</string>
+    <string name="business_type_section_description">Type of Business / Industry Classification Section</string>
+    <string name="business_nature_hint">Nature of Business</string>
+    <string name="business_nature_description">Select nature of business</string>
+    <string name="psic_no_hint">PSIC No.</string>
+    <string name="psic_no_description">Enter PSIC number</string>
+    <string name="industry_descriptor_hint">Philippine Standard Industry Descriptor</string>
+    <string name="industry_descriptor_description">Enter industry descriptor</string>
+    <string name="address_section">D. Address</string>
+    <string name="address_section_description">Address Section</string>
+    <string name="street_hint">Street / Barangay</string>
+    <string name="street_description">Enter street and barangay</string>
+    <string name="city_hint">City / Municipality</string>
+    <string name="city_description">Enter city or municipality</string>
+    <string name="province_hint">Province</string>
+    <string name="province_description">Enter province</string>
+    <string name="zip_code_hint">ZIP Code</string>
+    <string name="zip_code_description">Enter ZIP code</string>
+    <string name="contact_details_section">E. Contact Details</string>
+    <string name="contact_details_section_description">Contact Details Section</string>
+    <string name="phone_hint">Phone Number</string>
+    <string name="phone_description">Enter phone number</string>
+    <string name="email_hint">Email Address</string>
+    <string name="email_description">Enter email address</string>
+    <string name="website_hint">Company Website (Optional)</string>
+    <string name="website_description">Enter company website</string>
+    <string name="rep_info_section">F. Authorized Representative</string>
+    <string name="rep_info_section_description">Authorized Representative Section</string>
+    <string name="rep_name_hint">Full Name</string>
+    <string name="rep_name_description">Enter representative name</string>
+    <string name="rep_position_hint">Position / Role</string>
+    <string name="rep_position_description">Enter representative position</string>
+    <string name="rep_contact_hint">Contact Number</string>
+    <string name="rep_contact_description">Enter representative contact number</string>
+    <string name="rep_email_hint">Email Address</string>
+    <string name="rep_email_description">Enter representative email address</string>
+    <string name="attachments_section">G. Attachments / Uploads</string>
+    <string name="attachments_section_description">Attachments / Uploads Section</string>
+    <string name="attachments_info">Upload the following documents (PDF/IMAGE formats):\n• Business Permit\n• SEC/DTI Registration\n• EMB ID (if applicable)\n• Authorization Letter (if applicable)</string>
+    <string name="attachments_info_description">Instructions for uploading documents</string>
+    <string name="upload_files">Upload Files</string>
+    <string name="upload_files_description">Upload documents button</string>
+    <string name="no_files_selected">No files selected</string>
+    <string name="no_files_selected_description">No files selected text</string>
+    <string name="clear_fields">Clear</string>
+    <string name="clear_fields_description">Clear fields button</string>
+    <string name="save_changes">Submit Application</string>
+    <string name="save_changes_description">Save changes button</string>
+    <string name="back_button_description">Navigate back</string>
+    <string name="address_hint">Full Address</string>
+    <string name="address_description">Enter the full company address including street, city, province, and zip code</string>
+
+    <!-- PCO Dashboard -->
+    <string name="menu_icon_description">Open navigation menu</string>
+    <string name="notification_icon_description">View notifications</string>
+    <string name="home_title">Home</string>
+    <string name="greeting_message">Hi Iandane! Good Evening</string>
+    <string name="search_hint">Search</string>
+    <string name="search_bar_description">Search Bar for Dashboard</string>
+    <string name="welcome_message">Welcome! Monitor document reviews efficiently and process compliance submissions on time</string>
+    <string name="welcome_message_description">Welcome Message for Dashboard</string>
+    <string name="cnc_card_title">Certificate of Non-Coverage \n(CNC) Management</string>
+    <string name="cnc_icon_description">CNC Icon</string>
+    <string name="smr_card_title">Self-Monitoring \nReport (SMR) Management</string>
+    <string name="smr_icon_description">SMR Icon</string>
+    <string name="opms_card_title">Online Permitting and \nMonitoring (OPM)</string>
+    <string name="opms_icon_description">OMS Icon</string>
+    <string name="hazewaste_card_title">Hazardous Waste \nManifest</string>
+    <string name="hazewaste_icon_description">Hazardous Waste Icon</string>
+    <string name="pco_card_title">Pollution Control Officer \nAccreditation</string>
+    <string name="pco_icon_description">PCO Icon</string>
+    <string name="crs_card_title">Company Registration \n (CRS)</string>
+    <string name="crs_icon_description">CRS Icon</string>
+    <string name="nav_header_title">Capstone Envirotrack</string>
+    <string name="nav_header_subtitle">User Dashboard</string>
+
+    <!-- SMR MODULES/COMP_Modules -->
+    <string name="modules_title">Modules</string>
+    <string name="module1_title">Module 1: General Information</string>
+    <string name="module1_progress">40%</string>
+    <string name="module2_title">Module 2: RA 6969</string>
+    <string name="module2_progress">40%</string>
+    <string name="module3_title">Module 3: RA 9275</string>
+    <string name="module3_progress">40%</string>
+    <string name="module4_title">Module 4: RA 8749</string>
+    <string name="module4_progress">40%</string>
+    <string name="module5_title">Module 5: PD 1586</string>
+    <string name="module5_progress">40%</string>
+    <string name="module6_title">Module 6: Others</string>
+    <string name="module6_progress">40%</string>
+    <string name="submit_button">Submit</string>
+
+    <string name="feedback_title">Give Feedback</string>
+    <string name="feedback_prompt">Care to share more about your experience?</string>
+    <string name="publish_button">Publish</string>
 </resources>

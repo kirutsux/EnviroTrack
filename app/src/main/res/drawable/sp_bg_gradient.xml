@@ -6,7 +6,6 @@
                 android:startColor="#74EBD5"
                 android:endColor="#ACB6E5"
                 android:angle="135" />
-            <corners android:radius="30dp" />
         </shape>
     </item>
 </layer-list>

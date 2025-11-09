@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="status_filter">
+        <item>All Status</item>
+        <item>Pending</item>
+        <item>Approved</item>
+        <item>Rejected</item>
+    </string-array>
+
+    <!-- Dropdown Arrays -->
+    <string-array name="register_as_options">
+        <item>Service Provider</item>
+        <item>Pollution Control Officer</item>
+    </string-array>
+
+    <string-array name="company_types">
+        <item>Single Proprietorship</item>
+        <item>Partnership</item>
+        <item>Corporation</item>
+        <item>Cooperative</item>
+        <item>Government</item>
+        <item>NGO / Foundation</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="nature_of_business">
+        <item>Manufacturing</item>
+        <item>Retail / Trade</item>
+        <item>Construction</item>
+        <item>Mining / Quarrying</item>
+        <item>Energy / Power Generation</item>
+        <item>Transportation / Logistics</item>
+        <item>Waste Management</item>
+        <item>Agriculture / Fishery</item>
+        <item>Hospitality / Tourism</item>
+        <item>Healthcare / Pharmaceutical</item>
+        <item>Information Technology</item>
+        <item>Education</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="provinces_philippines">
+        <item>Abra</item>
+        <item>Agusan del Norte</item>
+        <item>Agusan del Sur</item>
+        <item>Aklan</item>
+        <item>Albay</item>
+        <item>Antique</item>
+        <item>Apayao</item>
+        <item>Aurora</item>
+        <item>Basilan</item>
+        <item>Bataan</item>
+        <item>Batanes</item>
+        <item>Batangas</item>
+        <item>Benguet</item>
+        <item>Biliran</item>
+        <item>Bohol</item>
+        <item>Bukidnon</item>
+        <item>Bulacan</item>
+        <item>Cagayan</item>
+        <item>Camarines Norte</item>
+        <item>Camarines Sur</item>
+        <item>Camiguin</item>
+        <item>Capiz</item>
+        <item>Catanduanes</item>
+        <item>Cavite</item>
+        <item>Cebu</item>
+        <item>Compostela Valley</item>
+        <item>Cotabato</item>
+        <item>Davao de Oro</item>
+        <item>Davao del Norte</item>
+        <item>Davao del Sur</item>
+        <item>Davao Occidental</item>
+        <item>Davao Oriental</item>
+        <item>Dinagat Islands</item>
+        <item>Eastern Samar</item>
+        <item>Guimaras</item>
+        <item>Ifugao</item>
+        <item>Ilocos Norte</item>
+        <item>Ilocos Sur</item>
+        <item>Iloilo</item>
+        <item>Isabela</item>
+        <item>Kalinga</item>
+        <item>La Union</item>
+        <item>Laguna</item>
+        <item>Lanao del Norte</item>
+        <item>Lanao del Sur</item>
+        <item>Leyte</item>
+        <item>Maguindanao</item>
+        <item>Marinduque</item>
+        <item>Masbate</item>
+        <item>Misamis Occidental</item>
+        <item>Misamis Oriental</item>
+        <item>Mountain Province</item>
+        <item>Negros Occidental</item>
+        <item>Negros Oriental</item>
+        <item>Northern Samar</item>
+        <item>Nueva Ecija</item>
+        <item>Nueva Vizcaya</item>
+        <item>Occidental Mindoro</item>
+        <item>Oriental Mindoro</item>
+        <item>Palawan</item>
+        <item>Pampanga</item>
+        <item>Pangasinan</item>
+        <item>Quezon</item>
+        <item>Quirino</item>
+        <item>Rizal</item>
+        <item>Romblon</item>
+        <item>Samar</item>
+        <item>Sarangani</item>
+        <item>Siquijor</item>
+        <item>Sorsogon</item>
+        <item>South Cotabato</item>
+        <item>Southern Leyte</item>
+        <item>Sultan Kudarat</item>
+        <item>Sulu</item>
+        <item>Surigao del Norte</item>
+        <item>Surigao del Sur</item>
+        <item>Tarlac</item>
+        <item>Tawi-Tawi</item>
+        <item>Zambales</item>
+        <item>Zamboanga del Norte</item>
+        <item>Zamboanga del Sur</item>
+        <item>Zamboanga Sibugay</item>
+    </string-array>
+
+    <!-- Existing service categories -->
+    <string-array name="service_categories">
+        <item>Waste Disposal Services</item>
+        <item>Hazardous Waste Collection</item>
+        <item>Non-Hazardous Waste Disposal</item>
+        <item>Water Testing &amp; Analysis</item>
+        <item>Wastewater Treatment</item>
+        <item>Drinking Water Purification</item>
+        <item>Industrial Water Treatment</item>
+        <item>Air Emission Monitoring</item>
+        <item>Odor Control Solutions</item>
+        <item>Industrial Air Filtration</item>
+        <item>Renewable Energy Consulting</item>
+        <item>Carbon Footprint Reduction</item>
+    </string-array>
+</resources>

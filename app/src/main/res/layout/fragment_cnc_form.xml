@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="Back"
+            app:tint="#445B6C" />
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_title_gradient"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Certificate of Non-Coverage (CNC) Application"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+
+                android:padding="10dp" />
+        </LinearLayout>
+
+        <!-- Subheader -->
+        <TextView
+            android:id="@+id/subHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please fill out all required fields accurately before submitting your CNC application."
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:background="@drawable/text_border"
+            android:padding="10dp"
+            android:layout_marginBottom="20dp" />
+
+        <TextView
+            android:text="A. Basic Information"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- A. Basic Information -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/inputCompanyName"
+                android:hint="Company Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+
+            <EditText
+                android:id="@+id/inputBusinessName"
+                android:hint="Business/Establishment Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputProjectTitle"
+                android:hint="Project Title"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputNatureOfBusiness"
+                android:hint="Nature of Business"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputProjectLocation"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:hint="Project Location (Address, Barangay, Municipality/City, Province)"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/email"
+                android:minHeight="48dp"
+                android:hint="Email Address"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputManagingHead"
+                android:layout_height="48dp"
+                android:hint="Managing Head Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputPcoName"
+                android:hint="Pollution Control Officer Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputPcoAccreditation"
+                android:layout_height="48dp"
+                android:hint="PCO Accreditation No."
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputDateEstablished"
+                android:layout_height="48dp"
+                android:hint="Date of Establishment"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputEmployees"
+                android:layout_height="48dp"
+                android:hint="Number of Employees"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputPsicCode"
+                android:layout_height="48dp"
+                android:hint="PSIC Code / Industry Classification"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="B. Project Description"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp" />
+
+        <!-- B. Project Description -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/inputProjectType"
+                android:layout_height="48dp"
+                android:hint="Project Type (e.g., Manufacturing, Retail, Service)"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputProjectScale"
+                android:layout_height="48dp"
+                android:hint="Project Size/Scale (Small, Medium, Large)"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputProjectCost"
+                android:layout_height="48dp"
+                android:hint="Project Cost / Capital Investment (₱)"
+                android:inputType="numberDecimal"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputLandArea"
+                android:layout_height="48dp"
+                android:hint="Land Area (sq. meters or hectares)"
+                android:inputType="numberDecimal"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputRawMaterials"
+                android:layout_height="48dp"
+                android:hint="Raw Materials Used"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputProductionCapacity"
+                android:layout_height="48dp"
+                android:hint="Production Capacity"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputUtilitiesUsed"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Utilities Used (Water, Power, Fuel, etc.)"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputWasteGenerated"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:hint="Waste Generated (solid, liquid, hazardous)"
+                android:inputType="textMultiLine"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="C. Location and Environmental Setting"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp" />
+
+        <!-- C. Location and Environmental Setting -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/inputCoordinates"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Coordinates (Latitude, Longitude)"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputNearbyWaters"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Nearby Bodies of Water"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputResidentialProximity"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Proximity to Residential Areas"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputEnvFeatures"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:hint="Environmental Features Nearby (forest, agricultural land, protected areas)"
+                android:inputType="textMultiLine"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputZoning"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Zoning Classification"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="D. Attachments / Uploads"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp" />
+
+        <!-- D. Attachments / Uploads -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upload the following documents (PDF/IMAGE formats):\n• Location Map\n• Vicinity Map\n• Project Layout / Site Development Plan\n• Business Permit / DTI/SEC Registration\n• Land Title / Lease Agreement\n• Authorization Letter (if applicable)\n• Proof of Non-Coverage Justification (Project Description Document)"
+                android:layout_marginTop="8dp"
+                android:padding="4dp"
+                android:textColorHint="@android:color/white"
+                android:textColor="@android:color/white"/>
+
+            <Button
+                android:id="@+id/btnUploadFiles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upload Files"
+                android:layout_marginTop="10dp" />
+
+            <TextView
+                android:id="@+id/txtFileNames"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No files selected"
+                android:textStyle="italic"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSubmitCnc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save and Continue to Payment"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#445B6C" />
+    </LinearLayout>
+</ScrollView>

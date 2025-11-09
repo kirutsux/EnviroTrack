@@ -2,38 +2,41 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.CapstoneEnviroTrack"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-
-        <!-- MainActivity is NOW THE LAUNCHER and hosts the NavGraph -->
+        <activity
+            android:name=".view.businesses.cnc.CncActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapstoneEnviroTrack" />
+        <activity
+            android:name=".view.businesses.opms.OpmsActivity"
+            android:exported="false" /> <!-- MainActivity is NOW THE LAUNCHER and hosts the NavGraph -->
         <!-- Its layout (e.g., activity_main.xml) will contain the NavHostFragment -->
         <!-- The NavHostFragment's graph will have WelcomeFragment as its startDestination -->
         <activity
-            android:name=".view.MainActivity"
-        android:exported="true"
-        android:theme="@style/Theme.CapstoneEnviroTrack">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
+            android:name=".view.all.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.CapstoneEnviroTrack">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-    <!-- Select User Type Activity - If this is still used and launched independently -->
-    <activity
-        android:name=".model.SelectUserType"
-        android:exported="false" /> <!-- Assuming it's not a launcher and launched from within your app -->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> <!-- Select User Type Activity - If this is still used and launched independently -->
+        <activity
+            android:name=".model.SelectUserType"
+            android:exported="false" />
+    </application>
 
-
-</application>
-
-    </manifest>
-
+</manifest>

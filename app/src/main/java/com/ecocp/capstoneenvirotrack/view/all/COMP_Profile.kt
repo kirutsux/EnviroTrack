@@ -1,0 +1,106 @@
+package com.ecocp.capstoneenvirotrack.view.businesses
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.ecocp.capstoneenvirotrack.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import de.hdodenhof.circleimageview.CircleImageView
+
+class COMP_Profile : Fragment() {
+
+    private lateinit var tvName: TextView
+    private lateinit var tvEmail: TextView
+    private lateinit var ivProfilePic: CircleImageView
+
+    private lateinit var btnAccount: LinearLayout
+    private lateinit var btnLogout: LinearLayout
+
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_comp__profile, container, false)
+
+        // Initialize UI
+        tvName = view.findViewById(R.id.tvName)
+        tvEmail = view.findViewById(R.id.tvEmail)
+        ivProfilePic = view.findViewById(R.id.ivProfilePic)
+        btnAccount = view.findViewById(R.id.btnAccount)
+        btnLogout = view.findViewById(R.id.btnLogout)
+
+        loadUserData()
+
+        // Navigate to Account Fragment
+        btnAccount.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_COMP_Profile_to_COMP_Account)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Logout button
+        btnLogout.setOnClickListener { logoutUser() }
+
+        return view
+    }
+
+    // 👤 Load user data
+    private fun loadUserData() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            tvEmail.text = currentUser.email ?: "No Email Available"
+            val uid = currentUser.uid
+
+            db.collection("users").document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val firstName = document.getString("firstName") ?: ""
+                        val lastName = document.getString("lastName") ?: ""
+                        val profileImageUrl = document.getString("profileImageUrl")
+                        val fullName = "$firstName $lastName".trim()
+
+                        tvName.text = if (fullName.isNotBlank()) fullName else "Unknown User"
+
+                        Glide.with(this)
+                            .load(profileImageUrl ?: R.drawable.sample_profile)
+                            .placeholder(R.drawable.sample_profile)
+                            .into(ivProfilePic)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Failed to load user info: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            tvName.text = "Guest"
+            tvEmail.text = "Not signed in"
+        }
+    }
+
+    // 🚪 Logout user and navigate to LoginFragment
+    private fun logoutUser() {
+        try {
+            auth.signOut()
+            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            // Navigate safely to login screen via nav_graph
+            findNavController().navigate(R.id.action_COMP_Profile_to_loginFragment)
+
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error logging out: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+}

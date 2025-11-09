@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/background_light"
-    tools:context=".view.WelcomePage">
+    tools:context=".view.all.WelcomePage">
 
     <!-- Top Section with Welcome Text and Logo -->
     <LinearLayout

@@ -114,5 +114,32 @@
             android:textSize="14sp"
             android:layout_gravity="center"
             android:layout_marginTop="4dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dont have an Service Provider account?"
+                android:textSize="14sp"
+                android:textColor="@color/black" />
+
+
+
+        </LinearLayout>
+        <TextView
+            android:id="@+id/tvRegister"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Request Access"
+            android:textSize="14sp"
+            android:layout_gravity="center"
+            android:textColor="@color/accent" />
+
+
     </LinearLayout>
 </FrameLayout>

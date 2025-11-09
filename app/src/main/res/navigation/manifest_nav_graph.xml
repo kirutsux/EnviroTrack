@@ -2,8 +2,29 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/manifest_nav_graph"
-    app:startDestination="@id/generatorApplicationFragment">
+    app:startDestination="@id/compHazwasteManifestFragment">
 
+    <!-- MAIN HWMS DASHBOARD -->
+    <fragment
+        android:id="@+id/compHazwasteManifestFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.COMP_Hazwaste_Manifest"
+        android:label="Hazardous Waste Management System" >
+        <action
+            android:id="@+id/action_hwms_to_generatorDashboard"
+            app:destination="@id/generatorDashboardFragment" />
+    </fragment>
+
+    <!-- Generator Dashboard -->
+    <fragment
+        android:id="@+id/generatorDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.GeneratorDashboardFragment"
+        android:label="Generator Dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_generatorApplication"
+            app:destination="@id/generatorApplicationFragment" />
+    </fragment>
+
+    <!-- Generator Application -->
     <fragment
         android:id="@+id/generatorApplicationFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.GeneratorApplicationFragment"
@@ -13,62 +34,42 @@
             app:destination="@id/transporterApplicationFragment" />
     </fragment>
 
+    <!-- Transporter Application -->
     <fragment
         android:id="@+id/transporterApplicationFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TransporterApplicationFragment"
-        android:label="Transporter Application">
-<!--        <action-->
-<!--            android:id="@+id/action_transporter_to_tsd"-->
-<!--            app:destination="@id/tsdFacilityApplicationFragment" />-->
-    </fragment>
+        android:label="Transporter Application" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/tsdFacilityApplicationFragment"-->
-<!--        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TSDFacilityApplicationFragment"-->
-<!--        android:label="TSD Facility Application">-->
-<!--        <action-->
-<!--            android:id="@+id/action_tsd_to_permit"-->
-<!--            app:destination="@id/permitToTransportFragment" />-->
-<!--    </fragment>-->
+    <!-- FUTURE PROCESSES (commented for now) -->
+    <!--
+    <fragment
+        android:id="@+id/tsdFacilityApplicationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TSDFacilityApplicationFragment"
+        android:label="TSD Facility Application" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/permitToTransportFragment"-->
-<!--        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.PermitToTransportFragment"-->
-<!--        android:label="Permit to Transport">-->
-<!--        <action-->
-<!--            android:id="@+id/action_permit_to_payment"-->
-<!--            app:destination="@id/paymentInformationFragment" />-->
-<!--    </fragment>-->
+    <fragment
+        android:id="@+id/permitToTransportFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.PermitToTransportFragment"
+        android:label="Permit to Transport" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/paymentInformationFragment"-->
-<!--        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.PaymentInformationFragment"-->
-<!--        android:label="Payment Information">-->
-<!--        <action-->
-<!--            android:id="@+id/action_payment_to_generator_manifest"-->
-<!--            app:destination="@id/generatorManifestFragment" />-->
-<!--    </fragment>-->
+    <fragment
+        android:id="@+id/paymentInformationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.PaymentInformationFragment"
+        android:label="Payment Information" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/generatorManifestFragment"-->
-<!--        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.GeneratorManifestFragment"-->
-<!--        android:label="Generator Manifest">-->
-<!--        <action-->
-<!--            android:id="@+id/action_generator_manifest_to_transporter_manifest"-->
-<!--            app:destination="@id/transporterManifestFragment" />-->
-<!--    </fragment>-->
+    <fragment
+        android:id="@+id/generatorManifestFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.GeneratorManifestFragment"
+        android:label="Generator Manifest" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/transporterManifestFragment"-->
-<!--        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TransporterManifestFragment"-->
-<!--        android:label="Transporter Manifest">-->
-<!--        <action-->
-<!--            android:id="@+id/action_transporter_manifest_to_tsd_manifest"-->
-<!--            app:destination="@id/tsdManifestFragment" />-->
-<!--    </fragment>-->
+    <fragment
+        android:id="@+id/transporterManifestFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TransporterManifestFragment"
+        android:label="Transporter Manifest" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/tsdManifestFragment"-->
-<!--        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TSDManifestFragment"-->
-<!--        android:label="TSD Manifest" />-->
+    <fragment
+        android:id="@+id/tsdManifestFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TSDManifestFragment"
+        android:label="TSD Manifest" />
+    -->
 </navigation>

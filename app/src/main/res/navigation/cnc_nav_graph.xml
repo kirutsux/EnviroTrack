@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cnc_nav_host_fragment"
+    app:startDestination="@id/cncDashboardFragment">
+
+    <!-- CNC DASHBOARD -->
+    <fragment
+        android:id="@+id/cncDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncDashboardFragment"
+        android:label="CNC Dashboard"
+        tools:layout="@layout/fragment_cnc_dashboard">
+
+        <action
+            android:id="@+id/action_cncDashboardFragment_to_cncFormFragment"
+            app:destination="@id/cncFormFragment" />
+
+        <!-- ✅ ADD THIS ACTION -->
+        <action
+            android:id="@+id/action_cncDashboardFragment_to_cncDetailsFragment"
+            app:destination="@id/cncDetailsFragment" />
+    </fragment>
+
+    <!-- CNC FORM -->
+    <fragment
+        android:id="@+id/cncFormFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncFormFragment"
+        android:label="CNC Form"
+        tools:layout="@layout/fragment_cnc_form">
+
+        <action
+            android:id="@+id/action_cncFormFragment_to_cncPaymentFragment"
+            app:destination="@id/cncPaymentFragment" />
+    </fragment>
+
+    <!-- CNC PAYMENT -->
+    <fragment
+        android:id="@+id/cncPaymentFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncPaymentFragment"
+        android:label="CNC Payment"
+        tools:layout="@layout/fragment_cnc_payment">
+
+        <action
+            android:id="@+id/action_cncPayment_to_cncReview"
+            app:destination="@id/cncReviewFragment" />
+    </fragment>
+
+    <!-- CNC REVIEW -->
+    <fragment
+        android:id="@+id/cncReviewFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncReviewFragment"
+        android:label="CNC Review"
+        tools:layout="@layout/fragment_cnc_review" />
+
+    <!-- CNC DETAILS -->
+    <fragment
+        android:id="@+id/cncDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncDetailsFragment"
+        android:label="CNC Details"
+        tools:layout="@layout/fragment_cnc_details" />
+
+</navigation>

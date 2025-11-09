@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="#445B6C"
+            android:contentDescription="@string/back_button_description"
+            tools:ignore="HardcodedText" />
+
+        <!-- 🟩 Header -->
+        <LinearLayout
+            android:id="@+id/topBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_title_gradient"
+            android:layout_marginBottom="12dp">
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/company_registration_title"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:padding="10dp"
+                android:contentDescription="@string/company_registration_title_description"
+                tools:text="Company Registration System" />
+        </LinearLayout>
+
+        <!-- 🟩 Subheader -->
+        <TextView
+            android:id="@+id/subHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/company_registration_subheader"
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:background="@drawable/text_border"
+            android:padding="10dp"
+            android:layout_marginBottom="20dp"
+            android:contentDescription="@string/company_registration_subheader_description"
+            tools:text="Please fill out all required fields accurately before submitting your company registration." />
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/company_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/company_info_section_description"
+            tools:text="A. Company Information" />
+
+        <!-- 🧩 A. Company Information -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etCompanyName_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/company_name_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCompanyName"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:padding="12dp"
+                    android:contentDescription="@string/company_name_description"
+                    tools:text="Example Corp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etCompanyType_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/company_type_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <AutoCompleteTextView
+                    android:id="@+id/etCompanyType"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="12dp"
+                    android:dropDownSelector="@color/input_field_background"
+                    android:contentDescription="@string/company_type_description"
+                    tools:text="Corporation" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etTinNumber_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/tin_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTinNumber"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:padding="12dp"
+                    android:contentDescription="@string/tin_description"
+                    tools:text="123-456-789-000" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ceo_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/ceo_info_section_description"
+            tools:text="B. CEO / President / Owner" />
+
+        <!-- 🧑‍💼 B. CEO / President / Owner -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etCeoName_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/ceo_name_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCeoName"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:padding="12dp"
+                    android:contentDescription="@string/ceo_name_description"
+                    tools:text="John Doe" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etCeoContact_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/ceo_contact_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCeoContact"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:padding="12dp"
+                    android:contentDescription="@string/ceo_contact_description"
+                    tools:text="+639123456789" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/business_type_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/business_type_section_description"
+            tools:text="C. Type of Business / Industry Classification" />
+
+        <!-- 🏢 C. Type of Business / Industry Classification -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etNatureOfBusiness_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/business_nature_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <AutoCompleteTextView
+                    android:id="@+id/etNatureOfBusiness"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="12dp"
+                    android:dropDownSelector="@color/input_field_background"
+                    android:contentDescription="@string/business_nature_description"
+                    tools:text="Manufacturing" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etPsicNo_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/psic_no_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPsicNo"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:padding="12dp"
+                    android:contentDescription="@string/psic_no_description"
+                    tools:text="123456" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etIndustryDescriptor_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/industry_descriptor_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etIndustryDescriptor"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textMultiLine"
+                    android:minLines="2"
+                    android:maxLines="4"
+                    android:padding="12dp"
+                    android:contentDescription="@string/industry_descriptor_description"
+                    tools:text="Manufacturing of Electronic Components" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/address_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/address_section_description"
+            tools:text="D. Address" />
+
+        <!-- 🏠 D. Address -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etAddress_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/address_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAddress"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textMultiLine"
+                    android:minLines="2"
+                    android:maxLines="4"
+                    android:padding="12dp"
+                    android:contentDescription="@string/address_description"
+                    tools:text="123 Main St, Brgy. Example, Quezon City, Metro Manila, 1100" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_details_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/contact_details_section_description"
+            tools:text="E. Contact Details" />
+
+        <!-- ☎️ E. Contact Details -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etPhone_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/phone_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPhone"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:padding="12dp"
+                    android:contentDescription="@string/phone_description"
+                    tools:text="+63212345678" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etEmail_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/email_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmail"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:padding="12dp"
+                    android:contentDescription="@string/email_description"
+                    tools:text="contact@example.com" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etWebsite_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/website_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etWebsite"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri"
+                    android:padding="12dp"
+                    android:contentDescription="@string/website_description"
+                    tools:text="https://example.com" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rep_info_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/rep_info_section_description"
+            tools:text="F. Authorized Representative" />
+
+        <!-- 👤 F. Authorized Representative -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etRepName_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/rep_name_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etRepName"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:padding="12dp"
+                    android:contentDescription="@string/rep_name_description"
+                    tools:text="Jane Smith" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etRepPosition_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/rep_position_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etRepPosition"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:padding="12dp"
+                    android:contentDescription="@string/rep_position_description"
+                    tools:text="Manager" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etRepContact_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/rep_contact_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etRepContact"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:padding="12dp"
+                    android:contentDescription="@string/rep_contact_description"
+                    tools:text="+639987654321" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etRepEmail_layout"
+                style="@style/TextInputBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/rep_email_hint"
+                app:boxStrokeColor="@color/input_field_border"
+                app:hintTextColor="@color/text_secondary"
+                app:boxBackgroundColor="@color/input_field_background">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etRepEmail"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:padding="12dp"
+                    android:contentDescription="@string/rep_email_description"
+                    tools:text="rep@example.com" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <TextView
+            style="@style/FormLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/attachments_section"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:contentDescription="@string/attachments_section_description"
+            tools:text="G. Attachments / Uploads" />
+
+        <!-- 📎 G. Attachments / Uploads -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/attachments_info"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="8dp"
+                android:padding="4dp"
+                android:contentDescription="@string/attachments_info_description"
+                tools:text="Upload the following documents (PDF/IMAGE formats):\n• Business Permit\n• SEC/DTI Registration\n• EMB ID (if applicable)\n• Authorization Letter (if applicable)" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUploadFiles"
+                style="@style/PrimaryButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/upload_files"
+                android:contentDescription="@string/upload_files_description"
+                tools:text="Upload Files" />
+
+            <TextView
+                android:id="@+id/txtFileNames"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_files_selected"
+                android:textStyle="italic"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/no_files_selected_description"
+                tools:text="No files selected" />
+        </LinearLayout>
+
+        <!-- 🟩 Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="32dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClear"
+                style="@style/OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:text="@string/clear_fields"
+                android:contentDescription="@string/clear_fields_description"
+                tools:text="Clear" />
+
+            <Space
+                android:layout_width="12dp"
+                android:layout_height="match_parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveChanges"
+                style="@style/PrimaryButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:text="@string/save_changes"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#445B6C"
+                android:enabled="false"
+                android:contentDescription="@string/save_changes_description"
+                tools:text="Submit Application"
+                tools:enabled="true" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

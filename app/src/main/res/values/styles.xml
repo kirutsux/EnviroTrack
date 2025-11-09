@@ -38,7 +38,7 @@
         <item name="android:inputType">number</item>
         <item name="android:maxLength">1</item>
         <item name="android:background">@drawable/otp_box_background</item>
-        <item name="android:textColor">@android:color/black</item> <!-- ✅ FIX: text black -->
+        <item name="android:textColor">@android:color/black</item>
         <item name="android:textSize">18sp</item>
     </style>
 
@@ -54,7 +54,36 @@
     <style name="CompactPrimaryButton" parent="@style/PrimaryButton">
         <item name="android:textSize">14sp</item>
         <item name="android:padding">6dp</item>
-        <!-- Ensure background and tint are not overridden -->
         <item name="android:backgroundTintMode">src_over</item>
+    </style>
+
+    <!-- Italic version -->
+    <style name="FormLabel.Italic">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
+    </style>
+
+    <style name="TextInputBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundMode">outline</item>
+        <item name="boxStrokeColor">@color/input_field_border</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+        <item name="boxBackgroundColor">@color/input_field_background</item>
+        <item name="hintTextColor">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+
+    <!-- Optional: matching hint text style -->
+    <style name="TextInputHint" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textColor">@color/gray</item>
+        <item name="android:textSize">14sp</item>
     </style>
 </resources>
