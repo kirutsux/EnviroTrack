@@ -21,8 +21,12 @@ class COMP_Profile : Fragment() {
     private lateinit var tvEmail: TextView
     private lateinit var ivProfilePic: CircleImageView
 
+
+    private lateinit var btnFiles: LinearLayout
     private lateinit var btnAccount: LinearLayout
     private lateinit var btnLogout: LinearLayout
+    private lateinit var btnFeedback: LinearLayout
+    private lateinit var btnAboutUs: LinearLayout
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
@@ -37,21 +41,43 @@ class COMP_Profile : Fragment() {
         tvName = view.findViewById(R.id.tvName)
         tvEmail = view.findViewById(R.id.tvEmail)
         ivProfilePic = view.findViewById(R.id.ivProfilePic)
+        btnFeedback = view.findViewById(R.id.btnFeedback)
         btnAccount = view.findViewById(R.id.btnAccount)
-        btnLogout = view.findViewById(R.id.btnLogout)
+        btnFiles = view.findViewById(R.id.btnFiles)
+        btnAboutUs = view.findViewById(R.id.btnAboutUs)
+        btnLogout = view.findViewById(R.id.btnLogout)  // add ID in XML
 
         loadUserData()
 
-        // Navigate to Account Fragment
+        // 👤 Account
         btnAccount.setOnClickListener {
+            findNavController().navigate(R.id.action_COMP_Profile_to_COMP_Account)
+        }
+        btnFeedback.setOnClickListener {
             try {
-                findNavController().navigate(R.id.action_COMP_Profile_to_COMP_Account)
+                findNavController().navigate(R.id.action_COMP_Profile_to_feedbackFragment)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+        btnAboutUs.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_COMP_Profile_to_aboutUsFragment)
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Logout button
+        btnFiles.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_COMP_Profile_to_filesFragment)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+        // 🚪 Logout
         btnLogout.setOnClickListener { logoutUser() }
 
         return view
@@ -90,15 +116,11 @@ class COMP_Profile : Fragment() {
         }
     }
 
-    // 🚪 Logout user and navigate to LoginFragment
     private fun logoutUser() {
         try {
             auth.signOut()
             Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
-
-            // Navigate safely to login screen via nav_graph
             findNavController().navigate(R.id.action_COMP_Profile_to_loginFragment)
-
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Error logging out: ${e.message}", Toast.LENGTH_SHORT).show()
         }

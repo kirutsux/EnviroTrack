@@ -1,9 +1,12 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.opms
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.databinding.FragmentDischargePermitDetailsBinding
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,6 +17,7 @@ class DischargePermitDetailsFragment : Fragment() {
 
     private lateinit var binding: FragmentDischargePermitDetailsBinding
     private val db = FirebaseFirestore.getInstance()
+    private var certificateUrl: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,6 +31,18 @@ class DischargePermitDetailsFragment : Fragment() {
             fetchPermitDetails(applicationId)
         } else {
             populateUIFromArgs()
+        }
+
+        // 🔹 Handle Download Certificate button click
+        binding.btnDownloadCertificate.setOnClickListener {
+            certificateUrl?.let { url ->
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Unable to open certificate.", Toast.LENGTH_SHORT).show()
+                }
+            } ?: Toast.makeText(requireContext(), "Certificate not available yet.", Toast.LENGTH_SHORT).show()
         }
 
         return binding.root
@@ -63,6 +79,28 @@ class DischargePermitDetailsFragment : Fragment() {
                     binding.txtPayment.text =
                         "₱%.2f %s\nPaid on: %s".format(amount, currency, formattedDate)
 
+                    // 🔹 Show feedback if available
+                    val feedback = doc.getString("feedback") ?: ""
+                    if (feedback.isNotBlank()) {
+                        binding.inputFeedback.visibility = View.VISIBLE
+                        binding.inputFeedback.setText(feedback)
+                        binding.inputFeedback.isEnabled = false
+                        binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                    } else {
+                        binding.inputFeedback.visibility = View.GONE
+                    }
+
+                    // ✅ Check if EMB uploaded a certificate
+                    certificateUrl = doc.getString("certificateUrl")
+
+                    if (!certificateUrl.isNullOrBlank()) {
+                        // Certificate exists -> show download button
+                        binding.btnDownloadCertificate.visibility = View.VISIBLE
+                    } else {
+                        // No certificate yet -> hide button
+                        binding.btnDownloadCertificate.visibility = View.GONE
+                    }
+
                 } else {
                     binding.txtCompanyName.text = "No details found"
                 }
@@ -86,5 +124,6 @@ class DischargePermitDetailsFragment : Fragment() {
         binding.txtOperationDate.text = arguments?.getString("operationStartDate") ?: "-"
         binding.txtStatus.text = arguments?.getString("status") ?: "-"
         binding.txtPayment.text = arguments?.getString("paymentInfo") ?: "₱1,500 - Pending"
+        binding.btnDownloadCertificate.visibility = View.GONE
     }
 }

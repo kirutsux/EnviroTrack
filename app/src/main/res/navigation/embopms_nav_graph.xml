@@ -1,0 +1,50 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/embopms_nav_host_fragment"
+    app:startDestination="@id/opmsEmbDashboardFragment">
+
+    <!-- EMB Dashboard -->
+    <fragment
+        android:id="@+id/opmsEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.OpmsEmbDashboardFragment"
+        android:label="EMB OPMS Dashboard"
+        tools:layout="@layout/fragment_opms_emb_dashboard">
+
+        <!-- Action to PTO Details -->
+        <action
+            android:id="@+id/action_embDashboard_to_ptoDetailsFragment"
+            app:destination="@id/ptoDetailsFragment" />
+
+        <!-- Action to DP Details -->
+        <action
+            android:id="@+id/action_embDashboard_to_dpDetailsFragment"
+            app:destination="@id/dpDetailsFragment" />
+
+        <action
+            android:id="@+id/action_embopmsDashboardFragment_to_embDashboardFragment"
+            app:destination="@id/embDashboardFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/embDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
+        android:label="EMB Dashboard"
+        tools:layout="@layout/emb_dashboard" />
+
+    <!-- Permit to Operate Details Fragment -->
+    <fragment
+        android:id="@+id/ptoDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.PtoDetailsFragment"
+        android:label="PTO Details"
+        tools:layout="@layout/fragment_pto_details2" />
+
+    <!-- Discharge Permit Details Fragment -->
+    <fragment
+        android:id="@+id/dpDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.DpDetailsFragment"
+        android:label="DP Details"
+        tools:layout="@layout/fragment_dp_details" />
+
+</navigation>

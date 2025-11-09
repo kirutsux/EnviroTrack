@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_sp"
+    app:startDestination="@id/SP_Dashboard">
+
+    <fragment
+        android:id="@+id/SP_Dashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Dashboard"
+        android:label="Dashboard"
+        tools:layout="@layout/sp_dashboard" />
+
+    <fragment
+        android:id="@+id/SP_Inbox"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Inbox"
+        android:label="Inbox"
+        tools:layout="@layout/fragment_sp_inbox" />
+
+    <fragment
+        android:id="@+id/SP_Bookings"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Bookings"
+        android:label="Bookings"
+        tools:layout="@layout/fragment_sp_bookings" />
+
+    <fragment
+        android:id="@+id/SP_Profile"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Profile"
+        android:label="Profile"
+        tools:layout="@layout/fragment_sp_profile" />
+
+    <fragment
+        android:id="@+id/SP_Account"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Account"
+        android:label="Account"
+        tools:layout="@layout/fragment_sp_account" />
+    <fragment
+        android:id="@+id/SP_ChangepasswordFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
+        tools:layout="@layout/sp_changepassword_fragment">
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_SP_Dashboard"
+            app:destination="@id/SP_Dashboard"
+            app:popUpTo="@id/SP_ChangepasswordFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SP_ChatFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_sp_chat">
+
+        <argument
+            android:name="receiverId"
+            app:argType="string" />
+
+        <argument
+            android:name="receiverName"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_SP_Bookings_to_SP_ChatFragment"
+            app:destination="@id/SP_ChatFragment" />
+    </fragment>
+</navigation>

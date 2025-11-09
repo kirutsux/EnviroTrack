@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/SP_Dashboard"
+        android:icon="@drawable/dashboards"
+        android:title="Dashboard" />
+
+    <item
+        android:id="@+id/SP_Inbox"
+        android:icon="@drawable/chat"
+        android:title="Inbox" />
+
+    <item
+        android:id="@+id/SP_Bookings"
+        android:icon="@drawable/booking"
+        android:title="Bookings" />
+
+    <item
+        android:id="@+id/SP_Profile"
+        android:icon="@drawable/user"
+        android:title="Profile" />
+</menu>

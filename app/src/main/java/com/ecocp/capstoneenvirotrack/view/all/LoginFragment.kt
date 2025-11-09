@@ -1,5 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.all
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
@@ -15,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.view.serviceprovider.SPMainActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -212,8 +215,19 @@ class LoginFragment : Fragment() {
                                 if (mustChangePassword) {
                                     findNavController().navigate(R.id.action_loginFragment_to_SP_ChangepasswordFragment)
                                 } else {
-                                    findNavController().navigate(R.id.action_loginFragment_to_serviceProviderDashboard)
+                                    // ✅ Save login session for SP user
+                                    val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                                    prefs.edit()
+                                        .putBoolean("isLoggedIn", true)
+                                        .putString("userType", "service_provider")
+                                        .apply()
+
+                                    // ✅ Redirect to SP dashboard
+                                    val intent = Intent(requireContext(), SPMainActivity::class.java)
+                                    startActivity(intent)
+                                    requireActivity().finish()
                                 }
+
                             } else {
                                 // 3️⃣ Not found → check if there's an approved service request for this email
                                 firestore.collection("service_requests")

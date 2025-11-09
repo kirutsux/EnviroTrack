@@ -16,6 +16,7 @@ import com.ecocp.capstoneenvirotrack.view.all.COMP_PCO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.text.SimpleDateFormat
 import java.util.*
 
 class COMP_PCOAccreditation : Fragment() {
@@ -65,10 +66,7 @@ class COMP_PCOAccreditation : Fragment() {
         submitApplicationButton = view.findViewById(R.id.submitApplicationButton)
         backButton = view.findViewById(R.id.backButton)
 
-        // ✅ Back button returns to previous fragment
-        backButton.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-        }
+        backButton.setOnClickListener { requireActivity().supportFragmentManager.popBackStack() }
 
         progressDialog = ProgressDialog(requireContext()).apply {
             setMessage("Submitting Application...")
@@ -76,7 +74,6 @@ class COMP_PCOAccreditation : Fragment() {
         }
 
         setupButtonListeners()
-
         return view
     }
 
@@ -91,9 +88,7 @@ class COMP_PCOAccreditation : Fragment() {
     }
 
     private fun openFileChooser(requestCode: Int) {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "application/pdf"
-        }
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/pdf" }
         startActivityForResult(intent, requestCode)
     }
 
@@ -102,7 +97,6 @@ class COMP_PCOAccreditation : Fragment() {
         if (resultCode == Activity.RESULT_OK && data?.data != null) {
             val uri = data.data
             val fileName = getFileNameFromUri(uri)
-
             when (requestCode) {
                 PICK_CERTIFICATE_REQUEST -> {
                     certificateUri = uri
@@ -193,6 +187,12 @@ class COMP_PCOAccreditation : Fragment() {
         govIdUrl: String,
         trainingUrl: String
     ) {
+        // ✅ Format timestamp
+        val dateFormat = SimpleDateFormat("MMMM dd, yyyy 'at' h:mm:ss a 'UTC+8'", Locale.ENGLISH)
+        dateFormat.timeZone = TimeZone.getTimeZone("Asia/Manila")
+        val formattedTimestamp = dateFormat.format(Date())
+
+        // ✅ Save "Pending" status
         val data = hashMapOf(
             "accreditationId" to accreditationId,
             "fullName" to fullName.text.toString(),
@@ -205,7 +205,8 @@ class COMP_PCOAccreditation : Fragment() {
             "governmentIdUrl" to govIdUrl,
             "trainingCertificateUrl" to trainingUrl,
             "uid" to uid,
-            "timestamp" to System.currentTimeMillis()
+            "status" to "Pending",
+            "submittedTimestamp" to formattedTimestamp
         )
 
         firestore.collection("accreditations")
@@ -215,7 +216,29 @@ class COMP_PCOAccreditation : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()
 
-                // ✅ Navigate back to PCO fragment
+                sendNotification(
+                    receiverId = uid,
+                    receiverType = "PCO",
+                    title = "PCO Accreditation Submitted",
+                    message = "You have successfully submitted your PCO accreditation application.",
+                    type = "submission"
+                )
+
+                firestore.collection("users")
+                    .whereEqualTo("userType", "emb")
+                    .get()
+                    .addOnSuccessListener { embUsers ->
+                        for (emb in embUsers) {
+                            sendNotification(
+                                receiverId = emb.id,
+                                receiverType = "EMB",
+                                title = "New PCO Accreditation Application",
+                                message = "A new PCO Accreditation application has been submitted by ${fullName.text}.",
+                                type = "alert"
+                            )
+                        }
+                    }
+
                 val compPCOFragment = COMP_PCO()
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.nav_host_fragment, compPCOFragment)
@@ -226,5 +249,26 @@ class COMP_PCOAccreditation : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Failed to save application: ${it.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun sendNotification(
+        receiverId: String,
+        receiverType: String,
+        title: String,
+        message: String,
+        type: String
+    ) {
+        val notificationData = hashMapOf(
+            "receiverId" to receiverId,
+            "receiverType" to receiverType,
+            "title" to title,
+            "message" to message,
+            "type" to type,
+            "isRead" to false,
+            "timestamp" to com.google.firebase.Timestamp.now()
+        )
+
+        firestore.collection("notifications")
+            .add(notificationData)
     }
 }

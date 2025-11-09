@@ -92,22 +92,10 @@
             android:id="@+id/action_verificationFragment_to_pcoDashboard"
             app:destination="@id/pcoDashboard" />
     </fragment>
-
-    <!-- 🔐 Service Provider Change Password -->
     <fragment
         android:id="@+id/SP_ChangepasswordFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
         tools:layout="@layout/sp_changepassword_fragment">
-        <action
-            android:id="@+id/action_SP_ChangepasswordFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/nav_graph"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_SP_ChangepasswordFragment_to_serviceProviderDashboard"
-            app:destination="@id/serviceProviderDashboard"
-            app:popUpTo="@id/SP_ChangepasswordFragment"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- 🧰 Service Provider Registration -->
@@ -123,14 +111,30 @@
     <!-- 🌿 EMB Dashboard -->
     <fragment
         android:id="@+id/embDashboard"
-        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_Dashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
         tools:layout="@layout/emb_dashboard">
-        <action android:id="@+id/action_embDashboard_to_embCNCFragment" app:destination="@id/embCNCFragment" />
-        <action android:id="@+id/action_embDashboard_to_embSMRFragment" app:destination="@id/embSMRFragment" />
-        <action android:id="@+id/action_embDashboard_to_embOPMSFragment" app:destination="@id/embOPMSFragment" />
-        <action android:id="@+id/action_embDashboard_to_embHMSFragment" app:destination="@id/embHMSFragment" />
-        <action android:id="@+id/action_embDashboard_to_embCRSFragment" app:destination="@id/embCRSFragment" />
-        <action android:id="@+id/action_embDashboard_to_embPCOFragment" app:destination="@id/embPCOFragment" />
+        <action
+            android:id="@+id/action_embDashboard_to_embCNCFragment"
+            app:destination="@id/embCNCFragment" />
+<!--        <action -->
+<!--            android:id="@+id/action_embDashboard_to_embSMRFragment" -->
+<!--            app:destination="@id/embSMRFragment" />-->
+        <action
+            android:id="@+id/action_embDashboard_to_embOPMSFragment"
+            app:destination="@id/embOPMSFragment" />
+<!--        <action -->
+<!--            android:id="@+id/action_embDashboard_to_embHMSFragment"-->
+<!--            app:destination="@id/embHMSFragment" />-->
+        <action
+            android:id="@+id/action_embDashboard_to_embCRSFragment"
+            app:destination="@id/embCRSFragment" />
+        <action
+            android:id="@+id/action_embDashboard_to_embPCOFragment"
+            app:destination="@id/embPCOFragment" />
+        <!-- add this -->
+        <action
+            android:id="@+id/action_embDashboard_to_companiesFragment"
+            app:destination="@id/companiesFragment" />
     </fragment>
 
     <!-- 🧰 Service Provider Dashboard -->
@@ -237,12 +241,30 @@
         tools:layout="@layout/fragment_about_us" />
 
     <!-- 🌍 EMB Modules -->
-    <fragment android:id="@+id/embCNCFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CNC" tools:layout="@layout/emb_cnc" />
-    <fragment android:id="@+id/embSMRFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_SMR" tools:layout="@layout/emb_smr" />
-    <fragment android:id="@+id/embOPMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_OPMS" tools:layout="@layout/emb_opms" />
-    <fragment android:id="@+id/embHMSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS" tools:layout="@layout/emb_hwms" />
-    <fragment android:id="@+id/embCRSFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_CRS" tools:layout="@layout/emb_crs" />
-    <fragment android:id="@+id/embPCOFragment" android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_PCO" tools:layout="@layout/emb_pco" />
+    <fragment
+        android:id="@+id/embCNCFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment"
+        tools:layout="@layout/fragment_cnc_emb_dashboard" />
+<!--    <fragment -->
+<!--        android:id="@+id/embSMRFragment" -->
+<!--        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_SMR" -->
+<!--        tools:layout="@layout/emb_smr" />-->
+    <fragment
+        android:id="@+id/embOPMSFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.OpmsEmbDashboardFragment"
+        tools:layout="@layout/fragment_opms_emb_dashboard" />
+<!--    <fragment -->
+<!--        android:id="@+id/embHMSFragment" -->
+<!--        android:name="com.ecocp.capstoneenvirotrack.view.emb.EMB_HMS"-->
+<!--        tools:layout="@layout/emb_hwms" />-->
+    <fragment
+        android:id="@+id/embCRSFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.crs.CrsEmbDashboardFragment"
+        tools:layout="@layout/fragment_crs_emb_dashboard" />
+    <fragment
+        android:id="@+id/embPCOFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.pcoacc.PcoEmbDashboardFragment"
+        tools:layout="@layout/fragment_pco_emb_dashboard" />
 
     <!-- 💬 Chat -->
     <fragment
@@ -255,22 +277,38 @@
         android:id="@+id/aiFaqBotFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.all.AiFaqBotFragment"
         tools:layout="@layout/fragment_ai_faq_bot" />
-
-    <!-- 👤 Profile -->
+    <!-- Profile -->
     <fragment
         android:id="@+id/comp_Profile"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.COMP_Profile"
-        android:label="Profile"
         tools:layout="@layout/fragment_comp__profile">
+
         <action
             android:id="@+id/action_COMP_Profile_to_COMP_Account"
             app:destination="@id/pco_Account" />
+
+        <action
+            android:id="@+id/action_COMP_Profile_to_feedbackFragment"
+            app:destination="@id/feedbackFragment" />
+        <action
+            android:id="@+id/action_COMP_Profile_to_filesFragment"
+            app:destination="@id/filesFragment" />
+
+        <action
+            android:id="@+id/action_COMP_Profile_to_aboutUsFragment"
+            app:destination="@id/aboutUsFragment" />
+
         <action
             android:id="@+id/action_COMP_Profile_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/filesFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.Files"
+        tools:layout="@layout/fragment_files" />
 
     <!-- ⚙️ Account -->
     <fragment
@@ -297,6 +335,53 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment"
         tools:layout="@layout/fragment_hwms_dashboard" />
 
+    <!-- ☣️ HWMS Add Application -->
+    <fragment
+        android:id="@+id/HwmsStep1Fragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.HwmsStep1Fragment"
+        tools:layout="@layout/fragment_hwms_step1">
+        <action
+            android:id="@+id/action_HwmsStep1Fragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+    </fragment>
+
+    <!-- ☣️ HWMS Step 2: Transporter Selection -->
+    <fragment
+        android:id="@+id/TransporterStep2Fragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TransporterStep2Fragment"
+        tools:layout="@layout/fragment_transporter_step2">
+        <action
+            android:id="@+id/action_TransporterStep2Fragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+        <action
+            android:id="@+id/action_transporterStep2Fragment_to_tsdFacilitySelectionFragment"
+            app:destination="@id/tsdFacilitySelectionFragment" />
+
+    </fragment>
+
+    <!-- ☣️ HWMS Step 3: TSD Facility Selection -->
+    <fragment
+        android:id="@+id/tsdFacilitySelectionFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.TsdFacilitySelectionFragment"
+        tools:layout="@layout/fragment_tsd_facility_selection">
+        <action
+            android:id="@+id/action_tsdFacilitySelectionFragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+        <action
+            android:id="@+id/action_tsdFacilitySelectionFragment_to_pttApplicationFragment"
+            app:destination="@id/pttApplicationFragment" />
+    </fragment>
+
+    <!-- ☣️ HWMS Step 4: PTT Application -->
+    <fragment
+        android:id="@+id/pttApplicationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.PttApplicationFragment"
+        tools:layout="@layout/fragment_ptt_application">
+        <action
+            android:id="@+id/action_pttApplicationFragment_to_HWMSDashboardFragment"
+            app:destination="@id/HWMSDashboardFragment" />
+    </fragment>
+
     <!-- 📋 Compliance Reporting System (CRS) -->
     <fragment
         android:id="@+id/COMP_CRS"
@@ -313,5 +398,24 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.crs.COMP_CRSApplication"
         android:label="Add Company"
         tools:layout="@layout/fragment_comp_crs_application" />
+
+    <!-- 🏢 EMB: Companies List -->
+    <fragment
+        android:id="@+id/companiesFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.CompaniesFragment"
+        tools:layout="@layout/fragment_companies">
+
+        <action
+            android:id="@+id/action_companiesFragment_to_companyDetailsFragment"
+            app:destination="@id/companyDetailsFragment" />
+    </fragment>
+
+    <!-- 🏢 EMB: Company Details -->
+    <fragment
+        android:id="@+id/companyDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.CompanyDetailsFragment"
+        tools:layout="@layout/fragment_company_details" />
+
+
 
 </navigation>

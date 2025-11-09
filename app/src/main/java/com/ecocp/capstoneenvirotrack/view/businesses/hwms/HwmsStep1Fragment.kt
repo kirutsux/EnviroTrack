@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentHwmsStep1Binding
 import com.google.firebase.auth.FirebaseAuth
@@ -129,16 +130,11 @@ class HwmsStep1Fragment : Fragment() {
             .add(data)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Waste details saved successfully.", Toast.LENGTH_SHORT).show()
-                navigateToFragment(TransporterStep2Fragment())
+                findNavController().navigate(R.id.TransporterStep2Fragment)
+
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to save waste details.", Toast.LENGTH_SHORT).show()
             }
-    }
-    private fun navigateToFragment(fragment: Fragment) {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.nav_host_fragment, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 }

@@ -144,7 +144,7 @@ class PtoReviewFragment : Fragment() {
 
                 // ✅ Notify EMB admin(s)
                 db.collection("users")
-                    .whereEqualTo("role", "emb")
+                    .whereEqualTo("userType", "emb")
                     .get()
                     .addOnSuccessListener { embUsers ->
                         for (emb in embUsers) {

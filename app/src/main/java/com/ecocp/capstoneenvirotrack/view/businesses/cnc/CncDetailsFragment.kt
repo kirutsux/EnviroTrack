@@ -1,5 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.cnc
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -87,11 +89,48 @@ class CncDetailsFragment : Fragment() {
                 binding.txtAmount.text = "₱%.2f %s".format(amount, currency)
                 binding.txtPaymentMethod.text = "Method: $paymentMethod"
                 binding.txtPaymentStatus.text = "Status: $paymentStatus"
-                binding.txtPaymentTimestamp.text = "Paid on: ${paymentTs?.let { dateFormat.format(it) } ?: "Not paid"}"
-                binding.txtSubmittedTimestamp.text = "Submitted on: ${submittedTs?.let { dateFormat.format(it) } ?: "Not submitted"}"
+                binding.txtPaymentTimestamp.text =
+                    "Paid on: ${paymentTs?.let { dateFormat.format(it) } ?: "Not paid"}"
+                binding.txtSubmittedTimestamp.text =
+                    "Submitted on: ${submittedTs?.let { dateFormat.format(it) } ?: "Not submitted"}"
+
+                // Feedback
+                val feedback = doc.getString("feedback") ?: ""
+                if (feedback.isNotBlank()) {
+                    binding.inputFeedback.visibility = View.VISIBLE
+                    binding.inputFeedback.setText(feedback)
+                    binding.inputFeedback.isEnabled = false
+                    binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                } else {
+                    binding.inputFeedback.visibility = View.GONE
+                }
+
+                // 🔹 Handle Certificate Download Button (NEW LOGIC)
+                val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
+                val certificateUrl = doc.getString("certificateUrl")
+
+                if (status == "approved" && !certificateUrl.isNullOrBlank()) {
+                    // show download button only if approved + certificate exists
+                    binding.btnDownloadCertificate.visibility = View.VISIBLE
+                    binding.btnDownloadCertificate.setOnClickListener {
+                        openFileLink(certificateUrl)
+                    }
+                } else {
+                    // hide if rejected or no certificate
+                    binding.btnDownloadCertificate.visibility = View.GONE
+                }
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error loading CNC details.", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun openFileLink(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Unable to open file", Toast.LENGTH_SHORT).show()
+        }
     }
 }

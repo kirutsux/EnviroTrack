@@ -130,6 +130,28 @@
                         android:textColor="@color/text_primary" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+            <!-- G. Feedback Section -->
+            <EditText
+                android:id="@+id/inputFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Enter feedback"
+                android:padding="8dp"
+                android:background="@drawable/text_border"
+                android:minHeight="80dp" />
+
+            <!-- Download Certificate Button -->
+            <Button
+                android:id="@+id/btnDownloadCertificate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Download Certificate"
+                android:backgroundTint="@color/teal_700"
+                android:textColor="@android:color/white"
+                android:visibility="gone" />
+
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

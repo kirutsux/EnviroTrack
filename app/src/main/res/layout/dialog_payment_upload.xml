@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tvBookingInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Proof of Payment"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:paddingBottom="10dp" />
+
+    <ImageView
+        android:id="@+id/imgPreview"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_upload"
+        android:background="@drawable/bg_upload_box"
+        android:contentDescription="Preview" />
+
+    <Button
+        android:id="@+id/btnSelectImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Image/PDF" />
+
+    <Button
+        android:id="@+id/btnUploadPayment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Proof"
+        android:enabled="false"
+        android:backgroundTint="@color/teal_700"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="10dp"/>
+</LinearLayout>

@@ -80,15 +80,20 @@ class SP_RegistrationFragment : Fragment() {
             return
         }
 
+        // Generate a unique UID (this will be used later in ChangePassword)
+        val uid = firestore.collection("uids").document().id
+
         val requestData = hashMapOf(
+            "uid" to uid,
             "email" to email,
             "status" to "pending",
             "createdAt" to com.google.firebase.Timestamp(Date())
         )
 
-        android.util.Log.d("SP_Registration", "Submitting request for: $email")
-        firestore.collection("service_requests")
-            .add(requestData)
+        android.util.Log.d("SP_Registration", "Submitting request for: $email with UID: $uid")
+
+        firestore.collection("service_requests").document(uid)
+            .set(requestData)
             .addOnSuccessListener {
                 android.util.Log.d("SP_Registration", "Request submitted successfully for: $email")
                 Toast.makeText(requireContext(), "Request submitted successfully!", Toast.LENGTH_LONG).show()
@@ -99,4 +104,5 @@ class SP_RegistrationFragment : Fragment() {
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 }

@@ -148,4 +148,7 @@
     <string name="feedback_title">Give Feedback</string>
     <string name="feedback_prompt">Care to share more about your experience?</string>
     <string name="publish_button">Publish</string>
+
+    <string name="feedback_hint">Share your thoughts...</string>
+    <string name="feedback_char_count">%1$d/500</string>
 </resources>

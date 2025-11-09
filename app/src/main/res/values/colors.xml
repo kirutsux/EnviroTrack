@@ -6,8 +6,8 @@
 
 
     <!-- Primary Colors -->
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 
     <!-- Brand Colors -->
     <color name="primary">#2C3E50</color> <!-- Dark Blue-Grey -->
@@ -74,4 +74,36 @@
     <color name="background_lighty">#FFFFFF</color>
     <color name="divider_light">#E0E0E0</color>
     <color name="purple_500">#6200EE</color>
+    <color name="light_gray">#D3D3D3</color>
+
+    <color name="status_pending">#9E9E9E</color>  <!-- Gray -->
+    <color name="status_approved">#4CAF50</color> <!-- Green -->
+    <color name="status_rejected">#F44336</color> <!-- Red -->
+    <color name="status_submitted">#FB8C00</color> <!-- Orange -->
+
+    <color name="success_green">#2E7D32</color>
+    <color name="error_red">#C62828</color>
+    <color name="lightt_gray">#E0E0E0</color>
+    <color name="darkerr_gray">#616161</color>
+
+    <color name="background_gray">#F5F6FA</color>
+
+
+
+    <color name="link_blue">#0000FF</color>
+
+    <color name="gray_dark">#616161</color>
+    <color name="very_light_gray">#F5F5F5</color>
+    <color name="card_light_bg">#FAFAFA</color>
+
+    <color name="bg_white">#FFFFFF</color>
+    <color name="surface">#F7F8FA</color>
+    <color name="primaryy">#0B63FF</color>
+    <color name="primaryVariant">#034EDC</color>
+    <color name="textPrimary">#111827</color>
+    <color name="textSecondary">#6B7280</color>
+    <color name="cardShadow">#22000000</color>
+    <color name="accentt">#06B6D4</color>
+    <color name="danger">#EF4444</color>
+
 </resources>

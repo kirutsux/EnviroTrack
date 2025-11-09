@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/embpco_nav_graph"
+    app:startDestination="@id/pcoEmbDashboardFragment">
+
+    <!-- EMB PCO Dashboard -->
+    <fragment
+        android:id="@+id/pcoEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.pcoacc.PcoEmbDashboardFragment"
+        android:label="EMB PCO Dashboard"
+        tools:layout="@layout/fragment_pco_emb_dashboard">
+
+        <action
+            android:id="@+id/action_pcoEmbDashboardFragment_to_pcoEmbReviewDetailsFragment"
+            app:destination="@id/pcoEmbReviewDetailsFragment" />
+
+        <action
+            android:id="@+id/action_embpcoDashboardFragment_to_embDashboardFragment"
+            app:destination="@id/embDashboardFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/embDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
+        android:label="EMB Dashboard"
+        tools:layout="@layout/emb_dashboard" />
+
+    <!-- Review Details Fragment -->
+    <fragment
+        android:id="@+id/pcoEmbReviewDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.pcoacc.PcoEmbReviewDetailsFragment"
+        android:label="Review PCO Accreditation"
+        tools:layout="@layout/fragment_pco_review_details" />
+</navigation>

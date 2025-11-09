@@ -1,342 +1,371 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/emb_dashboard_root"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".view.emb.EMB_Dashboard">
+    android:background="#FFFFFF"
+    tools:context=".view.all.COMP_Dashboard">
 
-    <!-- Top Navigation Bar -->
-    <LinearLayout
+    <!-- Main Content -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="#445B6C"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/menu_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:contentDescription="Menu Icon"
-            android:src="@drawable/ic_menu" />
-
-        <TextView
-            android:id="@+id/app_title"
+        <!-- Top Navigation Bar -->
+        <LinearLayout
+            android:id="@+id/top_nav"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginTop="25dp"
-            android:text="@string/home"
-            android:textColor="@color/white"
-            android:textSize="23sp"
-            android:textStyle="bold"
-            android:gravity="center" />
+            android:background="@color/header_background"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/emb_notification_icon"
-            android:layout_width="61dp"
-            android:layout_height="47dp"
-            android:layout_marginTop="25dp"
-            android:contentDescription="Notification Icon"
-            android:src="@drawable/ic_notifications"
-            app:tint="@color/white"/>
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/embdrawerMenu"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_menu"
+                android:contentDescription="@string/menu_icon_description"
+                android:layout_gravity="center_vertical"
+                app:tint="@color/white" />
 
-    <!-- Scrollable Content -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#FFFFFF"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#FFFFFF"
-            android:padding="16dp">
-
-            <!-- Greeting Message -->
             <TextView
-                android:id="@+id/greeting_message"
-                android:layout_width="match_parent"
+                android:id="@+id/app_title"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Hi Iandane! Good Day"
-                android:textSize="18sp"
-                android:textColor="#0088ED"
-                android:textStyle="bold" />
+                android:layout_weight="1"
+                android:text="@string/home_title"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center_vertical" />
 
-            <!-- Search Bar -->
-            <EditText
-                android:id="@+id/search_bar"
-                android:layout_width="match_parent"
+            <FrameLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="@string/search"
-                style="@style/InputField"
-                android:padding="8dp" />
+                android:layout_gravity="center_vertical">
 
-            <!-- Welcome Message -->
-            <TextView
-                android:id="@+id/welcome_message"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginTop="16dp"
-                android:padding="8dp"
-                android:background="@drawable/welcome_background"
-                android:text="@string/welcome_monitor_document_reviews_efficiently_and_process_compliance_submissions_on_time"
-                android:textColor="#000000"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                <ImageView
+                    android:id="@+id/emb_notification_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_notifications"
+                    app:tint="@color/white"
+                    android:contentDescription="@string/notification_icon_description" />
 
-            <!-- Recent Section -->
-            <TextView
-                android:id="@+id/recent_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/recent"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                <View
+                    android:id="@+id/emb_notification_badge"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/badge_red_dot"
+                    android:layout_gravity="end|top"
+                    android:visibility="gone"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="2dp"/>
+            </FrameLayout>
 
-            <!-- ========== ROW 1 ========== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <!-- CNC -->
-                <LinearLayout
-                    android:id="@+id/CNC_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginEnd="16dp"
-                    android:background="@drawable/recent_item_background"
-                    android:padding="8dp"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/ic_recent"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/certificate_of_non_coverage_cnc_management"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center" />
-                </LinearLayout>
-
-                <!-- SMR -->
-                <LinearLayout
-                    android:id="@+id/SMR_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="@drawable/recent_item_background"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/smr"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/self_monitoring_report_smr_management"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ========== ROW 2 ========== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <!-- OPMS -->
-                <LinearLayout
-                    android:id="@+id/OPMS_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginEnd="16dp"
-                    android:background="@drawable/recent_item_background"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/opms"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/online_permitting_and_monitoring_system"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center" />
-                </LinearLayout>
-
-                <!-- HMS -->
-                <LinearLayout
-                    android:id="@+id/HMS_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="@drawable/recent_item_background"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/hms"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Hazardous waste manifest system"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ========== ROW 3 ========== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <!-- CRS -->
-                <LinearLayout
-                    android:id="@+id/CRS_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_marginEnd="16dp"
-                    android:background="@drawable/recent_item_background"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/crs"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/company_registration"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center" />
-                </LinearLayout>
-
-                <!-- PCO -->
-                <LinearLayout
-                    android:id="@+id/PCO_icon"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="@drawable/recent_item_background"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:layout_width="105dp"
-                        android:layout_height="105dp"
-                        android:src="@drawable/pco"
-                        android:layout_gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/pco_accreditation"
-                        android:textSize="14sp"
-                        android:textAlignment="center"
-                        android:gravity="center" />
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
-    </ScrollView>
 
-    <!-- Bottom Navigation Bar -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingVertical="12dp"
-        android:background="#FFFFFF">
+        <!-- Scrollable Content -->
+        <ScrollView
+            android:id="@+id/rdy8igdwc09t"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/top_nav"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/nav_home"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:src="@drawable/ic_home" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/nav_task"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:src="@drawable/ic_task" />
+                <!-- Greeting Message -->
+                <TextView
+                    android:id="@+id/greeting_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Hi"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_highlight"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
-        <ImageView
-            android:id="@+id/nav_providers"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:src="@drawable/ic_providers" />
+                <!-- Welcome Message -->
+                <TextView
+                    android:id="@+id/welcome_message"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="16dp"
+                    android:padding="8dp"
+                    android:textStyle="bold"
+                    android:background="@drawable/welcome_background"
+                    android:text="@string/welcome_message"
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/greeting_message"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:contentDescription="@string/welcome_message_description"
+                    tools:text="Welcome! Monitor document reviews efficiently and process compliance submissions on time" />
 
-        <ImageView
-            android:id="@+id/nav_chats"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp"
-            android:src="@drawable/ic_chats" />
+                <!-- Spacer for Scrolling -->
+                <GridLayout
+                    android:id="@+id/recent_grid"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:horizontalSpacing="16dp"
+                    android:padding="16dp"
+                    android:verticalSpacing="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/welcome_message">
 
-        <ImageView
-            android:id="@+id/nav_profile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp"
-            android:src="@drawable/ic_profile" />
-    </LinearLayout>
+                    <!-- CNC Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cnc_card"
+                        android:layout_width="160dp"
+                        android:layout_height="150dp"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="25dp"
+                        app:cardElevation="6dp">
 
-</LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/recent_item_background"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <ImageView
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:contentDescription="@string/cnc_icon_description"
+                                android:src="@drawable/ic_recent" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/cnc_card_title"
+                                android:textAlignment="center"
+                                android:textColor="@color/text_primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                tools:text="Certificate of Non-Coverage \n(CNC) Management" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- SMR Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/smr_card"
+                        android:layout_width="160dp"
+                        android:layout_height="150dp"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="25dp"
+                        app:cardElevation="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/recent_item_background"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <ImageView
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:contentDescription="@string/smr_icon_description"
+                                android:src="@drawable/smr" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/smr_card_title"
+                                android:textAlignment="center"
+                                android:textColor="@color/text_primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                tools:text="Self-Monitoring \nReport (SMR) Management" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- OPMS Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/opms_card"
+                        android:layout_width="160dp"
+                        android:layout_height="150dp"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="25dp"
+                        app:cardElevation="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/recent_item_background"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <ImageView
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:contentDescription="@string/opms_icon_description"
+                                android:src="@drawable/opms" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/opms_card_title"
+                                android:textAlignment="center"
+                                android:textColor="@color/text_primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Hazardous Waste Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/hazewaste_card"
+                        android:layout_width="160dp"
+                        android:layout_height="150dp"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="25dp"
+                        app:cardElevation="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/recent_item_background"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <ImageView
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:contentDescription="@string/hazewaste_icon_description"
+                                android:src="@drawable/hms" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/hazewaste_card_title"
+                                android:textAlignment="center"
+                                android:textColor="@color/text_primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                tools:text="Hazardous Waste \nManifest" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- PCO Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/pco_card"
+                        android:layout_width="160dp"
+                        android:layout_height="150dp"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="25dp"
+                        app:cardElevation="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/recent_item_background"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <ImageView
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:contentDescription="@string/pco_icon_description"
+                                android:src="@drawable/pco" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/pco_card_title"
+                                android:textAlignment="center"
+                                android:textColor="@color/text_primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- CRS Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/crs_card"
+                        android:layout_width="160dp"
+                        android:layout_height="150dp"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="25dp"
+                        app:cardElevation="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/recent_item_background"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <ImageView
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:contentDescription="@string/crs_icon_description"
+                                android:src="@drawable/crs" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/crs_card_title"
+                                android:textAlignment="center"
+                                android:textColor="@color/text_primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </GridLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    app:layout_constraintTop_toBottomOf="@id/recent_grid"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/emb_drawer"
+        app:headerLayout="@layout/nav_header"
+        android:background="@color/white"
+        app:itemIconTint="@color/nav_item_tint"
+        app:itemTextColor="@color/nav_item_text" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

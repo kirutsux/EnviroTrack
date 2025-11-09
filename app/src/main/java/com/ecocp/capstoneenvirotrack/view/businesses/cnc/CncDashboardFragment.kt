@@ -41,14 +41,68 @@ class CncDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        cncAdapter = CncAdapter(cncList, requireContext()) { cnc ->
-            val bundle = Bundle().apply { putString("applicationId", cnc.applicationId) }
-            findNavController().navigate(R.id.action_cncDashboardFragment_to_cncDetailsFragment, bundle)
-        }
+        cncAdapter = CncAdapter(
+            cncList,
+            requireContext(),
+            onItemClick = { cnc ->
+                val bundle = Bundle().apply { putString("applicationId", cnc.applicationId) }
+                findNavController().navigate(R.id.action_cncDashboardFragment_to_cncDetailsFragment, bundle)
+            },
+            onItemLongClick = onItemLongClick@{ cnc ->
+                // ✅ Check if status is pending first
+                if (cnc.status != "Pending") {
+                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Cannot Delete")
+                        .setMessage("Only pending applications can be deleted.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                    return@onItemLongClick
+                }
+
+                // ✅ Proceed to delete if pending
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Application")
+                    .setMessage("Are you sure you want to delete this submitted CNC application?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        val appId = cnc.applicationId ?: return@setPositiveButton // Prevent null id
+
+                        db.collection("cnc_applications").document(appId)
+                            .delete()
+                            .addOnSuccessListener {
+                                // Update the local list and refresh adapter
+                                val updatedList = cncList.toMutableList()
+                                updatedList.remove(cnc)
+                                cncList.clear()
+                                cncList.addAll(updatedList)
+                                cncAdapter.notifyDataSetChanged()
+
+                                android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Application deleted successfully.",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            .addOnFailureListener { e ->
+                                android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Failed to delete application: ${e.message}",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+
+
+        )
 
         binding.recyclerCncList.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = cncAdapter
+        }
+        binding.backButton.setOnClickListener {
+            findNavController().navigate(R.id.action_cncDashboardFragment_to_pcoDashboardFragment)
         }
 
         binding.btnAddCnc.setOnClickListener {

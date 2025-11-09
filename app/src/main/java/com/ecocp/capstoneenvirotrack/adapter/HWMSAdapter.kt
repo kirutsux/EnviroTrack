@@ -1,9 +1,10 @@
 package com.ecocp.capstoneenvirotrack.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.ItemHwmsBinding
 import com.ecocp.capstoneenvirotrack.model.HWMSApplication
 
@@ -22,15 +23,38 @@ class HWMSAdapter(
                 tvTransporter.text = "Transporter: ${application.transporterName}"
                 tvTsdFacility.text = "TSD Facility: ${application.tsdFacilityName}"
                 tvPermitNo.text = "Permit No: ${application.permitNumber ?: "Pending"}"
-                tvPaymentStatuss.text = "Payment: ${application.paymentStatus ?: "Unpaid"}"
 
-                // Display color-coded status text
-                tvStatus.text = application.status
-                when (application.status.lowercase()) {
-                    "pending" -> tvStatus.setTextColor(root.context.getColor(android.R.color.holo_orange_dark))
-                    "approved" -> tvStatus.setTextColor(root.context.getColor(android.R.color.holo_green_dark))
-                    "rejected" -> tvStatus.setTextColor(root.context.getColor(android.R.color.holo_red_dark))
-                    else -> tvStatus.setTextColor(root.context.getColor(android.R.color.darker_gray))
+                // ✅ PAYMENT STATUS TEXT + COLOR
+                val paymentStatus = application.status?.trim() ?: "Unpaid"
+                tvPaymentStatuss.text = "Payment: $paymentStatus"
+
+                when (paymentStatus.lowercase()) {
+                    "paid" -> tvPaymentStatuss.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.holo_green_dark)
+                    )
+                    "unpaid" -> tvPaymentStatuss.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.holo_red_dark)
+                    )
+                    else -> tvPaymentStatuss.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.darker_gray)
+                    )
+                }
+
+                // ✅ EMB STATUS COLOR (already good, just kept clean)
+                tvStatus.text = application.embStatus ?: "Pending"
+                when (application.embStatus?.lowercase()) {
+                    "pending" -> tvStatus.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.holo_orange_dark)
+                    )
+                    "approved" -> tvStatus.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.holo_green_dark)
+                    )
+                    "rejected" -> tvStatus.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.holo_red_dark)
+                    )
+                    else -> tvStatus.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.darker_gray)
+                    )
                 }
 
                 root.setOnClickListener { onItemClick(application) }
@@ -49,7 +73,6 @@ class HWMSAdapter(
 
     override fun getItemCount(): Int = applications.size
 
-    // Optional helper methods
     fun updateData(newList: List<HWMSApplication>) {
         applications.clear()
         applications.addAll(newList)

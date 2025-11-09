@@ -1,5 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.opms
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -59,7 +61,7 @@ class PtoDetailsFragment : Fragment() {
                     val amount = doc.getDouble("amount") ?: 0.0
                     val currency = doc.getString("currency") ?: "PHP"
                     val paymentMethod = doc.getString("paymentMethod") ?: "-"
-                    val paymentStatus = doc.getString("paymentstatus") ?: "Pending"
+                    val paymentStatus = doc.getString("paymentStatus") ?: "Pending"
                     val paymentTimestamp = doc.getTimestamp("paymentTimestamp")?.toDate()
                     val formattedDate = paymentTimestamp?.let {
                         SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault()).format(it)
@@ -69,8 +71,35 @@ class PtoDetailsFragment : Fragment() {
                         amount, currency, paymentMethod, paymentStatus, formattedDate
                     )
 
-                    binding.txtStatus.text =
-                        "Status: ${doc.getString("status") ?: "Pending"}"
+                    // 🔹 Show feedback if available
+                    val feedback = doc.getString("feedback") ?: ""
+                    if (feedback.isNotBlank()) {
+                        binding.inputFeedback.visibility = View.VISIBLE
+                        binding.inputFeedback.setText(feedback)
+                        binding.inputFeedback.isEnabled = false
+                        binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                    } else {
+                        binding.inputFeedback.visibility = View.GONE
+                    }
+
+                    binding.txtStatus.text = "Status: ${doc.getString("status") ?: "Pending"}"
+
+                    // 🔹 Check if certificate exists, show download button
+                    val certificateUrl = doc.getString("certificateUrl")
+                    if (!certificateUrl.isNullOrBlank()) {
+                        binding.btnDownloadCertificate.visibility = View.VISIBLE
+                        binding.btnDownloadCertificate.setOnClickListener {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(certificateUrl))
+                                startActivity(intent)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    } else {
+                        binding.btnDownloadCertificate.visibility = View.GONE
+                    }
+
                 } else {
                     binding.txtOwnerName.text = "No details found for this PTO."
                 }

@@ -81,7 +81,7 @@ class DischargePermitReviewFragment : Fragment() {
                 val amount = doc.getDouble("amount") ?: 0.0
                 val currency = doc.getString("currency") ?: "PHP"
                 val paymentMethod = doc.getString("paymentMethod") ?: "-"
-                val paymentStatus = doc.getString("status") ?: "Pending"
+                val paymentStatus = doc.getString("paymentStatus") ?: "Pending"
                 val paymentTimestamp = doc.getTimestamp("paymentTimestamp")
 
                 // Format timestamp nicely if available
@@ -97,8 +97,11 @@ class DischargePermitReviewFragment : Fragment() {
                     "Receiving Body: $receivingBody\nVolume: $dischargeVolume\nTreatment: $dischargeMethod"
 
                 // --- Payment Display ---
-                val paymentDisplay = if (paymentStatus.equals("Paid", ignoreCase = true)) {
-                    "✅ Payment Completed\nAmount: ₱$amount $currency\nMethod: $paymentMethod\nDate: $formattedDate"
+                val isPaid = paymentTimestamp != null && paymentMethod != "-" && amount > 0
+
+                val paymentDisplay = if (isPaid) {
+                    val formattedAmount = String.format(Locale.getDefault(), "%.2f", amount)
+                    "✅ Payment Completed\nAmount: ₱$formattedAmount $currency\nMethod: $paymentMethod\nDate: $formattedDate"
                 } else {
                     "❌ Payment Pending"
                 }
@@ -125,7 +128,7 @@ class DischargePermitReviewFragment : Fragment() {
         }
 
         val updateData = mapOf(
-            "status" to "Submitted",
+            "status" to "Pending",
             "submittedTimestamp" to Timestamp.now()
         )
 
@@ -147,7 +150,7 @@ class DischargePermitReviewFragment : Fragment() {
                 // ✅ Send notification to EMB (admin)
                 // Replace with your actual EMB UID or set a specific receiverType = "EMB"
                 db.collection("users")
-                    .whereEqualTo("role", "emb")
+                    .whereEqualTo("userType", "emb")
                     .get()
                     .addOnSuccessListener { embUsers ->
                         for (emb in embUsers) {
