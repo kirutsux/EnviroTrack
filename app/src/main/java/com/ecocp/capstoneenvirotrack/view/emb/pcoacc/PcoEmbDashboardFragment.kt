@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,70 +44,16 @@ class PcoEmbDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = PcoEmbAdapter(
-            filteredList,
-            onItemClick = { selectedApp ->
-                val bundle = Bundle().apply { putString("applicationId", selectedApp.applicationId) }
-                findNavController().navigate(
-                    R.id.action_pcoEmbDashboardFragment_to_pcoEmbReviewDetailsFragment,
-                    bundle
-                )
-            },
-            onItemLongClick = onItemLongClick@{ pco ->
-                // ✅ Only allow delete for pending or rejected applications
-                if (!pco.status.equals("Pending", ignoreCase = true) &&
-                    !pco.status.equals("Rejected", ignoreCase = true)
-                ) {
-                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                        .setTitle("Cannot Delete")
-                        .setMessage("Only pending or rejected applications can be deleted.")
-                        .setPositiveButton("OK", null)
-                        .show()
-                    return@onItemLongClick
-                }
-
-                // ✅ Confirm deletion dialog
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Delete Application")
-                    .setMessage("Are you sure you want to delete this PCO Accreditation application?")
-                    .setPositiveButton("Delete") { _, _ ->
-                        val appId = pco.applicationId ?: return@setPositiveButton
-
-                        db.collection("accreditations").document(appId)
-                            .delete()
-                            .addOnSuccessListener {
-                                // Update the list and refresh adapter
-                                val updatedList = pcoList.toMutableList()
-                                updatedList.remove(pco)
-                                pcoList.clear()
-                                pcoList.addAll(updatedList)
-                                applyFilters()
-
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Application deleted successfully.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Failed to delete application: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
-            }
-        )
+        adapter = PcoEmbAdapter(filteredList) { selectedApp ->
+            val bundle = Bundle().apply { putString("applicationId", selectedApp.applicationId) }
+            findNavController().navigate(
+                R.id.action_pcoEmbDashboardFragment_to_pcoEmbReviewDetailsFragment,
+                bundle
+            )
+        }
 
         binding.recyclerEmbPcoList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEmbPcoList.adapter = adapter
-
-        binding.backButton.setOnClickListener {
-            findNavController().navigate(R.id.action_embpcoDashboardFragment_to_embDashboardFragment)
-        }
 
         setupSpinner()
         setupSearchBar()
@@ -158,8 +103,6 @@ class PcoEmbDashboardFragment : Fragment() {
 
                     val submittedTimestamp =
                         (data["submittedTimestamp"] as? Timestamp) ?: Timestamp.now()
-                    val issueDate = data["issueDate"] as? Timestamp
-                    val expiryDate = data["expiryDate"] as? Timestamp
 
                     val applicationId = doc.id
                     val pcoName = data["fullName"] as? String ?: "N/A"
@@ -174,9 +117,7 @@ class PcoEmbDashboardFragment : Fragment() {
                         companyAffiliation = companyAffiliation,
                         positionDesignation = positionDesignation,
                         status = status,
-                        submittedTimestamp= submittedTimestamp,
-                        issueDate = issueDate,
-                        expiryDate = expiryDate
+                        submittedTimestamp= submittedTimestamp
                     )
 
                     pcoList.add(pco)

@@ -55,10 +55,6 @@ class CncEmbDashboardFragment : Fragment() {
         binding.recyclerEmbCncList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEmbCncList.adapter = adapter
 
-        binding.backButton.setOnClickListener {
-            findNavController().navigate(R.id.action_embcncDashboardFragment_to_embDashboardFragment)
-        }
-
         setupSpinner()
         setupSearchBar()
 

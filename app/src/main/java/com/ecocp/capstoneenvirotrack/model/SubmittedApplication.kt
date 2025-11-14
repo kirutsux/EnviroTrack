@@ -1,7 +1,5 @@
 package com.ecocp.capstoneenvirotrack.model
 
-import com.google.firebase.Timestamp
-
 data class SubmittedApplication(
     val id: String = "",
     val companyName: String = "",
@@ -19,7 +17,5 @@ data class SubmittedApplication(
     val status: String = "Pending",
     val paymentInfo: String = "",
     val timestamp: String = "",
-    val applicationType: String = "",
-    val issueDate: Timestamp? = null,   // ✅ Added
-    val expiryDate: Timestamp? = null // ✅ Added
+    val applicationType: String = ""
 )

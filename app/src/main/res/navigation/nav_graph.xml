@@ -131,10 +131,6 @@
         <action
             android:id="@+id/action_embDashboard_to_embPCOFragment"
             app:destination="@id/embPCOFragment" />
-        <!-- add this -->
-        <action
-            android:id="@+id/action_embDashboard_to_companiesFragment"
-            app:destination="@id/companiesFragment" />
     </fragment>
 
     <!-- 🧰 Service Provider Dashboard -->
@@ -398,24 +394,6 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.crs.COMP_CRSApplication"
         android:label="Add Company"
         tools:layout="@layout/fragment_comp_crs_application" />
-
-    <!-- 🏢 EMB: Companies List -->
-    <fragment
-        android:id="@+id/companiesFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.CompaniesFragment"
-        tools:layout="@layout/fragment_companies">
-
-        <action
-            android:id="@+id/action_companiesFragment_to_companyDetailsFragment"
-            app:destination="@id/companyDetailsFragment" />
-    </fragment>
-
-    <!-- 🏢 EMB: Company Details -->
-    <fragment
-        android:id="@+id/companyDetailsFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.CompanyDetailsFragment"
-        tools:layout="@layout/fragment_company_details" />
-
 
 
 </navigation>

@@ -27,7 +27,7 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <ImageView
-                android:id="@+id/embdrawerMenu"
+                android:id="@+id/drawerMenu"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:src="@drawable/ic_menu"
@@ -362,7 +362,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/emb_drawer"
+        app:menu="@menu/drawer_menu"
         app:headerLayout="@layout/nav_header"
         android:background="@color/white"
         app:itemIconTint="@color/nav_item_tint"

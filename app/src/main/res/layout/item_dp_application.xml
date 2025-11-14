@@ -94,24 +94,5 @@
             android:layout_marginTop="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/tvIssueDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Issued: -"
-            android:textSize="12sp"
-            android:textColor="#555"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:id="@+id/tvExpiryDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Expires: -"
-            android:textSize="12sp"
-            android:textColor="#555"
-            android:layout_marginTop="2dp" />
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>

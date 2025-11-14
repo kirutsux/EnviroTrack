@@ -21,7 +21,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.*
 
 class DpDetailsFragment : Fragment() {
 
@@ -166,6 +165,7 @@ class DpDetailsFragment : Fragment() {
                     txtVolume.text = doc.getString("volume") ?: "-"
                     txtTreatment.text = doc.getString("treatmentMethod") ?: "-"
                     txtOperationDate.text = doc.getString("operationStartDate") ?: "-"
+                    txtStatus.text = doc.getString("status") ?: "-"
 
                     // Payment info
                     val amount = doc.getDouble("amount") ?: 0.0
@@ -187,57 +187,47 @@ class DpDetailsFragment : Fragment() {
                     val feedback = doc.getString("feedback") ?: ""
                     val certificateUrl = doc.getString("certificateUrl")
 
-                    // store uploaded certificate URL (if any)
+                    // populate local var if certificate was already uploaded earlier
                     uploadedCertificateUrl = certificateUrl
-
-                    txtStatus.text = "Status: ${status.replaceFirstChar { it.uppercase() }}"
 
                     when (status) {
                         "approved" -> {
-                            // Hide upload section
-                            btnUploadCertificate.visibility = View.GONE
-                            tvSelectedFile.visibility = View.GONE
-
-                            // Hide review buttons
                             btnApprove.visibility = View.GONE
                             btnReject.visibility = View.GONE
-
-                            // Feedback readonly
+                            // EMB can still view upload button only if no certificate exists (but as per your request upload visible while pending,
+                            // so for approved we hide upload if cert exists, otherwise leave it visible)
                             inputFeedback.visibility = View.VISIBLE
                             inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                             inputFeedback.isEnabled = false
                             inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
-                        }
 
+                            if (certificateUrl.isNullOrBlank()) {
+                                // in rare case approved but no certificate yet -> allow upload
+                                btnUploadCertificate.visibility = View.VISIBLE
+                                tvSelectedFile.text = "No file selected"
+                            } else {
+                                btnUploadCertificate.visibility = View.GONE
+                                tvSelectedFile.text = "Uploaded: ${certificateUrl.substringAfterLast("/").substringBefore("?")}"
+                            }
+                        }
                         "rejected" -> {
-                            // Hide upload section
-                            btnUploadCertificate.visibility = View.GONE
-                            tvSelectedFile.visibility = View.GONE
-
-                            // Hide review buttons
                             btnApprove.visibility = View.GONE
                             btnReject.visibility = View.GONE
-
-                            // Feedback readonly
+                            btnUploadCertificate.visibility = View.GONE
                             inputFeedback.visibility = View.VISIBLE
                             inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                             inputFeedback.isEnabled = false
                             inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                            tvSelectedFile.text = "No file selected"
                         }
-
-                        else -> { // pending
-                            // Show upload section only for pending
-                            btnUploadCertificate.visibility = View.VISIBLE
-                            tvSelectedFile.visibility = View.VISIBLE
-
-                            // Show review controls
+                        else -> { // pending -> show upload button (EMB can upload while pending)
                             btnApprove.visibility = View.VISIBLE
                             btnReject.visibility = View.VISIBLE
+                            btnUploadCertificate.visibility = View.VISIBLE
                             inputFeedback.visibility = View.VISIBLE
                             inputFeedback.isEnabled = true
                             inputFeedback.setText(feedback)
-
-                            // show filename if already uploaded
+                            // show filename if already uploaded, otherwise default text
                             if (!certificateUrl.isNullOrBlank()) {
                                 tvSelectedFile.text = "Uploaded: ${certificateUrl.substringAfterLast("/").substringBefore("?")}"
                             } else {
@@ -246,7 +236,7 @@ class DpDetailsFragment : Fragment() {
                         }
                     }
 
-                    // Display uploaded application files (fileLinks)
+                    // Display uploaded application files (fileLinks) if any
                     val fileLinksField = doc.get("fileLinks")
                     when (fileLinksField) {
                         is List<*> -> {
@@ -266,7 +256,6 @@ class DpDetailsFragment : Fragment() {
                     binding.txtCompanyName.text = "Error loading details: ${e.message}"
             }
     }
-
 
     // Show clickable file links
     private fun displayFileLinks(fileLinks: List<String>) {
@@ -303,7 +292,6 @@ class DpDetailsFragment : Fragment() {
     }
 
     // Approve / Reject + Notifications
-    // Approve / Reject + Notifications
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
@@ -312,38 +300,27 @@ class DpDetailsFragment : Fragment() {
             return
         }
 
-        // ✅ Common fields for update
-        val updateData = mutableMapOf<String, Any>(
+        val updateData = mapOf(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
-
-        // ✅ If approved → add issueDate and expiryDate
-        if (status.equals("Approved", ignoreCase = true)) {
-            val issueDate = Timestamp.now()
-            val calendar = Calendar.getInstance().apply { time = issueDate.toDate() }
-            calendar.add(Calendar.YEAR, 5)
-            val expiryDate = Timestamp(calendar.time)
-            updateData["issueDate"] = issueDate
-            updateData["expiryDate"] = expiryDate
-        }
 
         db.collection("opms_discharge_permits").document(id)
             .update(updateData)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // Reload details to refresh UI
+                // Reload details so upload button and filename update immediately
                 loadDischargePermitDetails()
 
-                // Navigate back to dashboard
+                // Optionally navigate back to dashboard (kept behavior from your previous code)
                 if (isAdded) {
                     val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // ✅ Notifications
+                // Send Notifications
                 db.collection("opms_discharge_permits").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
@@ -384,7 +361,6 @@ class DpDetailsFragment : Fragment() {
                 Log.e("DP_REVIEW", "❌ Failed to update DP status", e)
             }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

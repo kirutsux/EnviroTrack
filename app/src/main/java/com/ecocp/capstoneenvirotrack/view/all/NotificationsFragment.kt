@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.adapter.NotificationAdapter
@@ -42,40 +41,9 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = NotificationAdapter(notifList) { notif ->
-            // Long press callback
-            showDeleteDialog(notif)
-        }
+        adapter = NotificationAdapter(notifList)
         binding.recyclerNotifications.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerNotifications.adapter = adapter
-    }
-
-    private fun showDeleteDialog(notification: NotificationModel) {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        builder.setTitle("Delete Notification")
-        builder.setMessage("Are you sure you want to delete this notification?")
-        builder.setPositiveButton("Yes") { dialog, _ ->
-            deleteNotification(notification)
-            dialog.dismiss()
-        }
-        builder.setNegativeButton("No") { dialog, _ ->
-            dialog.dismiss()
-        }
-        builder.show()
-    }
-
-    private fun deleteNotification(notification: NotificationModel) {
-        val docId = notification.id ?: return
-        db.collection("notifications").document(docId)
-            .delete()
-            .addOnSuccessListener {
-                notifList.remove(notification)
-                adapter.notifyDataSetChanged()
-                if (notifList.isEmpty()) binding.emptyNotificationsText.visibility = View.VISIBLE
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to delete: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
     }
 
 
