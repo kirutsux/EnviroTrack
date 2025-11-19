@@ -3,143 +3,121 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F6FA"
     tools:context=".view.serviceprovider.SP_Servicerequest">
 
-    <!-- 🔹 EnviroTrack Top Header -->
-    <RelativeLayout
-        android:id="@+id/headerBar"
+    <!-- Top colored bar -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/topBarCard"
         android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:background="#34495E"
-        android:paddingHorizontal="16dp"
+        android:layout_height="56dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="0dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:backgroundTint="#1F3A4A">
+
+        <TextView
+            android:id="@+id/txtPageTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Service Requests Management"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Sort row -->
+    <LinearLayout
+        android:id="@+id/sortFilterRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        app:layout_constraintTop_toBottomOf="@id/topBarCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Hamburger Menu -->
-        <ImageView
-            android:id="@+id/imgMenu"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_menu"
-            app:tint="#FFFFFF"
-            android:contentDescription="Menu" />
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Requests Overview"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_weight="1" />
 
-        <!-- Notification Bell -->
-        <ImageView
-            android:id="@+id/imgNotification"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_notifications"
-            app:tint="#FFFFFF"
-            android:contentDescription="Notifications" />
-
-        <!-- Logo and Title Section -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_centerInParent="true"
+        <Spinner
+            android:id="@+id/spinnerSort"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="36dp"
+            android:entries="@array/sort_options"
+            android:layout_marginStart="8dp"
+            android:padding="4dp"
+            android:background="@drawable/spinner_background" />
+    </LinearLayout>
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/logo"
-                android:contentDescription="EnviroTrack Logo"
-                android:layout_gravity="center" />
-
-            <TextView
-                android:id="@+id/txtAppName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="EnviroTrack"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_gravity="center" />
-
-
-        </LinearLayout>
-    </RelativeLayout>
-
-    <!-- 🔹 Blue Title Bar -->
-    <View
-        android:id="@+id/subTitleBar"
-        android:layout_width="0dp"
-        android:layout_height="36dp"
-        android:background="#1F3A4A"
-        app:layout_constraintTop_toBottomOf="@id/headerBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <TextView
-        android:id="@+id/txtPageTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Service Requests Management"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="14sp"
-        app:layout_constraintTop_toTopOf="@id/subTitleBar"
-        app:layout_constraintBottom_toBottomOf="@id/subTitleBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:gravity="center" />
-
-    <!-- 🔹 Inner Content (Spinner + RecyclerView) -->
-    <LinearLayout
-        android:id="@+id/contentLayout"
-        android:orientation="vertical"
-        android:padding="12dp"
+    <!-- List container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/listCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/subTitleBar"
+        android:layout_margin="12dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/sortFilterRow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Header (Sort Bar) -->
-        <LinearLayout
-            android:orientation="horizontal"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/txtTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Requests Overview"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_weight="1" />
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp">
 
-            <Spinner
-                android:id="@+id/spinnerSort"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:entries="@array/sort_options"
-                android:layout_marginStart="8dp"
-                android:padding="4dp"
-                android:background="@drawable/spinner_background" />
-        </LinearLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerRequests"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="8dp"
+                    android:scrollbars="vertical" />
 
-        <!-- RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerRequests"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingTop="8dp"/>
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/txtEmptyState"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="No service requests found.\nPull to refresh."
+                    android:textAlignment="center"
+                    android:visibility="gone"
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    android:padding="24dp" />
+
+                <ProgressBar
+                    android:id="@+id/progressLoading"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
+            </FrameLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

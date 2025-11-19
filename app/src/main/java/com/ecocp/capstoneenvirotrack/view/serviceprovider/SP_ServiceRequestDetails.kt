@@ -31,7 +31,7 @@ class SP_ServiceRequestDetails : Fragment() {
         view.findViewById<TextView>(R.id.txtServiceType).text = serviceType
         view.findViewById<TextView>(R.id.txtLocation).text = location
         view.findViewById<TextView>(R.id.txtDateRequested).text = dateRequested
-        view.findViewById<TextView>(R.id.txtStatus).text = status
+
 
         // 🟢 Handle buttons
         val btnAccept = view.findViewById<Button>(R.id.btnAccept)

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F6FA"
@@ -11,150 +13,268 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
+        android:layout_height="wrap_content">
 
-        <!-- Top title bar -->
+        <!-- Top title -->
         <TextView
-            android:text=" Service Requests Details"
-            android:textColor="#FFFFFF"
+            android:id="@+id/tvHeader"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
             android:background="#1F3A4A"
-            android:gravity="center"
+            android:text="Service Request Details"
+            android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:padding="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Info card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp">
 
-        <!-- Blue info card -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <!-- Top row: avatar + company name + status -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/imgCompanyLogo"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:src="@drawable/avatar"
+                        android:contentDescription="Company logo"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_bg"
+                        android:padding="4dp"/>
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:id="@+id/txtCompanyName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Company Name"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#212121"/>
+
+                        <TextView
+                            android:id="@+id/txtServiceType"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Service Type · Hazardous Waste Pickup"
+                            android:textSize="13sp"
+                            android:textColor="#616161"
+                            android:layout_marginTop="4dp"/>
+                    </LinearLayout>
+
+                    <!-- Status pill -->
+                    <TextView
+                        android:id="@+id/txtStatusPill"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="12dp"
+                        android:paddingRight="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="Pending"
+                        android:textColor="#fff"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:backgroundTint="#F39C12"
+                        android:background="@drawable/rounded_status_bg"
+                        android:gravity="center"
+                        android:layout_marginStart="8dp"
+                        android:contentDescription="Request status" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EDEDED"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- Info rows -->
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <!-- Location row -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Location"
+                        android:textColor="#757575"
+                        android:textSize="12sp"/>
+
+                    <TextView
+                        android:id="@+id/txtLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="123 Sample St., Barangay, City"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Date requested -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Date Requested"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtDateRequested"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="Nov 19, 2025 10:30 AM"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Contact person -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Contact"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtContactPerson"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="Juan Dela Cruz — (0917) 123-4567"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Attachments -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Attachments"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="6dp">
+
+                        <ImageView
+                            android:id="@+id/icAttachment"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_attachment"
+                            android:contentDescription="Attachment icon" />
+
+                        <TextView
+                            android:id="@+id/txtAttachments"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="No attachments"
+                            android:textColor="#616161"/>
+                    </LinearLayout>
+
+                    <!-- Notes / Instructions -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Notes / Instructions"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtNotes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="12dp"
+                        android:text="Please bring proper PPE. Gate codes are at the reception."
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"
+                        android:minHeight="72dp"/>
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Action buttons -->
         <LinearLayout
-            android:orientation="vertical"
-            android:background="#3498DB"
-            android:padding="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:gravity="center">
-
-            <!-- Company Name -->
-            <TextView
-                android:text="Company Name:"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/txtCompanyName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_field"
-                android:padding="8dp"
-                android:textColor="#000000" />
-
-            <!-- Service Type -->
-            <TextView
-                android:text="Service Type:"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/txtServiceType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_field"
-                android:padding="8dp"
-                android:textColor="#000000" />
-
-            <!-- Location -->
-            <TextView
-                android:text="Location:"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/txtLocation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_field"
-                android:padding="8dp"
-                android:textColor="#000000" />
-
-            <!-- Date Requested -->
-            <TextView
-                android:text="Date Requested:"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/txtDateRequested"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_field"
-                android:padding="8dp"
-                android:textColor="#000000" />
-
-            <!-- Status -->
-            <TextView
-                android:text="Status:"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/txtStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_field"
-                android:padding="8dp"
-                android:textColor="#000000" />
-        </LinearLayout>
-
-        <!-- Buttons for Accept / Reject -->
-        <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
             android:weightSum="2">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAccept"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#27AE60"
-                android:text="✔ Accept"
+                android:text="Accept"
+                android:textAllCaps="false"
+                style="@style/Widget.MaterialComponents.Button"
+                app:cornerRadius="8dp"
+                app:backgroundTint="#27AE60"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Accept request"/>
 
-            <Space
-                android:layout_width="16dp"
-                android:layout_height="wrap_content" />
-
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReject"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#C0392B"
-                android:text="✖ Reject"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:text="Reject"
+                android:textAllCaps="false"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:cornerRadius="8dp"
+                app:strokeColor="#C0392B"
+                app:strokeWidth="1dp"
+                android:textColor="#C0392B"
+                android:layout_marginStart="8dp"
+                android:contentDescription="Reject request"/>
         </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

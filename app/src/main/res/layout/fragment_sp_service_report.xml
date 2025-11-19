@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F6FA"
@@ -13,182 +15,341 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- 🔹 Top Header -->
-        <RelativeLayout
+        <!-- Top Title Card w/ Back Button -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/topBarCard"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:background="#34495E"
-            android:padding="16dp">
+            android:layout_height="56dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#1F3A4A">
 
-            <ImageView
-                android:id="@+id/btnBack"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/backbtn"
-                app:tint="#FFFFFF"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="Back Button" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/txtHeaderTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Service Report"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_centerInParent="true" />
-        </RelativeLayout>
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_arrow_back"
+                    android:backgroundTint="@android:color/transparent"
+                    android:contentDescription="Back"
+                    app:tint="@android:color/white"/>
 
-        <!-- 🟦 Company Details Card -->
-        <LinearLayout
-            android:orientation="horizontal"
+                <TextView
+                    android:id="@+id/txtHeaderTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Service Report"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Company Details Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardCompany"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_field"
-            android:padding="16dp"
-            android:layout_marginTop="16dp">
-
-            <ImageView
-                android:id="@+id/imgCompanyLogo"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/dunkin"
-                android:layout_marginEnd="12dp"
-                android:background="@drawable/image_round_shape" />
+            app:cardCornerRadius="10dp"
+            app:cardElevation="3dp"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical">
 
+                <ImageView
+                    android:id="@+id/imgCompanyLogo"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/dunkin"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circle_bg"
+                    android:contentDescription="Company logo"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+
+                    <TextView
+                        android:id="@+id/txtCompanyName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dunkin Donuts"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#212121"/>
+
+                    <TextView
+                        android:id="@+id/txtCompanyAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="A.S. Fortuna St, Mandaue City, Cebu"
+                        android:textSize="14sp"
+                        android:textColor="#616161"
+                        android:layout_marginTop="4dp"/>
+
+                    <TextView
+                        android:id="@+id/txtReportRef"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ref: SR-2025-0012"
+                        android:textSize="12sp"
+                        android:textColor="#9E9E9E"
+                        android:layout_marginTop="6dp"/>
+                </LinearLayout>
+
+                <!-- Small status badge (optional) -->
                 <TextView
+                    android:id="@+id/txtSmallStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/txtCompanyName"
-                    android:text="Dunkin Donuts"
-                    android:textSize="16sp"
+                    android:text="Completed"
+                    android:textSize="12sp"
                     android:textStyle="bold"
-                    android:textColor="#000000" />
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:background="@drawable/rounded_status_bg"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="Status"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Report Details Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/txtCompanyAddress"
-                    android:text="A.S. Fortuna St, Mandaue City, Cebu"
-                    android:textColor="#555555"
-                    android:textSize="14sp" />
+                    android:text="Report Details"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#212121"/>
+
+                <!-- Row: Service Type -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Service Type"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtServiceType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="Waste Disposal"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
+                <!-- Row: Completion Date -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Date Completed"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtCompletionDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="Feb 12, 2025"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
+                <!-- Row: Remarks -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Remarks"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtRemarks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="Completed successfully without issues."
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
             </LinearLayout>
-        </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- 📋 Report Information -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Report Details"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginTop="20dp" />
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:background="#EAF2F8"
-            android:padding="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/txtServiceType"
-                android:text="Service Type: Waste Disposal"
-                android:textSize="15sp"
-                android:textColor="#000000"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/txtCompletionDate"
-                android:text="Date Completed: Feb 12, 2025"
-                android:textSize="15sp"
-                android:textColor="#000000"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/txtRemarks"
-                android:text="Remarks: Completed successfully without issues."
-                android:textSize="15sp"
-                android:textColor="#000000" />
-        </LinearLayout>
-
-        <!-- 📂 Attached File Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Attached Document"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginTop="20dp" />
-
-        <LinearLayout
-            android:id="@+id/fileContainer"
-            android:orientation="vertical"
+        <!-- Attachment Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAttachment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="#D6EAF8"
-            android:padding="12dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            android:layout_marginBottom="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/txtFileName"
-                android:text="Completion_Report.pdf"
-                android:textColor="#1F3A4A"
-                android:textStyle="bold"
-                android:textSize="14sp" />
+                android:orientation="vertical"
+                android:padding="12dp">
 
-            <Button
-                android:id="@+id/btnDownload"
-                android:text="Download File"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="#1F3A4A"
-                android:textColor="#FFFFFF" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Attached Document"
+                    android:textStyle="bold"
+                    android:textColor="#212121"
+                    android:textSize="16sp"/>
 
-        <!-- 🟩 Footer Buttons -->
+                <!-- File row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
+
+                    <ImageView
+                        android:id="@+id/imgFileIcon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_pdf"
+                        android:contentDescription="file icon"
+                        android:background="@drawable/bg_field"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:id="@+id/txtFileName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Completion_Report.pdf"
+                            android:textStyle="bold"
+                            android:textColor="#1F3A4A"/>
+
+                        <TextView
+                            android:id="@+id/txtFileSize"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="320 KB"
+                            android:textColor="#9E9E9E"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"/>
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/progressDownload"
+                        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                        android:layout_width="120dp"
+                        android:layout_height="8dp"
+                        android:visibility="gone"
+                        android:layout_marginEnd="8dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btnDownload"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/ic_download"
+                        android:backgroundTint="@android:color/transparent"
+                        android:contentDescription="Download"
+                        app:tint="#1F3A4A"/>
+
+                    <ImageButton
+                        android:id="@+id/btnShare"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/ic_share"
+                        android:backgroundTint="@android:color/transparent"
+                        android:contentDescription="Share"
+                        android:layout_marginStart="8dp"
+                        app:tint="#27AE60"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Footer Buttons -->
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="24dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnShareReport"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:text="Share Report"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#27AE60"
+                app:cornerRadius="8dp"
+                app:backgroundTint="#27AE60"
                 android:textColor="#FFFFFF"
-                android:layout_marginEnd="12dp" />
+                android:icon="@drawable/ic_share"
+                android:iconTint="#FFFFFF"
+                app:iconPadding="8dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Share report" />
 
-            <Button
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBackToList"
-                android:text="Back to List"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#C0392B"
-                android:textColor="#FFFFFF" />
+                android:text="Back to List"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:cornerRadius="8dp"
+                app:strokeColor="#C0392B"
+                app:strokeWidth="1dp"
+                android:textColor="#C0392B"
+                android:icon="@drawable/ic_list"
+                android:iconTint="#C0392B"
+                app:iconPadding="8dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="Back to list" />
+
         </LinearLayout>
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

@@ -78,18 +78,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- Search Bar -->
-            <EditText
-                android:id="@+id/search_bar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Search"
-                style="@style/InputField"
-                app:layout_constraintTop_toBottomOf="@id/greeting_message"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:contentDescription="Search Bar for Dashboard" />
+
 
             <!-- Welcome Message -->
             <TextView
@@ -102,7 +91,7 @@
                 android:background="@drawable/welcome_background"
                 android:text="Welcome! Monitor document reviews efficiently and process compliance submissions on time"
                 android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/search_bar"
+                app:layout_constraintTop_toBottomOf="@id/greeting_message"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:contentDescription="Welcome Message for Dashboard" />
