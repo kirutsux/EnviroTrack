@@ -1,5 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,11 +10,14 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.Timestamp
+
+
 
 class SP_ChangepasswordFragment : Fragment() {
 
@@ -65,7 +70,7 @@ class SP_ChangepasswordFragment : Fragment() {
         )
         spinnerRole.adapter = spinnerAdapter
 
-        // Pre-fill email
+        // Pre-fill email if logged in
         auth.currentUser?.email?.let { etEmail.setText(it) }
 
         btnUpdatePassword.setOnClickListener {
@@ -75,17 +80,23 @@ class SP_ChangepasswordFragment : Fragment() {
             val confirmPassword = etConfirmPassword.text.toString().trim()
 
             if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
 
             if (newPassword != confirmPassword) {
-                Toast.makeText(requireContext(), "New passwords do not match", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "New passwords do not match", Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
 
             if (newPassword.length < 8) {
-                Toast.makeText(requireContext(), "Password must be at least 8 characters long", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Password must be at least 8 characters long",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
@@ -93,7 +104,9 @@ class SP_ChangepasswordFragment : Fragment() {
         }
 
         tvLogin.setOnClickListener {
-            findNavController().navigate(R.id.action_SP_ChangepasswordFragment_to_loginFragment)
+            val intent = Intent(requireContext(), SPMainActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
         }
     }
 
@@ -110,6 +123,7 @@ class SP_ChangepasswordFragment : Fragment() {
             .addOnSuccessListener {
                 user.updatePassword(newPassword)
                     .addOnSuccessListener {
+
                         val spData = mapOf(
                             "uid" to user.uid,
                             "name" to etName.text.toString().trim(),
@@ -127,19 +141,104 @@ class SP_ChangepasswordFragment : Fragment() {
                         firestore.collection("service_providers").document(user.uid)
                             .set(spData, SetOptions.merge())
                             .addOnSuccessListener {
-                                Toast.makeText(requireContext(), "Password updated and profile saved!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Password updated and profile saved!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 findNavController().navigate(R.id.action_SP_ChangepasswordFragment_to_serviceProviderDashboard)
+
+                                val uid = user.uid
+
+                                // Fetch existing data first to preserve profileImageUrl and createdAt
+                                firestore.collection("service_providers").document(uid)
+                                    .get()
+                                    .addOnSuccessListener { document ->
+                                        val existingProfileUrl =
+                                            document.getString("profileImageUrl")
+                                        val existingCreatedAt =
+                                            document.getTimestamp("createdAt") ?: Timestamp.now()
+
+                                        val spData = mapOf(
+                                            "uid" to uid,
+                                            "name" to etName.text.toString().trim(),
+                                            "companyName" to etCompanyName.text.toString().trim(),
+                                            "contactNumber" to etContactNumber.text.toString()
+                                                .trim(),
+                                            "email" to email,
+                                            "location" to etAddress.text.toString().trim(),
+                                            "role" to selectedRole,
+                                            "status" to "approved",
+                                            "password" to newPassword,
+                                            "mustChangePassword" to false,
+                                            "profileImageUrl" to existingProfileUrl,
+                                            "createdAt" to existingCreatedAt
+                                        )
+
+                                        firestore.collection("service_providers").document(uid)
+                                            .set(spData)
+                                            .addOnSuccessListener {
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "Password changed successfully!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+
+                                                // ✅ Save login session
+                                                val prefs = requireContext().getSharedPreferences(
+                                                    "user_prefs",
+                                                    Context.MODE_PRIVATE
+                                                )
+                                                prefs.edit()
+                                                    .putBoolean("isLoggedIn", true)
+                                                    .putString("userType", "service_provider")
+                                                    .apply()
+
+                                                // ✅ Redirect to SP Dashboard
+                                                val intent = Intent(
+                                                    requireContext(),
+                                                    SPMainActivity::class.java
+                                                )
+                                                intent.addFlags(
+                                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                )
+                                                startActivity(intent)
+                                                requireActivity().finish()
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "Failed to update Firestore: ${e.message}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Error fetching profile: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                             }
                             .addOnFailureListener { e ->
-                                Toast.makeText(requireContext(), "Error saving profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to update password: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(requireContext(), "Failed to update password: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Reauthentication failed: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Reauthentication failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 }

@@ -11,5 +11,6 @@ data class HWMSApplication(
     val tsdFacilityName: String = "",
     val permitNumber: String? = null,
     val paymentStatus: String? = null,
-    val status: String = "Pending"
+    val status: String = "",
+    val embStatus: String = ""
 )

@@ -1,86 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_waste_profile"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:padding="10dp"
+    android:background="#F9F9F9"
     android:layout_marginBottom="12dp"
-    android:elevation="2dp">
+    android:elevation="2dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <!-- Waste Name and Remove Button -->
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical">
+        android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/etWasteName"
-            android:hint="Waste Name (e.g. B201 - Sulfuric Acid)"
+            android:hint="Waste Name"
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:inputType="textCapWords"
-            android:padding="8dp" />
+            android:layout_height="wrap_content" />
 
         <ImageButton
             android:id="@+id/btnRemoveWaste"
             android:src="@android:drawable/ic_delete"
-            android:contentDescription="Remove"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!-- Nature of Waste -->
     <EditText
-        android:id="@+id/etNature"
-        android:hint="Nature"
+        android:id="@+id/etWasteType"
+        android:hint="Waste Type/Category"
         android:layout_marginTop="6dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:padding="8dp" />
-
-    <!-- Catalogue -->
-    <EditText
-        android:id="@+id/Quantity"
-        android:hint="Quantity"
-        android:layout_marginTop="6dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:padding="8dp" />
+        android:layout_height="wrap_content" />
 
     <EditText
-        android:id="@+id/etCatalogue"
-        android:hint="Catalogue"
+        android:id="@+id/etWasteCode"
+        android:hint="Waste Code (DENR Classification)"
         android:layout_marginTop="6dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:padding="8dp" />
+        android:layout_height="wrap_content" />
 
-    <!-- Waste Details -->
     <EditText
-        android:id="@+id/etWasteDetails"
-        android:hint="Waste Details"
+        android:id="@+id/etWasteQuantity"
+        android:hint="Quantity (kg/L)"
+        android:inputType="numberDecimal"
         android:layout_marginTop="6dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:minLines="2"
-        android:padding="8dp" />
+        android:layout_height="wrap_content" />
 
-    <!-- Current Waste Management Practice -->
     <EditText
-        android:id="@+id/etCurrentPractice"
-        android:hint="Current Waste Management Practice"
+        android:id="@+id/etStorageLocation"
+        android:hint="Storage Location within facility"
         android:layout_marginTop="6dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:minLines="2"
-        android:padding="8dp" />
+        android:layout_height="wrap_content" />
 
+    <!-- Updated field -->
+    <TextView
+        android:id="@+id/tvDateGenerated"
+        android:hint="Date of Generation"
+        android:padding="8dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginTop="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

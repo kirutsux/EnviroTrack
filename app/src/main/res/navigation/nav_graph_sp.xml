@@ -43,8 +43,8 @@
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
         tools:layout="@layout/sp_changepassword_fragment">
         <action
-            android:id="@+id/action_SP_ChangepasswordFragment_to_serviceProviderDashboard"
-            app:destination="@id/serviceProviderDashboard"
+            android:id="@+id/action_SP_ChangepasswordFragment_to_SP_Dashboard"
+            app:destination="@id/SP_Dashboard"
             app:popUpTo="@id/SP_ChangepasswordFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -94,4 +94,22 @@
         android:label="Service Report"
         tools:layout="@layout/fragment_sp_service_report" />
 
+    <fragment
+        android:id="@+id/SP_ChatFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_sp_chat">
+
+        <argument
+            android:name="receiverId"
+            app:argType="string" />
+
+        <argument
+            android:name="receiverName"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_SP_Bookings_to_SP_ChatFragment"
+            app:destination="@id/SP_ChatFragment" />
+    </fragment>
 </navigation>

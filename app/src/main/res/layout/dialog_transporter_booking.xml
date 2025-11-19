@@ -16,39 +16,53 @@
             android:layout_height="wrap_content"
             android:text="Booking for: Provider name"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"/>
 
         <!-- Waste type (prefill or allow edit) -->
         <EditText
             android:id="@+id/etWasteType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Waste type (e.g., B201 - Sulfuric acid)" />
+            android:hint="Waste type (e.g., B201 - Sulfuric acid)"
+            android:inputType="textCapWords"/>
 
         <EditText
             android:id="@+id/etQuantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Quantity (e.g., 150 liters)"
-            android:inputType="text" />
+            android:inputType="text"
+            android:layout_marginTop="6dp"/>
 
         <EditText
             android:id="@+id/etPackaging"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Packaging (drums, drums sealed, etc.)" />
+            android:hint="Packaging (drums, drums sealed, etc.)"
+            android:layout_marginTop="6dp"/>
 
         <EditText
             android:id="@+id/etOrigin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Origin / Pickup address" />
+            android:hint="Origin / Pickup address"
+            android:layout_marginTop="6dp"/>
 
         <EditText
             android:id="@+id/etDestination"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Destination (TSD facility) - optional" />
+            android:hint="Destination (TSD facility) - optional"
+            android:layout_marginTop="6dp"/>
+
+        <EditText
+            android:id="@+id/etAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Amount (PHP)"
+            android:inputType="numberDecimal"
+            android:layout_marginTop="8dp" />
 
         <EditText
             android:id="@+id/etSpecialInstructions"
@@ -56,7 +70,8 @@
             android:layout_height="wrap_content"
             android:hint="Special handling instructions (optional)"
             android:inputType="textMultiLine"
-            android:minLines="2" />
+            android:minLines="2"
+            android:layout_marginTop="6dp"/>
 
         <!-- Date selector -->
         <LinearLayout
@@ -80,6 +95,59 @@
                 android:layout_marginStart="12dp" />
         </LinearLayout>
 
+        <!-- Required uploads (Transport Plan + Storage Permit) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload required documents (PDF / JPG / PNG):"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="6dp">
+
+            <Button
+                android:id="@+id/btnUploadPlan"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Upload Transport Plan" />
+
+            <TextView
+                android:id="@+id/tvPlanStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not uploaded"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="6dp">
+
+            <Button
+                android:id="@+id/btnUploadPermit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Upload Storage Permit" />
+
+            <TextView
+                android:id="@+id/tvPermitStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not uploaded"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <!-- Action Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
