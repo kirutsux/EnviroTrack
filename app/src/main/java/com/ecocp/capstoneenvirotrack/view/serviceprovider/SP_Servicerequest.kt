@@ -34,16 +34,25 @@ class SP_Servicerequest : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = ServiceRequestAdapter(requests) { selected ->
-            // 🟢 Pass selected item details to the next screen
+
             val bundle = Bundle().apply {
                 putString("companyName", selected.companyName)
-                putString("serviceType", selected.serviceTitle)
-                putString("location", "Mandaue City") // Example static field
-                putString("dateRequested", "Feb 8, 2025") // Example static field
+                putString("serviceTitle", selected.serviceTitle)
+                putString("origin", selected.origin)
+                putString("dateRequested", selected.dateRequested)  // ✔ FIXED
+                putString("providerName", selected.providerName)
+                putString("providerContact", selected.providerContact)
                 putString("status", selected.status)
+                putString("notes", selected.notes.ifEmpty { selected.compliance })
+
+                // attachments — send first or whole list
+                putString(
+                    "attachment",
+                    selected.attachments?.firstOrNull()
+                        ?: selected.imageUrl   // fallback to the image path (local file)
+                )
             }
 
-            // 🟢 Navigate to details fragment
             findNavController().navigate(
                 R.id.action_SP_Servicerequest_to_SP_ServiceRequestDetails,
                 bundle
@@ -61,25 +70,40 @@ class SP_Servicerequest : Fragment() {
                     id = "1",
                     clientName = "Client A",
                     companyName = "McDonald’s",
+                    providerName = "John Doe",
+                    providerContact = "(0917) 123-4567",
                     serviceTitle = "Waste Disposal for Client A",
                     status = "Pending",
-                    compliance = "In Compliance"
+                    origin = "Mandaue City",
+                    dateRequested = "Feb 8, 2025",
+                    notes = "Pickup at rear gate.",
+                    attachments = listOf("/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png")
                 ),
                 ServiceRequest(
                     id = "2",
                     clientName = "Client B",
                     companyName = "Jollibee",
+                    providerName = "Maria Reyes",
+                    providerContact = "(0908) 654-2221",
                     serviceTitle = "Water Quality Testing",
                     status = "In Progress",
-                    compliance = "In Compliance"
+                    origin = "Cebu City",
+                    dateRequested = "Feb 7, 2025",
+                    notes = "Bring sample bottles.",
+                    attachments = listOf("/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png")
                 ),
                 ServiceRequest(
                     id = "3",
                     clientName = "Client C",
                     companyName = "Starbucks",
+                    providerName = "Leo Cruz",
+                    providerContact = "(0935) 888-1199",
                     serviceTitle = "Hazardous Waste Collection",
                     status = "Completed",
-                    compliance = "In Compliance"
+                    origin = "Lapu-Lapu City",
+                    dateRequested = "Feb 5, 2025",
+                    notes = "Hazardous waste stored behind kitchen.",
+                    attachments = listOf("/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png")
                 )
             )
         )
