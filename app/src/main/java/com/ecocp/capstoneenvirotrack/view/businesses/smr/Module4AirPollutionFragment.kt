@@ -31,6 +31,10 @@ class Module4AirPollutionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
         // Preload existing Air Pollution data if any
         smrViewModel.smr.value?.airPollution?.let {
             currentAirPollution = it

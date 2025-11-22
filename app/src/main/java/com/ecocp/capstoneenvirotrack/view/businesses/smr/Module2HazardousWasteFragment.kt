@@ -32,6 +32,10 @@ class Module2HazardousWasteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
         /** --- Load existing entries from ViewModel if any --- */
         smrViewModel.smr.value?.hazardousWastes?.let { hazardousWasteList.addAll(it) }
 

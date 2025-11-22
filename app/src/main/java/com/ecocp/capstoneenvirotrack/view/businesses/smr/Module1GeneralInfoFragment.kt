@@ -30,6 +30,10 @@ class Module1GeneralInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
         /** ✅ Save Module without clearing fields */
         binding.SaveModule.setOnClickListener {
             if (validateInputs()) saveGeneralInfo(partial = true)

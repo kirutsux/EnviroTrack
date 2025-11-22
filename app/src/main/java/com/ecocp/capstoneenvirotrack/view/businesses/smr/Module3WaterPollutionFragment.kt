@@ -31,6 +31,10 @@ class Module3WaterPollutionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
         // Preload existing water pollution records if any
         smrViewModel.smr.value?.waterPollutionRecords?.let { waterPollutionList.addAll(it) }
 
