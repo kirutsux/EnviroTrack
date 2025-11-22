@@ -10,10 +10,17 @@
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Dashboard"
         android:label="Dashboard"
         tools:layout="@layout/sp_dashboard">
-    <action
-        android:id="@+id/action_SP_Dashboard_to_SP_Servicerequest"
-        app:destination="@id/SP_Servicerequest"/>
+        <action
+            android:id="@+id/action_SP_Dashboard_to_SP_Servicerequest"
+            app:destination="@id/SP_Servicerequest"/>
     </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_log_in" />
+
 
     <fragment
         android:id="@+id/SP_Inbox"
@@ -47,6 +54,12 @@
             app:destination="@id/SP_Dashboard"
             app:popUpTo="@id/SP_ChangepasswordFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/SP_ChangepasswordFragment"
+            app:popUpToInclusive="true" />
+
     </fragment>
     <!-- Service Requests List Screen -->
     <fragment
