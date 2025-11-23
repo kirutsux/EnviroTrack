@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view.serviceprovider
+  package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
 import android.content.Intent
 import android.os.Bundle
@@ -39,7 +39,12 @@ class SPMainActivity : AppCompatActivity() {
         // Fragments where bottom nav should be hidden
         val hideBottomNavOn = setOf(
             R.id.SP_Servicerequest,         // Service Requests list
-            R.id.SP_ServiceRequestDetails   // Service Request details
+            R.id.SP_ServiceRequestDetails,   // Service Request details
+            R.id.SP_CompletedServices,
+            R.id.SP_ActiveTasks,
+            R.id.SP_TaskUpdateDetails,
+            R.id.SP_ServiceReport,
+            // Completed Services lis
         )
 
         // Toggle bottom nav visibility on destination change

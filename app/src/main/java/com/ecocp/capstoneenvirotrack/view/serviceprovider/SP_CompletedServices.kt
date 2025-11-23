@@ -108,33 +108,74 @@ class SP_CompletedServices : Fragment() {
     }
 
     private fun buildSampleData(): List<ServiceRequest> {
+        val devPath = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png"
+
         return listOf(
             ServiceRequest(
                 id = "1",
+                bookingId = null,
                 clientName = "Client A",
                 companyName = "Dunkin Donuts",
+                providerName = "Dunkin Provider",
+                providerContact = "(0917) 111-2222",
                 serviceTitle = "Waste Disposal for Dunkin",
                 status = "Completed",
-                compliance = "In Compliance"
+                origin = "Mandaue City",
+                destination = "TSD Facility - Demo",
+                dateRequested = "Feb 01, 2025",
+                wasteType = "B201 - Sulfuric acid",
+                quantity = "150 liters",
+                packaging = "Sealed drums",
+                notes = "Pickup completed. Signed by client.",
+                compliance = "In Compliance",
+                attachments = listOf(devPath),
+                imageUrl = devPath
             ),
+
             ServiceRequest(
                 id = "2",
+                bookingId = null,
                 clientName = "Client B",
                 companyName = "McDonald's",
+                providerName = "McProvider",
+                providerContact = "(0917) 333-4444",
                 serviceTitle = "Oil Collection for McDonald's",
                 status = "Completed",
-                compliance = "In Compliance"
+                origin = "Cebu City",
+                destination = "TSD Facility - Demo",
+                dateRequested = "Feb 05, 2025",
+                wasteType = "Used Cooking Oil",
+                quantity = "200 liters",
+                packaging = "IBC Tanks",
+                notes = "Collected and transferred to TSD.",
+                compliance = "In Compliance",
+                attachments = listOf(devPath),
+                imageUrl = devPath
             ),
+
             ServiceRequest(
                 id = "3",
+                bookingId = null,
                 clientName = "Client C",
                 companyName = "Jollibee Foods Corp",
+                providerName = "Jollibee Provider",
+                providerContact = "(0917) 555-6666",
                 serviceTitle = "Waste Audit for Jollibee",
                 status = "Completed",
-                compliance = "In Compliance"
+                origin = "Lapu-Lapu City",
+                destination = "TSD Facility - Demo",
+                dateRequested = "Feb 10, 2025",
+                wasteType = "Kitchen Waste",
+                quantity = "300 kg",
+                packaging = "Plastic bins",
+                notes = "Audit completed and report uploaded.",
+                compliance = "In Compliance",
+                attachments = listOf(devPath),
+                imageUrl = devPath
             )
         )
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

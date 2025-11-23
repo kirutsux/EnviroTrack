@@ -10,14 +10,17 @@ import com.ecocp.capstoneenvirotrack.model.ServiceRequest
 
 class ServiceRequestAdapter(
     private val requests: List<ServiceRequest>,
-    private val onViewClick: (ServiceRequest) -> Unit
+    private val isActiveTasks: Boolean,        // NEW FLAG
+    private val onActionClick: (ServiceRequest) -> Unit
 ) : RecyclerView.Adapter<ServiceRequestAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemServiceRequestBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemServiceRequestBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemServiceRequestBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
         return ViewHolder(binding)
     }
 
@@ -26,27 +29,29 @@ class ServiceRequestAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val request = requests[position]
         holder.binding.apply {
+
             txtServiceTitle.text = request.serviceTitle
             txtCompanyName.text = request.companyName
             txtStatus.text = request.status
             txtCompliance.text = request.compliance
 
-            // 🟩 Set button text based on request status
-            btnView.text = if (request.status == "Completed") "View" else "Update Status"
+            // 🟩 FIXED: Decide button label based on screen type
+            btnView.text = if (isActiveTasks) "Update Status" else "View"
 
-            // Change background color based on status
+            // Status color
             when (request.status) {
                 "Pending" -> txtStatus.setBackgroundColor(Color.parseColor("#f39c12"))
                 "In Progress" -> txtStatus.setBackgroundColor(Color.parseColor("#2980b9"))
                 "Completed" -> txtStatus.setBackgroundColor(Color.parseColor("#27ae60"))
             }
 
+            // Image
             Glide.with(imgClient.context)
                 .load(request.imageUrl.ifEmpty { "https://i.pravatar.cc/150?img=3" })
                 .circleCrop()
                 .into(imgClient)
 
-            btnView.setOnClickListener { onViewClick(request) }
+            btnView.setOnClickListener { onActionClick(request) }
         }
     }
 }

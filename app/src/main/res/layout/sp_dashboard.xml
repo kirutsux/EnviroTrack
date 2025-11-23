@@ -89,7 +89,7 @@
                 android:padding="8dp"
                 android:textStyle="bold"
                 android:background="@drawable/welcome_background"
-                android:text="Welcome! Monitor document reviews efficiently and process compliance submissions on time"
+                android:text="Welcome! Manage bookings efficiently and process service requests on time."
                 android:textSize="16sp"
                 app:layout_constraintTop_toBottomOf="@id/greeting_message"
                 app:layout_constraintStart_toStartOf="parent"
