@@ -4,12 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPttApplicationBinding
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,122 +15,87 @@ class PttApplicationFragment : Fragment() {
 
     private lateinit var binding: FragmentPttApplicationBinding
     private val db = FirebaseFirestore.getInstance()
+    private val storageRef = FirebaseStorage.getInstance().reference
 
-    // Firestore ID references
     private var selectedGeneratorId: String? = null
     private var selectedTransportBookingId: String? = null
     private var selectedTsdBookingId: String? = null
 
-    // Uploaded file URIs
     private var generatorCertUri: Uri? = null
     private var transportPlanUri: Uri? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: android.view.LayoutInflater, container: android.view.ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): android.view.View {
         binding = FragmentPttApplicationBinding.inflate(inflater, container, false)
 
-        loadApprovedGenerators()
-        loadConfirmedTransportBookings()
-        loadConfirmedTsdBookings()
+        binding.btnSelectGenerator.setOnClickListener { showGeneratorDialog() }
+        binding.btnSelectTransportBooking.setOnClickListener { showTransportDialog() }
+        binding.btnSelectTsdBooking.setOnClickListener { showTsdDialog() }
 
         binding.btnUploadGenCert.setOnClickListener { selectFile(1001) }
         binding.btnUploadTransportPlan.setOnClickListener { selectFile(1002) }
+
         binding.btnSubmitPTT.setOnClickListener { submitPttApplication() }
 
         return binding.root
     }
 
-    // 1️⃣ Approved Generators
-    private fun loadApprovedGenerators() {
-        db.collection("HazardousWastegenerator")
-            .whereEqualTo("status", "Approved")
-            .get()
-            .addOnSuccessListener { docs ->
-                val names = mutableListOf<String>()
-                val ids = mutableListOf<String>()
-
-                for (doc in docs) {
-                    names.add(doc.getString("generatorName") ?: "Unnamed Generator")
-                    ids.add(doc.id)
+    private fun showGeneratorDialog() {
+        db.collection("HazardousWasteGenerator").whereEqualTo("status", "Approved")
+            .get().addOnSuccessListener { docs ->
+                if (docs.isEmpty) {
+                    Toast.makeText(requireContext(), "No approved generators found", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
                 }
+                val names = docs.map { it.getString("generatorName") ?: "Unnamed Generator" }
+                val ids = docs.map { it.id }
 
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, names)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.spinnerGeneratorApps.adapter = adapter
-
-                binding.spinnerGeneratorApps.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?, view: View?, position: Int, id: Long
-                    ) {
-                        selectedGeneratorId = ids.getOrNull(position)
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                }
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Select Generator")
+                    .setItems(names.toTypedArray()) { _, index ->
+                        selectedGeneratorId = ids[index]
+                        binding.tvSelectedGenerator.text = names[index]
+                    }.show()
             }
     }
 
-    // 2️⃣ Confirmed Transport Bookings
-    private fun loadConfirmedTransportBookings() {
-        db.collection("transport_bookings")
-            .whereEqualTo("status", "Confirmed")
-            .get()
-            .addOnSuccessListener { docs ->
-                val names = mutableListOf<String>()
-                val ids = mutableListOf<String>()
-
-                for (doc in docs) {
-                    val transporter = doc.getString("transporterName") ?: "Unknown Transporter"
-                    val generator = doc.getString("generatorName") ?: "Unknown Generator"
-                    names.add("$transporter → $generator")
-                    ids.add(doc.id)
+    private fun showTransportDialog() {
+        db.collection("transport_bookings").whereEqualTo("status", "Confirmed")
+            .get().addOnSuccessListener { docs ->
+                if (docs.isEmpty) {
+                    Toast.makeText(requireContext(), "No confirmed transport bookings found", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
                 }
+                val names = docs.map { "${it.getString("transporterName") ?: "Unknown"} → ${it.getString("generatorName") ?: "Unknown"}" }
+                val ids = docs.map { it.id }
 
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, names)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.spinnerTransportBookings.adapter = adapter
-
-                binding.spinnerTransportBookings.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?, view: View?, position: Int, id: Long
-                    ) {
-                        selectedTransportBookingId = ids.getOrNull(position)
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                }
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Select Transport Booking")
+                    .setItems(names.toTypedArray()) { _, index ->
+                        selectedTransportBookingId = ids[index]
+                        binding.tvSelectedTransportBooking.text = names[index]
+                    }.show()
             }
     }
 
-    // 3️⃣ Confirmed TSD Bookings
-    private fun loadConfirmedTsdBookings() {
-        db.collection("tsd_bookings")
-            .whereEqualTo("status", "Confirmed")
-            .get()
-            .addOnSuccessListener { docs ->
-                val names = mutableListOf<String>()
-                val ids = mutableListOf<String>()
-
-                for (doc in docs) {
-                    names.add(doc.getString("facilityName") ?: "Unnamed Facility")
-                    ids.add(doc.id)
+    private fun showTsdDialog() {
+        db.collection("tsd_bookings").whereEqualTo("status", "Confirmed")
+            .get().addOnSuccessListener { docs ->
+                if (docs.isEmpty) {
+                    Toast.makeText(requireContext(), "No confirmed TSD bookings found", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
                 }
+                val names = docs.map { it.getString("facilityName") ?: "Unnamed Facility" }
+                val ids = docs.map { it.id }
 
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, names)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.spinnerTsdBookings.adapter = adapter
-
-                binding.spinnerTsdBookings.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?, view: View?, position: Int, id: Long
-                    ) {
-                        selectedTsdBookingId = ids.getOrNull(position)
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
-                }
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Select TSD Booking")
+                    .setItems(names.toTypedArray()) { _, index ->
+                        selectedTsdBookingId = ids[index]
+                        binding.tvSelectedTsdBooking.text = names[index]
+                    }.show()
             }
     }
 
@@ -152,11 +113,11 @@ class PttApplicationFragment : Fragment() {
             when (requestCode) {
                 1001 -> {
                     generatorCertUri = uri
-                    binding.tvGenCertStatus.text = uri?.lastPathSegment
+                    binding.etGenCert.setText(uri?.lastPathSegment)
                 }
                 1002 -> {
                     transportPlanUri = uri
-                    binding.tvTransportPlanStatus.text = uri?.lastPathSegment
+                    binding.etTransportPlan.setText(uri?.lastPathSegment)
                 }
             }
         }
@@ -168,7 +129,7 @@ class PttApplicationFragment : Fragment() {
             return
         }
 
-        val data = hashMapOf<String, Any>(
+        val data = hashMapOf(
             "generatorId" to selectedGeneratorId!!,
             "transportBookingId" to selectedTransportBookingId!!,
             "tsdBookingId" to selectedTsdBookingId!!,
@@ -186,9 +147,7 @@ class PttApplicationFragment : Fragment() {
     }
 
     private fun uploadFilesAndSave(data: HashMap<String, Any>, uploads: List<Pair<String, Uri>>) {
-        val storageRef = FirebaseStorage.getInstance().reference
         var uploadedCount = 0
-
         uploads.forEach { (key, uri) ->
             val ref = storageRef.child("ptt_requirements/${System.currentTimeMillis()}_$key")
             ref.putFile(uri)
@@ -209,10 +168,10 @@ class PttApplicationFragment : Fragment() {
         db.collection("ptt_applications")
             .add(data)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "PTT Application submitted successfully", Toast.LENGTH_SHORT).show()
+                binding.tvStatus.text = "PTT Application submitted successfully!"
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to submit: ${it.message}", Toast.LENGTH_SHORT).show()
+                binding.tvStatus.text = "Failed to submit: ${it.message}"
             }
     }
 }
