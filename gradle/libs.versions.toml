@@ -19,6 +19,7 @@ firebaseAppcheckPlayintegrity = "19.0.1"
 filamentAndroid = "1.17.1"
 materialVersion = "1.13.0"
 animationCore = "1.9.3"
+roomCompiler = "2.8.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,6 +41,7 @@ firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "fireb
 filament-android = { group = "com.google.ar.sceneform", name = "filament-android", version.ref = "filamentAndroid" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
 androidx-animation-core = { group = "androidx.compose.animation", name = "animation-core", version.ref = "animationCore" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
