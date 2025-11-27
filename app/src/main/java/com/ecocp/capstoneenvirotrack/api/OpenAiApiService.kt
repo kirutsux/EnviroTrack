@@ -9,4 +9,3 @@ interface OpenAiApiService {
     @POST("v1/chat/completions")
     suspend fun getChatCompletion(@Body request: ChatRequest): ChatResponse
 }
-    
