@@ -255,6 +255,7 @@ class TransporterStep2Fragment : Fragment() {
                 "specialInstructions" to special,
                 "bookingDate" to Date(selectedDateMillis!!),
                 "dateBooked" to FieldValue.serverTimestamp(),
+                "bookingStatus" to "pending",
                 "status" to "Pending" // will change to "Paid" after payment
             )
 
@@ -506,7 +507,7 @@ class TransporterStep2Fragment : Fragment() {
      * Booking doc will include uploaded file URLs and bookingId already set.
      */
     private fun saveBookingToFirestore(status: String) {
-        bookingData["status"] = status
+        bookingData["paymentStatus"] = status
 
         val bookingId = bookingData["bookingId"] as? String
         if (bookingId.isNullOrEmpty()) {

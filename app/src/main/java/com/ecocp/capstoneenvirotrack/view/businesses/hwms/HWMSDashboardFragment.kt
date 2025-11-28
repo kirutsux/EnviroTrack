@@ -11,37 +11,73 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.HWMSAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentHwmsDashboardBinding
-import com.ecocp.capstoneenvirotrack.model.HWMSApplication
+import com.ecocp.capstoneenvirotrack.model.DisplayItem
+import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class HWMSDashboardFragment : Fragment() {
 
-    private lateinit var binding: FragmentHwmsDashboardBinding
+    private var _binding: FragmentHwmsDashboardBinding? = null
+    private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
-    private val applications = mutableListOf<HWMSApplication>()
     private lateinit var adapter: HWMSAdapter
+
+    // current mode: "transport", "tsd", "ptt"
+    private var currentMode = "transport"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHwmsDashboardBinding.inflate(inflater, container, false)
+        _binding = FragmentHwmsDashboardBinding.inflate(inflater, container, false)
 
         setupRecyclerView()
+        setupTabs()
         setupListeners()
-        fetchApplications()
+
+        // default load transport bookings
+        loadTransportBookings()
 
         return binding.root
     }
 
     private fun setupRecyclerView() {
-        adapter = HWMSAdapter(applications) { selectedApp ->
-            Toast.makeText(requireContext(), "Selected: ${selectedApp.wasteType}", Toast.LENGTH_SHORT).show()
+        adapter = HWMSAdapter(mutableListOf<DisplayItem>()) { selected ->
+            Toast.makeText(requireContext(), "Selected: ${selected.title}", Toast.LENGTH_SHORT).show()
         }
-
         binding.recyclerViewHWMS.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewHWMS.adapter = adapter
+    }
+
+
+    private fun setupTabs() {
+        val tl = binding.tabLayoutCategories
+        tl.addTab(tl.newTab().setText("Transporter"))
+        tl.addTab(tl.newTab().setText("TSD"))
+        tl.addTab(tl.newTab().setText("PTT"))
+
+        // Tab selected listener — switch mode and query
+        tl.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                when (tab.position) {
+                    0 -> {
+                        currentMode = "transport"
+                        loadTransportBookings()
+                    }
+                    1 -> {
+                        currentMode = "tsd"
+                        loadTsdBookings()
+                    }
+                    2 -> {
+                        currentMode = "ptt"
+                        loadPttBookings()
+                    }
+                }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
     }
 
     private fun setupListeners() {
@@ -50,103 +86,137 @@ class HWMSDashboardFragment : Fragment() {
         }
     }
 
-    private fun fetchApplications() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    // ------------- Queries & mapping --------------
 
+    private fun loadTransportBookings() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         binding.tvEmptyState.visibility = View.GONE
 
-        db.collection("HazardousWasteGenerator")
-            .whereEqualTo("userId", userId)
+        db.collection("transport_bookings")
+            .whereEqualTo("pcoId", userId)
             .get()
-            .addOnSuccessListener { result ->
-                applications.clear()
-                val wasteList = result.documents
+            .addOnSuccessListener { snap ->
+                val list = snap.map { doc ->
+                    val wasteType = doc.getString("wasteType") ?: ""
+                    val quantity = doc.getString("quantity") ?: ""
+                    val transporter = doc.getString("serviceProviderName") ?: doc.getString("providerName") ?: ""
+                    val tsd = doc.getString("tsdFacilityName") ?: "" // if you stored it
+                    val permitNo = doc.getString("bookingId") ?: doc.id
+                    val paymentStatus = doc.getString("paymentStatus") ?: doc.getString("status") ?: "Unpaid"
+                    val status = doc.getString("status") ?: doc.getString("bookingStatus") ?: "Pending"
 
-                if (wasteList.isEmpty()) {
-                    binding.tvEmptyState.visibility = View.VISIBLE
-                    adapter.notifyDataSetChanged()
-                    return@addOnSuccessListener
+                    DisplayItem(
+                        id = doc.id,
+                        title = wasteType.ifEmpty { "Transport Booking" },
+                        subtitle = "Quantity: $quantity",
+                        transporter = transporter,
+                        tsdFacility = tsd,
+                        permitNo = permitNo,
+                        paymentStatus = paymentStatus,
+                        status = status,
+                        rawMap = doc.data
+                    )
                 }
-
-                // 🔹 Step 1: Fetch all transport bookings for this generator
-                db.collection("transport_bookings")
-                    .whereEqualTo("pcoId", userId)
-                    .get()
-                    .addOnSuccessListener { bookingsSnap ->
-
-                        // 🔹 Step 2: Build bookingId → status lookup map
-                        val bookingStatusMap = mutableMapOf<String, String>()
-                        for (booking in bookingsSnap) {
-                            val bookingId = booking.getString("bookingId") ?: booking.id
-                            val status = booking.getString("status") ?: "Unpaid"
-                            bookingStatusMap[bookingId] = status
-                        }
-
-                        // 🔹 Step 3: Build HWMS applications list
-                        for (doc in wasteList) {
-                            val wasteDetailsList =
-                                doc.get("wasteDetails") as? List<Map<String, Any>> ?: emptyList()
-                            val firstDetail = wasteDetailsList.firstOrNull()
-
-                            val wasteType = firstDetail?.get("wasteName") as? String ?: ""
-                            val quantity = firstDetail?.get("quantity") as? String ?: ""
-                            val storageLocation = firstDetail?.get("currentPractice") as? String ?: ""
-                            val dateGenerated = doc.getTimestamp("timestamp")?.toDate().toString()
-
-                            // 🔹 Try to get bookingId from HWMS document
-                            val bookingId = doc.getString("bookingId")
-
-                            // 🔹 Step 4: Determine payment status
-                            val paymentStatus = when {
-                                // Match by bookingId (exact link)
-                                !bookingId.isNullOrEmpty() && bookingStatusMap.containsKey(bookingId) ->
-                                    bookingStatusMap[bookingId] ?: "Unpaid"
-
-                                // If not found, match by generatorId (fallback)
-                                bookingsSnap.any { it.getString("generatorId") == userId } -> {
-                                    bookingsSnap.firstOrNull {
-                                        it.getString("generatorId") == userId
-                                    }?.getString("status") ?: "Unpaid"
-                                }
-
-                                else -> "Unpaid"
-                            }
-
-                            // 🔹 EMB permit or processing status (placeholder)
-                            val embStatus = "Pending"
-
-                            val app = HWMSApplication(
-                                id = doc.id,
-                                wasteType = wasteType,
-                                quantity = quantity,
-                                storageLocation = storageLocation,
-                                dateGenerated = dateGenerated,
-                                status = paymentStatus,
-                                embStatus = embStatus
-                            )
-
-                            applications.add(app)
-                        }
-
-                        adapter.notifyDataSetChanged()
-                        binding.tvEmptyState.visibility =
-                            if (applications.isEmpty()) View.VISIBLE else View.GONE
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(
-                            requireContext(),
-                            "Failed to load transport booking info.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                adapter.update(list)
+                binding.tvEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }
-            .addOnFailureListener {
-                Toast.makeText(
-                    requireContext(),
-                    "Failed to load HWMS applications.",
-                    Toast.LENGTH_SHORT
-                ).show()
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Load failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
+    private fun loadTsdBookings() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        binding.tvEmptyState.visibility = View.GONE
+
+        db.collection("tsd_bookings")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { snap ->
+                val list = snap.map { doc ->
+                    val facilityName = doc.getString("facilityName") ?: "TSD Booking"
+
+                    // Safely get quantity as string
+                    val rawQuantity = doc.get("quantity")
+                    val quantity = when (rawQuantity) {
+                        is Number -> rawQuantity.toString()
+                        is String -> rawQuantity
+                        else -> ""
+                    }
+
+                    val transporter = doc.getString("transporterName") ?: ""
+                    val tsd = doc.getString("facilityName") ?: ""
+                    val permitNo = doc.getString("bookingId") ?: doc.id
+                    val paymentStatus = when {
+                        doc.getString("status")?.contains("Paid", true) == true -> "Paid"
+                        doc.getString("status")?.contains("Pending", true) == true -> "Pending"
+                        else -> doc.getString("status") ?: "Pending Payment"
+                    }
+                    val status = doc.getString("status") ?: "Pending"
+
+                    DisplayItem(
+                        id = doc.id,
+                        title = facilityName,
+                        subtitle = "Quantity: $quantity",
+                        transporter = transporter,
+                        tsdFacility = tsd,
+                        permitNo = permitNo,
+                        paymentStatus = paymentStatus,
+                        status = status,
+                        rawMap = doc.data
+                    )
+                }
+
+                adapter.update(list)
+                binding.tvEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Load failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+    private fun loadPttBookings() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        binding.tvEmptyState.visibility = View.GONE
+
+        db.collection("ptt_applications")
+            .whereEqualTo("generatorId", userId)
+            .get()
+            .addOnSuccessListener { snap ->
+                val list = snap.map { doc ->
+                    val gid = doc.getString("generatorId") ?: ""
+                    val tid = doc.getString("transportBookingId") ?: ""
+                    val tsdid = doc.getString("tsdBookingId") ?: ""
+                    val remarks = doc.getString("remarks") ?: ""
+                    val paymentStatus = doc.getString("paymentStatus") ?: doc.getString("status") ?: "Unpaid"
+                    val status = doc.getString("status") ?: "Pending Review"
+
+                    val subtitle = "Transport booking: ${tid.ifEmpty { "-"} }\nTSD booking: ${tsdid.ifEmpty { "-" }}"
+
+                    DisplayItem(
+                        id = doc.id,
+                        title = "PTT Application",
+                        subtitle = subtitle,
+                        transporter = tid,
+                        tsdFacility = tsdid,
+                        permitNo = doc.id,
+                        paymentStatus = paymentStatus,
+                        status = status,
+                        rawMap = doc.data
+                    )
+                }
+
+                adapter.update(list)
+                binding.tvEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Load failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
