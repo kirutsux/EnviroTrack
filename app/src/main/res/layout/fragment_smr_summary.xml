@@ -82,6 +82,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <include
+            layout="@layout/item_aisummary_module"
+            android:id="@+id/module6Container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <!-- SUBMIT BUTTON -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSubmitSmr"

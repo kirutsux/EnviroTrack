@@ -1,3 +1,6 @@
+import java.util.Properties
+
+kotlin
 plugins {
     id("com.android.application") // do NOT specify version
     id("org.jetbrains.kotlin.android")
@@ -11,6 +14,12 @@ android {
     namespace = "com.ecocp.capstoneenvirotrack"
     compileSdk = 35
 
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.inputStream())
+    }
+    
     defaultConfig {
         applicationId = "com.ecocp.capstoneenvirotrack"
         minSdk = 24
@@ -19,6 +28,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "OPENAI_API_KEY",
+            properties.getProperty("OPENAI_API_KEY") ?: ""
+        )
     }
 
     buildTypes {
@@ -33,6 +48,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
     compileOptions {

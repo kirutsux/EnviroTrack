@@ -37,9 +37,18 @@ class SmrSummaryFragment : Fragment() {
 
         displaySmrData()
 
+        val fullSummary = buildFullSmrSummary()
+        smrViewModel.analyzeSummary(fullSummary)
+
         binding.btnSubmitSmr.setOnClickListener {
             submitSmrToFirebase()
         }
+
+        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
+            binding.module6Container.tvAiAnalysis.text = analysis?: "No AI analysis provided."
+        }
+
+        observeAiAnalysis()
     }
 
     /** --- DISPLAY SUMMARY DATA --- **/
@@ -71,6 +80,35 @@ class SmrSummaryFragment : Fragment() {
         binding.module5Container.tvModuleTitle.text = "Module 5: Others"
         binding.module5Container.tvModuleSummary.text =
             smr?.others?.othersText() ?: "No data provided"
+    }
+
+    private fun buildFullSmrSummary(): String {
+        val smr = smrViewModel.smr.value ?: return "No SMR data available."
+
+        return """
+            SELF-MONITORING REPORT SUMMARY
+            --- MODULE 1: GENERAL INFORMATION ---
+            ${smr.generalInfo.generalInfoText()}
+            
+            --- MODULE 2: WATER POLLUTION ---
+            ${smr.waterPollutionRecords.waterPollutionText()}
+            
+            --- MODULE 3: AIR POLLUTION ---
+            ${smr.airPollution.airPollutionText()}
+            
+            --- MODULE 4: HAZARDOUS WASTE ---
+            ${smr.hazardousWastes.hazardousWasteText()}
+            
+            --- MODULE 5: OTHERS ---
+            ${smr.others.othersText()}
+            """.trimIndent()
+    }
+
+    private fun observeAiAnalysis(){
+        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
+            binding.module6Container.tvAiAnalysis.text =
+                analysis ?: "No AI analysis provided."
+        }
     }
 
     // Extension functions for generating module text

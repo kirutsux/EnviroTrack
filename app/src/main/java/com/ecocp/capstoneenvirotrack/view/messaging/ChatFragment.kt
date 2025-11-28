@@ -95,7 +95,9 @@ class ChatFragment : Fragment() {
                 senderId = senderId,
                 receiverId = providerId,
                 message = messageText,
-                timestamp = timestamp
+                timestamp = timestamp,
+                role = "",
+                content = ""
             )
 
             // References for both sender and receiver
