@@ -36,9 +36,14 @@
     </string-array>
     <!-- Spinner options for Service Provider Request Overview -->
     <string-array name="sort_options">
-        <item>Sort by Date</item>
-        <item>Sort by Status</item>
-        <item>Sort by Client</item>
+        <item>Sort by Pending</item>
+        <item>Sort by Confirmed</item>
+        <item>Sort by Rejected</item>
+    </string-array>
+    <string-array name="transporter_status_options">
+        <item>Pending</item>
+        <item>In Transit</item>
+        <item>Delivered</item>
     </string-array>
     <!-- CRS LABELS -->
     <string name="company_registration_title">Company Registration</string>

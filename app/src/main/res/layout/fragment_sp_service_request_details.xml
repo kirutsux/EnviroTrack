@@ -124,6 +124,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
+                    <!-- Booking ID (hidden) -->
+                    <TextView
+                        android:id="@+id/txtBookingId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+
                     <!-- Location -->
                     <TextView
                         android:layout_width="match_parent"

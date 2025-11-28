@@ -44,7 +44,7 @@ class SP_CompletedServices : Fragment() {
             val bundle = Bundle().apply {
                 putString("companyName", selected.companyName)
                 putString("serviceTitle", selected.serviceTitle)
-                putString("status", selected.status)
+                putString("status", selected.bookingStatus)
                 putString("compliance", selected.compliance)
                 putString("clientName", selected.clientName)
                 putString("requestId", selected.id)
@@ -119,7 +119,7 @@ class SP_CompletedServices : Fragment() {
                 providerName = "Dunkin Provider",
                 providerContact = "(0917) 111-2222",
                 serviceTitle = "Waste Disposal for Dunkin",
-                status = "Completed",
+                bookingStatus = "Completed",
                 origin = "Mandaue City",
                 destination = "TSD Facility - Demo",
                 dateRequested = "Feb 01, 2025",
@@ -140,7 +140,7 @@ class SP_CompletedServices : Fragment() {
                 providerName = "McProvider",
                 providerContact = "(0917) 333-4444",
                 serviceTitle = "Oil Collection for McDonald's",
-                status = "Completed",
+                bookingStatus = "Completed",
                 origin = "Cebu City",
                 destination = "TSD Facility - Demo",
                 dateRequested = "Feb 05, 2025",
@@ -161,7 +161,7 @@ class SP_CompletedServices : Fragment() {
                 providerName = "Jollibee Provider",
                 providerContact = "(0917) 555-6666",
                 serviceTitle = "Waste Audit for Jollibee",
-                status = "Completed",
+                bookingStatus = "Completed",
                 origin = "Lapu-Lapu City",
                 destination = "TSD Facility - Demo",
                 dateRequested = "Feb 10, 2025",

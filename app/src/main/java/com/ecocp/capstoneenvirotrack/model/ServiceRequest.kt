@@ -16,7 +16,7 @@ data class ServiceRequest(
 
     // Service / status
     val serviceTitle: String = "",     // txtServiceType
-    val status: String = "Pending",    // txtStatusPill
+    val bookingStatus: String = "Pending",    // txtStatusPill
     val compliance: String = "",       // compliance / short notes
 
     // Booking details mapped from Booking

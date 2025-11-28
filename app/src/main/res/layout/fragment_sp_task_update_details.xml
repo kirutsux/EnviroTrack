@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Header Card: Company Info -->
+        <!-- Header Card: Company & Booking Info -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardHeader"
             android:layout_width="match_parent"
@@ -32,6 +32,7 @@
                 android:padding="12dp"
                 android:gravity="center_vertical">
 
+                <!-- KEEP Company Logo -->
                 <ImageView
                     android:id="@+id/imgCompanyLogo"
                     android:layout_width="80dp"
@@ -74,15 +75,14 @@
                         android:textSize="12sp"
                         android:textColor="#9E9E9E"
                         android:layout_marginTop="6dp"/>
-
                 </LinearLayout>
 
-                <!-- Status Pill (non-edit) -->
+                <!-- Status Pill -->
                 <TextView
                     android:id="@+id/txtStatusPill"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="In Progress"
+                    android:text="Pending"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:paddingLeft="12dp"
@@ -96,7 +96,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Documents / Task Info Card -->
+        <!-- Waste & Transport Info Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardTaskInfo"
             android:layout_width="match_parent"
@@ -112,130 +112,107 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp">
 
-                <!-- Title -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Documents  Task Info"
+                    android:text="Waste and Transport Info"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="#212121"/>
 
-                <!-- Task Name (editable) -->
+                <!-- Waste Type -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Task Name"
+                    android:text="Waste Type"
                     android:textSize="12sp"
                     android:textColor="#757575"
                     android:layout_marginTop="12dp"/>
-                <EditText
-                    android:id="@+id/edtTaskName"
+                <TextView
+                    android:id="@+id/txtWasteType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_field"
-                    android:padding="10dp"
-                    android:text="Collect Waste Sample"
+                    android:text="test37"
                     android:textColor="#212121"
-                    android:inputType="text"/>
-
-                <!-- Deadline (tap to edit / date picker) -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Deadline"
-                    android:textSize="12sp"
-                    android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:id="@+id/txtDeadline"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_field"
-                        android:padding="10dp"
-                        android:text="Nov 22, 2025 • 05:00 PM"
-                        android:textColor="#212121"/>
-
-                    <ImageButton
-                        android:id="@+id/btnPickDate"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_calendar"
-                        android:backgroundTint="@android:color/transparent"
-                        android:contentDescription="Pick date"
-                        android:layout_marginStart="8dp"
-                        app:tint="#1F3A4A" />
-                </LinearLayout>
-
-                <!-- Status Dropdown -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Status"
-                    android:textSize="12sp"
-                    android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
-                <Spinner
-                    android:id="@+id/spinnerStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:entries="@array/status_options"
-                    android:background="@drawable/spinner_background"
-                    android:padding="8dp"/>
-
-                <!-- Notes -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Notes / Instructions"
-                    android:textSize="12sp"
-                    android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
-                <EditText
-                    android:id="@+id/edtNotes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="80dp"
-                    android:gravity="top"
-                    android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:text="Please bring proper PPE. Gate codes are at the reception."
-                    android:textColor="#212121"
-                    android:inputType="textMultiLine"/>
+                    android:background="@drawable/bg_field"/>
 
-                <!-- Attachments header -->
-                <LinearLayout
+                <!-- Quantity -->
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="12dp">
+                    android:text="Quantity"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtQuantity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="test37"
+                    android:textColor="#212121"
+                    android:padding="10dp"
+                    android:background="@drawable/bg_field"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Attachments"
-                        android:textStyle="bold"
-                        android:textColor="#212121"/>
+                <!-- Origin / Destination -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Origin / Destination"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtOriginDestination"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="test37 → test37"
+                    android:textColor="#212121"
+                    android:padding="10dp"
+                    android:background="@drawable/bg_field"/>
 
-                    <Space android:layout_width="8dp" android:layout_height="wrap_content" />
+                <!-- Packaging -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Packaging"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtPackaging"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="test37"
+                    android:textColor="#212121"
+                    android:padding="10dp"
+                    android:background="@drawable/bg_field"/>
 
-                    <TextView
-                        android:id="@+id/txtAttachmentHint"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(photos, reports, PDFs)"
-                        android:textColor="#9E9E9E"
-                        android:textSize="12sp"/>
-                </LinearLayout>
+                <!-- Special Instructions -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Special Instructions"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtSpecialInstructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="test37"
+                    android:textColor="#212121"
+                    android:padding="10dp"
+                    android:background="@drawable/bg_field"/>
 
+                <!-- Upload Collection Proof -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Upload Collection Proof"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
                 <!-- Attachment row: preview + add button (NO RecyclerView) -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -284,31 +261,36 @@
                         android:layout_marginStart="8dp"/>
                 </LinearLayout>
 
-                <!-- Upload progress (hidden by default) -->
-                <ProgressBar
-                    android:id="@+id/progressUpload"
-                    style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                <!-- Status Update -->
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="10dp"
-                    android:visibility="gone"
-                    android:progress="50"/>
+                    android:layout_height="wrap_content"
+                    android:text="Update Status"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <Spinner
+                    android:id="@+id/spinnerStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/transporter_status_options"
+                    android:background="@drawable/spinner_background"
+                    android:padding="8dp"/>
 
-                <!-- Action buttons -->
+                <!-- Action Buttons -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginTop="16dp">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSave"
+                        android:id="@+id/btnSaveStatus"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="Save"
+                        android:text="Save Status"
                         app:cornerRadius="8dp"
                         app:backgroundTint="#1F3A4A"
                         android:textColor="#FFFFFF"
@@ -326,7 +308,6 @@
                         app:strokeWidth="1dp"
                         android:textColor="#C0392B"
                         android:layout_marginStart="8dp"/>
-
                 </LinearLayout>
 
             </LinearLayout>

@@ -12,7 +12,8 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
 
         <!-- Profile Picture -->
         <ImageView
@@ -24,30 +25,42 @@
             android:scaleType="centerCrop"
             android:background="@drawable/image_round_shape" />
 
-        <!-- Info -->
+        <!-- Info Column -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1">
 
+            <!-- Service Title -->
             <TextView
+                android:id="@+id/txtServiceTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/txtServiceTitle"
                 android:text="Waste Disposal for Client A"
                 android:textStyle="bold"
                 android:textColor="#000000"
                 android:textSize="16sp" />
 
+            <!-- Company Name -->
             <TextView
+                android:id="@+id/txtCompanyName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/txtCompanyName"
                 android:text="McDonald's"
                 android:textColor="#555555"
                 android:textSize="14sp"
                 android:layout_marginTop="2dp" />
+
+            <!-- Booking Date -->
+            <TextView
+                android:id="@+id/txtBookingDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nov 27, 2025"
+                android:textColor="#777777"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp"/>
 
             <!-- Status Row -->
             <LinearLayout
@@ -57,15 +70,15 @@
                 android:layout_marginTop="6dp">
 
                 <TextView
+                    android:id="@+id/bookingStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/bookingStatus"
-                    android:text="Pending"
+                    android:text="Confirmed"
                     android:textSize="13sp"
                     android:padding="4dp"
                     android:textColor="#ffffff"
-                    android:backgroundTint="#f39c12"
-                    android:background="@drawable/status_bg" />
+                    android:background="@drawable/status_bg"
+                    android:backgroundTint="#2ECC71"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -79,6 +92,6 @@
             android:backgroundTint="#007AFF"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"/>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -1,16 +1,18 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider.adapters
 
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.ItemServiceRequestBinding
 import com.ecocp.capstoneenvirotrack.model.ServiceRequest
 
 class ServiceRequestAdapter(
-    private val requests: List<ServiceRequest>,
-    private val isActiveTasks: Boolean,        // NEW FLAG
+    private val requests: MutableList<ServiceRequest>,
+    private val isActiveTasks: Boolean,
     private val onActionClick: (ServiceRequest) -> Unit
 ) : RecyclerView.Adapter<ServiceRequestAdapter.ViewHolder>() {
 
@@ -26,31 +28,53 @@ class ServiceRequestAdapter(
 
     override fun getItemCount(): Int = requests.size
 
+    // ⭐ Called by Sorting / Filtering
+    fun updateList(newList: List<ServiceRequest>) {
+        requests.clear()
+        requests.addAll(newList)
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val request = requests[position]
         holder.binding.apply {
 
             txtServiceTitle.text = request.serviceTitle
             txtCompanyName.text = request.companyName
-            txtStatus.text = request.status
-            txtCompliance.text = request.compliance
 
-            // 🟩 FIXED: Decide button label based on screen type
-            btnView.text = if (isActiveTasks) "Update Status" else "View"
+            // ⭐ FIXED bookingStatus null handling
+            val statusRaw = request.bookingStatus ?: "Pending"
+            val status = statusRaw.lowercase()
 
-            // Status color
-            when (request.status) {
-                "Pending" -> txtStatus.setBackgroundColor(Color.parseColor("#f39c12"))
-                "In Progress" -> txtStatus.setBackgroundColor(Color.parseColor("#2980b9"))
-                "Completed" -> txtStatus.setBackgroundColor(Color.parseColor("#27ae60"))
+            // Display
+            bookingStatus.text = status.replaceFirstChar { it.uppercase() }
+            bookingStatus.setBackgroundResource(R.drawable.bg_status_badge)
+
+            // ⭐ Dynamic badge color
+            val colorRes = when (status) {
+                "confirmed", "completed" -> R.color.status_approved
+                "rejected" -> R.color.status_rejected
+                "pending", "paid" -> R.color.status_pending
+                else -> R.color.status_pending
             }
 
-            // Image
+            val badgeColor = ContextCompat.getColor(root.context, colorRes)
+            bookingStatus.backgroundTintList = ColorStateList.valueOf(badgeColor)
+
+            // ⭐ Button behavior
+            btnView.text = if (isActiveTasks) "Update Status" else "View"
+
+            // ⭐ Image (fallback avatar)
             Glide.with(imgClient.context)
-                .load(request.imageUrl.ifEmpty { "https://i.pravatar.cc/150?img=3" })
+                .load(
+                    request.imageUrl.ifEmpty {
+                        "https://i.pravatar.cc/150?img=3"
+                    }
+                )
                 .circleCrop()
                 .into(imgClient)
 
+            // ⭐ Click callback
             btnView.setOnClickListener { onActionClick(request) }
         }
     }
