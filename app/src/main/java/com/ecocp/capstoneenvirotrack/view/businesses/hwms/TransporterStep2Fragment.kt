@@ -134,7 +134,6 @@ class TransporterStep2Fragment : Fragment() {
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
         val etPackaging = dialogView.findViewById<EditText>(R.id.etPackaging)
         val etOrigin = dialogView.findViewById<EditText>(R.id.etOrigin)
-        val etDestination = dialogView.findViewById<EditText>(R.id.etDestination)
         val etSpecial = dialogView.findViewById<EditText>(R.id.etSpecialInstructions)
         val etAmount = dialogView.findViewById<EditText>(R.id.etAmount)
         val btnPickDate = dialogView.findViewById<Button>(R.id.btnPickDate)
@@ -213,7 +212,6 @@ class TransporterStep2Fragment : Fragment() {
             val quantity = etQuantity.text.toString().trim()
             val packaging = etPackaging.text.toString().trim()
             val origin = etOrigin.text.toString().trim()
-            val destination = etDestination.text.toString().trim()
             val special = etSpecial.text.toString().trim()
             val amountText = etAmount.text.toString().trim()
 
@@ -251,7 +249,6 @@ class TransporterStep2Fragment : Fragment() {
                 "quantity" to quantity,
                 "packaging" to packaging,
                 "origin" to origin,
-                "destination" to destination,
                 "specialInstructions" to special,
                 "bookingDate" to Date(selectedDateMillis!!),
                 "dateBooked" to FieldValue.serverTimestamp(),
