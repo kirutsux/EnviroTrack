@@ -29,7 +29,7 @@
     <color name="card_text">#FFFFFF</color>
     <color name="card_teal">#1ABC9C</color> <!-- Teal for Review Waste Management -->
     <color name="card_blue">#2980B9</color> <!-- Blue for Status Tracking -->
-    <color name="card_green_background">#DFF6E3</color> <!-- Compliance Badge -->
+    <color name="card_green_background">#5EC875</color> <!-- Compliance Badge -->
 
     <!-- Header -->
     <color name="header_background">#445B6C</color>

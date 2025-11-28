@@ -62,6 +62,10 @@ class TransporterStep2Fragment : Fragment() {
     // Temp: the provisional doc id used while uploading files before payment
     private var provisionalBookingId: String? = null
 
+    // Dialog references (fixed)
+    private var currentDialogView: View? = null
+    private var bookingDialog: androidx.appcompat.app.AlertDialog? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -121,7 +125,10 @@ class TransporterStep2Fragment : Fragment() {
         storagePermitUri = null
         provisionalBookingId = null
 
+        // inflate and keep reference
         val dialogView = layoutInflater.inflate(R.layout.dialog_transporter_booking, null)
+        currentDialogView = dialogView
+
         val tvProviderTitle = dialogView.findViewById<TextView>(R.id.tvProviderTitle)
         val etWasteType = dialogView.findViewById<EditText>(R.id.etWasteType)
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
@@ -171,8 +178,8 @@ class TransporterStep2Fragment : Fragment() {
             pickFile(REQ_PICK_PERMIT)
         }
 
-        // Helper to update status UI and confirm button enable check
-        fun updateStatusUI() {
+        // Helper to update status UI and confirm button enable check (local initial update)
+        fun updateStatusUI_Local() {
             tvPlanStatus.text = if (transportPlanUri != null) "✅ Uploaded" else "Not uploaded"
             tvPermitStatus.text = if (storagePermitUri != null) "✅ Uploaded" else "Not uploaded"
             btnConfirm.isEnabled = (transportPlanUri != null && storagePermitUri != null)
@@ -182,13 +189,24 @@ class TransporterStep2Fragment : Fragment() {
         tvPlanStatus.text = "Not uploaded"
         tvPermitStatus.text = "Not uploaded"
 
-        btnCancel.setOnClickListener { /* clear temp */ provisionalBookingId = null; transportPlanUri = null; storagePermitUri = null; (dialogView.parent as? View)?.let { } ;  /*dismiss below*/  }
-        // We will call dialog.dismiss() after setting click listeners; keep a handle
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        // Build dialog and show
+        bookingDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .create()
 
-        btnCancel.setOnClickListener { dialog.dismiss() }
+        // ensure currentDialogView cleared on dismiss
+        bookingDialog?.setOnDismissListener {
+            currentDialogView = null
+        }
+
+        btnCancel.setOnClickListener {
+            // clear temp
+            provisionalBookingId = null
+            transportPlanUri = null
+            storagePermitUri = null
+            // dismiss dialog
+            bookingDialog?.dismiss()
+        }
 
         btnConfirm.setOnClickListener {
             val wasteType = etWasteType.text.toString().trim()
@@ -260,14 +278,15 @@ class TransporterStep2Fragment : Fragment() {
 
                 // 3) Start payment flow (Stripe) — only after uploads finished
                 createPaymentIntent(paymentAmount)
-                dialog.dismiss()
+                bookingDialog?.dismiss()
             }
         }
 
-        // Whenever fragment receives a file selection, update the dialog UI; we use a short loop to poll while dialog shown
-        // Simpler approach: when onActivityResult sets transportPlanUri/storagePermitUri, call updateStatusUI()
-        // We'll set a tag on dialogView so onActivityResult can find it
-        dialog.show()
+        // show dialog
+        bookingDialog?.show()
+
+        // initial local update in case URIs were already set (unlikely but safe)
+        updateStatusUI_Local()
     }
 
     /**
@@ -299,7 +318,6 @@ class TransporterStep2Fragment : Fragment() {
                 "image/jpeg" -> ".jpg"
                 "image/png" -> ".png"
                 else -> {
-                    // fallback using MimeTypeMap
                     val mime = type ?: ""
                     val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: ""
                     if (extension.isNotBlank()) ".$extension" else ""
@@ -383,24 +401,24 @@ class TransporterStep2Fragment : Fragment() {
         when (requestCode) {
             REQ_PICK_PLAN -> {
                 transportPlanUri = uri
-                // update dialog status views if visible
-                updateDialogStatuses()
                 Toast.makeText(requireContext(), "Transport Plan selected", Toast.LENGTH_SHORT).show()
             }
             REQ_PICK_PERMIT -> {
                 storagePermitUri = uri
-                updateDialogStatuses()
                 Toast.makeText(requireContext(), "Storage Permit selected", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // update status textviews and confirm button inside the open dialog (if any)
+        updateDialogStatuses()
     }
 
     /**
-     * Try to find the open booking dialog and update the status TextViews + confirm enable state.
+     * Update the TextViews and Confirm button inside the currently open booking dialog.
+     * Uses the stored currentDialogView reference (no searching the activity view tree).
      */
     private fun updateDialogStatuses() {
-        // find currently shown AlertDialog's content (if any)
-        val root = dialogRootView() ?: return
+        val root = currentDialogView ?: return
         val tvPlanStatus = root.findViewById<TextView?>(R.id.tvPlanStatus)
         val tvPermitStatus = root.findViewById<TextView?>(R.id.tvPermitStatus)
         val btnConfirm = root.findViewById<Button?>(R.id.btnConfirmBooking)
@@ -408,26 +426,6 @@ class TransporterStep2Fragment : Fragment() {
         tvPlanStatus?.text = if (transportPlanUri != null) "✅ Selected" else "Not uploaded"
         tvPermitStatus?.text = if (storagePermitUri != null) "✅ Selected" else "Not uploaded"
         btnConfirm?.isEnabled = (transportPlanUri != null && storagePermitUri != null)
-    }
-
-    // Helper to find the top-most dialog content view (works for AlertDialog created by this fragment)
-    private fun dialogRootView(): View? {
-        // This is a pragmatic attempt — if your app uses multiple dialogs simultaneously you may adjust.
-        val decor = activity?.window?.decorView ?: return null
-        // search for any view with tvPlanStatus id in the view hierarchy
-        return findViewWithIdInView(decor, R.id.tvPlanStatus)
-    }
-
-    private fun findViewWithIdInView(view: View, id: Int): View? {
-        if (view.id == id) return view
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                val child = view.getChildAt(i)
-                val found = findViewWithIdInView(child, id)
-                if (found != null) return found
-            }
-        }
-        return null
     }
 
     /**

@@ -1,112 +1,366 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:padding="16dp">
 
+        <!-- Title -->
         <TextView
             android:id="@+id/tvTitle"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Permit to Transport (PTT) Application"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:layout_marginBottom="12dp"/>
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/text_primary"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Step 1: Generator -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardGenerator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/teal_700"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/iconGenerator"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_factory"
+                    app:tint="@color/teal_700"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1. Approved Hazardous Waste Generator"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="12dp"
+                    app:layout_constraintStart_toEndOf="@id/iconGenerator"
+                    app:layout_constraintTop_toTopOf="@id/iconGenerator"
+                    app:layout_constraintBottom_toBottomOf="@id/iconGenerator" />
+
+                <TextView
+                    android:id="@+id/tvSelectedGenerator"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="None selected"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="12dp"
+                    app:layout_constraintTop_toBottomOf="@id/iconGenerator"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/btnSelectGenerator" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSelectGenerator"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select"
+                    android:textSize="13sp"
+                    app:icon="@drawable/ic_arrow_forward"
+                    app:iconGravity="textEnd"
+                    app:strokeColor="@color/teal_700"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tvSelectedGenerator"
+                    app:layout_constraintBottom_toBottomOf="@id/tvSelectedGenerator" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Step 2: Transport Booking -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTransportBooking"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/orange_submitted"
+            app:layout_constraintTop_toBottomOf="@id/cardGenerator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/iconTransport"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_truck"
+                    app:tint="@color/orange_submitted"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2. Confirmed Transporter Booking"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="12dp"
+                    app:layout_constraintStart_toEndOf="@id/iconTransport"
+                    app:layout_constraintTop_toTopOf="@id/iconTransport"
+                    app:layout_constraintBottom_toBottomOf="@id/iconTransport" />
+
+                <TextView
+                    android:id="@+id/tvSelectedTransportBooking"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="None selected"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="12dp"
+                    app:layout_constraintTop_toBottomOf="@id/iconTransport"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/btnSelectTransportBooking" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSelectTransportBooking"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select"
+                    android:textSize="13sp"
+                    app:icon="@drawable/ic_arrow_forward"
+                    app:iconGravity="textEnd"
+                    app:strokeColor="@color/orange_submitted"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tvSelectedTransportBooking"
+                    app:layout_constraintBottom_toBottomOf="@id/tvSelectedTransportBooking" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Step 3: TSD Booking -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTsdBooking"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/card_green_background"
+            app:layout_constraintTop_toBottomOf="@id/cardTransportBooking"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/iconTsd"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_recycle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3. Confirmed TSD Facility Booking"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="12dp"
+                    app:layout_constraintStart_toEndOf="@id/iconTsd"
+                    app:layout_constraintTop_toTopOf="@id/iconTsd"
+                    app:layout_constraintBottom_toBottomOf="@id/iconTsd" />
+
+                <TextView
+                    android:id="@+id/tvSelectedTsdBooking"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="None selected"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="12dp"
+                    app:layout_constraintTop_toBottomOf="@id/iconTsd"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/btnSelectTsdBooking" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSelectTsdBooking"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select"
+                    android:textSize="13sp"
+                    app:icon="@drawable/ic_arrow_forward"
+                    app:iconGravity="textEnd"
+                    app:strokeColor="@color/card_green_background"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tvSelectedTsdBooking"
+                    app:layout_constraintBottom_toBottomOf="@id/tvSelectedTsdBooking" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Upload Requirements Section -->
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/tvUploadTitle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="1) Select Approved Generator Application" />
+            android:text="Upload Required Documents"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp"
+            app:layout_constraintTop_toBottomOf="@id/cardTsdBooking"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <Spinner
-            android:id="@+id/spinnerGeneratorApps"
-            android:layout_width="match_parent"
+        <!-- Generator Certificate -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilGenCert"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="12dp"
+            app:hintEnabled="false"
+            app:layout_constraintTop_toBottomOf="@id/tvUploadTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="2) Select Confirmed Transport Booking" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etGenCert"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Generator Certificate (PDF)"
+                android:enabled="false"
+                android:text="No file selected"
+                android:textSize="14sp" />
 
-        <Spinner
-            android:id="@+id/spinnerTransportBookings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="3) Select Confirmed TSD Booking" />
-
-        <Spinner
-            android:id="@+id/spinnerTsdBookings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Upload PTT Requirements" />
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUploadGenCert"
-            android:layout_width="match_parent"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Upload Generator Registration Certificate"
-            android:layout_marginTop="8dp" />
+            android:text="Choose File"
+            app:icon="@drawable/ic_upload"
+            app:layout_constraintTop_toBottomOf="@id/tilGenCert"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:id="@+id/tvGenCertStatus"
-            android:layout_width="match_parent"
+        <!-- Transport Plan -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTransportPlan"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="No file selected"
-            android:textSize="12sp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="16dp"
+            app:hintEnabled="false"
+            app:layout_constraintTop_toBottomOf="@id/btnUploadGenCert"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTransportPlan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Transport Management Plan (PDF)"
+                android:enabled="false"
+                android:text="No file selected"
+                android:textSize="14sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUploadTransportPlan"
-            android:layout_width="match_parent"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Upload Transport Plan Document"
-            android:layout_marginTop="4dp" />
+            android:text="Choose File"
+            app:icon="@drawable/ic_upload"
+            app:layout_constraintTop_toBottomOf="@id/tilTransportPlan"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:id="@+id/tvTransportPlanStatus"
-            android:layout_width="match_parent"
+        <!-- Remarks -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRemarks"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="No file selected"
-            android:textSize="12sp"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            app:hintEnabled="true"
+            app:layout_constraintTop_toBottomOf="@id/btnUploadTransportPlan"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <EditText
-            android:id="@+id/etRemarks"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Remarks (optional)"
-            android:inputType="textMultiLine"
-            android:minLines="2"
-            android:layout_marginBottom="12dp" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRemarks"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:hint="Additional Remarks (Optional)"
+                android:inputType="textMultiLine"
+                android:gravity="top|start"
+                android:maxLines="5" />
 
-        <Button
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Submit Button -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSubmitPTT"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Submit PTT Application" />
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:text="Submit PTT Application"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_send"
+            app:iconGravity="textStart"
+            app:cornerRadius="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tilRemarks"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp" />
 
+        <!-- Status Message -->
         <TextView
             android:id="@+id/tvStatus"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text=""
-            android:textSize="12sp"
-            android:layout_marginTop="12dp" />
-    </LinearLayout>
+            android:textSize="14sp"
+            android:textColor="@color/red_rejected"
+            android:gravity="center"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintTop_toBottomOf="@id/btnSubmitPTT"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
