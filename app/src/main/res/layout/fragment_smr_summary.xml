@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollSummary"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface"
+    android:padding="16dp"
+    tools:context=".view.businesses.smr.SmrSummaryFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- SMR SUMMARY HEADER -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Card.Elevated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvTitleSummary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Self-Monitoring Report Summary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary" />
+
+                <TextView
+                    android:id="@+id/tvSubtitleSummary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Review all submitted data before final submission"
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- MODULE 1: GENERAL INFO -->
+        <include
+            layout="@layout/item_summary_module"
+            android:id="@+id/module1Container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- MODULE 2: WATER POLLUTION -->
+        <include
+            layout="@layout/item_summary_module"
+            android:id="@+id/module2Container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- MODULE 3: AIR POLLUTION -->
+        <include
+            layout="@layout/item_summary_module"
+            android:id="@+id/module3Container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- MODULE 4: HAZARDOUS WASTE -->
+        <include
+            layout="@layout/item_summary_module"
+            android:id="@+id/module4Container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- MODULE 5: OTHERS -->
+        <include
+            layout="@layout/item_summary_module"
+            android:id="@+id/module5Container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            layout="@layout/item_aisummary_module"
+            android:id="@+id/module6Container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- SUBMIT BUTTON -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSubmitSmr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit SMR to EMB"
+            android:layout_marginTop="24dp"
+            app:backgroundTint="@color/primary"
+            android:textColor="@color/bg_white"
+            android:textStyle="bold" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

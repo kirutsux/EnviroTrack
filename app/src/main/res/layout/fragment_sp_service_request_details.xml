@@ -124,7 +124,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <!-- Location row -->
+                    <!-- Booking ID (hidden) -->
+                    <TextView
+                        android:id="@+id/txtBookingId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+
+                    <!-- Location -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -180,6 +187,118 @@
                         android:textColor="#212121"
                         android:layout_marginTop="6dp"/>
 
+                    <!-- WASTE DETAILS: waste type / qty / packaging -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Waste type"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtWasteType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="B201 - Sulfuric acid"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Quantity"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtQuantity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="150 liters"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Packaging"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtPackaging"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="Sealed drums"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Destination -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Destination"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtDestination"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="TSD Facility - Demo"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Amount -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Amount (PHP)"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="5,000.00"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Special handling instructions -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Special handling instructions"
+                        android:textColor="#757575"
+                        android:textSize="12sp"
+                        android:layout_marginTop="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtSpecialInstructions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="Handle with acid-rated PPE. Keep upright."
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
                     <!-- Attachments -->
                     <TextView
                         android:layout_width="match_parent"
@@ -211,6 +330,22 @@
                             android:text="No attachments"
                             android:textColor="#616161"/>
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtUploadTransportPlanStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Transport Plan: Not uploaded"
+                        android:textColor="#616161"
+                        android:layout_marginTop="8dp"/>
+
+                    <TextView
+                        android:id="@+id/txtUploadStoragePermitStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Storage Permit: Not uploaded"
+                        android:textColor="#616161"
+                        android:layout_marginTop="4dp"/>
 
                     <!-- Notes / Instructions -->
                     <TextView

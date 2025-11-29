@@ -5,39 +5,60 @@
     android:id="@+id/nav_graph_sp"
     app:startDestination="@id/SP_Dashboard">
 
+    <!-- Dashboard -->
     <fragment
         android:id="@+id/SP_Dashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Dashboard"
         android:label="Dashboard"
         tools:layout="@layout/sp_dashboard">
-    <action
-        android:id="@+id/action_SP_Dashboard_to_SP_Servicerequest"
-        app:destination="@id/SP_Servicerequest"/>
+        <action
+            android:id="@+id/action_SP_Dashboard_to_SP_Servicerequest"
+            app:destination="@id/SP_Servicerequest"/>
+        <action
+            android:id="@+id/action_SP_Dashboard_to_SP_CompletedServices"
+            app:destination="@id/SP_CompletedServices" />
     </fragment>
 
+    <!-- Login -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_log_in" />
+
+    <!-- Inbox -->
     <fragment
         android:id="@+id/SP_Inbox"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Inbox"
         android:label="Inbox"
         tools:layout="@layout/fragment_sp_inbox" />
 
+    <!-- Bookings -->
     <fragment
         android:id="@+id/SP_Bookings"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Bookings"
         android:label="Bookings"
-        tools:layout="@layout/fragment_sp_bookings" />
+        tools:layout="@layout/fragment_sp_bookings">
+        <action
+            android:id="@+id/action_SP_Bookings_to_SP_ChatFragment"
+            app:destination="@id/SP_ChatFragment" />
+    </fragment>
 
+    <!-- Profile -->
     <fragment
         android:id="@+id/SP_Profile"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Profile"
         android:label="Profile"
         tools:layout="@layout/fragment_sp_profile" />
 
+    <!-- Account -->
     <fragment
         android:id="@+id/SP_Account"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Account"
         android:label="Account"
         tools:layout="@layout/fragment_sp_account" />
+
+    <!-- Change Password -->
     <fragment
         android:id="@+id/SP_ChangepasswordFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChangepasswordFragment"
@@ -47,69 +68,75 @@
             app:destination="@id/SP_Dashboard"
             app:popUpTo="@id/SP_ChangepasswordFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_SP_ChangepasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/SP_ChangepasswordFragment"
+            app:popUpToInclusive="true" />
     </fragment>
-    <!-- Service Requests List Screen -->
+
+    <!-- Service Requests -->
     <fragment
         android:id="@+id/SP_Servicerequest"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Servicerequest"
         android:label="Service Requests"
         tools:layout="@layout/fragment_sp_servicerequest">
-
         <action
             android:id="@+id/action_SP_Servicerequest_to_SP_ServiceRequestDetails"
             app:destination="@id/SP_ServiceRequestDetails" />
     </fragment>
 
-    <!-- Service Request Details Screen -->
+    <!-- Service Request Details -->
     <fragment
         android:id="@+id/SP_ServiceRequestDetails"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ServiceRequestDetails"
         android:label="Service Request Details"
         tools:layout="@layout/fragment_sp_service_request_details" />
 
+    <!-- Active Tasks -->
     <fragment
         android:id="@+id/SP_ActiveTasks"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ActiveTasks"
         android:label="Active Tasks"
-        tools:layout="@layout/fragment_sp_active_tasks" />
+        tools:layout="@layout/fragment_sp_active_tasks">
+        <action
+            android:id="@+id/action_spActiveTasksFragment_to_spTaskUpdateDetailsFragment"
+            app:destination="@id/SP_TaskUpdateDetails" />
+    </fragment>
 
+    <!-- Task Update Details -->
     <fragment
         android:id="@+id/SP_TaskUpdateDetails"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_TaskUpdateDetails"
         android:label="Task Update Details"
         tools:layout="@layout/fragment_sp_task_update_details" />
 
+    <!-- Completed Services -->
     <fragment
         android:id="@+id/SP_CompletedServices"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_CompletedServices"
         android:label="Completed Services"
         tools:layout="@layout/fragment_sp_completed_services" />
-    <action
-        android:id="@+id/action_SP_Dashboard_to_SP_CompletedServices"
-        app:destination="@id/SP_CompletedServices" />
 
+    <!-- Service Report -->
     <fragment
         android:id="@+id/SP_ServiceReport"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ServiceReport"
         android:label="Service Report"
         tools:layout="@layout/fragment_sp_service_report" />
 
+    <!-- Chat Fragment -->
     <fragment
         android:id="@+id/SP_ChatFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChatFragment"
         android:label="Chat"
         tools:layout="@layout/fragment_sp_chat">
-
         <argument
             android:name="receiverId"
             app:argType="string" />
-
         <argument
             android:name="receiverName"
             app:argType="string" />
-
-        <action
-            android:id="@+id/action_SP_Bookings_to_SP_ChatFragment"
-            app:destination="@id/SP_ChatFragment" />
     </fragment>
+
 </navigation>

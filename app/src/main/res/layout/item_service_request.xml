@@ -59,24 +59,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/txtStatus"
+                    android:id="@+id/bookingStatus"
                     android:text="Pending"
                     android:textSize="13sp"
                     android:padding="4dp"
                     android:textColor="#ffffff"
                     android:backgroundTint="#f39c12"
                     android:background="@drawable/status_bg" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/txtCompliance"
-                    android:text="In Compliance"
-                    android:textSize="13sp"
-                    android:textColor="#ffffff"
-                    android:layout_marginStart="8dp"
-                    android:padding="4dp"
-                    android:background="@drawable/compliance_bg" />
             </LinearLayout>
         </LinearLayout>
 
