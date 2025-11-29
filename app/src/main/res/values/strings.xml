@@ -51,6 +51,13 @@
         <item>Approved</item>
         <item>Rejected</item>
     </string-array>
+    <string-array name="checklist_status_filter">
+        <item>All</item>
+        <item>Pending</item>
+        <item>Submitted</item>
+        <item>Approved</item>
+        <item>Rejected</item>
+    </string-array>
     <!-- CRS LABELS -->
     <string name="company_registration_title">Company Registration</string>
     <string name="company_registration_title_description">Company Registration itle</string>

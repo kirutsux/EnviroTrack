@@ -11,10 +11,12 @@ import com.ecocp.capstoneenvirotrack.databinding.ItemChecklistBinding
 import com.ecocp.capstoneenvirotrack.model.ChecklistItem
 
 class ChecklistAdapter(
-    private val onStatusChange: (String, String) -> Unit
+    private val onStatusChange: (String, String) -> Unit,
+    private val onItemLongClick: (ChecklistItem) -> Unit // Added callback for long press
 ) : ListAdapter<ChecklistItem, ChecklistAdapter.ViewHolder>(ChecklistDiffCallback()) {
 
-    inner class ViewHolder(private val binding: ItemChecklistBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: ItemChecklistBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         private var currentItem: ChecklistItem? = null
 
@@ -34,7 +36,7 @@ class ChecklistAdapter(
             }
             binding.spinnerStatus.setSelection(position, false) // false prevents triggering listener on bind
 
-            // Set listener
+            // Status change listener
             binding.spinnerStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
                     val newStatus = when (pos) {
@@ -51,9 +53,13 @@ class ChecklistAdapter(
                     }
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                    // Optional: do nothing
-                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+            // Long press listener
+            binding.root.setOnLongClickListener {
+                currentItem?.let { onItemLongClick(it) }
+                true
             }
         }
     }

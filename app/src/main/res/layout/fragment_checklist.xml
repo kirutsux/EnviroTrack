@@ -16,7 +16,7 @@
         android:textStyle="bold"
         android:textColor="#000000"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="12dp"/>
 
     <!-- Input Fields -->
     <EditText
@@ -67,6 +67,15 @@
         android:layout_gravity="center_horizontal"
         android:textColor="#000000"
         android:layout_marginBottom="12dp"/>
+
+    <!-- Status Filter Spinner -->
+    <Spinner
+        android:id="@+id/spinnerFilterStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:entries="@array/checklist_status_filter"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"/>
 
     <!-- Checklist Items -->
     <androidx.recyclerview.widget.RecyclerView

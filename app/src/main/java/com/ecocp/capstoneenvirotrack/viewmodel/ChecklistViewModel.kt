@@ -82,6 +82,34 @@ class ChecklistViewModel : ViewModel() {
         }
     }
 
+    fun updateItem(itemId: String, newName: String, newDescription: String) {
+        val currentList = _checklistItems.value?.toMutableList() ?: mutableListOf()
+        val index = currentList.indexOfFirst { it.id == itemId }
+
+        if (index != -1) {
+            val updatedItem = currentList[index].copy(name = newName, description = newDescription)
+            currentList[index] = updatedItem
+            _checklistItems.value = currentList
+
+            collectionRef.document(itemId)
+                .update("name", newName, "description", newDescription)
+                .addOnSuccessListener { Log.d("ChecklistVM", "Item updated successfully") }
+                .addOnFailureListener { e -> Log.e("ChecklistVM", "Failed to update item", e) }
+        }
+    }
+
+    fun deleteItem(itemId: String) {
+        val currentList = _checklistItems.value?.toMutableList() ?: mutableListOf()
+        currentList.removeAll { it.id == itemId }
+        _checklistItems.value = currentList
+
+        collectionRef.document(itemId)
+            .delete()
+            .addOnSuccessListener { Log.d("ChecklistVM", "Item deleted successfully") }
+            .addOnFailureListener { e -> Log.e("ChecklistVM", "Failed to delete item", e) }
+    }
+
+
     /** Calculate completion percentage based on Approved items */
     fun getCompletionPercentage(): Int {
         val items = _checklistItems.value ?: return 0
