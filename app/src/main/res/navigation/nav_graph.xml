@@ -193,6 +193,9 @@
             android:id="@+id/action_pcoDashboard_to_COMP_CRS"
             app:destination="@id/COMP_CRS" />
         <action
+            android:id="@+id/action_pcoDashboard_to_checklistFragment"
+            app:destination="@id/checklistFragment" />
+        <action
             android:id="@+id/action_pcoDashboard_to_inboxFragment"
             app:destination="@id/inboxFragment" />
         <action
@@ -204,16 +207,12 @@
         <action
             android:id="@+id/action_pcoDashboard_to_aboutUsFragment"
             app:destination="@id/aboutUsFragment" />
-        <action
-            android:id="@+id/action_pcoDashboard_to_modulesFragment"
-            app:destination="@id/modulesFragment" />
     </fragment>
 
-    <!-- 📋 Modules -->
     <fragment
-        android:id="@+id/modulesFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Modules"
-        tools:layout="@layout/pco_smr_modules" />
+        android:id="@+id/checklistFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.ChecklistFragment"
+        tools:layout="@layout/fragment_checklist" />
 
     <!-- 💬 Inbox -->
     <fragment
@@ -325,8 +324,8 @@
     <!-- 📊 SMR Management -->
     <fragment
         android:id="@+id/COMP_SMR"
-        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.COMP_SMR"
-        tools:layout="@layout/pco_smr" />
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.smr.SmrDashboardFragment"
+        tools:layout="@layout/fragment_smr_dashboard" />
 
     <!-- ☣️ Hazardous Waste Management -->
     <fragment
