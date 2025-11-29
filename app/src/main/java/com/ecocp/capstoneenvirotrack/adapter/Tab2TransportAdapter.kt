@@ -3,31 +3,30 @@ package com.ecocp.capstoneenvirotrack.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.ecocp.capstoneenvirotrack.databinding.ItemHwmsTsdBinding
+import com.ecocp.capstoneenvirotrack.databinding.ItemTab2TransportBinding
 import com.ecocp.capstoneenvirotrack.model.DisplayItem
 
-class TsdAdapter(
+class Tab2TransportAdapter(
     private var items: MutableList<DisplayItem>,
     private val onClick: (DisplayItem) -> Unit
-) : RecyclerView.Adapter<TsdAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<Tab2TransportAdapter.ViewHolder>() {
 
-    inner class ViewHolder(val binding: ItemHwmsTsdBinding) :
+    inner class ViewHolder(val binding: ItemTab2TransportBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: DisplayItem) {
-            binding.apply {
-                tvFacility.text = item.tsdFacility
-                tvSubtitle.text = item.subtitle
-                tvTransporter.text = item.transporter
-                tvStatus.text = item.status
+        fun bind(item: DisplayItem) = with(binding) {
+            tvTitle.text = item.title
+            tvSubtitle.text = item.subtitle
+            tvTransporter.text = item.transporter
+            tvTsd.text = item.tsdFacility
+            tvStatus.text = item.status
 
-                root.setOnClickListener { onClick(item) }
-            }
+            root.setOnClickListener { onClick(item) }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val b = ItemHwmsTsdBinding.inflate(
+        val b = ItemTab2TransportBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false

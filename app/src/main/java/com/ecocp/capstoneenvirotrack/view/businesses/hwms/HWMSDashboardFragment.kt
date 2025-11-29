@@ -26,10 +26,10 @@ class HWMSDashboardFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
 
     // adapters
-    private lateinit var wasteGenAdapter: WasteGenAdapter
-    private lateinit var transportAdapter: TransportAdapter
-    private lateinit var tsdAdapter: TsdAdapter
-    private lateinit var pttAdapter: PttAdapter
+    private lateinit var tab1WasteGenAdapter: Tab1WasteGenAdapter
+    private lateinit var tab2TransportAdapter: Tab2TransportAdapter
+    private lateinit var tab3TsdAdapter: Tab3TsdAdapter
+    private lateinit var tab4PttAdapter: Tab4PttAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,16 +48,16 @@ class HWMSDashboardFragment : Fragment() {
     }
 
     private fun setupAdapters() {
-        wasteGenAdapter = WasteGenAdapter(mutableListOf()) { item ->
+        tab1WasteGenAdapter = Tab1WasteGenAdapter(mutableListOf()) { item ->
             Toast.makeText(requireContext(), "Selected: ${item.companyName}", Toast.LENGTH_SHORT).show()
         }
-        transportAdapter = TransportAdapter(mutableListOf()) { item ->
+        tab2TransportAdapter = Tab2TransportAdapter(mutableListOf()) { item ->
             Toast.makeText(requireContext(), "Selected: ${item.title}", Toast.LENGTH_SHORT).show()
         }
-        tsdAdapter = TsdAdapter(mutableListOf()) { item ->
+        tab3TsdAdapter = Tab3TsdAdapter(mutableListOf()) { item ->
             Toast.makeText(requireContext(), "Selected: ${item.title}", Toast.LENGTH_SHORT).show()
         }
-        pttAdapter = PttAdapter(mutableListOf()) { item ->
+        tab4PttAdapter = Tab4PttAdapter(mutableListOf()) { item ->
             Toast.makeText(requireContext(), "Selected: ${item.title}", Toast.LENGTH_SHORT).show()
         }
 
@@ -95,7 +95,7 @@ class HWMSDashboardFragment : Fragment() {
 
     private fun loadWasteGeneration() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        binding.recyclerViewHWMS.adapter = wasteGenAdapter
+        binding.recyclerViewHWMS.adapter = tab1WasteGenAdapter
 
         db.collection("HazardousWasteGenerator")
             .whereEqualTo("userId", userId)
@@ -104,7 +104,7 @@ class HWMSDashboardFragment : Fragment() {
             .addOnSuccessListener { snap ->
 
                 if (snap.isEmpty) {
-                    wasteGenAdapter.update(emptyList())
+                    tab1WasteGenAdapter.update(emptyList())
                     binding.tvEmptyState.visibility = View.VISIBLE
                     return@addOnSuccessListener
                 }
@@ -119,17 +119,21 @@ class HWMSDashboardFragment : Fragment() {
                         )
                     } ?: emptyList()
 
+                    // 🔥 FIX HERE — Convert Timestamp to String
+                    val ts = doc.getTimestamp("timestamp")
+                    val formattedTime = ts?.toDate()?.toString() ?: ""
+
                     WasteGenDisplay(
                         id = doc.id,
                         companyName = doc.getString("companyName") ?: "Waste Generator",
                         embRegNo = doc.getString("embRegNo") ?: "",
                         status = doc.getString("status") ?: "Pending",
-                        timestamp = doc.getString("timestamp") ?: "",
+                        timestamp = formattedTime,
                         wasteList = wasteList
                     )
                 }
 
-                wasteGenAdapter.update(list)
+                tab1WasteGenAdapter.update(list)
                 binding.tvEmptyState.visibility = View.GONE
             }
     }
@@ -138,7 +142,7 @@ class HWMSDashboardFragment : Fragment() {
 
     private fun loadTransportBookings() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        binding.recyclerViewHWMS.adapter = transportAdapter
+        binding.recyclerViewHWMS.adapter = tab2TransportAdapter
         binding.tvEmptyState.visibility = View.GONE
 
         db.collection("transport_bookings")
@@ -160,7 +164,7 @@ class HWMSDashboardFragment : Fragment() {
                     )
                 }
 
-                transportAdapter.update(list)
+                tab2TransportAdapter.update(list)
                 binding.tvEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }
     }
@@ -169,7 +173,7 @@ class HWMSDashboardFragment : Fragment() {
 
     private fun loadTsdBookings() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        binding.recyclerViewHWMS.adapter = tsdAdapter
+        binding.recyclerViewHWMS.adapter = tab3TsdAdapter
 
         db.collection("tsd_bookings")
             .whereEqualTo("userId", userId)
@@ -190,7 +194,7 @@ class HWMSDashboardFragment : Fragment() {
                     )
                 }
 
-                tsdAdapter.update(list)
+                tab3TsdAdapter.update(list)
                 binding.tvEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }
     }
@@ -199,7 +203,7 @@ class HWMSDashboardFragment : Fragment() {
 
     private fun loadPttBookings() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        binding.recyclerViewHWMS.adapter = pttAdapter
+        binding.recyclerViewHWMS.adapter = tab4PttAdapter
 
         db.collection("ptt_applications")
             .whereEqualTo("generatorId", userId)
@@ -221,7 +225,7 @@ class HWMSDashboardFragment : Fragment() {
                     )
                 }
 
-                pttAdapter.update(list)
+                tab4PttAdapter.update(list)
                 binding.tvEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }
     }

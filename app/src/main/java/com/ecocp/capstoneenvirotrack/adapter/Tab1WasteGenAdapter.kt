@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.databinding.ItemHwmsWasteBinding
 import com.ecocp.capstoneenvirotrack.model.WasteGenDisplay
 
-class WasteGenAdapter(
+class Tab1WasteGenAdapter(
     private var items: MutableList<WasteGenDisplay>,
     private val onClick: (WasteGenDisplay) -> Unit
-) : RecyclerView.Adapter<WasteGenAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<Tab1WasteGenAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemHwmsWasteBinding) :
         RecyclerView.ViewHolder(binding.root) {
