@@ -1,10 +1,13 @@
 package com.ecocp.capstoneenvirotrack.api
 
+import com.ecocp.capstoneenvirotrack.model.TsdBooking
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 // ----------------- Email -----------------
@@ -39,6 +42,26 @@ data class AskResponse(
     val answer: String
 )
 
+// ----------------- TSD request payloads -----------------
+data class AcceptRequest(
+    val remarks: String? = null,
+    val scheduledDate: String? = null
+)
+
+data class RejectRequest(
+    val reason: String
+)
+
+data class ReceiveRequest(
+    val quantity: Double,
+    val remarks: String? = null
+)
+
+data class TreatRequest(
+    val notes: String? = null,
+    val treatedQuantity: Double? = null
+)
+
 interface ApiService {
     // Send email
     @Headers("Content-Type: application/json")
@@ -59,4 +82,43 @@ interface ApiService {
     fun getPendingDischargePermit(
         @Query("uid") userId: String
     ): Call<Boolean>
+
+    // =================== NEW TSD ENDPOINTS ===================
+
+    @GET("api/tsd/bookings")
+    fun getTsdBookings(
+        @Header("Authorization") auth: String
+    ): Call<List<TsdBooking>>
+
+    @Headers("Content-Type: application/json")
+    @POST("api/tsd/bookings/{id}/accept")
+    fun acceptTsdBooking(
+        @Header("Authorization") auth: String,
+        @Path("id") bookingId: String,
+        @Body body: Map<String, String>
+    ): Call<Void>
+
+    @Headers("Content-Type: application/json")
+    @POST("api/tsd/bookings/{id}/reject")
+    fun rejectTsdBooking(
+        @Header("Authorization") auth: String,
+        @Path("id") bookingId: String,
+        @Body body: Map<String, String>
+    ): Call<Void>
+
+    @Headers("Content-Type: application/json")
+    @POST("api/tsd/bookings/{id}/receive")
+    fun receiveTsdBooking(
+        @Header("Authorization") auth: String,
+        @Path("id") bookingId: String,
+        @Body body: Map<String, Double>
+    ): Call<Void>
+
+    @Headers("Content-Type: application/json")
+    @POST("api/tsd/bookings/{id}/treat")
+    fun treatTsdBooking(
+        @Header("Authorization") auth: String,
+        @Path("id") bookingId: String,
+        @Body body: Map<String, String>
+    ): Call<Void>
 }

@@ -132,6 +132,84 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Booking & Parties Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardBookingInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Booking and Parties"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#212121"/>
+
+                <!-- Booking ID -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Booking ID"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtBookingId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="00StHYU4w1Ob8pDLHE7C"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
+                <!-- Provider name & contact -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Service Provider"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtProviderName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="Entech - Ayane Mezgo"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Provider Contact"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtProviderContact"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="(0917) 111-2222"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Report Details Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardReport"
@@ -155,25 +233,27 @@
                     android:textSize="16sp"
                     android:textColor="#212121"/>
 
-                <!-- Row: Service Type -->
+
+
+
+                <!-- Booking / Completion Date -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Service Type"
+                    android:text="Booking Date"
                     android:textSize="12sp"
                     android:textColor="#757575"
                     android:layout_marginTop="12dp"/>
                 <TextView
-                    android:id="@+id/txtServiceType"
+                    android:id="@+id/txtBookingDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:text="Waste Disposal"
+                    android:text="Nov 26, 2025 • 11:28 PM"
                     android:textColor="#212121"
                     android:layout_marginTop="6dp"/>
 
-                <!-- Row: Completion Date -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -187,11 +267,64 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:text="Feb 12, 2025"
+                    android:text="Nov 26, 2025 • 23:29"
                     android:textColor="#212121"
                     android:layout_marginTop="6dp"/>
 
-                <!-- Row: Remarks -->
+                <!-- Waste Type & Quantity -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Waste Type"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtWasteType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="test37"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Quantity"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtQuantity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="test37"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
+                <!-- Packaging -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Packaging"
+                    android:textSize="12sp"
+                    android:textColor="#757575"
+                    android:layout_marginTop="12dp"/>
+                <TextView
+                    android:id="@+id/txtPackaging"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="10dp"
+                    android:text="test37"
+                    android:textColor="#212121"
+                    android:layout_marginTop="6dp"/>
+
+                <!-- Remarks / Notes -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -293,15 +426,7 @@
                         android:contentDescription="Download"
                         app:tint="#1F3A4A"/>
 
-                    <ImageButton
-                        android:id="@+id/btnShare"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/ic_share"
-                        android:backgroundTint="@android:color/transparent"
-                        android:contentDescription="Share"
-                        android:layout_marginStart="8dp"
-                        app:tint="#27AE60"/>
+
 
                 </LinearLayout>
 
@@ -317,20 +442,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="24dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnShareReport"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Share Report"
-                app:cornerRadius="8dp"
-                app:backgroundTint="#27AE60"
-                android:textColor="#FFFFFF"
-                android:icon="@drawable/ic_share"
-                android:iconTint="#FFFFFF"
-                app:iconPadding="8dp"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="Share report" />
+
 
 
             <com.google.android.material.button.MaterialButton

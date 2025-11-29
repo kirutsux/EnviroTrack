@@ -110,6 +110,10 @@ dependencies {
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
+    //completed
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+
+
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.filament.android)

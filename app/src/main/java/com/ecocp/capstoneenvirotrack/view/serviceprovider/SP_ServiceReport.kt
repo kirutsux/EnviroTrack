@@ -1,17 +1,23 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import androidx.core.content.FileProvider
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSpServiceReportBinding
-import com.google.android.material.button.MaterialButton
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
 import java.io.File
 
 class SP_ServiceReport : Fragment() {
@@ -19,109 +25,146 @@ class SP_ServiceReport : Fragment() {
     private var _binding: FragmentSpServiceReportBinding? = null
     private val binding get() = _binding!!
 
-    // Optional: track download state so UI can show / hide progress
-    private var isDownloading = false
+    private val db = FirebaseFirestore.getInstance()
+
+    private val DEV_FALLBACK = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png"
+
+    private var currentAttachmentUrl: String? = null
+    private var currentFileName: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSpServiceReportBinding.inflate(inflater, container, false)
-        val view = binding.root
 
-        // ---- safe wiring using binding (no casting mistakes) ----
-        binding.btnBack.setOnClickListener {
-            // navigate back
-            findNavController().popBackStack()
-        }
-
-        // Buttons in your XML are ImageButton for download/share and MaterialButtons for footer:
-        binding.btnDownload.setOnClickListener { startDownload() }
-        binding.btnShare.setOnClickListener { shareReport() }
-
-        binding.btnShareReport.setOnClickListener { shareReport() }
+        binding.btnBack.setOnClickListener { findNavController().popBackStack() }
         binding.btnBackToList.setOnClickListener { findNavController().popBackStack() }
 
-        // Populate fields from bundle arguments (if any)
-        populateFromArgs()
+        binding.btnDownload.setOnClickListener { onDownloadClicked() }
 
-        return view
+        populateFromArgsBasic()
+        fetchBookingAndPopulate()
+
+        return binding.root
     }
 
-    private fun populateFromArgs() {
-        // Read the bundle passed from CompletedServices (if any)
+    private fun populateFromArgsBasic() {
         val args = arguments
         args?.let {
-            val company = it.getString("companyName") ?: ""
-            val serviceTitle = it.getString("serviceTitle") ?: ""
-            val status = it.getString("status") ?: ""
-            val compliance = it.getString("compliance") ?: ""
-            val clientName = it.getString("clientName") ?: ""
-            val requestId = it.getString("requestId") ?: ""
-
-            // Set UI values (IDs must match your XML)
-            binding.txtCompanyName.text = company
-            binding.txtServiceType.text = serviceTitle
-            binding.txtRemarks.text = status + if (compliance.isNotBlank()) " • $compliance" else ""
-            // optionally use other textviews
-            if (requestId.isNotBlank()) binding.txtReportRef.text = "Ref: $requestId"
-
-            // If you have a file name passed in bundle:
-            val fileName = it.getString("fileName")
-            if (!fileName.isNullOrBlank()) {
-                binding.txtFileName.text = fileName
-                // optionally set file size text if passed
-                val fileSize = it.getString("fileSize")
-                if (!fileSize.isNullOrBlank()) binding.txtFileSize.text = fileSize
-            }
+            binding.txtCompanyName.text = it.getString("companyName", "")
+            binding.txtRemarks.text = it.getString("status", "")
+            val req = it.getString("requestId", "")
+            if (req.isNotBlank()) binding.txtReportRef.text = "Ref: $req"
         }
     }
 
-    private fun startDownload() {
-        // Basic stub: show progress bar while downloading, then hide it.
-        // Replace this with your real download logic (WorkManager / Retrofit / OkHttp).
-        if (isDownloading) return
+    private fun fetchBookingAndPopulate() {
+        val args = arguments
+        val id = args?.getString("requestId") ?: args?.getString("bookingId") ?: ""
 
-        isDownloading = true
+        if (id.isBlank()) {
+            Toast.makeText(requireContext(), "No booking ID provided", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         binding.progressDownload.visibility = View.VISIBLE
-        binding.progressDownload.progress = 0
 
-        // Simulate progress quickly on UI thread (remove when using real downloader)
-        binding.progressDownload.postDelayed({
-            binding.progressDownload.progress = 100
-            binding.progressDownload.visibility = View.GONE
-            isDownloading = false
-            // after download, set txtFileName/txtFileSize to the actual downloaded file if needed
-        }, 1200)
+        db.collection("transport_bookings").document(id).get()
+            .addOnSuccessListener { doc ->
+                binding.progressDownload.visibility = View.GONE
+                val m = doc.data ?: return@addOnSuccessListener
+
+                binding.txtBookingId.text = (m["bookingId"] as? String) ?: doc.id
+                binding.txtReportRef.text = "Ref: ${(m["bookingId"] as? String) ?: doc.id}"
+
+                val providerName = (m["serviceProviderCompany"] as? String)?.let { comp ->
+                    val pname = (m["serviceProviderName"] as? String).orEmpty()
+                    if (pname.isBlank()) comp else "$comp - $pname"
+                } ?: (m["serviceProviderName"] as? String) ?: ""
+                binding.txtProviderName.text = providerName
+                binding.txtProviderContact.text = (m["providerContact"] as? String) ?: ""
+
+                val bookingTs = (m["bookingDate"] as? Timestamp) ?: (m["dateBooked"] as? Timestamp)
+                val completedTs =
+                    (m["completedAt"] as? Timestamp)
+                        ?: (m["assignedAt"] as? Timestamp)
+                        ?: bookingTs
+
+                binding.txtBookingDate.text = bookingTs?.toDate()?.let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it)
+                } ?: ""
+
+                binding.txtCompletionDate.text = completedTs?.toDate()?.let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it)
+                } ?: ""
+
+
+
+
+                binding.txtQuantity.text = (m["quantity"] as? String) ?: ""
+                binding.txtPackaging.text = (m["packaging"] as? String) ?: ""
+                binding.txtRemarks.text =
+                    (m["specialInstructions"] as? String)
+                        ?: (m["notes"] as? String)
+                                ?: binding.txtRemarks.text
+
+                val attachments = mutableListOf<String>()
+                (m["collectionProof"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+                (m["finalReportUrl"] as? String)?.let { attachments.add(it) }
+                (m["transportPlanUrl"] as? String)?.let { attachments.add(it) }
+                (m["storagePermitUrl"] as? String)?.let { attachments.add(it) }
+                (m["attachments"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+
+                if (attachments.isEmpty()) attachments.add(DEV_FALLBACK)
+
+                currentAttachmentUrl = attachments.firstOrNull()
+                currentFileName = extractFileNameFromUrl(currentAttachmentUrl ?: "")
+
+                binding.txtFileName.text = currentFileName
+                binding.txtFileSize.text = ""
+
+                if (isImageUrl(currentAttachmentUrl)) {
+                    Glide.with(this).load(currentAttachmentUrl).into(binding.imgFileIcon)
+                } else {
+                    binding.imgFileIcon.setImageResource(R.drawable.ic_pdf)
+                }
+            }
+            .addOnFailureListener {
+                binding.progressDownload.visibility = View.GONE
+                Toast.makeText(requireContext(), "Failed loading report", Toast.LENGTH_SHORT).show()
+            }
     }
 
-    private fun shareReport() {
-        // If you already downloaded the file and have a File reference, share via FileProvider.
-        // This is an example that assumes you have a file in app's cache directory named "Completion_Report.pdf".
-        // Replace with your actual file path.
+    private fun extractFileNameFromUrl(url: String): String {
+        if (url.isBlank()) return "attachment"
+        return url.substringAfterLast("/").substringBefore("?")
+    }
 
-        // first check if file exists; if not, show share of a link or simple text
-        val cachedFile = File(requireContext().cacheDir, "Completion_Report.pdf")
-        if (cachedFile.exists()) {
-            val uri: Uri = FileProvider.getUriForFile(
-                requireContext(),
-                "${requireContext().packageName}.fileprovider",
-                cachedFile
-            )
+    private fun isImageUrl(url: String?): Boolean {
+        if (url == null) return false
+        val u = url.lowercase()
+        return u.endsWith(".jpg") || u.endsWith(".png") || u.contains("image")
+    }
 
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "application/pdf"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startActivity(Intent.createChooser(shareIntent, "Share report"))
-        } else {
-            // fallback: share a simple text message
-            val textIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, "Service report for ${binding.txtCompanyName.text}")
-            }
-            startActivity(Intent.createChooser(textIntent, "Share report"))
+    private fun onDownloadClicked() {
+        val url = currentAttachmentUrl ?: return
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (_: Exception) {}
+
+        try {
+            val dm = requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val req = DownloadManager.Request(Uri.parse(url))
+                .setTitle(currentFileName ?: "file")
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, currentFileName)
+
+            dm.enqueue(req)
+            Toast.makeText(requireContext(), "Downloading…", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 

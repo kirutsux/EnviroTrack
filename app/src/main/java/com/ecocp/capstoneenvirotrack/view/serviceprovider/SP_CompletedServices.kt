@@ -1,21 +1,28 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
 import android.os.Bundle
+import android.text.format.DateFormat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSpCompletedServicesBinding
 import com.ecocp.capstoneenvirotrack.model.ServiceRequest
 import com.ecocp.capstoneenvirotrack.view.serviceprovider.adapters.CompletedServiceAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
+import kotlin.Exception
+
+private const val TAG = "SP_CompletedServices"
 
 class SP_CompletedServices : Fragment() {
 
@@ -25,6 +32,15 @@ class SP_CompletedServices : Fragment() {
     private lateinit var adapter: CompletedServiceAdapter
     private val completedList = mutableListOf<ServiceRequest>()
 
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    // Configurable fallback image
+    private val DEV_FALLBACK = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png"
+
+    // Firestore listener handle so we can remove it
+    private var listener: ListenerRegistration? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,14 +49,13 @@ class SP_CompletedServices : Fragment() {
 
         setupRecyclerView()
         setupSwipeToRefresh()
-        loadCompletedDataAsync()
+        subscribeToCompletedServicesRealtime()
 
         return binding.root
     }
 
     private fun setupRecyclerView() {
         adapter = CompletedServiceAdapter(completedList) { selected ->
-            // prepare bundle for detail screen
             val bundle = Bundle().apply {
                 putString("companyName", selected.companyName)
                 putString("serviceTitle", selected.serviceTitle)
@@ -48,16 +63,9 @@ class SP_CompletedServices : Fragment() {
                 putString("compliance", selected.compliance)
                 putString("clientName", selected.clientName)
                 putString("requestId", selected.id)
+                putString("finalReportUrl", selected.finalReportUrl ?: "")
             }
-
-            // try to navigate using explicit action id if available, else navigate by destination id
-            try {
-                // prefer safe action id if you created it in nav graph:
-                findNavController().navigate(R.id.SP_ServiceReport, bundle)
-            } catch (ex: IllegalArgumentException) {
-                // fallback to using fragment id as you had before (works if that id exists)
-                findNavController().navigate(R.id.SP_ServiceReport, bundle)
-            }
+            findNavController().navigate(R.id.SP_ServiceReport, bundle)
         }
 
         binding.recyclerCompleted.layoutManager = LinearLayoutManager(requireContext())
@@ -65,120 +73,132 @@ class SP_CompletedServices : Fragment() {
     }
 
     private fun setupSwipeToRefresh() {
-        // If your layout doesn't have a SwipeRefreshLayout, add one in XML and change the id accordingly.
-        // Here we assume you added swipeRefresh inside the card as in the enhanced layout.
         binding.swipeRefresh.setOnRefreshListener {
-            // simulate refresh
-            loadCompletedDataAsync(refresh = true)
+            // force a single refresh by re-subscribing
+            subscribeToCompletedServicesRealtime(forceRefresh = true)
         }
     }
 
-    private fun loadCompletedDataAsync(refresh: Boolean = false) {
-        // show progress (optional)
+    /**
+     * Subscribe in realtime to bookings for current provider where wasteStatus == "Delivered".
+     * Logs results and updates adapter immediately.
+     */
+    private fun subscribeToCompletedServicesRealtime(forceRefresh: Boolean = false) {
         binding.progressLoading?.visibility = View.VISIBLE
         binding.txtEmptyState?.visibility = View.GONE
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            // simulate network / DB work on IO
-            val data = withContext(Dispatchers.IO) {
-                // simulate delay only when actually refreshing
-                if (refresh) delay(600)
-                // return the sample data (replace with real fetch)
-                buildSampleData()
-            }
-
-            // update UI on main thread
-            completedList.clear()
-            completedList.addAll(data)
-
-            // Prefer adapter.setData() if your adapter exposes it; otherwise notifyDataSetChanged
-            try {
-                val setDataMethod = adapter::class.java.getMethod("setData", List::class.java)
-                setDataMethod.invoke(adapter, data)
-            } catch (_: Exception) {
-                // fallback
-                adapter.notifyDataSetChanged()
-            }
-
-            binding.swipeRefresh.isRefreshing = false
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            // no user: show empty and return
+            Log.w(TAG, "No authenticated user found; completed list will remain empty.")
             binding.progressLoading?.visibility = View.GONE
-
-            binding.txtEmptyState.visibility = if (data.isEmpty()) View.VISIBLE else View.GONE
+            binding.txtEmptyState.visibility = View.VISIBLE
+            binding.swipeRefresh.isRefreshing = false
+            return
         }
+
+        // remove previous listener if forcing refresh or switching listeners
+        if (forceRefresh) {
+            listener?.remove()
+            listener = null
+        }
+
+        if (listener != null && !forceRefresh) {
+            Log.d(TAG, "Already listening for completed services.")
+            binding.progressLoading?.visibility = View.GONE
+            return
+        }
+
+        Log.d(TAG, "Subscribing to completed services for providerId=$uid")
+
+        val q: Query = db.collection("transport_bookings")
+            .whereEqualTo("providerId", uid)
+            .whereEqualTo("wasteStatus", "Delivered")
+            .orderBy("assignedAt", Query.Direction.DESCENDING)
+
+        listener = q.addSnapshotListener(EventListener { snapshot, error ->
+            if (error != null) {
+                Log.e(TAG, "Listener error: ${error.message}", error)
+                Toast.makeText(requireContext(), "Failed to load completed services.", Toast.LENGTH_SHORT).show()
+                binding.progressLoading?.visibility = View.GONE
+                binding.swipeRefresh.isRefreshing = false
+                return@EventListener
+            }
+
+            if (snapshot == null) {
+                Log.w(TAG, "Listener snapshot is null")
+                binding.progressLoading?.visibility = View.GONE
+                binding.swipeRefresh.isRefreshing = false
+                binding.txtEmptyState.visibility = View.VISIBLE
+                return@EventListener
+            }
+
+            Log.d(TAG, "Snapshot received: ${snapshot.size()} documents")
+            val list = snapshot.documents.mapNotNull { doc ->
+                try {
+                    val m = doc.data ?: return@mapNotNull null
+
+                    val completedTs = (m["completedAt"] as? Timestamp)
+                        ?: (m["updatedAt"] as? Timestamp)
+                        ?: (m["assignedAt"] as? Timestamp)
+                        ?: (m["dateBooked"] as? Timestamp)
+
+                    val displayDate = completedTs?.toDate()?.let {
+                        DateFormat.format("MMM dd, yyyy hh:mm a", it).toString()
+                    } ?: ""
+
+                    val attachments = mutableListOf<String>()
+                    (m["collectionProof"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+                    (m["finalReportUrl"] as? String)?.takeIf { it.isNotBlank() }?.let { attachments.add(it) }
+                    (m["transportPlanUrl"] as? String)?.takeIf { it.isNotBlank() }?.let { attachments.add(it) }
+                    (m["storagePermitUrl"] as? String)?.takeIf { it.isNotBlank() }?.let { attachments.add(it) }
+                    (m["attachments"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+
+                    if (attachments.isEmpty()) attachments.add(DEV_FALLBACK)
+
+                    ServiceRequest(
+                        id = doc.id,
+                        bookingId = (m["bookingId"] as? String) ?: doc.id,
+                        clientName = (m["pcoId"] as? String) ?: "",
+                        companyName = (m["serviceProviderCompany"] as? String) ?: (m["companyName"] as? String) ?: "",
+                        providerName = (m["serviceProviderName"] as? String) ?: "",
+                        providerContact = (m["providerContact"] as? String) ?: "",
+                        serviceTitle = if (((m["wasteType"] as? String) ?: "").isNotBlank()) "Transport - ${m["wasteType"]}" else "Transport Booking",
+                        bookingStatus = (m["bookingStatus"] as? String) ?: "Delivered",
+                        origin = (m["origin"] as? String) ?: "",
+                        destination = (m["destination"] as? String) ?: "",
+                        dateRequested = displayDate,
+                        dateBooked = completedTs,
+                        wasteType = (m["wasteType"] as? String) ?: "",
+                        quantity = (m["quantity"] as? String) ?: "",
+                        packaging = (m["packaging"] as? String) ?: "",
+                        notes = (m["specialInstructions"] as? String) ?: (m["notes"] as? String) ?: "",
+                        compliance = "Delivered",
+                        attachments = attachments,
+                        imageUrl = attachments.firstOrNull() ?: DEV_FALLBACK,
+                        finalReportUrl = (m["finalReportUrl"] as? String)
+                    )
+                } catch (ex: Exception) {
+                    Log.e(TAG, "Error mapping doc ${doc.id}: ${ex.message}", ex)
+                    null
+                }
+            }
+
+            // update UI
+            completedList.clear()
+            completedList.addAll(list)
+            adapter.setData(list)
+
+            Log.d(TAG, "UI updated — items: ${list.size}")
+            binding.progressLoading?.visibility = View.GONE
+            binding.swipeRefresh.isRefreshing = false
+            binding.txtEmptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+        })
     }
-
-    private fun buildSampleData(): List<ServiceRequest> {
-        val devPath = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png"
-
-        return listOf(
-            ServiceRequest(
-                id = "1",
-                bookingId = null,
-                clientName = "Client A",
-                companyName = "Dunkin Donuts",
-                providerName = "Dunkin Provider",
-                providerContact = "(0917) 111-2222",
-                serviceTitle = "Waste Disposal for Dunkin",
-                bookingStatus = "Completed",
-                origin = "Mandaue City",
-                destination = "TSD Facility - Demo",
-                dateRequested = "Feb 01, 2025",
-                wasteType = "B201 - Sulfuric acid",
-                quantity = "150 liters",
-                packaging = "Sealed drums",
-                notes = "Pickup completed. Signed by client.",
-                compliance = "In Compliance",
-                attachments = listOf(devPath),
-                imageUrl = devPath
-            ),
-
-            ServiceRequest(
-                id = "2",
-                bookingId = null,
-                clientName = "Client B",
-                companyName = "McDonald's",
-                providerName = "McProvider",
-                providerContact = "(0917) 333-4444",
-                serviceTitle = "Oil Collection for McDonald's",
-                bookingStatus = "Completed",
-                origin = "Cebu City",
-                destination = "TSD Facility - Demo",
-                dateRequested = "Feb 05, 2025",
-                wasteType = "Used Cooking Oil",
-                quantity = "200 liters",
-                packaging = "IBC Tanks",
-                notes = "Collected and transferred to TSD.",
-                compliance = "In Compliance",
-                attachments = listOf(devPath),
-                imageUrl = devPath
-            ),
-
-            ServiceRequest(
-                id = "3",
-                bookingId = null,
-                clientName = "Client C",
-                companyName = "Jollibee Foods Corp",
-                providerName = "Jollibee Provider",
-                providerContact = "(0917) 555-6666",
-                serviceTitle = "Waste Audit for Jollibee",
-                bookingStatus = "Completed",
-                origin = "Lapu-Lapu City",
-                destination = "TSD Facility - Demo",
-                dateRequested = "Feb 10, 2025",
-                wasteType = "Kitchen Waste",
-                quantity = "300 kg",
-                packaging = "Plastic bins",
-                notes = "Audit completed and report uploaded.",
-                compliance = "In Compliance",
-                attachments = listOf(devPath),
-                imageUrl = devPath
-            )
-        )
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
+        listener?.remove()
         _binding = null
     }
 }

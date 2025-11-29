@@ -438,7 +438,7 @@ class TransporterStep2Fragment : Fragment() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val url = URL("http://10.0.2.2:8080/create-payment-intent")
+                val url = URL("http://10.0.2.2:3000/create-payment-intent")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")

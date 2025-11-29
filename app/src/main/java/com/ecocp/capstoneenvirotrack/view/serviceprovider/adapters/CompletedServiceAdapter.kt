@@ -8,7 +8,7 @@ import com.ecocp.capstoneenvirotrack.databinding.ItemCompletedServiceBinding
 import com.ecocp.capstoneenvirotrack.model.ServiceRequest
 
 class CompletedServiceAdapter(
-    private val completedList: List<ServiceRequest>,
+    private val completedList: MutableList<ServiceRequest>,
     private val onViewReportClick: (ServiceRequest) -> Unit
 ) : RecyclerView.Adapter<CompletedServiceAdapter.ViewHolder>() {
 
@@ -24,7 +24,6 @@ class CompletedServiceAdapter(
         return ViewHolder(binding)
     }
 
-
     override fun getItemCount(): Int = completedList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -32,7 +31,7 @@ class CompletedServiceAdapter(
         holder.binding.apply {
             txtServiceTitle.text = service.serviceTitle
             txtCompanyName.text = service.companyName
-            txtDateCompleted.text = "Completed: Feb 10, 2025"
+            txtDateCompleted.text = service.dateRequested ?: "Completed"
 
             Glide.with(imgClient.context)
                 .load(service.imageUrl.ifEmpty { "https://i.pravatar.cc/150?img=5" })
@@ -43,5 +42,12 @@ class CompletedServiceAdapter(
                 onViewReportClick(service)
             }
         }
+    }
+
+    /** Replace adapter data cleanly */
+    fun setData(newList: List<ServiceRequest>) {
+        completedList.clear()
+        completedList.addAll(newList)
+        notifyDataSetChanged()
     }
 }
