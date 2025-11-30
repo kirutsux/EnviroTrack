@@ -3,10 +3,12 @@ package com.ecocp.capstoneenvirotrack.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.ecocp.capstoneenvirotrack.api.OpenAiClient
-import com.ecocp.capstoneenvirotrack.model.*
-import kotlinx.coroutines.launch
+import com.ecocp.capstoneenvirotrack.model.AirPollution
+import com.ecocp.capstoneenvirotrack.model.GeneralInfo
+import com.ecocp.capstoneenvirotrack.model.HazardousWaste
+import com.ecocp.capstoneenvirotrack.model.Others
+import com.ecocp.capstoneenvirotrack.model.Smr
+import com.ecocp.capstoneenvirotrack.model.WaterPollution
 
 class SmrViewModel : ViewModel() {
 
@@ -155,40 +157,5 @@ class SmrViewModel : ViewModel() {
         )
         val filled = fields.count { !it.isNullOrEmpty() }
         return (filled.toFloat() / fields.size * 100).toInt()
-    }
-
-    private val _aiAnalysis = MutableLiveData<String>()
-    val aiAnalysis: LiveData<String> get() = _aiAnalysis
-
-    fun analyzeSummary(summaryText: String) {
-        viewModelScope.launch {
-            val request = ChatRequest(
-                model = "gpt-3.5-turbo",
-                messages = listOf(
-                    ApiMessage(
-                        role = "system",
-                        content = "You are an environmental compliance AI. Analyze SMR summaries."
-                    ),
-                    ApiMessage(
-                        role = "user",
-                        content = "Analyze the following SMR summary:\n$summaryText"
-                    )
-                )
-            )
-            try {
-                val response = OpenAiClient.instance.getChatCompletion(request)
-
-                val content = response
-                    .choices
-                    .firstOrNull()
-                    ?.message
-                    ?.content
-                    ?: "No analysis was generated."
-
-                _analysis.value = content
-            } catch (e: Exception) {
-                _analysis.value = "Analysis failed: ${e.message}"
-            }
-        }
     }
 }

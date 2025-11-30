@@ -37,18 +37,18 @@ class SmrSummaryFragment : Fragment() {
 
         displaySmrData()
 
-        val fullSummary = buildFullSmrSummary()
-        smrViewModel.analyzeSummary(fullSummary)
+//        val fullSummary = buildFullSmrSummary()
+//        smrViewModel.analyzeSummary(fullSummary)
 
         binding.btnSubmitSmr.setOnClickListener {
             submitSmrToFirebase()
         }
 
-        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
-            binding.module6Container.tvAiAnalysis.text = analysis?: "No AI analysis provided."
-        }
+//        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
+//            binding.module6Container.tvAiAnalysis.text = analysis?: "No AI analysis provided."
+//        }
 
-        observeAiAnalysis()
+//        observeAiAnalysis()
     }
 
     /** --- DISPLAY SUMMARY DATA --- **/
@@ -104,12 +104,12 @@ class SmrSummaryFragment : Fragment() {
             """.trimIndent()
     }
 
-    private fun observeAiAnalysis(){
-        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
-            binding.module6Container.tvAiAnalysis.text =
-                analysis ?: "No AI analysis provided."
-        }
-    }
+//    private fun observeAiAnalysis(){
+//        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
+//            binding.module6Container.tvAiAnalysis.text =
+//                analysis ?: "No AI analysis provided."
+//        }
+//    }
 
     // Extension functions for generating module text
     private fun GeneralInfo.generalInfoText() = """
