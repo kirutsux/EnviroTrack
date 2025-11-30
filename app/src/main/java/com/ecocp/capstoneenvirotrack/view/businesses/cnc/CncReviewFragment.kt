@@ -36,8 +36,19 @@ class CncReviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         fetchCncDetails()
 
+        // ✅ Edit CNC Info
         binding.btnCncEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.cncFormFragment, false)
+            if (currentDocId != null) {
+                val bundle = Bundle().apply {
+                    putString("applicationId", currentDocId)
+                }
+                findNavController().navigate(
+                    R.id.action_cncReviewFragment_to_cncEditInfoFragment,
+                    bundle
+                )
+            } else {
+                Toast.makeText(requireContext(), "No CNC data available to edit.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.btnCncSubmitApplication.setOnClickListener {
@@ -168,7 +179,14 @@ class CncReviewFragment : Fragment() {
                         }
                     }
 
-                findNavController().navigate(R.id.cncDashboardFragment)
+                // ✅ Navigate to CNC Dashboard and clear back stack
+                findNavController().navigate(
+                    R.id.cncDashboardFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.cncDashboardFragment, true)
+                        .build()
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit CNC application.", Toast.LENGTH_SHORT).show()

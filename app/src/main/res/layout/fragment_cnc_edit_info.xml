@@ -33,27 +33,29 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Permit to Operate (PTO) — Application"
+                android:text="Certificate of Non-Coverage (CNC) Application"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="@android:color/white"
                 android:gravity="center"
+
                 android:padding="10dp" />
         </LinearLayout>
 
+        <!-- Subheader -->
         <TextView
             android:id="@+id/subHeader"
-            android:text="Please fill out all required fields accurately before submitting your application."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Please fill out all required fields accurately before submitting your CNC application."
             android:textSize="14sp"
             android:textColor="#555"
             android:background="@drawable/text_border"
             android:padding="10dp"
-            android:layout_marginBottom="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_marginBottom="20dp" />
 
         <TextView
-            android:text="A. General Information"
+            android:text="A. Basic Information"
             android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="#445B6C"
@@ -63,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- A. General Information -->
+        <!-- A. Basic Information -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -73,8 +75,18 @@
             android:layout_marginBottom="12dp">
 
             <EditText
-                android:id="@+id/inputOwnerName"
-                android:hint="Name of Owner"
+                android:id="@+id/inputCompanyName"
+                android:hint="Company Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+
+            <EditText
+                android:id="@+id/inputBusinessName"
+                android:hint="Business/Establishment Name"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
@@ -82,67 +94,8 @@
                 android:layout_marginBottom="10dp" />
 
             <EditText
-                android:id="@+id/inputEstablishmentName"
-                android:hint="Name of Establishment"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
-
-            <EditText
-                android:id="@+id/inputMailingAddress"
-                android:hint="Mailing Address"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
-
-            <EditText
-                android:id="@+id/inputPlantAddress"
-                android:hint="Plant Address"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
-        </LinearLayout>
-
-        <TextView
-            android:text="B. Company Information"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#445B6C"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/text_border_green"
-            android:padding="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- B. Company Information -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp">
-
-
-            <EditText
-                android:id="@+id/inputTin"
-                android:hint="TIN"
-                android:inputType="number"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
-
-            <EditText
-                android:id="@+id/inputOwnershipType"
-                android:hint="Nature of Ownership (e.g. Corporation)"
+                android:id="@+id/inputProjectTitle"
+                android:hint="Project Title"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
@@ -159,8 +112,38 @@
                 android:layout_marginBottom="10dp" />
 
             <EditText
+                android:id="@+id/inputProjectLocation"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:hint="Project Location (Address, Barangay, Municipality/City, Province)"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/email"
+                android:minHeight="48dp"
+                android:hint="Email Address"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputManagingHead"
+                android:layout_height="48dp"
+                android:hint="Managing Head Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
                 android:id="@+id/inputPcoName"
-                android:hint="PCO Name"
+                android:hint="Pollution Control Officer Name"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
@@ -169,26 +152,53 @@
 
             <EditText
                 android:id="@+id/inputPcoAccreditation"
+                android:layout_height="48dp"
                 android:hint="PCO Accreditation No."
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputDateEstablished"
+                android:layout_height="48dp"
+                android:hint="Date of Establishment"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputEmployees"
+                android:layout_height="48dp"
+                android:hint="Number of Employees"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputPsicCode"
+                android:layout_height="48dp"
+                android:hint="PSIC Code / Industry Classification"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
                 android:layout_marginBottom="10dp" />
         </LinearLayout>
 
         <TextView
-            android:text="C. Operational Information"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="B. Project Description"
             android:textStyle="bold"
             android:textSize="16sp"
             android:textColor="#445B6C"
             android:layout_marginBottom="8dp"
             android:background="@drawable/text_border_green"
-            android:padding="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:padding="8dp" />
 
-        <!-- C. Operational Information -->
+        <!-- B. Project Description -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -197,88 +207,94 @@
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
-
             <EditText
-                android:id="@+id/inputOperatingHours"
-                android:hint="Operating Hours (e.g. 8 hrs/day)"
+                android:id="@+id/inputProjectType"
+                android:layout_height="48dp"
+                android:hint="Project Type (e.g., Manufacturing, Retail, Service)"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp" />
 
             <EditText
-                android:id="@+id/inputTotalEmployees"
-                android:hint="Total Employees"
-                android:inputType="number"
+                android:id="@+id/inputProjectScale"
+                android:layout_height="48dp"
+                android:hint="Project Size/Scale (Small, Medium, Large)"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp" />
 
             <EditText
-                android:id="@+id/inputLandArea"
-                android:hint="Land Area (m²)"
+                android:id="@+id/inputProjectCost"
+                android:layout_height="48dp"
+                android:hint="Project Cost / Capital Investment (₱)"
                 android:inputType="numberDecimal"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp" />
-        </LinearLayout>
-
-        <TextView
-            android:text="D. Equipment / Emissions"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#445B6C"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/text_border_green"
-            android:padding="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- D. Equipment / Emissions -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp">
-
 
             <EditText
-                android:id="@+id/inputEquipmentName"
-                android:hint="Equipment Name (e.g. Generator Set)"
+                android:id="@+id/inputLandArea"
+                android:layout_height="48dp"
+                android:hint="Land Area (sq. meters or hectares)"
+                android:inputType="numberDecimal"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp" />
 
             <EditText
-                android:id="@+id/inputFuelType"
-                android:hint="Type of Fuel (e.g. Diesel)"
+                android:id="@+id/inputRawMaterials"
+                android:layout_height="48dp"
+                android:hint="Raw Materials Used"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp" />
 
             <EditText
-                android:id="@+id/inputEmissions"
-                android:hint="Brief summary (e.g. NOx, SOx, PM...)"
+                android:id="@+id/inputProductionCapacity"
+                android:layout_height="48dp"
+                android:hint="Production Capacity"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputUtilitiesUsed"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Utilities Used (Water, Power, Fuel, etc.)"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputWasteGenerated"
                 android:layout_width="match_parent"
                 android:layout_height="72dp"
+                android:hint="Waste Generated (solid, liquid, hazardous)"
                 android:inputType="textMultiLine"
                 android:background="@drawable/text_border"
                 android:padding="10dp"
                 android:layout_marginBottom="10dp" />
         </LinearLayout>
 
-        <!-- E. Supporting Documents -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="C. Location and Environmental Setting"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp" />
+
+        <!-- C. Location and Environmental Setting -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -287,50 +303,59 @@
             android:padding="12dp"
             android:layout_marginBottom="12dp">
 
-            <TextView
-                android:text="E. Supporting Documents"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#445B6C"
-                android:background="@drawable/text_border_green"
-                android:padding="8dp"
+            <EditText
+                android:id="@+id/inputCoordinates"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="48dp"
+                android:hint="Coordinates (Latitude, Longitude)"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
 
-            <TextView
-                android:id="@+id/fileHintText"
-                android:text="Upload required documents (PDF/Image format)."
-                android:textSize="13sp"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="6dp"
+            <EditText
+                android:id="@+id/inputNearbyWaters"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="48dp"
+                android:hint="Nearby Bodies of Water"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
 
-            <Button
-                android:id="@+id/btnUploadFile"
-                android:text="Upload File(s)"
+            <EditText
+                android:id="@+id/inputResidentialProximity"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_height="48dp"
+                android:hint="Proximity to Residential Areas"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
 
-            <TextView
-                android:id="@+id/txtFileName"
-                android:text="No files selected"
-                android:textStyle="italic"
-                android:textColor="#FFFFFF"
-                android:layout_marginTop="8dp"
+            <EditText
+                android:id="@+id/inputEnvFeatures"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="72dp"
+                android:hint="Environmental Features Nearby (forest, agricultural land, protected areas)"
+                android:inputType="textMultiLine"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputZoning"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Zoning Classification"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp" />
         </LinearLayout>
 
-        <!-- Submit Button -->
         <Button
-            android:id="@+id/btnSubmitPto"
-            android:text="Save and Continue to Review"
+            android:id="@+id/btnReview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#FFF"
-            android:enabled="false" />
-
+            android:text="Submit and go to Review "
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#445B6C" />
     </LinearLayout>
 </ScrollView>

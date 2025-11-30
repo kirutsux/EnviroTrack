@@ -38,12 +38,24 @@ class DischargePermitReviewFragment : Fragment() {
         fetchPermitDetails()
 
         binding.btnEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.dischargePermitFormFragment, false)
+            if (currentDocId != null) {
+                val bundle = Bundle().apply {
+                    putString("documentId", currentDocId) // Pass the document ID
+                }
+                findNavController().navigate(
+                    R.id.action_dischargePermitReviewFragment_to_dischargePermitEditInfoFragment,
+                    bundle
+                )
+            } else {
+                Toast.makeText(requireContext(), "No application found to edit.", Toast.LENGTH_SHORT).show()
+            }
         }
+
 
         binding.btnSubmitApplication.setOnClickListener {
             submitApplication()
         }
+
     }
 
     private fun fetchPermitDetails() {
@@ -66,14 +78,18 @@ class DischargePermitReviewFragment : Fragment() {
                 val doc = result.documents.first()
                 currentDocId = doc.id
 
-                // --- Fetch main permit info ---
+                // --- Fetch all permit info ---
                 val companyName = doc.getString("companyName") ?: "-"
                 val companyAddress = doc.getString("companyAddress") ?: "-"
                 val pcoName = doc.getString("pcoName") ?: "-"
                 val pcoAccreditationNumber = doc.getString("pcoAccreditation") ?: "-"
+                val contactNumber = doc.getString("contactNumber") ?: "-"
+                val email = doc.getString("email") ?: "-"
                 val receivingBody = doc.getString("bodyOfWater") ?: "-"
+                val sourceWastewater = doc.getString("sourceWastewater") ?: "-"
                 val dischargeVolume = doc.getString("volume") ?: "-"
                 val dischargeMethod = doc.getString("treatmentMethod") ?: "-"
+                val operationStartDate = doc.getString("operationStartDate") ?: "-"
                 val uploadedFiles = doc.getString("fileLinks") ?: "No files uploaded"
                 val status = doc.getString("status") ?: "Pending"
 
@@ -84,17 +100,19 @@ class DischargePermitReviewFragment : Fragment() {
                 val paymentStatus = doc.getString("paymentStatus") ?: "Pending"
                 val paymentTimestamp = doc.getTimestamp("paymentTimestamp")
 
-                // Format timestamp nicely if available
                 val formattedDate = paymentTimestamp?.toDate()?.let {
                     SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(it)
                 } ?: "-"
 
                 // --- Update UI ---
                 binding.txtCompanyReview.text =
-                    "$companyName\n$companyAddress\nPCO: $pcoName ($pcoAccreditationNumber)"
+                    "$companyName\n$companyAddress\nPCO: $pcoName ($pcoAccreditationNumber)\n" +
+                            "Contact: $contactNumber\nEmail: $email"
 
                 binding.txtDischargeReview.text =
-                    "Receiving Body: $receivingBody\nVolume: $dischargeVolume\nTreatment: $dischargeMethod"
+                    "Receiving Body: $receivingBody\nSource Wastewater: $sourceWastewater\n" +
+                            "Volume: $dischargeVolume\nTreatment: $dischargeMethod\n" +
+                            "Operation Start Date: $operationStartDate"
 
                 // --- Payment Display ---
                 val paymentDisplay = if (paymentStatus.equals("Paid", ignoreCase = true)) {
@@ -102,11 +120,7 @@ class DischargePermitReviewFragment : Fragment() {
                 } else {
                     "❌ Payment Pending"
                 }
-
                 binding.txtPaymentReview.text = paymentDisplay
-
-                // --- Status Display (optional) ---
-//                binding.txtStatusReview.text = "Status: $status"
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to fetch data.", Toast.LENGTH_SHORT).show()
@@ -162,7 +176,14 @@ class DischargePermitReviewFragment : Fragment() {
                     }
 
 
-                findNavController().navigate(R.id.opmsDashboardFragment)
+                // ✅ Navigate to OPMS Dashboard and clear back stack
+                findNavController().navigate(
+                    R.id.opmsDashboardFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.opmsDashboardFragment, true)
+                        .build()
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()

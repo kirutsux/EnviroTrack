@@ -49,6 +49,9 @@
         <action
             android:id="@+id/action_form_to_ptoPayment"
             app:destination="@id/ptoPaymentFragment" />
+        <action
+            android:id="@+id/action_form_to_ptoReview"
+            app:destination="@id/ptoReviewFragment" />
     </fragment>
 
     <!-- ✅ PTO Payment -->
@@ -73,7 +76,21 @@
         android:id="@+id/ptoReviewFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.PtoReviewFragment"
         android:label="Review and Submit"
-        tools:layout="@layout/fragment_pto_review" />
+        tools:layout="@layout/fragment_pto_review" >
+        <action
+            android:id="@+id/action_ptoReviewFragment_to_ptoEditInfoFragment"
+            app:destination="@id/ptoEditInfoFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ptoEditInfoFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.PtoEditInfoFragment"
+        android:label="Edit info"
+        tools:layout="@layout/fragment_pto_edit_info" >
+    <action
+        android:id="@+id/action_ptoEditInfoFragment_to_ptoReviewFragment"
+        app:destination="@id/ptoReviewFragment" />
+</fragment>
 
     <!-- Existing Discharge Permit stuff... -->
     <fragment
@@ -84,6 +101,9 @@
         <action
             android:id="@+id/action_application_to_payment"
             app:destination="@id/dischargePermitPaymentFragment" />
+        <action
+            android:id="@+id/action_application_to_review"
+            app:destination="@id/dischargePermitReviewFragment" />
     </fragment>
 
     <fragment
@@ -100,11 +120,32 @@
         android:id="@+id/dischargePermitReviewFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitReviewFragment"
         android:label="Review and Submit"
-        tools:layout="@layout/fragment_discharge_permit_review" />
+        tools:layout="@layout/fragment_discharge_permit_review" >
+    <action
+        android:id="@+id/action_dischargePermitReviewFragment_to_dischargePermitEditInfoFragment"
+        app:destination="@id/DischargePermitEditInfoFragment" />
+</fragment>
+
+
+    <fragment
+        android:id="@+id/DischargePermitEditInfoFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitEditInfoFragment"
+        android:label="Edit Info"
+        tools:layout="@layout/fragment_discharge_permit_edit_info" >
+    <action
+        android:id="@+id/action_edit_to_review"
+        app:destination="@id/dischargePermitReviewFragment" />
+</fragment>
 
     <fragment
         android:id="@+id/dischargePermitDetailsFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.DischargePermitDetailsFragment"
         android:label="Discharge Permit Details"
         tools:layout="@layout/fragment_discharge_permit_details" />
+
+    <fragment
+        android:id="@+id/COMP_Dashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Dashboard"
+        android:label="PCO Dasgboard"
+        tools:layout="@layout/pco_dashboard" />
 </navigation>

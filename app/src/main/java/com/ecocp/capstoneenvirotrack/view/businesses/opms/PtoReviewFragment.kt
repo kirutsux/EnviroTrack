@@ -37,12 +37,23 @@ class PtoReviewFragment : Fragment() {
         fetchPtoDetails()
 
         binding.btnEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.ptoFormFragment, false)
+            if (currentDocId != null) {
+                val bundle = Bundle().apply {
+                    putString("applicationId", currentDocId) // Pass the document ID only
+                }
+                findNavController().navigate(
+                    R.id.action_ptoReviewFragment_to_ptoEditInfoFragment,
+                    bundle
+                )
+            } else {
+                Toast.makeText(requireContext(), "No application found to edit.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.btnSubmitApplication.setOnClickListener {
             submitApplication()
         }
+
     }
 
     private fun fetchPtoDetails() {
@@ -84,7 +95,7 @@ class PtoReviewFragment : Fragment() {
                 // --- Equipment Info ---
                 val equipmentName = doc.getString("equipmentName") ?: "-"
                 val fuelType = doc.getString("fuelType") ?: "-"
-                val emissions = doc.getString("emissions") ?: "-"
+                val emissions = doc.getString("emissionsSummary") ?: "-"
 
                 // --- Payment Info ---
                 val amount = doc.getDouble("amount") ?: 0.0
@@ -158,7 +169,14 @@ class PtoReviewFragment : Fragment() {
                         }
                     }
 
-                findNavController().navigate(R.id.opmsDashboardFragment)
+                // ✅ Navigate to OPMS Dashboard and clear back stack
+                findNavController().navigate(
+                    R.id.opmsDashboardFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.opmsDashboardFragment, true)
+                        .build()
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()

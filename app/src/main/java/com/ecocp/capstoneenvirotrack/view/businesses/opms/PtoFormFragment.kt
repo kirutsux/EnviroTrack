@@ -72,27 +72,72 @@ class PtoFormFragment : Fragment() {
     }
 
     private fun checkPendingPto() {
-        val uid = auth.currentUser?.uid ?: return
+        val userUid = auth.currentUser?.uid ?: return
+
         firestore.collection("opms_pto_applications")
-            .whereEqualTo("uid", uid)
-            .whereEqualTo("status", "Pending")
+            .whereEqualTo("uid", userUid)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .limit(1)
             .get()
-            .addOnSuccessListener { snap ->
-                if (!snap.isEmpty) {
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("Pending PTO Found")
-                        .setMessage("You already have a pending PTO application. Resume to review/payment?")
-                        .setPositiveButton("Yes") { _, _ ->
-                            val doc = snap.documents.first()
-                            val bundle = Bundle().apply { putString("applicationId", doc.id) }
-                            findNavController().navigate(R.id.action_form_to_ptoPayment, bundle)
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val doc = querySnapshot.documents.first()
+                    val status = doc.getString("status") ?: "Pending"
+                    val paymentStatus = doc.getString("paymentStatus") ?: "Pending"
+                    val submittedTimestamp = doc.getTimestamp("submittedTimestamp") // null if not submitted
+                    val formData = doc.data ?: emptyMap<String, Any>()
+
+                    when {
+                        // Pending & payment not done → continue to payment
+                        status.equals("Pending", true) && paymentStatus.equals("Pending", true) -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Pending PTO Found")
+                                .setMessage("You have a pending PTO application. Do you want to continue to payment?")
+                                .setPositiveButton("Yes") { _, _ ->
+                                    val bundle = Bundle().apply {
+                                        putString("applicationId", doc.id)
+                                        putString("ownerName", formData["ownerName"] as? String)
+                                        putString("establishmentName", formData["establishmentName"] as? String)
+                                        putString("pcoName", formData["pcoName"] as? String)
+                                        putString("pcoAccreditationNumber", formData["pcoAccreditation"] as? String)
+                                        putString("paymentInfo", "₱1,500 - Pending")
+                                    }
+                                    findNavController().navigate(R.id.action_form_to_ptoPayment, bundle)
+                                }
+                                .setNegativeButton("No", null)
+                                .show()
                         }
-                        .setNegativeButton("No", null)
-                        .show()
+
+                        // Pending & paid & NOT submitted → continue to review
+                        status.equals("Pending", true) && paymentStatus.equals("Paid", true) && submittedTimestamp == null -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Paid PTO Found")
+                                .setMessage("You have already paid for this PTO application. Do you want to continue to review your application?")
+                                .setPositiveButton("Yes") { _, _ ->
+                                    val bundle = Bundle().apply {
+                                        putString("applicationId", doc.id)
+                                        putString("ownerName", formData["ownerName"] as? String)
+                                        putString("establishmentName", formData["establishmentName"] as? String)
+                                        putString("pcoName", formData["pcoName"] as? String)
+                                        putString("pcoAccreditationNumber", formData["pcoAccreditation"] as? String)
+                                        putString("paymentInfo", "₱1,500 - Paid")
+                                    }
+                                    findNavController().navigate(R.id.action_form_to_ptoReview, bundle)
+                                }
+                                .setNegativeButton("No", null)
+                                .show()
+                        }
+
+                        // Already submitted or other statuses → do nothing
+                        else -> { /* No dialog, user waits for EMB review or can submit a new application */ }
+                    }
                 }
             }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to check previous PTO application.", Toast.LENGTH_SHORT).show()
+            }
     }
+
 
     private fun validateAndSave() {
         val formData = mapOf(
