@@ -121,8 +121,8 @@ class COMP_Dashboard : Fragment() {
     private fun setupNavigationView() {
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_modules -> {
-                    findNavController().navigate(R.id.action_pcoDashboard_to_modulesFragment)
+                R.id.nav_checklist -> {
+                    findNavController().navigate(R.id.action_pcoDashboard_to_checklistFragment)
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }

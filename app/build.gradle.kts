@@ -109,9 +109,13 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
-
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    //completed
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+
 
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")

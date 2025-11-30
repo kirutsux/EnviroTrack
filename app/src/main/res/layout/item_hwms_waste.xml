@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvCompanyName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Company Name"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#1E1E1E" />
+
+        <!-- EMB Reg No -->
+        <TextView
+            android:id="@+id/tvEmbNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EMB Reg No: 12345"
+            android:layout_marginTop="4dp"
+            android:textColor="#555555" />
+
+        <!-- List of Wastes -->
+        <LinearLayout
+            android:id="@+id/containerWasteList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp" />
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: Draft"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:textColor="#0066CC" />
+
+        <!-- Timestamp -->
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submitted: November 27, 2025"
+            android:layout_marginTop="4dp"
+            android:textColor="#777777" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

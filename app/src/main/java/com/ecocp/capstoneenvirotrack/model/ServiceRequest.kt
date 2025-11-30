@@ -35,5 +35,6 @@ data class ServiceRequest(
 
     // Attachments / image
     val attachments: List<String>? = null, // list of file urls or local paths
-    val imageUrl: String = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png" // logo / preview (dev path)
+    val imageUrl: String = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png", // logo / preview (dev path)
+    val finalReportUrl: String? = null   // <- added
 )
