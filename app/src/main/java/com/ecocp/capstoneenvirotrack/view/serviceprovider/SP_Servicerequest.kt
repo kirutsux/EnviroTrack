@@ -38,69 +38,9 @@ class SP_Servicerequest : Fragment() {
 
         setupRecyclerView()
         setupSortingSpinner()
-
-        // ====== TEMP DEBUG CALLS - remove after testing ======
-        debugUserAndProviderInfo()
-        debugDumpAllTsdBookings()
-        // Optional: force test path (uncomment to force TSD loader)
-        // FirebaseAuth.getInstance().currentUser?.uid?.let { uid -> loadTsdBookingsOnly(uid) }
-        // ======================================================
-
-        determineAndLoadBookings() // <-- auto-detect role and load accordingly
+        determineAndLoadBookings() // decide transporter vs tsd and load accordingly
 
         return binding.root
-    }
-
-    // ---------------------------
-    // TEMP DEBUG: dump all tsd_bookings (to confirm permission / query behavior)
-    // ---------------------------
-    private fun debugDumpAllTsdBookings() {
-        val db = FirebaseFirestore.getInstance()
-        Log.d("TSD_DEBUG", "debugDumpAllTsdBookings: starting full collection read")
-        db.collection("tsd_bookings")
-            .get()
-            .addOnSuccessListener { qs ->
-                Log.d("TSD_DEBUG", "DEBUG: tsd_bookings total docs = ${qs.size()}")
-                qs.documents.forEach { d ->
-                    Log.d(
-                        "TSD_DEBUG",
-                        "DOC: id=${d.id} facilityId=${d.getString("facilityId")} tsdFacilityId=${d.getString("tsdFacilityId")} facilityName=${d.getString("facilityName")} status=${d.getString("status")}"
-                    )
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("TSD_DEBUG", "DEBUG: tsd_bookings read failed: ${e.message}")
-            }
-    }
-
-    // ---------------------------
-    // TEMP DEBUG: print users/{uid} role and service_providers/{uid}
-    // ---------------------------
-    private fun debugUserAndProviderInfo() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
-        if (uid.isNullOrBlank()) {
-            Log.d("TSD_DEBUG", "debugUserAndProviderInfo: no user signed in")
-            return
-        }
-        val db = FirebaseFirestore.getInstance()
-        db.collection("users").document(uid).get()
-            .addOnSuccessListener { uDoc ->
-                Log.d("TSD_DEBUG", "users/$uid doc exists=${uDoc.exists()} role=${uDoc.getString("role")}")
-            }
-            .addOnFailureListener { e ->
-                Log.e("TSD_DEBUG", "users/$uid fetch failed: ${e.message}")
-            }
-
-        db.collection("service_providers").document(uid).get()
-            .addOnSuccessListener { sDoc ->
-                Log.d(
-                    "TSD_DEBUG",
-                    "service_providers/$uid exists=${sDoc.exists()} providerType=${sDoc.getString("providerType")} companyName=${sDoc.getString("companyName")}"
-                )
-            }
-            .addOnFailureListener { e ->
-                Log.e("TSD_DEBUG", "service_providers/$uid fetch failed: ${e.message}")
-            }
     }
 
     // ---------------------------
@@ -108,7 +48,7 @@ class SP_Servicerequest : Fragment() {
     // ---------------------------
     private fun setupRecyclerView() {
         adapter = ServiceRequestAdapter(
-            requests = mutableListOf(),   // <-- MutableList
+            requests = mutableListOf(),
             isActiveTasks = false,
             onActionClick = { selected ->
                 val bundle = Bundle().apply {
@@ -137,53 +77,133 @@ class SP_Servicerequest : Fragment() {
     }
 
     // ---------------------------
-    // Role detection: choose which loader to use
+    // Determine role, then load transport or tsd bookings accordingly
     // ---------------------------
     private fun determineAndLoadBookings() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
             Toast.makeText(requireContext(), "Not logged in", Toast.LENGTH_SHORT).show()
+            Log.d("TSD_DEBUG", "determineAndLoadBookings -> no logged-in user")
             return
         }
 
         val db = FirebaseFirestore.getInstance()
-        db.collection("users").document(uid)
-            .get()
+        Log.d("TSD_DEBUG", "determineAndLoadBookings -> currentUser.uid='$uid'")
+
+        // 1) try users collection
+        db.collection("users").document(uid).get()
             .addOnSuccessListener { userDoc ->
+                Log.d("TSD_DEBUG", "users doc exists=${userDoc.exists()}, data=${userDoc.data}")
                 val role = userDoc.getString("role")?.trim()?.lowercase()
-                Log.d("TSD_DEBUG", "determineAndLoadBookings: users/$uid role=$role")
-                if (role == "tsd" || role == "tsdfacility" || role == "tsd_facility") {
-                    // mark adapter as TSD so it adapts UI
-                    try {
-                        adapter.setRole("tsd")
-                    } catch (ex: Exception) {
-                        Log.w("SP_Servicerequest", "adapter.setRole missing or failed: ${ex.message}")
-                    }
+                Log.d("TSD_DEBUG", "users.role = '$role'")
+                if (role != null && (role.contains("tsd") || role.contains("tsd_facility") || role.contains("tsdfacility"))) {
+                    try { adapter.setRole("tsd") } catch (_: Exception) {}
                     loadTsdBookingsOnly(uid)
                 } else {
-                    // fallback to your existing transporter logic
-                    try {
-                        adapter.setRole("transporter")
-                    } catch (ex: Exception) {
-                        Log.w("SP_Servicerequest", "adapter.setRole missing or failed: ${ex.message}")
-                    }
-                    loadTransporterBookingsOnly()
+                    // 2) fallback: check service_providers doc
+                    db.collection("service_providers").document(uid).get()
+                        .addOnSuccessListener { spDoc ->
+                            Log.d("TSD_DEBUG", "service_providers exists=${spDoc.exists()}, data=${spDoc.data}")
+                            val providerType = spDoc.getString("providerType")?.trim()?.lowercase().orEmpty()
+                            val spRole = spDoc.getString("role")?.trim()?.lowercase().orEmpty()
+                            val companyName = spDoc.getString("companyName")?.trim().orEmpty()
+
+                            Log.d("TSD_DEBUG", "service_providers.providerType='$providerType', service_providers.role='$spRole', companyName='$companyName'")
+
+                            val isTsdByProviderType = providerType == "tsd" || providerType == "tsdfacility" || providerType == "tsd_facility"
+                            val isTsdByRoleField = spRole.contains("tsd") || spRole.contains("tsd_facility") || spRole.contains("tsdfacility")
+
+                            if (isTsdByProviderType || isTsdByRoleField) {
+                                try { adapter.setRole("tsd") } catch (_: Exception) {}
+                                loadTsdBookingsOnly(uid)
+                            } else {
+                                // 3) Last-resort heuristic: if companyName exists and there are tsd_bookings for it,
+                                // treat as TSD (this helps when metadata is incomplete)
+                                if (companyName.isNotEmpty()) {
+                                    Log.d("TSD_DEBUG", "Attempting heuristic: query tsd_bookings where facilityName == '$companyName'")
+                                    db.collection("tsd_bookings")
+                                        .whereEqualTo("facilityName", companyName)
+                                        .limit(1)
+                                        .get()
+                                        .addOnSuccessListener { qs ->
+                                            Log.d("TSD_DEBUG", "heuristic facilityName query -> size=${qs.size()}")
+                                            if (qs.size() > 0) {
+                                                try { adapter.setRole("tsd") } catch (_: Exception) {}
+                                                loadTsdBookingsOnly(uid)
+                                            } else {
+                                                try { adapter.setRole("transporter") } catch (_: Exception) {}
+                                                loadTransporterBookingsOnly()
+                                            }
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Log.e("TSD_DEBUG", "heuristic facilityName query failed: ${e.message}", e)
+                                            try { adapter.setRole("transporter") } catch (_: Exception) {}
+                                            loadTransporterBookingsOnly()
+                                        }
+                                } else {
+                                    try { adapter.setRole("transporter") } catch (_: Exception) {}
+                                    loadTransporterBookingsOnly()
+                                }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("TSD_DEBUG", "failed fetching service_providers doc: ${e.message}", e)
+                            try { adapter.setRole("transporter") } catch (_: Exception) {}
+                            loadTransporterBookingsOnly()
+                        }
                 }
             }
             .addOnFailureListener { e ->
-                // if users doc is missing or an error occurs, fallback to existing transporter logic
-                Log.w("SP_Servicerequest", "users doc fetch failed: ${e.message}, falling back to transporter loader")
-                try {
-                    adapter.setRole("transporter")
-                } catch (ex: Exception) {
-                    Log.w("SP_Servicerequest", "adapter.setRole missing or failed: ${ex.message}")
-                }
-                loadTransporterBookingsOnly()
+                Log.e("TSD_DEBUG", "failed fetching users doc: ${e.message}", e)
+                // If users doc missing/fails, try service_providers directly (same logic)
+                db.collection("service_providers").document(uid).get()
+                    .addOnSuccessListener { spDoc ->
+                        Log.d("TSD_DEBUG", "service_providers exists=${spDoc.exists()}, data=${spDoc.data}")
+                        val providerType = spDoc.getString("providerType")?.trim()?.lowercase().orEmpty()
+                        val spRole = spDoc.getString("role")?.trim()?.lowercase().orEmpty()
+                        val companyName = spDoc.getString("companyName")?.trim().orEmpty()
+
+                        val isTsdByProviderType = providerType == "tsd" || providerType == "tsdfacility" || providerType == "tsd_facility"
+                        val isTsdByRoleField = spRole.contains("tsd") || spRole.contains("tsd_facility") || spRole.contains("tsdfacility")
+
+                        if (isTsdByProviderType || isTsdByRoleField) {
+                            try { adapter.setRole("tsd") } catch (_: Exception) {}
+                            loadTsdBookingsOnly(uid)
+                        } else if (companyName.isNotEmpty()) {
+                            Log.d("TSD_DEBUG", "Attempting heuristic after users failure: query tsd_bookings where facilityName == '$companyName'")
+                            db.collection("tsd_bookings")
+                                .whereEqualTo("facilityName", companyName)
+                                .limit(1)
+                                .get()
+                                .addOnSuccessListener { qs ->
+                                    Log.d("TSD_DEBUG", "heuristic facilityName query -> size=${qs.size()}")
+                                    if (qs.size() > 0) {
+                                        try { adapter.setRole("tsd") } catch (_: Exception) {}
+                                        loadTsdBookingsOnly(uid)
+                                    } else {
+                                        try { adapter.setRole("transporter") } catch (_: Exception) {}
+                                        loadTransporterBookingsOnly()
+                                    }
+                                }
+                                .addOnFailureListener { e2 ->
+                                    Log.e("TSD_DEBUG", "heuristic facilityName query failed after users failure: ${e2.message}", e2)
+                                    try { adapter.setRole("transporter") } catch (_: Exception) {}
+                                    loadTransporterBookingsOnly()
+                                }
+                        } else {
+                            try { adapter.setRole("transporter") } catch (_: Exception) {}
+                            loadTransporterBookingsOnly()
+                        }
+                    }
+                    .addOnFailureListener {
+                        try { adapter.setRole("transporter") } catch (_: Exception) {}
+                        loadTransporterBookingsOnly()
+                    }
             }
     }
 
+
     // ---------------------------
-    // Load bookings for transporter
-    // (original method unchanged)
+    // Load bookings for transporter (unchanged)
     // ---------------------------
     private fun loadTransporterBookingsOnly() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
@@ -248,7 +268,7 @@ class SP_Servicerequest : Fragment() {
     }
 
     // ---------------------------
-    // Fallback single-field query
+    // Fallback single-field query for transporter
     // ---------------------------
     private fun fetchAndFilterByNameFallback(
         db: FirebaseFirestore,
@@ -279,7 +299,6 @@ class SP_Servicerequest : Fragment() {
                 Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
-
 
     // ---------------------------
     // Convert Firestore → Model (Transporter mapping)
@@ -331,6 +350,7 @@ class SP_Servicerequest : Fragment() {
 
     // ---------------------------
     // Load TSD bookings and map to ServiceRequest for UI
+    //  - Try facilityId == tsdUid first (fast), then fallback to facilityName == companyName
     // ---------------------------
     private fun loadTsdBookingsOnly(tsdUid: String) {
         val db = FirebaseFirestore.getInstance()
@@ -338,18 +358,16 @@ class SP_Servicerequest : Fragment() {
         binding.progressLoading.visibility = View.VISIBLE
         binding.txtEmptyState.visibility = View.GONE
 
-        // First attempt: match facilityId == tsdUid
+        // 1) Try facilityId == tsdUid
         db.collection("tsd_bookings")
             .whereEqualTo("facilityId", tsdUid)
             .get()
             .addOnSuccessListener { qs ->
-                val items = qs.documents.mapNotNull { doc ->
-                    doc.data?.let { mapTsdToServiceRequest(doc.id, it) }
-                }
+                val items = qs.documents.mapNotNull { doc -> doc.data?.let { mapTsdToServiceRequest(doc.id, it) } }
                 if (items.isNotEmpty()) {
                     handleBookingsResult(items)
                 } else {
-                    // fallback to matching by facility name from service_providers doc
+                    // fallback: fetch service_providers companyName (if any) and query facilityName
                     db.collection("service_providers").document(tsdUid)
                         .get()
                         .addOnSuccessListener { spDoc ->
@@ -359,9 +377,7 @@ class SP_Servicerequest : Fragment() {
                                     .whereEqualTo("facilityName", facilityName)
                                     .get()
                                     .addOnSuccessListener { qs2 ->
-                                        val items2 = qs2.documents.mapNotNull { d ->
-                                            d.data?.let { mapTsdToServiceRequest(d.id, it) }
-                                        }
+                                        val items2 = qs2.documents.mapNotNull { d -> d.data?.let { mapTsdToServiceRequest(d.id, it) } }
                                         handleBookingsResult(items2)
                                     }
                                     .addOnFailureListener { e ->
@@ -370,26 +386,26 @@ class SP_Servicerequest : Fragment() {
                                         Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
                                     }
                             } else {
-                                // nothing matched — show empty
                                 handleBookingsResult(emptyList())
                             }
                         }
                         .addOnFailureListener { e ->
                             binding.progressLoading.visibility = View.GONE
-                            binding.txtEmptyState.visibility = View.GONE
+                            binding.txtEmptyState.visibility = View.VISIBLE
                             Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                 }
             }
             .addOnFailureListener { e ->
                 binding.progressLoading.visibility = View.GONE
-                binding.txtEmptyState.visibility = View.GONE
+                binding.txtEmptyState.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 
     // ---------------------------
     // Mapping TSD doc -> ServiceRequest (so UI can reuse same adapter)
+    //  - Also normalizes status like "Pending Payment" -> "Pending"
     // ---------------------------
     private fun mapTsdToServiceRequest(docId: String, m: Map<String, Any>): ServiceRequest {
 
@@ -397,7 +413,6 @@ class SP_Servicerequest : Fragment() {
             return (m[key] as? String)?.trim().takeUnless { it.isNullOrEmpty() } ?: alt
         }
 
-        // TSD doc fields you shared earlier
         val bookingId = s("bookingId", docId)
         val facilityName = s("facilityName", s("facility", "TSD Facility"))
         val location = s("location")
@@ -405,27 +420,36 @@ class SP_Servicerequest : Fragment() {
         val contactNumber = s("contactNumber")
         val treatmentInfo = s("treatmentInfo")
         val previousRecord = s("previousRecordUrl", "")
-        val certificate = s("certificateUrl", "")
-        val status = s("status", "Pending")
+        val rawStatus = s("status", "Pending")
+
+        // Normalize status (explicitly convert "Pending Payment" -> "Pending")
+        val normalizedStatus = when {
+            rawStatus.equals("Pending Payment", true) -> "Pending"
+            rawStatus.contains("pending", true) -> "Pending"
+            rawStatus.contains("paid", true) -> "Paid"
+            rawStatus.contains("confirm", true) -> "Confirmed"
+            rawStatus.contains("reject", true) -> "Rejected"
+            else -> rawStatus
+        }
+
         val qty = (m["quantity"] as? Number)?.toDouble() ?: 0.0
         val totalPayment = (m["totalPayment"] as? Number)?.toDouble() ?: 0.0
 
-        // Map to your ServiceRequest fields (choose best matches)
         return ServiceRequest(
             id = docId,
             bookingId = bookingId,
             clientName = s("userId", "-"),
-            companyName = facilityName,            // show facility as company
-            providerName = facilityName,           // provider column reused
+            companyName = facilityName,
+            providerName = facilityName,
             providerContact = contactNumber,
             serviceTitle = "TSD - ${treatmentInfo.ifEmpty { "Treatment" }}",
-            bookingStatus = status,
-            origin = location,                     // reuse origin to display location
+            bookingStatus = normalizedStatus,
+            origin = location,
             destination = facilityName,
             dateRequested = preferredDate.ifEmpty { m["dateCreated"]?.toString() ?: "N/A" },
             wasteType = treatmentInfo,
             quantity = if (qty > 0) qty.toString() else "-",
-            packaging = "-",                       // unknown
+            packaging = "-",
             notes = s("notes", s("specialInstructions", "No notes")),
             compliance = "Payment: ${if (totalPayment > 0) "₱ ${"%,.2f".format(totalPayment)}" else "-"}",
             attachments = if (previousRecord.isNotBlank()) listOf(previousRecord) else listOf(DEV_ATTACHMENT),
@@ -448,13 +472,8 @@ class SP_Servicerequest : Fragment() {
             "Sort by Confirmed" -> masterList.filter { it.bookingStatus?.contains("confirm", true) == true }
             "Sort by Rejected" -> masterList.filter { it.bookingStatus?.contains("reject", true) == true }
             else -> masterList
-
         }
-        // 🔥 DEBUG LOG — INSERT THIS
-        Log.d(
-            "TSD_DEBUG",
-            "handleBookingsResult: total=${list.size} filtered=${filtered.size} (selected=$selected)"
-                )
+
         adapter.updateList(filtered)
 
         binding.progressLoading.visibility = View.GONE
@@ -481,7 +500,6 @@ class SP_Servicerequest : Fragment() {
                         "Sort by Rejected" -> masterList.filter { it.bookingStatus?.contains("reject", true) == true }
                         else -> masterList
                     }
-
 
                     adapter.updateList(filtered)
                 }
