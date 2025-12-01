@@ -134,13 +134,29 @@ class PtoDetailsFragment : Fragment() {
 
                         // ✅ Feedback visibility
                         when (status.lowercase(Locale.getDefault())) {
-                            "approved", "rejected" -> {
+                            "approved" -> {
+                                btnApprove.visibility = View.GONE
+                                btnReject.visibility = View.GONE
+                                inputFeedback.visibility = if (feedback.isNotBlank()) View.VISIBLE else View.GONE
+                                inputFeedback.setText(feedback)
+                                inputFeedback.isEnabled = false
+                                inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+
+                                // ✅ Show certificate URL if approved
+                                val certificateUrl = doc.getString("certificateUrl")
+                                tvSelectedFile.visibility = if (!certificateUrl.isNullOrBlank()) View.VISIBLE else View.GONE
+                                tvSelectedFile.text = certificateUrl?.substringAfterLast('/')?.substringBefore('?') ?: ""
+                            }
+                            "rejected" -> {
                                 btnApprove.visibility = View.GONE
                                 btnReject.visibility = View.GONE
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                                 inputFeedback.isEnabled = false
                                 inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+
+                                // ❌ Hide certificate if rejected
+                                tvSelectedFile.visibility = View.GONE
                             }
                             else -> {
                                 btnApprove.visibility = View.VISIBLE
@@ -148,6 +164,9 @@ class PtoDetailsFragment : Fragment() {
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.isEnabled = true
                                 inputFeedback.setText(feedback)
+
+                                // Hide certificate for pending
+                                tvSelectedFile.visibility = View.GONE
                             }
                         }
                     }

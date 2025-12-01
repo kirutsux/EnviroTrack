@@ -82,41 +82,76 @@ class DischargePermitFormFragment : Fragment() {
     // ✅ Function to check pending discharge permit
     private fun checkPendingDischargePermit() {
         val userUid = auth.currentUser?.uid ?: return
+
         firestore.collection("opms_discharge_permits")
             .whereEqualTo("uid", userUid)
-            .whereEqualTo("status", "Pending")
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(1)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (!querySnapshot.isEmpty) {
-                    // Pending permit found — show dialog
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("Pending Application Found")
-                        .setMessage("You have a pending Discharge Permit application. Do you want to continue to payment?")
-                        .setPositiveButton("Yes") { _, _ ->
-                            val doc = querySnapshot.documents.first()
-                            val formData = doc.data ?: return@setPositiveButton
+                    val doc = querySnapshot.documents.first()
+                    val status = doc.getString("status") ?: "Pending"
+                    val paymentStatus = doc.getString("paymentStatus") ?: "Pending"
+                    val submittedTimestamp = doc.getTimestamp("submittedTimestamp") // null if not submitted
+                    val formData = doc.data ?: emptyMap<String, Any>()
 
-                            val bundle = Bundle().apply {
-                                putString("documentId", doc.id) // ✅ pass the doc ID
-                                putString("companyName", formData["companyName"] as? String)
-                                putString("companyAddress", formData["companyAddress"] as? String)
-                                putString("pcoName", formData["pcoName"] as? String)
-                                putString("pcoAccreditationNumber", formData["pcoAccreditation"] as? String)
-                                putString("receivingBody", formData["bodyOfWater"] as? String)
-                                putString("dischargeVolume", formData["volume"] as? String)
-                                putString("dischargeMethod", formData["treatmentMethod"] as? String)
-                                putString("uploadedFiles", formData["fileLinks"] as? String)
-                                putString("paymentInfo", "₱1,500 - Pending")
-                            }
-
-                            findNavController().navigate(R.id.action_application_to_payment, bundle)
+                    when {
+                        // Pending & payment not done → continue to payment
+                        status.equals("Pending", true) && paymentStatus.equals("Pending", true) -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Pending Application Found")
+                                .setMessage("You have a pending Discharge Permit application. Do you want to continue to payment?")
+                                .setPositiveButton("Yes") { _, _ ->
+                                    val bundle = Bundle().apply {
+                                        putString("documentId", doc.id)
+                                        putString("companyName", formData["companyName"] as? String)
+                                        putString("companyAddress", formData["companyAddress"] as? String)
+                                        putString("pcoName", formData["pcoName"] as? String)
+                                        putString("pcoAccreditationNumber", formData["pcoAccreditation"] as? String)
+                                        putString("receivingBody", formData["bodyOfWater"] as? String)
+                                        putString("dischargeVolume", formData["volume"] as? String)
+                                        putString("dischargeMethod", formData["treatmentMethod"] as? String)
+                                        putString("operationStartDate", formData["operationStartDate"] as? String)
+                                        putString("paymentInfo", "₱1,500 - Pending")
+                                    }
+                                    findNavController().navigate(R.id.action_application_to_payment, bundle)
+                                }
+                                .setNegativeButton("No", null)
+                                .show()
                         }
-                        .setNegativeButton("No", null)
-                        .show()
+
+                        // Pending & paid & NOT submitted → continue to review
+                        status.equals("Pending", true) && paymentStatus.equals("Paid", true) && submittedTimestamp == null -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Paid Application Found")
+                                .setMessage("You have already paid for this Discharge Permit. Do you want to continue to review your application?")
+                                .setPositiveButton("Yes") { _, _ ->
+                                    val bundle = Bundle().apply {
+                                        putString("documentId", doc.id)
+                                        putString("companyName", formData["companyName"] as? String)
+                                        putString("companyAddress", formData["companyAddress"] as? String)
+                                        putString("pcoName", formData["pcoName"] as? String)
+                                        putString("pcoAccreditationNumber", formData["pcoAccreditation"] as? String)
+                                        putString("receivingBody", formData["bodyOfWater"] as? String)
+                                        putString("dischargeVolume", formData["volume"] as? String)
+                                        putString("dischargeMethod", formData["treatmentMethod"] as? String)
+                                        putString("operationStartDate", formData["operationStartDate"] as? String)
+                                        putString("paymentInfo", "₱1,500 - Paid")
+                                    }
+                                    findNavController().navigate(R.id.action_application_to_review, bundle)
+                                }
+                                .setNegativeButton("No", null)
+                                .show()
+                        }
+
+                        // Already submitted or other statuses → do nothing
+                        else -> { /* No dialog, user waits for EMB review or can submit a new application */ }
+                    }
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to check pending application.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to check previous application.", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -216,17 +251,22 @@ class DischargePermitFormFragment : Fragment() {
                 Toast.makeText(requireContext(), "Discharge Permit submitted successfully!", Toast.LENGTH_LONG).show()
 
                 val bundle = Bundle().apply {
-                    putString("documentId", docId) // ✅ pass to payment
+                    putString("documentId", docId)
                     putString("companyName", formData["companyName"])
                     putString("companyAddress", formData["companyAddress"])
                     putString("pcoName", formData["pcoName"])
                     putString("pcoAccreditationNumber", formData["pcoAccreditation"])
+                    putString("contactNumber", formData["contactNumber"])
+                    putString("email", formData["email"])
                     putString("receivingBody", formData["bodyOfWater"])
+                    putString("sourceWastewater", formData["sourceWastewater"])
                     putString("dischargeVolume", formData["volume"])
                     putString("dischargeMethod", formData["treatmentMethod"])
+                    putString("operationStartDate", formData["operationStartDate"])
                     putString("uploadedFiles", fileLinks.joinToString("\n"))
                     putString("paymentInfo", "₱1,500 - Pending")
                 }
+
 
                 clearForm()
                 findNavController().navigate(R.id.action_application_to_payment, bundle)

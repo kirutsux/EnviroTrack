@@ -51,7 +51,11 @@
         android:id="@+id/cncReviewFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncReviewFragment"
         android:label="CNC Review"
-        tools:layout="@layout/fragment_cnc_review" />
+        tools:layout="@layout/fragment_cnc_review" >
+        <action
+            android:id="@+id/action_cncReviewFragment_to_cncEditInfoFragment"
+            app:destination="@id/cncEditInfoFragment" />
+</fragment>
 
     <!-- CNC DETAILS -->
     <fragment
@@ -59,5 +63,15 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncDetailsFragment"
         android:label="CNC Details"
         tools:layout="@layout/fragment_cnc_details" />
+
+    <fragment
+        android:id="@+id/cncEditInfoFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncEditInfoFragment"
+        android:label="CNC Review"
+        tools:layout="@layout/fragment_cnc_edit_info" >
+        <action
+            android:id="@+id/action_cncEditInfoFragment_to_cncReviewFragment"
+            app:destination="@id/cncReviewFragment" />
+</fragment>
 
 </navigation>
