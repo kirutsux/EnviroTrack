@@ -339,8 +339,7 @@ class DpDetailsFragment : Fragment() {
                             category = "approval",
                             priority = "high",
                             module = "OPMS",
-                            documentId = id,
-                            actionLink = "dpDashboard/$id" // deep link for PCO
+                            documentId = id
                         )
 
                         // EMB notification
@@ -351,8 +350,7 @@ class DpDetailsFragment : Fragment() {
                             category = "system",
                             priority = "high",
                             module = "OPMS",
-                            documentId = id,
-                            actionLink = "dpEmbDashboard/$id" // deep link for EMB
+                            documentId = id
                         )
                     }
             }

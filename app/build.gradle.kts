@@ -107,7 +107,7 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-
+    implementation ("com.google.firebase:firebase-messaging-ktx")
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
     //completed

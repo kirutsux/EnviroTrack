@@ -314,8 +314,7 @@ class CncReviewDetailsFragment : Fragment() {
                             category = "approval",
                             priority = "high",
                             module = "CNC",
-                            documentId = id,
-                            actionLink = "cncDashboard/$id" // example deep link
+                            documentId = id
                         )
 
                         // EMB Notification
@@ -326,8 +325,7 @@ class CncReviewDetailsFragment : Fragment() {
                             category = "approval",
                             priority = "high",
                             module = "CNC",
-                            documentId = id,
-                            actionLink = "cncEmbDashboard/$id"
+                            documentId = id
                         )
                     }
 

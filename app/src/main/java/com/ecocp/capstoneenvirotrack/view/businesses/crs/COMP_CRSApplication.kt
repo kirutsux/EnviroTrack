@@ -293,8 +293,7 @@ class COMP_CRSApplication : Fragment() {
                     category = "submission",
                     priority = "medium",
                     module = "CRS",
-                    documentId = uid,
-                    actionLink = "crs/$uid"
+                    documentId = uid
                 )
 
                 // ----------------------------------------------------------------------
@@ -306,8 +305,7 @@ class COMP_CRSApplication : Fragment() {
                     category = "alert",
                     priority = "high",
                     module = "CRS",
-                    documentId = uid,
-                    actionLink = "emb/crs/$uid"
+                    documentId = uid
                 )
             }
             .addOnFailureListener { e ->

@@ -1,26 +1,27 @@
 package com.ecocp.capstoneenvirotrack.utils
 
+import android.util.Log
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.SendNotificationRequest
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 object NotificationManager {
     private val db = FirebaseFirestore.getInstance()
 
-    /**
-     * Core function to send a notification document to the "notifications" collection.
-     * Extra fields added to help UI grouping & deep-linking.
-     */
     fun sendNotificationToUser(
         receiverId: String,
         title: String,
         message: String,
-        category: String = "general",   // submission | alert | expiry | system | approval etc.
-        priority: String = "medium",    // low | medium | high
-        module: String? = null,         // e.g. "CNC", "OPMS", "PTO"
-        documentId: String? = null,     // id of related application
-        actionLink: String? = null      // optional route or deep link path in-app
+        category: String = "general",
+        priority: String = "medium",
+        module: String? = null,
+        documentId: String? = null
     ) {
         val now = Timestamp.now()
         val dayString = dateToDayString(now.toDate())
@@ -33,20 +34,30 @@ object NotificationManager {
             "priority" to priority,
             "module" to module,
             "documentId" to documentId,
-            "actionLink" to actionLink,
             "timestamp" to now,
-            // duplicate day string to speed up grouping in queries/ui
             "dayString" to dayString,
             "isRead" to false
         )
 
+        // Save Firestore document
         db.collection("notifications").add(payload)
+
+        // Send ONE push notification
+        val request = SendNotificationRequest(receiverId, title, message)
+        RetrofitClient.instance.sendNotification(request)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    Log.d("NotificationManager", "Push notification sent successfully")
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.e("NotificationManager", "Push notification error", t)
+                }
+            })
     }
 
-    /**
-     * Sends the notification to every EMB user (use for admin-alerts).
-     * This performs one query to fetch EMB users and writes one notification per EMB user.
-     */
+
+    // FIXED: remove duplicate API calls
     fun sendToAllEmb(
         title: String,
         message: String,
@@ -54,7 +65,7 @@ object NotificationManager {
         priority: String = "high",
         module: String? = null,
         documentId: String? = null,
-        actionLink: String? = null
+        excludeUid: String? = null // <-- PCO UID to exclude
     ) {
         db.collection("users")
             .whereEqualTo("userType", "emb")
@@ -62,6 +73,10 @@ object NotificationManager {
             .addOnSuccessListener { snap ->
                 for (user in snap.documents) {
                     val embId = user.id
+                    // Skip the excluded UID (usually the submitting PCO)
+                    if (excludeUid != null && embId == excludeUid) continue
+
+                    // Save to Firestore & send push
                     sendNotificationToUser(
                         receiverId = embId,
                         title = title,
@@ -69,21 +84,19 @@ object NotificationManager {
                         category = category,
                         priority = priority,
                         module = module,
-                        documentId = documentId,
-                        actionLink = actionLink
+                        documentId = documentId
                     )
                 }
             }
+            .addOnFailureListener { e ->
+                Log.e("NotificationManager", "Failed to fetch EMB users", e)
+            }
     }
 
-    /**
-     * Mark a notification read/unread
-     */
-    fun markAsRead(notificationId: String, isRead: Boolean = true) {
-        db.collection("notifications")
-            .document(notificationId)
-            .update(mapOf("isRead" to isRead))
-    }
+
+    fun markAsRead(notificationId: String, isRead: Boolean = true) =
+        db.collection("notifications").document(notificationId)
+            .update("isRead", isRead)
 
     fun deleteNotification(notificationId: String) {
         db.collection("notifications").document(notificationId).delete()
@@ -94,3 +107,4 @@ object NotificationManager {
         return sdf.format(date)
     }
 }
+

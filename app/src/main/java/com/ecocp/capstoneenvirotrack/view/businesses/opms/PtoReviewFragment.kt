@@ -146,7 +146,7 @@ class PtoReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
                 // ----------------------------------------------------------------------
-                // ✅ Notify PCO (self)
+                // ✅ Notify PCO (self) - confirmation
                 // ----------------------------------------------------------------------
                 NotificationManager.sendNotificationToUser(
                     receiverId = uid!!,
@@ -155,12 +155,12 @@ class PtoReviewFragment : Fragment() {
                     category = "submission",
                     priority = "medium",
                     module = "OPMS",
-                    documentId = currentDocId!!,
-                    actionLink = "opms/pto/$currentDocId"
+                    documentId = currentDocId!!
                 )
 
                 // ----------------------------------------------------------------------
-                // ✅ Notify all EMB admins
+                // ✅ Notify all EMB admins - alert
+                // Exclude the submitting PCO UID to prevent duplicates
                 // ----------------------------------------------------------------------
                 NotificationManager.sendToAllEmb(
                     title = "New PTO Application",
@@ -169,7 +169,7 @@ class PtoReviewFragment : Fragment() {
                     priority = "high",
                     module = "OPMS",
                     documentId = currentDocId!!,
-                    actionLink = "emb/pto/$currentDocId"
+                    excludeUid = uid // <-- ensures PCO does not receive this notification
                 )
 
                 // ----------------------------------------------------------------------
@@ -187,6 +187,7 @@ class PtoReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

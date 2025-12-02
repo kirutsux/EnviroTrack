@@ -355,8 +355,7 @@ class PtoDetailsFragment : Fragment() {
                             category = "approval",
                             priority = "high",
                             module = "PTO",
-                            documentId = id,
-                            actionLink = "ptoDashboard/$id" // deep link for PCO
+                            documentId = id
                         )
 
                         // EMB notification
@@ -367,8 +366,7 @@ class PtoDetailsFragment : Fragment() {
                             category = "system",
                             priority = "high",
                             module = "PTO",
-                            documentId = id,
-                            actionLink = "ptoEmbDashboard/$id" // deep link for EMB
+                            documentId = id
                         )
                     }
             }

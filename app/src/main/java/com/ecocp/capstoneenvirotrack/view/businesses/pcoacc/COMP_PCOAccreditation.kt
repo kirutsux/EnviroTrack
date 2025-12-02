@@ -227,8 +227,7 @@ class COMP_PCOAccreditation : Fragment() {
                     category = "submission",
                     priority = "medium",
                     module = "PCO_Accreditation",
-                    documentId = accreditationId,
-                    actionLink = "accreditation/$accreditationId"
+                    documentId = accreditationId
                 )
 
                 // ----------------------------------------------------------------------
@@ -240,8 +239,7 @@ class COMP_PCOAccreditation : Fragment() {
                     category = "alert",
                     priority = "high",
                     module = "PCO_Accreditation",
-                    documentId = accreditationId,
-                    actionLink = "emb/accreditation/$accreditationId"
+                    documentId = accreditationId
                 )
 
                 // ----------------------------------------------------------------------

@@ -173,8 +173,7 @@ class PcoEmbReviewDetailsFragment : Fragment() {
                             category = "approval",
                             priority = "high",
                             module = "Accreditation",
-                            documentId = id,
-                            actionLink = "accreditationDashboard/$id" // deep link for PCO
+                            documentId = id
                         )
 
                         // EMB notification
@@ -185,8 +184,7 @@ class PcoEmbReviewDetailsFragment : Fragment() {
                             category = "system",
                             priority = "high",
                             module = "Accreditation",
-                            documentId = id,
-                            actionLink = "accreditationEmbDashboard/$id" // deep link for EMB
+                            documentId = id
                         )
                     }
             }

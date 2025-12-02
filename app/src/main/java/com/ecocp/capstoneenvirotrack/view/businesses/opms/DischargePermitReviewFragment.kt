@@ -161,8 +161,7 @@ class DischargePermitReviewFragment : Fragment() {
                     category = "submission",
                     priority = "medium",
                     module = "OPMS",
-                    documentId = currentDocId!!,
-                    actionLink = "opms/discharge-permit/$currentDocId"
+                    documentId = currentDocId!!
                 )
 
                 // ----------------------------------------------------------------------
@@ -174,8 +173,7 @@ class DischargePermitReviewFragment : Fragment() {
                     category = "alert",
                     priority = "high",
                     module = "OPMS",
-                    documentId = currentDocId!!,
-                    actionLink = "emb/discharge-permit/$currentDocId"
+                    documentId = currentDocId!!
                 )
 
                 // ----------------------------------------------------------------------

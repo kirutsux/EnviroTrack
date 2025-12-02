@@ -165,8 +165,7 @@ class CncReviewFragment : Fragment() {
                     category = "submission",
                     priority = "medium",
                     module = "CNC",
-                    documentId = currentDocId!!,
-                    actionLink = "cnc/$currentDocId"
+                    documentId = currentDocId!!
                 )
 
                 // ----------------------------------------------------------------------
@@ -178,8 +177,7 @@ class CncReviewFragment : Fragment() {
                     category = "alert",
                     priority = "high",
                     module = "CNC",
-                    documentId = currentDocId!!,
-                    actionLink = "emb/cnc/$currentDocId"
+                    documentId = currentDocId!!
                 )
 
                 // ----------------------------------------------------------------------

@@ -191,8 +191,7 @@ class CrsReviewDetailsFragment : Fragment() {
                             category = "approval",
                             priority = "high",
                             module = "CRS",
-                            documentId = id,
-                            actionLink = "crsDashboard/$id" // deep link for PCO
+                            documentId = id
                         )
 
                         // EMB notification
@@ -203,8 +202,7 @@ class CrsReviewDetailsFragment : Fragment() {
                             category = "system",
                             priority = "high",
                             module = "CRS",
-                            documentId = id,
-                            actionLink = "crsEmbDashboard/$id" // deep link for EMB
+                            documentId = id
                         )
                     }
             }
