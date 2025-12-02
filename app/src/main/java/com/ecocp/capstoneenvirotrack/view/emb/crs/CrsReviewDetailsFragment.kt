@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCrsReviewDetailsBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -163,7 +164,6 @@ class CrsReviewDetailsFragment : Fragment() {
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        // ✅ Update CRS Application status
         db.collection("crs_applications").document(id)
             .update(updateData)
             .addOnSuccessListener {
@@ -173,40 +173,37 @@ class CrsReviewDetailsFragment : Fragment() {
                     requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
 
-                // ✅ Send Notifications to Company and EMB
+                // ✅ Send notifications using NotificationManager
                 db.collection("crs_applications").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("userId") ?: return@addOnSuccessListener
                         val companyName = doc.getString("companyName") ?: "Unknown Company"
                         val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notificationForPCO = hashMapOf(
-                            "receiverId" to pcoUid,
-                            "receiverType" to "company",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "Company Registration Approved" else "Company Registration Rejected",
-                            "message" to if (isApproved)
+                        // PCO notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = pcoUid,
+                            title = if (isApproved) "Company Registration Approved" else "Company Registration Rejected",
+                            message = if (isApproved)
                                 "Your Company Registration has been approved."
                             else
                                 "Your Company Registration has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                            category = "approval",
+                            priority = "high",
+                            module = "CRS",
+                            documentId = id
                         )
 
-                        val notificationForEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "Company Registration ${status.uppercase()}",
-                            "message" to "You have $status a company registration application for $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // EMB notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = embUid,
+                            title = "Company Registration ${status.uppercase()}",
+                            message = "You have $status a company registration application for $companyName.",
+                            category = "system",
+                            priority = "high",
+                            module = "CRS",
+                            documentId = id
                         )
-
-                        db.collection("notifications").add(notificationForPCO)
-                        db.collection("notifications").add(notificationForEMB)
                     }
             }
             .addOnFailureListener { e ->
@@ -214,7 +211,6 @@ class CrsReviewDetailsFragment : Fragment() {
                 Log.e("CRS_REVIEW", "❌ Failed to update CRS application status", e)
             }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

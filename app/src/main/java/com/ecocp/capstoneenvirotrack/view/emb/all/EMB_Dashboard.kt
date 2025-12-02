@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
@@ -124,22 +125,22 @@ class EMB_Dashboard : Fragment() {
     // ---------------- NOTIFICATIONS -----------------
     private fun setupNotificationIcon() {
         notificationIcon.setOnClickListener {
-            openNotificationsFragment()
+            // Use NavController to navigate to NotificationsFragment
+            val navController = findNavController() // if inside a fragment
+            // OR: requireActivity().findNavController(R.id.nav_host_fragment) if inside activity
+
+            // Optional: create a Bundle if you want to pass data
+            val bundle = Bundle() // add args if needed
+
+            // Navigate using global action or direct fragment ID
+            val options = NavOptions.Builder()
+                .setEnterAnim(R.anim.slide_in_left)
+                .setExitAnim(R.anim.slide_out_right)
+                .setPopEnterAnim(R.anim.slide_in_right)
+                .setPopExitAnim(R.anim.slide_out_left)
+                .build()
+            navController.navigate(R.id.action_global_embnotificationsFragment, bundle, options)
+
         }
-    }
-
-
-    private fun openNotificationsFragment() {
-        val fragment = EMBNotificationsFragment()
-        requireActivity().supportFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in_left,
-                R.anim.slide_out_right,
-                R.anim.slide_in_right,
-                R.anim.slide_out_left
-            )
-            .replace(R.id.nav_host_fragment, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 }

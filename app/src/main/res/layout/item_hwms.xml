@@ -19,9 +19,9 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Waste Type (Title) -->
+        <!-- Title -->
         <TextView
-            android:id="@+id/tvWasteType"
+            android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Used Oil"
@@ -29,9 +29,9 @@
             android:textSize="18sp"
             android:textColor="@android:color/black" />
 
-        <!-- Sub Info -->
+        <!-- Subtitle -->
         <TextView
-            android:id="@+id/tvQuantity"
+            android:id="@+id/tvSubtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Quantity: 150 liters"
@@ -39,6 +39,7 @@
             android:layout_marginTop="4dp"
             android:textColor="#555555" />
 
+        <!-- Transporter -->
         <TextView
             android:id="@+id/tvTransporter"
             android:layout_width="match_parent"
@@ -48,6 +49,7 @@
             android:layout_marginTop="2dp"
             android:textColor="#555555" />
 
+        <!-- TSD Facility -->
         <TextView
             android:id="@+id/tvTsdFacility"
             android:layout_width="match_parent"
@@ -57,6 +59,7 @@
             android:layout_marginTop="2dp"
             android:textColor="#555555" />
 
+        <!-- Permit No -->
         <TextView
             android:id="@+id/tvPermitNo"
             android:layout_width="match_parent"
@@ -66,7 +69,7 @@
             android:layout_marginTop="2dp"
             android:textColor="#555555" />
 
-        <!-- Payment + Status Row -->
+        <!-- Payment + Status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,7 +78,7 @@
             android:gravity="center_vertical">
 
             <TextView
-                android:id="@+id/tvPaymentStatuss"
+                android:id="@+id/tvPaymentStatus"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -92,6 +95,9 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:textColor="#FFA000" />
+
         </LinearLayout>
+
     </LinearLayout>
+
 </com.google.android.material.card.MaterialCardView>

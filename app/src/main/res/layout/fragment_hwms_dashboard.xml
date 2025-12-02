@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootHwms"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="12dp"
     android:background="@color/white">
 
     <!-- Title -->
@@ -21,18 +23,30 @@
     <Button
         android:id="@+id/btnAddApplication"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:text="+ Add New Application"
         android:backgroundTint="@color/teal_700"
         android:textColor="@color/white"
         android:layout_marginBottom="12dp" />
+
+    <!-- Segmented Tabs -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabIndicatorColor="@color/teal_700"
+        app:tabSelectedTextColor="@color/teal_700"
+        app:tabTextColor="#808080"
+        app:tabIndicatorFullWidth="false"
+        app:tabMode="fixed"
+        android:layout_marginBottom="8dp" />
 
     <!-- Empty State Message -->
     <TextView
         android:id="@+id/tvEmptyState"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No HWMS applications yet."
+        android:text="No items yet."
         android:textAlignment="center"
         android:textColor="#757575"
         android:visibility="gone"

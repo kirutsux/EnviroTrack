@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoDetails2Binding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -134,13 +135,29 @@ class PtoDetailsFragment : Fragment() {
 
                         // ✅ Feedback visibility
                         when (status.lowercase(Locale.getDefault())) {
-                            "approved", "rejected" -> {
+                            "approved" -> {
+                                btnApprove.visibility = View.GONE
+                                btnReject.visibility = View.GONE
+                                inputFeedback.visibility = if (feedback.isNotBlank()) View.VISIBLE else View.GONE
+                                inputFeedback.setText(feedback)
+                                inputFeedback.isEnabled = false
+                                inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+
+                                // ✅ Show certificate URL if approved
+                                val certificateUrl = doc.getString("certificateUrl")
+                                tvSelectedFile.visibility = if (!certificateUrl.isNullOrBlank()) View.VISIBLE else View.GONE
+                                tvSelectedFile.text = certificateUrl?.substringAfterLast('/')?.substringBefore('?') ?: ""
+                            }
+                            "rejected" -> {
                                 btnApprove.visibility = View.GONE
                                 btnReject.visibility = View.GONE
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                                 inputFeedback.isEnabled = false
                                 inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+
+                                // ❌ Hide certificate if rejected
+                                tvSelectedFile.visibility = View.GONE
                             }
                             else -> {
                                 btnApprove.visibility = View.VISIBLE
@@ -148,6 +165,9 @@ class PtoDetailsFragment : Fragment() {
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.isEnabled = true
                                 inputFeedback.setText(feedback)
+
+                                // Hide certificate for pending
+                                tvSelectedFile.visibility = View.GONE
                             }
                         }
                     }
@@ -311,45 +331,43 @@ class PtoDetailsFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
+                // Navigate back to EMB dashboard
                 if (isAdded) {
                     val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // ✅ Notifications
+                // ✅ Send notifications using NotificationManager
                 db.collection("opms_pto_applications").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
                         val companyName = doc.getString("establishmentName") ?: "Unknown Establishment"
                         val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notificationForPCO = hashMapOf(
-                            "receiverId" to pcoUid,
-                            "receiverType" to "pco",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
-                            "message" to if (isApproved)
+                        // PCO notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = pcoUid,
+                            title = if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
+                            message = if (isApproved)
                                 "Your Permit to Operate application has been approved."
                             else
                                 "Your Permit to Operate application has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                            category = "approval",
+                            priority = "high",
+                            module = "PTO",
+                            documentId = id
                         )
 
-                        val notificationForEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "PTO Application ${status.uppercase()}",
-                            "message" to "You have $status a PTO application for $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // EMB notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = embUid,
+                            title = "PTO Application ${status.uppercase()}",
+                            message = "You have $status a PTO application for $companyName.",
+                            category = "system",
+                            priority = "high",
+                            module = "PTO",
+                            documentId = id
                         )
-
-                        db.collection("notifications").add(notificationForPCO)
-                        db.collection("notifications").add(notificationForEMB)
                     }
             }
             .addOnFailureListener { e ->
@@ -357,6 +375,7 @@ class PtoDetailsFragment : Fragment() {
                 Log.e("PTO_REVIEW", "❌ Failed to update PTO status", e)
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

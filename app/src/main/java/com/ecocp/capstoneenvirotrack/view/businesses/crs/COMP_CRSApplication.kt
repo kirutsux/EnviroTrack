@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.Timestamp
@@ -273,70 +274,43 @@ class COMP_CRSApplication : Fragment() {
             "dateSubmitted" to Date()
         )
 
-        db.collection("crs_applications")
-            .document(uid)
-            .set(applicationData)
+        val docRef = db.collection("crs_applications").document(uid)
+
+        docRef.set(applicationData)
             .addOnSuccessListener {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
                 clearFields()
                 findNavController().navigateUp()
 
+                // ----------------------------------------------------------------------
                 // ✅ Notify PCO (self)
-                sendNotification(
+                // ----------------------------------------------------------------------
+                NotificationManager.sendNotificationToUser(
                     receiverId = uid,
-                    receiverType = "PCO",
                     title = "CRS Submission",
                     message = "You have successfully submitted a Company Registration application.",
-                    type = "submission"
+                    category = "submission",
+                    priority = "medium",
+                    module = "CRS",
+                    documentId = uid
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New CRS Application",
-                                message = "A new Company Registration System application has been submitted by a PCO.",
-                                type = "alert"
-                            )
-                        }
-                    }
+                // ----------------------------------------------------------------------
+                // ✅ Notify all EMB admins
+                // ----------------------------------------------------------------------
+                NotificationManager.sendToAllEmb(
+                    title = "New CRS Application",
+                    message = "A new Company Registration System application has been submitted by a PCO.",
+                    category = "alert",
+                    priority = "high",
+                    module = "CRS",
+                    documentId = uid
+                )
             }
             .addOnFailureListener { e ->
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Error submitting: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-    }
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

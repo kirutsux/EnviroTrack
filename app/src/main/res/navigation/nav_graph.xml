@@ -101,6 +101,27 @@
             app:destination="@id/serviceProviderDashboard" />
     </fragment>
 
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.notifications.NotificationsFragment"
+        tools:layout="@layout/fragment_notifications">
+    </fragment>
+    <!-- Global action -->
+    <action
+        android:id="@+id/action_global_notificationsFragment"
+        app:destination="@id/notificationsFragment" />
+
+    <fragment
+        android:id="@+id/embnotificationsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.notifications.EMBNotificationsFragment"
+        tools:layout="@layout/fragment_emb_notifications">
+    </fragment>
+
+    <!-- Global action -->
+    <action
+        android:id="@+id/action_global_embnotificationsFragment"
+        app:destination="@id/embnotificationsFragment" />
+
     <!-- 🧰 Service Provider Registration -->
     <fragment
         android:id="@+id/SP_RegistrationFragment"
@@ -136,6 +157,19 @@
             app:destination="@id/embPCOFragment" />
     </fragment>
 
+    <!-- CNC DASHBOARD -->
+    <fragment
+        android:id="@+id/cncEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment"
+        android:label="EMB CNC Dashboard"
+        tools:layout="@layout/fragment_cnc_emb_dashboard">
+        <deepLink
+            app:uri="myapp://emb/cnc/{documentId}" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_embcncDashboardFragment"
+        app:destination="@id/cncEmbDashboardFragment" />
+
     <!-- 🧰 Service Provider Dashboard -->
     <fragment
         android:id="@+id/serviceProviderDashboard"
@@ -154,6 +188,21 @@
             app:popUpToInclusive="true" />
     </fragment>
 
+
+    <!-- EMB PCO Dashboard -->
+    <fragment
+        android:id="@+id/pcoEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.pcoacc.PcoEmbDashboardFragment"
+        android:label="EMB PCO Dashboard"
+        tools:layout="@layout/fragment_pco_emb_dashboard">
+        <deepLink
+            app:uri="myapp://emb/accreditation/{documentId}" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_embpcoaccDashboardFragment"
+        app:destination="@id/pcoEmbDashboardFragment" />
+
+
     <!-- 🗂️ Business: PCO Table/List -->
     <fragment
         android:id="@+id/COMP_PCO"
@@ -167,7 +216,12 @@
         <action
             android:id="@+id/action_COMP_PCO_to_COMP_PCOAccreditation"
             app:destination="@id/COMP_PCOAccreditation" />
+        <deepLink
+            app:uri="myapp://accreditation/{documentId}" />
     </fragment>
+    <action
+        android:id="@+id/action_global_pcoaccDashboardFragment"
+        app:destination="@id/COMP_PCO" />
 
     <!-- 🏠 PCO Dashboard -->
     <fragment
@@ -208,6 +262,19 @@
             android:id="@+id/action_pcoDashboard_to_aboutUsFragment"
             app:destination="@id/aboutUsFragment" />
     </fragment>
+
+    <!-- CNC DASHBOARD -->
+    <fragment
+        android:id="@+id/cncDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncDashboardFragment"
+        android:label="CNC Dashboard"
+        tools:layout="@layout/fragment_cnc_dashboard">
+        <deepLink
+            app:uri="myapp://cnc/{documentId}" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_cncDashboardFragment"
+        app:destination="@id/cncDashboardFragment" />
 
     <fragment
         android:id="@+id/checklistFragment"
@@ -389,7 +456,53 @@
         <action
             android:id="@+id/action_COMP_CRS_to_COMP_CRSApplication"
             app:destination="@id/COMP_CRSApplication" />
+        <deepLink
+            app:uri="myapp://crs/{documentId}" />
     </fragment>
+    <action
+        android:id="@+id/action_global_crsDashboardFragment"
+        app:destination="@id/COMP_CRS" />
+
+    <!-- CRS DASHBOARD EMB -->
+    <fragment
+        android:id="@+id/crsEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.crs.CrsEmbDashboardFragment"
+        android:label="EMB CRS Dashboard"
+        tools:layout="@layout/fragment_crs_emb_dashboard">
+        <deepLink
+            app:uri="myapp://emb/crs/{documentId}" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_embcrsDashboardFragment"
+        app:destination="@id/crsEmbDashboardFragment" />
+
+    <fragment
+        android:id="@+id/opmsDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsDashboardFragment"
+        android:label="OPMS Dashboard"
+        tools:layout="@layout/fragment_opms_dashboard">
+        <deepLink
+            app:uri="myapp://opms/{documentId}" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_opmsDashboardFragment"
+        app:destination="@id/opmsDashboardFragment" />
+
+    <!-- OPMS EMB Dashboard -->
+    <fragment
+    android:id="@+id/opmsEmbDashboardFragment"
+    android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.OpmsEmbDashboardFragment"
+    android:label="EMB OPMS Dashboard"
+    tools:layout="@layout/fragment_opms_emb_dashboard">
+    <deepLink
+        app:uri="myapp://emb/pto/{documentId}" />
+    <deepLink
+        app:uri="myapp://emb/discharge-permit/{documentId}" />
+</fragment>
+    <action
+        android:id="@+id/action_global_embopmsDashboardFragment"
+        app:destination="@id/opmsEmbDashboardFragment" />
+
 
     <fragment
         android:id="@+id/COMP_CRSApplication"

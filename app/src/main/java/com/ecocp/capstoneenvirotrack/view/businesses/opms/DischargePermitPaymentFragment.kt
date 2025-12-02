@@ -117,7 +117,7 @@ class DischargePermitPaymentFragment : Fragment() {
         val paymentData = mapOf(
             "amount" to 50,
             "currency" to "PHP",
-            "status" to "Paid",
+            "paymentStatus" to "Paid",
             "paymentMethod" to "Stripe",
             "paymentTimestamp" to Timestamp.now() // renamed key to avoid overwriting main timestamp
         )

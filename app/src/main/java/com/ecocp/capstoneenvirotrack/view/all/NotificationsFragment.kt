@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.adapter.NotificationAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentNotificationsBinding
 import com.ecocp.capstoneenvirotrack.model.NotificationModel
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -23,6 +22,7 @@ class NotificationsFragment : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+
     private lateinit var adapter: NotificationAdapter
     private val notifList = mutableListOf<NotificationModel>()
 
@@ -36,6 +36,9 @@ class NotificationsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.btnBack.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
         setupRecyclerView()
         fetchNotifications()
     }
@@ -45,7 +48,6 @@ class NotificationsFragment : Fragment() {
         binding.recyclerNotifications.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerNotifications.adapter = adapter
     }
-
 
     private fun fetchNotifications() {
         val userId = auth.currentUser?.uid ?: return
@@ -57,14 +59,18 @@ class NotificationsFragment : Fragment() {
                 if (e != null || snapshot == null) return@addSnapshotListener
 
                 val notifications = snapshot.documents.mapNotNull { doc ->
-                    val notif = doc.toObject(NotificationModel::class.java)
-                    notif?.id = doc.id
-                    notif
+                    doc.toObject(NotificationModel::class.java)?.apply {
+                        // Only set documentId if you need the Firestore doc ID in your app
+                        if (documentId.isNullOrEmpty()) {
+                            documentId = doc.id
+                        }
+                    }
                 }
 
                 displayGroupedNotifications(notifications)
             }
     }
+
 
     private fun displayGroupedNotifications(notifications: List<NotificationModel>) {
         notifList.clear()
@@ -73,16 +79,16 @@ class NotificationsFragment : Fragment() {
         val yesterday = mutableListOf<NotificationModel>()
         val earlier = mutableListOf<NotificationModel>()
 
-        val calendar = Calendar.getInstance()
-        val todayDate = getDayString(calendar.time)
-        calendar.add(Calendar.DATE, -1)
-        val yesterdayDate = getDayString(calendar.time)
+        val cal = Calendar.getInstance()
+        val todayStr = getDayString(cal.time)
+        cal.add(Calendar.DATE, -1)
+        val yesterdayStr = getDayString(cal.time)
 
         for (notif in notifications) {
             val notifDate = notif.timestamp?.toDate()?.let { getDayString(it) }
             when (notifDate) {
-                todayDate -> today.add(notif)
-                yesterdayDate -> yesterday.add(notif)
+                todayStr -> today.add(notif)
+                yesterdayStr -> yesterday.add(notif)
                 else -> earlier.add(notif)
             }
         }
@@ -98,12 +104,8 @@ class NotificationsFragment : Fragment() {
 
     private fun buildSection(title: String, items: List<NotificationModel>): List<NotificationModel> {
         if (items.isEmpty()) return emptyList()
-        val sectionHeader = NotificationModel(
-            title = title,
-            message = "",
-            isHeader = true
-        )
-        return listOf(sectionHeader) + items
+        val header = NotificationModel(title = title, isHeader = true)
+        return listOf(header) + items
     }
 
     private fun getDayString(date: Date): String {

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoReviewBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -37,12 +38,23 @@ class PtoReviewFragment : Fragment() {
         fetchPtoDetails()
 
         binding.btnEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.ptoFormFragment, false)
+            if (currentDocId != null) {
+                val bundle = Bundle().apply {
+                    putString("applicationId", currentDocId) // Pass the document ID only
+                }
+                findNavController().navigate(
+                    R.id.action_ptoReviewFragment_to_ptoEditInfoFragment,
+                    bundle
+                )
+            } else {
+                Toast.makeText(requireContext(), "No application found to edit.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.btnSubmitApplication.setOnClickListener {
             submitApplication()
         }
+
     }
 
     private fun fetchPtoDetails() {
@@ -84,7 +96,7 @@ class PtoReviewFragment : Fragment() {
                 // --- Equipment Info ---
                 val equipmentName = doc.getString("equipmentName") ?: "-"
                 val fuelType = doc.getString("fuelType") ?: "-"
-                val emissions = doc.getString("emissions") ?: "-"
+                val emissions = doc.getString("emissionsSummary") ?: "-"
 
                 // --- Payment Info ---
                 val amount = doc.getDouble("amount") ?: 0.0
@@ -133,63 +145,46 @@ class PtoReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "PTO Submission",
+                // ----------------------------------------------------------------------
+                // ✅ Notify PCO (self) - confirmation
+                // ----------------------------------------------------------------------
+                NotificationManager.sendNotificationToUser(
+                    receiverId = uid!!,
+                    title = "PTO Submitted",
                     message = "You have successfully submitted a Permit to Operate application.",
-                    type = "submission"
+                    category = "submission",
+                    priority = "medium",
+                    module = "OPMS",
+                    documentId = currentDocId!!
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New PTO Application",
-                                message = "A new Permit to Operate has been submitted by a PCO.",
-                                type = "alert"
-                            )
-                        }
-                    }
+                // ----------------------------------------------------------------------
+                // ✅ Notify all EMB admins - alert
+                // Exclude the submitting PCO UID to prevent duplicates
+                // ----------------------------------------------------------------------
+                NotificationManager.sendToAllEmb(
+                    title = "New PTO Application",
+                    message = "A new Permit to Operate has been submitted by a PCO.",
+                    category = "alert",
+                    priority = "high",
+                    module = "OPMS",
+                    documentId = currentDocId!!,
+                    excludeUid = uid // <-- ensures PCO does not receive this notification
+                )
 
-                findNavController().navigate(R.id.opmsDashboardFragment)
+                // ----------------------------------------------------------------------
+                // ✅ Navigate back to OPMS Dashboard and clear back stack
+                // ----------------------------------------------------------------------
+                findNavController().navigate(
+                    R.id.opmsDashboardFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.opmsDashboardFragment, true)
+                        .build()
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
