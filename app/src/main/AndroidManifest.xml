@@ -30,6 +30,10 @@
             android:exported="false"
             android:theme="@style/Theme.CapstoneEnviroTrack" />
         <activity
+            android:name=".view.emb.smr.EmbSmrActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapstoneEnviroTrack"/>
+        <activity
             android:name=".view.serviceprovider.SPMainActivity"
             android:exported="false" />
         <activity

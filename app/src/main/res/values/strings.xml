@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">EnviroTrack</string>
     <string name="self_monitoring_report_smr_management">Self-Monitoring Report (SMR) Management</string>
     <string name="certificate_of_non_coverage_cnc_management">Certificate of Non-Coverage (CNC) Management</string>
     <string name="recent">Recent</string>

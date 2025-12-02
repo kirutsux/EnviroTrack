@@ -7,8 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.R
 import androidx.navigation.fragment.findNavController
+import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.api.OpenAiClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.model.AirPollution
