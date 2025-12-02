@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import java.util.Locale
 
 @Suppress("UNCHECKED_CAST", "PrivatePropertyName")
 class SmrReviewDetailsFragment : Fragment() {
@@ -270,7 +269,9 @@ class SmrReviewDetailsFragment : Fragment() {
             try {
                 for ((moduleName, moduleData) in modules) {
                     withContext(Dispatchers.Main) {
-                        progressDialog.setMessage("Analyzing $moduleName...")
+                        if (_binding != null) {
+                            progressDialog.setMessage("Analyzing $moduleName...")
+                        }
                     }
 
                     val prompt = """
@@ -287,21 +288,22 @@ class SmrReviewDetailsFragment : Fragment() {
                         max_tokens = 500
                     )
 
-                    val response = withTimeout(120_000){
+                    val response = withTimeout(3_600_000) {
                         OpenAiClient.instance.getChatCompletion(request)
                     }
 
-                    val moduleAnalysis = response.choices.firstOrNull()?.message?.content?:"No analysis for $moduleName"
+                    val moduleAnalysis = response.choices.firstOrNull()?.message?.content
+                        ?: "No analysis for $moduleName"
 
                     analyses.add("$moduleName: $moduleAnalysis")
                     currentModuleIndex++
 
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         progressDialog.setMessage("Completed $moduleName. Processing next...")
                     }
                 }
 
-                val fullAnalysis = analyses.joinToString("\n\n") {it}
+                val fullAnalysis = analyses.joinToString("\n\n") { it }
                 val finalPrompt = """
                     Compile the following module analyses into a comprehensive SMR compliance report:
                     $fullAnalysis
@@ -314,46 +316,66 @@ class SmrReviewDetailsFragment : Fragment() {
                     max_tokens = 1500
                 )
 
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     progressDialog.setMessage("Finalizing analysis...")
                 }
 
-                val finalResponse = withTimeout(120_000){
+                val finalResponse = withTimeout(3_600_000) {
                     OpenAiClient.instance.getChatCompletion(finalRequest)
                 }
-                val compiledAnalysis = finalResponse.choices.firstOrNull()?.message?.content ?: "Compilation failed."
+                val compiledAnalysis =
+                    finalResponse.choices.firstOrNull()?.message?.content ?: "Compilation failed."
 
-                withContext(Dispatchers.Main){
-                    binding.tvAiAnalysis.text = compiledAnalysis
-                    progressDialog.dismiss()
+                withContext(Dispatchers.Main) {
+                    if (_binding != null) {
+                        binding.tvAiAnalysis.text = compiledAnalysis
+                        progressDialog.dismiss()
 
-                    binding.tvCompletionPercentage.visibility = View.GONE
-                    binding.recyclerModules.visibility = View.GONE
-                    binding.btnAnalyze.visibility = View.GONE
-                    binding.tvAiAnalysis.visibility = View.VISIBLE
+                        binding.tvCompletionPercentage.visibility = View.GONE
+                        binding.recyclerModules.visibility = View.GONE
+                        binding.btnAnalyze.visibility = View.GONE
+                        binding.tvAiAnalysis.visibility = View.VISIBLE
 
-                    db.collection("smr_submissions").document(smr.id!!)
-                        .update("status", "Reviewed")
-                        .addOnSuccessListener { Log.d("Status Update", "Status updated to Reviewed for ${smr.id}") }
-                        .addOnFailureListener { e -> Log.d("Status Update", "Status update failed. ${e.message}}") }
+                        db.collection("smr_submissions").document(smr.id!!)
+                            .update("status", "Reviewed")
+                            .addOnSuccessListener {
+                                Log.d(
+                                    "Status Update",
+                                    "Status updated to Reviewed for ${smr.id}"
+                                )
+                            }
+                            .addOnFailureListener { e ->
+                                Log.d(
+                                    "Status Update",
+                                    "Status update failed. ${e.message}}"
+                                )
+                            }
+                    }
                 }
 
                 saveToCache("full_analysis_${smr.id}", compiledAnalysis)
-            }  catch (_: TimeoutCancellationException) {
+            } catch (_: TimeoutCancellationException) {
                 withContext(Dispatchers.Main) {
-                    binding.tvAiAnalysis.text = "AI analysis timed out."
-                    progressDialog.dismiss()
+                    if (_binding != null) {
+                        binding.tvAiAnalysis.text = "AI analysis timed out."
+                        progressDialog.dismiss()
+                    }
                 }
             } catch (e: retrofit2.HttpException) {
                 val errorBody = e.response()?.errorBody()?.string()
                 withContext(Dispatchers.Main) {
-                    binding.tvAiAnalysis.text = "AI analysis failed: HTTP ${e.code()} - $errorBody"
-                    progressDialog.dismiss()
+                    if (_binding != null) {
+                        binding.tvAiAnalysis.text =
+                            "AI analysis failed: HTTP ${e.code()} - $errorBody"
+                        progressDialog.dismiss()
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    binding.tvAiAnalysis.text = "AI analysis failed: ${e.localizedMessage}"
-                    progressDialog.dismiss()
+                    if (_binding != null) {
+                        binding.tvAiAnalysis.text = "AI analysis failed: ${e.localizedMessage}"
+                        progressDialog.dismiss()
+                    }
                 }
             }
         }

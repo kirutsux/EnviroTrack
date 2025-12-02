@@ -17,7 +17,7 @@
         android:id="@+id/tvCompletionPercentage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Completion: 0%"
+        android:text="Completion:"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginTop="16dp" />
@@ -26,7 +26,7 @@
         android:id="@+id/recyclerModules"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="20"
         android:layout_marginTop="16dp" />
 
     <Button
@@ -36,10 +36,16 @@
         android:text="Analyze with AI"
         android:layout_marginTop="16dp" />
 
-    <TextView
-        android:id="@+id/tvAiAnalysis"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="AI analysis will appear here."
-        android:layout_marginTop="16dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:layout_marginTop="16dp">
+        <TextView
+            android:id="@+id/tvAiAnalysis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="AI analysis will appear here." />
+    </ScrollView>
 </LinearLayout>
