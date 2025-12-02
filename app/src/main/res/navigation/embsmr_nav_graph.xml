@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/embsmr_nav_graph"
+    app:startDestination="@id/embSmrDashboardFragment">
+
+    <fragment
+        android:id="@+id/embSmrDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.smr.SmrEmbDashboardFragment"
+        android:label="EMB SMR Dashboard"
+        tools:layout="@layout/fragment_smr_emb_dashboard">
+
+        <action
+            android:id="@+id/action_embSmrDashboardFragment_to_embSmrReviewDetailsFragment"
+            app:destination="@id/embSmrReviewDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/embSmrReviewDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.smr.SmrReviewDetailsFragment"
+        android:label="Review SMR Details"
+        tools:layout="@layout/fragment_smr_review_details">
+
+        <action
+            android:id="@+id/action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment"
+            app:destination="@id/embSmrDashboardFragment" />
+    </fragment>
+
+</navigation>

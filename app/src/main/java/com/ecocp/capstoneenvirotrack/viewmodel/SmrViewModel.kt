@@ -2,9 +2,10 @@ package com.ecocp.capstoneenvirotrack.viewmodel
 
 import android.app.Application
 import android.util.Log
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.*
-import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
+//import androidx.datastore.preferences.core.*
+//import androidx.datastore.preferences.preferencesDataStore
 import com.ecocp.capstoneenvirotrack.api.OpenAiClient
 import com.ecocp.capstoneenvirotrack.model.*
 import kotlinx.coroutines.TimeoutCancellationException
@@ -15,7 +16,7 @@ import kotlinx.coroutines.withTimeout
 // --------------------------------------------
 // DATASTORE EXTENSION
 // --------------------------------------------
-private val Application.smrDataStore by preferencesDataStore("smr_ai_cache")
+//private val Application.smrDataStore by preferencesDataStore("smr_ai_cache")
 
 class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
     init {
@@ -41,95 +42,95 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
     )
     val moduleProgress: LiveData<Map<String, Int>> get() = _moduleProgress
 
-    // ---------------------------------------------------------
-    // DATASTORE KEYS
-    // ---------------------------------------------------------
-    private val KEY_LAST_PROMPT_HASH = stringPreferencesKey("last_prompt_hash")
-    private val KEY_LAST_AI_OUTPUT = stringPreferencesKey("last_ai_output")
+//     ---------------------------------------------------------
+//     DATASTORE KEYS
+//     ---------------------------------------------------------
+//    private val KEY_LAST_PROMPT_HASH = stringPreferencesKey("last_prompt_hash")
+//    private val KEY_LAST_AI_OUTPUT = stringPreferencesKey("last_ai_output")
 
-    // ---------------------------------------------------------
-    // SAVE TO DATASTORE
-    // ---------------------------------------------------------
-    private suspend fun saveToCache(promptHash: String, aiOutput: String) {
-        app.smrDataStore.edit { prefs ->
-            prefs[KEY_LAST_PROMPT_HASH] = promptHash
-            prefs[KEY_LAST_AI_OUTPUT] = aiOutput
-        }
-    }
+//     ---------------------------------------------------------
+//     SAVE TO DATASTORE
+//     ---------------------------------------------------------
+//    private suspend fun saveToCache(promptHash: String, aiOutput: String) {
+//        app.smrDataStore.edit { prefs ->
+//            prefs[KEY_LAST_PROMPT_HASH] = promptHash
+//            prefs[KEY_LAST_AI_OUTPUT] = aiOutput
+//        }
+//    }
 
     // ---------------------------------------------------------
     // LOAD FROM CACHE
     // ---------------------------------------------------------
-    private suspend fun loadCached(): Pair<String?, String?> {
-        val prefs = app.smrDataStore.data.first()
-        return Pair(
-            prefs[KEY_LAST_PROMPT_HASH],
-            prefs[KEY_LAST_AI_OUTPUT]
-        )
-    }
+//    private suspend fun loadCached(): Pair<String?, String?> {
+//        val prefs = app.smrDataStore.data.first()
+//        return Pair(
+//            prefs[KEY_LAST_PROMPT_HASH],
+//            prefs[KEY_LAST_AI_OUTPUT]
+//        )
+//    }
 
     // =========================================================
     // AI ANALYSIS WITH TIMEOUT + CACHE
     // =========================================================
-    fun analyzeSummary(prompt: String) {
-        viewModelScope.launch {
+//    fun analyzeSummary(prompt: String) {
+//        viewModelScope.launch {
 
-            val promptHash = prompt.hashCode().toString()
+//            val promptHash = prompt.hashCode().toString()
 
-            // LOAD CACHE FIRST
-            val (cachedHash, cachedOutput) = loadCached()
+//             LOAD CACHE FIRST
+//            val (cachedHash, cachedOutput) = loadCached()
 
-            // ---------------------------------------------
-            // USE CACHE IF PROMPT DIDN’T CHANGE
-            // ---------------------------------------------
-            if (cachedHash == promptHash && !cachedOutput.isNullOrEmpty()) {
-                _aiAnalysis.value = cachedOutput
-                return@launch
-            }
+//             ---------------------------------------------
+//             USE CACHE IF PROMPT DIDN’T CHANGE
+//             ---------------------------------------------
+//            if (cachedHash == promptHash && !cachedOutput.isNullOrEmpty()) {
+//                _aiAnalysis.value = cachedOutput
+//                return@launch
+//            }
 
-            // ---------------------------------------------
-            // OTHERWISE → NEW AI REQUEST WITH TIMEOUT
-            // ---------------------------------------------
-            try {
-                val request = ChatRequest(
-                    model = "gpt-4.1-mini",
-                    messages = listOf(
-                        ApiMessage(
-                            role = "system",
-                            content = "You are an environmental compliance AI assistant..."
-                        ),
-                        ApiMessage(
-                            role = "user",
-                            content = prompt
-                        )
-                    )
-                )
+//             ---------------------------------------------
+//             OTHERWISE → NEW AI REQUEST WITH TIMEOUT
+//             ---------------------------------------------
+//            try {
+//                val request = ChatRequest(
+//                    model = "gpt-4.1-mini",
+//                    messages = listOf(
+//                        ApiMessage(
+//                            role = "system",
+//                            content = "You are an environmental compliance AI assistant..."
+//                        ),
+//                        ApiMessage(
+//                            role = "user",
+//                            content = prompt
+//                        )
+//                    )
+//                )
+//
+//                val response = withTimeout(10_000) {
+//                    OpenAiClient.instance.getChatCompletion(request)
+//                }
+//
+//                val output = response.choices.firstOrNull()?.message?.content
+//                    ?: "No analysis generated."
+//
+//                _aiAnalysis.value = output
+//                saveToCache(promptHash, output)
 
-                val response = withTimeout(10_000) {
-                    OpenAiClient.instance.getChatCompletion(request)
-                }
-
-                val output = response.choices.firstOrNull()?.message?.content
-                    ?: "No analysis generated."
-
-                _aiAnalysis.value = output
-                saveToCache(promptHash, output)
-
-            } catch (e: TimeoutCancellationException) {
-                if (!cachedOutput.isNullOrEmpty()) {
-                    _aiAnalysis.value =
-                        "⚠️ AI request timed out. Loaded cached analysis.\n\n$cachedOutput"
-                } else {
-                    _aiAnalysis.value =
-                        "⚠️ AI request timed out and no cached analysis is available."
-                }
-
-            } catch (e: Exception) {
-                _aiAnalysis.value = "AI analysis failed: ${e.message}"
-            }
-        }
-    }
-
+//            } catch (e: TimeoutCancellationException) {
+//                if (!cachedOutput.isNullOrEmpty()) {
+//                    _aiAnalysis.value =
+//                        "⚠️ AI request timed out. Loaded cached analysis.\n\n$cachedOutput"
+//                } else {
+//                    _aiAnalysis.value =
+//                        "⚠️ AI request timed out and no cached analysis is available."
+//                }
+//
+//            } catch (e: Exception) {
+//                _aiAnalysis.value = "AI analysis failed: ${e.message}"
+//            }
+//        }
+//    }
+//
     // =========================================================
     // SMR MODULE UPDATES
     // =========================================================
