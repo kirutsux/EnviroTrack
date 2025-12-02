@@ -134,7 +134,7 @@ class AiFaqBotFragment : Fragment() {
                 )
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:5000/ask")
+                    .url("http://10.0.2.2:3000/ask")
                     .post(body)
                     .build()
 

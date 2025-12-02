@@ -64,7 +64,6 @@ class SP_Payments : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-
     ): View? {
 
         val view = inflater.inflate(R.layout.fragment_sp__payments, container, false)
@@ -74,11 +73,9 @@ class SP_Payments : Fragment() {
 
         // Bind booking-specific views if present in the layout (safe)
 
-
         paymentsContainer = view.findViewById(R.id.payments_list_container)
 
         // optional tsd section (may be absent in layout)
-
 
         // hide TSD-only UI when transporter is using this screen (will adjust after detection)
         if (userRole == "TRANSPORTER") {
@@ -280,9 +277,7 @@ class SP_Payments : Fragment() {
                 paymentsContainer.removeAllViews()
                 if (snap != null && !snap.isEmpty) {
                     for (doc in snap.documents) {
-                        val amount = doc.getDouble("amount")
-                            ?: doc.getLong("amount")?.toDouble()
-                            ?: 0.0
+                        val amount = doc.getDouble("amount") ?: doc.getLong("amount")?.toDouble() ?: 0.0
                         val method = doc.getString("method") ?: "Unknown"
                         val reference = doc.getString("reference") ?: ""
                         val timestamp = doc.getTimestamp("timestamp")
@@ -668,7 +663,6 @@ class SP_Payments : Fragment() {
 
         container.addView(row)
     }
-
 
     // ----------------------------
     // TSD: fetch generator name then render

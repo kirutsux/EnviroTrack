@@ -211,7 +211,7 @@ class SP_TaskUpdateDetails : Fragment() {
                     (m[key] as? String)?.trim().takeUnless { it.isNullOrEmpty() } ?: alt
 
                 // ---------------------------------
-                // UPDATE LABELS FOR TSD MODE ONLY
+                // UPDATE LABELS FOR TSD MODE ONLY (kept as-is)
                 // ---------------------------------
                 try {
                     val card = requireView().findViewById<View>(R.id.cardTaskInfo)
@@ -234,11 +234,37 @@ class SP_TaskUpdateDetails : Fragment() {
                 } catch (_: Exception) {}
 
                 // ---------------------------------
-                // FIELDS
+                // FIELDS (CHANGES: prefer tsdName; fallback to wasteType instead of "Unknown";
+                // if tsdName equals wasteType then show timestamp in company slot)
                 // ---------------------------------
-                txtCompanyName.text = s("facilityName", s("facility", "Unknown"))
+                val facilityNameRaw = s("facilityName", s("facility", ""))
+                val tsdNameRaw = s("tsdName", "")
+                val wasteRaw = s("wasteType", s("treatmentInfo", s("treatment", s("waste", ""))))
+                val bookingRef = s("refNumber", s("bookingId", id))
+
+                // choose timestamp if needed (preferred field 'timestamp', fallback 'dateCreated')
+                val tsCandidate = (m["timestamp"] as? com.google.firebase.Timestamp)
+                    ?: (m["dateCreated"] as? com.google.firebase.Timestamp)
+                    ?: (m["confirmedAt"] as? com.google.firebase.Timestamp)
+                val tsDisplay = tsCandidate?.toDate()?.let {
+                    android.text.format.DateFormat.format("MMM dd, yyyy hh:mm a", it).toString()
+                } ?: ""
+
+                // decide what to show in company name:
+                // Prefer tsdName if it's present and not equal to waste type.
+                // If tsdName is exactly the waste type (e.g. "Food Waste"), show the timestamp instead.
+                // If none of those, fallback to facilityName, then to waste type, then to "Unknown".
+                val companyToShow = when {
+                    tsdNameRaw.isNotBlank() && !tsdNameRaw.equals(wasteRaw, ignoreCase = true) -> tsdNameRaw
+                    tsdNameRaw.isNotBlank() && tsdNameRaw.equals(wasteRaw, ignoreCase = true) && tsDisplay.isNotBlank() -> tsDisplay
+                    facilityNameRaw.isNotBlank() -> facilityNameRaw
+                    wasteRaw.isNotBlank() -> wasteRaw
+                    else -> "Unknown"
+                }
+
+                txtCompanyName.text = companyToShow
                 txtCompanyAddress.text = s("location", "")
-                txtTaskRef.text = "Ref: ${s("refNumber", s("bookingId", id))}"
+                txtTaskRef.text = "Ref: $bookingRef"
 
                 val status = s("status", s("bookingStatus", "Pending"))
                 updateStatusPill(status)
@@ -247,8 +273,9 @@ class SP_TaskUpdateDetails : Fragment() {
                 val treatment = s("treatmentInfo", s("treatment", s("notes", "-")))
                 txtOriginDestination.text = treatment.ifEmpty { "-" }
 
-                val waste = s("wasteType", s("waste", ""))
-                txtWasteType.text = if (waste.isNotEmpty()) waste else treatment
+                // waste display should always show the waste type (if exists), otherwise treatment
+                val waste = if (wasteRaw.isNotBlank()) wasteRaw else treatment
+                txtWasteType.text = if (waste.isNotEmpty()) waste else "-"
 
                 txtQuantity.text = when (val q = m["quantity"]) {
                     is Number -> q.toString()
@@ -256,7 +283,7 @@ class SP_TaskUpdateDetails : Fragment() {
                     else -> ""
                 }
 
-                // Payment mapping
+                // Payment mapping (keeps original behavior)
                 val total = (m["totalPayment"] as? Number)?.toDouble()
                 val rate = (m["rate"] as? Number)?.toDouble()
                 txtPackaging.text =
@@ -268,17 +295,15 @@ class SP_TaskUpdateDetails : Fragment() {
 
                 txtSpecialInstructions.text = s("specialInstructions", s("notes", "-"))
 
-                // Attachments
+                // Attachments (keeps original behavior)
                 uploadedFiles.clear()
-
                 (m["previousRecordUrl"] as? String)?.let { if (it.isNotBlank()) uploadedFiles.add(Uri.parse(it)) }
                 (m["certificateUrl"] as? String)?.let { if (it.isNotBlank()) uploadedFiles.add(Uri.parse(it)) }
-
                 val cp = m["collectionProof"]
                 if (cp is List<*>) cp.mapNotNull { it as? String }.forEach { uploadedFiles.add(Uri.parse(it)) }
-
                 displayUploadedFiles()
 
+                // spinner selection (keeps original behavior)
                 val options = resources.getStringArray(R.array.transporter_status_options)
                 spinnerStatus.setSelection(options.indexOf(status).coerceAtLeast(0))
             }
@@ -286,6 +311,7 @@ class SP_TaskUpdateDetails : Fragment() {
                 Toast.makeText(requireContext(), "Failed to load booking.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
 
 
@@ -432,6 +458,8 @@ class SP_TaskUpdateDetails : Fragment() {
             spinnerStatus.isEnabled = true
         }
     }
+
+
 
 
     private fun updateBookingInFirestore(collection: String, id: String, map: Map<String, Any>) {

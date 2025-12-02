@@ -260,7 +260,7 @@ class SP_ServiceReport : Fragment() {
 
             val m = snap.data ?: emptyMap<String, Any>()
 
-            // bookingId
+            // bookingId & ref
             val bookingId = (m["bookingId"] as? String) ?: snap.id
             binding.txtBookingId.text = bookingId
             binding.txtReportRef.text = "Ref: $bookingId"
@@ -268,10 +268,26 @@ class SP_ServiceReport : Fragment() {
             // status (optional)
             binding.txtSmallStatus.text = (m["bookingStatus"] as? String) ?: (m["status"] as? String) ?: ""
 
-            // facilityName -> company header (and providerName field)
+            // --- TOP HEADER: show wasteType as company header (per your request) ---
+            val wasteType = (m["wasteType"] as? String)?.trim()
+                .takeUnless { it.isNullOrEmpty() }
+                ?: (m["treatmentInfo"] as? String)?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: (m["treatment"] as? String)?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: ""
+
+            // Prefer tsdName for provider slot, fallback to facilityName/companyName
+            val tsdName = (m["tsdName"] as? String)?.trim().orEmpty()
             val facilityName = (m["facilityName"] as? String).orEmpty()
-            binding.txtCompanyName.text = facilityName
-            binding.txtProviderName.text = facilityName // show facility name in provider slot for TSD POV
+            val companyHeader = if (wasteType.isNotBlank()) {
+                wasteType
+            } else {
+                tsdName.ifEmpty { facilityName }
+            }
+
+            binding.txtCompanyName.text = companyHeader.ifEmpty { "Unknown" }
+
+            // Show tsdName (or facility) in providerName slot
+            binding.txtProviderName.text = if (tsdName.isNotBlank()) tsdName else facilityName
 
             // contact number
             binding.txtProviderContact.text = (m["contactNumber"] as? String)
@@ -283,13 +299,21 @@ class SP_ServiceReport : Fragment() {
             binding.txtCompanyAddress.text = location
             binding.txtLocation.text = location
 
-            // booking date (dateCreated canonical)
-            val bookingTs = (m["dateCreated"] as? Timestamp)
-                ?: (m["bookingDate"] as? Timestamp)
-                ?: (m["dateBooked"] as? Timestamp)
-            binding.txtBookingDate.text = bookingTs?.toDate()?.let {
-                DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString()
-            } ?: ""
+            // ---------- booking date slot: prefer confirmedAt, else fallback to canonical date ----------
+            val confirmedTs = (m["confirmedAt"] as? com.google.firebase.Timestamp)
+                ?: (m["confirmed_at"] as? com.google.firebase.Timestamp) // tolerant key
+            if (confirmedTs != null) {
+                binding.txtBookingDate.text = confirmedTs.toDate().let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString()
+                }
+            } else {
+                val bookingTs = (m["dateCreated"] as? com.google.firebase.Timestamp)
+                    ?: (m["bookingDate"] as? com.google.firebase.Timestamp)
+                    ?: (m["dateBooked"] as? com.google.firebase.Timestamp)
+                binding.txtBookingDate.text = bookingTs?.toDate()?.let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString()
+                } ?: ""
+            }
 
             // quantity
             binding.txtQuantity.text = when (val q = m["quantity"]) {
@@ -298,7 +322,7 @@ class SP_ServiceReport : Fragment() {
                 else -> ""
             }
 
-            // payment: rate or totalPayment -> txtPayment
+            // payment: rate or totalPayment -> txtPayment (keeps previous behavior)
             val rate = (m["rate"] as? Number)?.toDouble()
             val total = (m["totalPayment"] as? Number)?.toDouble()
             binding.txtPayment.text = when {
@@ -310,7 +334,7 @@ class SP_ServiceReport : Fragment() {
             // treatmentInfo -> txtTreatmentInfo
             binding.txtTreatmentInfo.text = (m["treatmentInfo"] as? String) ?: ""
 
-            // Attachments: prefer collectionProof array then certificateUrl / previousRecordUrl
+            // Attachments (unchanged)
             val attachments = mutableListOf<String>()
             (m["collectionProof"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
             (m["certificateUrl"] as? String)?.let { attachments.add(it) }
@@ -334,6 +358,8 @@ class SP_ServiceReport : Fragment() {
             }
         }
     }
+
+
 
     private fun isImageUrl(url: String?): Boolean {
         if (url == null) return false

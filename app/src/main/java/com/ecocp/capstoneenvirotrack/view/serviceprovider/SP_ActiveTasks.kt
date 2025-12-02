@@ -18,14 +18,6 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-data class TransporterBooking(
-    val bookingId: String = "",
-    val serviceProviderName: String = "",
-    val serviceProviderCompany: String = "",
-    val bookingStatus: String = "",
-    val bookingDate: Timestamp? = null
-)
-
 class SP_ActiveTasks : Fragment() {
 
     private lateinit var recyclerActiveTasks: RecyclerView
@@ -76,10 +68,11 @@ class SP_ActiveTasks : Fragment() {
 
     /**
      * Load bookings:
-     * - If current user is TSD: query tsd_bookings for facilityId OR tsdFacilityId with status == "Confirmed"
+     * - If current user is TSD: query tsd_bookings for ownership (tsdId / facilityId / tsdFacilityId)
+     *   and filter client-side for confirmed statuses.
      * - Otherwise: query transport_bookings with bookingStatus == "Confirmed"
      *
-     * This function mirrors transport_bookings data mapping for the list rows (does not modify transport_bookings).
+     * Transporter side left unchanged.
      */
     private fun loadAllConfirmedBookings(adapter: ActiveTasksAdapter, done: () -> Unit) {
         val uid = auth.currentUser?.uid
@@ -130,62 +123,119 @@ class SP_ActiveTasks : Fragment() {
                 }
         }
 
+        // statuses we treat as "active" — compare case-insensitively
+        val activeStatusSet = setOf("confirmed", "in transit", "delivered", "completed", "in_transit")
+
         checkIfCurrentUserIsTsd { isTsd ->
             if (isTsd) {
-                // USER IS TSD -> mirror transport row mapping using tsd_bookings data
+                // USER IS TSD -> fetch candidate docs by ownership fields, then filter client-side
+                // Accept Pairs here because you construct lists with "id to data"
+                fun processSnapshot(snapDocs: List<Pair<String, Map<String, Any>>>) {
+                    for ((id, map) in snapDocs) {
+                        if (seen.contains(id)) continue
+                        val rawStatus = (map["bookingStatus"] as? String)
+                            ?: (map["status"] as? String)
+                            ?: ""
+                        if (rawStatus.lowercase() !in activeStatusSet) continue
+
+                        val b = TransporterBooking(
+                            bookingId = id,
+                            serviceProviderName = (map["confirmedBy"] as? String) ?: "",
+                            serviceProviderCompany = (map["tsdName"] as? String)
+                                ?: (map["facilityName"] as? String)
+                                ?: (map["facility"] as? String)
+                                ?: "",
+                            bookingStatus = rawStatus,
+                            bookingDate = (map["timestamp"] as? Timestamp)
+                                ?: (map["dateCreated"] as? Timestamp)
+                                ?: (map["bookingDate"] as? Timestamp)
+                        )
+                        bookings.add(b); seen.add(id)
+                    }
+                }
+
+                // 1) Query by tsdId
                 db.collection("tsd_bookings")
-                    .whereEqualTo("facilityId", uid)
-                    .whereIn("status", listOf("Confirmed", "In Transit", "Delivered"))
+                    .whereEqualTo("tsdId", uid)
                     .get()
                     .addOnSuccessListener { snap1 ->
-                        for (doc in snap1.documents) {
-                            val id = doc.id
-                            if (seen.contains(id)) continue
-                            val map = doc.data ?: continue
-                            val b = TransporterBooking(
-                                bookingId = id,
-                                serviceProviderName = (map["confirmedBy"] as? String) ?: "",
-                                serviceProviderCompany = (map["facilityName"] as? String)
-                                    ?: (map["facility"] as? String) ?: "",
-                                bookingStatus = (map["status"] as? String)
-                                    ?: (map["bookingStatus"] as? String) ?: "",
-                                bookingDate = map["dateCreated"] as? Timestamp
-                            )
-                            bookings.add(b); seen.add(id)
+                        val list1 = snap1.documents.mapNotNull { d ->
+                            val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                            d.id to dataMap
                         }
-
-                        // also check tsdFacilityId ownership
+                        processSnapshot(list1)
+                        // 2) Also query by facilityId (older key) if needed
                         db.collection("tsd_bookings")
-                            .whereEqualTo("tsdFacilityId", uid)
-                            .whereIn("status", listOf("Confirmed", "In Transit", "Delivered"))
+                            .whereEqualTo("facilityId", uid)
                             .get()
                             .addOnSuccessListener { snap2 ->
-                                for (doc in snap2.documents) {
-                                    val id = doc.id
-                                    if (seen.contains(id)) continue
-                                    val map = doc.data ?: continue
-                                    val b = TransporterBooking(
-                                        bookingId = id,
-                                        serviceProviderName = (map["confirmedBy"] as? String) ?: "",
-                                        serviceProviderCompany = (map["facilityName"] as? String)
-                                            ?: (map["facility"] as? String) ?: "",
-                                        bookingStatus = (map["status"] as? String)
-                                            ?: (map["bookingStatus"] as? String) ?: "",
-                                        bookingDate = map["dateCreated"] as? Timestamp
-                                    )
-                                    bookings.add(b); seen.add(id)
+                                val list2 = snap2.documents.mapNotNull { d ->
+                                    val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                                    d.id to dataMap
                                 }
-                                adapter.notifyDataSetChanged()
-                                done()
+                                processSnapshot(list2)
+                                // 3) Also query by tsdFacilityId (another possible key)
+                                db.collection("tsd_bookings")
+                                    .whereEqualTo("tsdFacilityId", uid)
+                                    .get()
+                                    .addOnSuccessListener { snap3 ->
+                                        val list3 = snap3.documents.mapNotNull { d ->
+                                            val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                                            d.id to dataMap
+                                        }
+                                        processSnapshot(list3)
+                                        // 4) Final fallback: try matching by tsdName/facilityName (companyName)
+                                        db.collection("service_providers").document(uid)
+                                            .get()
+                                            .addOnSuccessListener { spDoc ->
+                                                val tsdName = spDoc.getString("companyName")?.trim().orEmpty()
+                                                if (tsdName.isNotEmpty()) {
+                                                    db.collection("tsd_bookings")
+                                                        .whereEqualTo("tsdName", tsdName)
+                                                        .get()
+                                                        .addOnSuccessListener { snap4 ->
+                                                            val list4 = snap4.documents.mapNotNull { d ->
+                                                                val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                                                                d.id to dataMap
+                                                            }
+                                                            processSnapshot(list4)
+                                                            adapter.notifyDataSetChanged(); done()
+                                                        }
+                                                        .addOnFailureListener {
+                                                            adapter.notifyDataSetChanged(); done()
+                                                        }
+                                                } else {
+                                                    adapter.notifyDataSetChanged(); done()
+                                                }
+                                            }
+                                            .addOnFailureListener {
+                                                adapter.notifyDataSetChanged(); done()
+                                            }
+                                    }
+                                    .addOnFailureListener {
+                                        adapter.notifyDataSetChanged(); done()
+                                    }
                             }
                             .addOnFailureListener {
-                                adapter.notifyDataSetChanged()
-                                done()
+                                adapter.notifyDataSetChanged(); done()
                             }
                     }
                     .addOnFailureListener {
-                        adapter.notifyDataSetChanged()
-                        done()
+                        // If primary tsdId query fails, try fallback facilityId, then proceed similarly
+                        db.collection("tsd_bookings")
+                            .whereEqualTo("facilityId", uid)
+                            .get()
+                            .addOnSuccessListener { snap2 ->
+                                val list2 = snap2.documents.mapNotNull { d ->
+                                    val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                                    d.id to dataMap
+                                }
+                                processSnapshot(list2)
+                                adapter.notifyDataSetChanged(); done()
+                            }
+                            .addOnFailureListener {
+                                adapter.notifyDataSetChanged(); done()
+                            }
                     }
             } else {
                 // NOT TSD -> keep transport_bookings query EXACTLY as before (mirror behavior)
@@ -215,4 +265,3 @@ class SP_ActiveTasks : Fragment() {
         }
     }
 }
-

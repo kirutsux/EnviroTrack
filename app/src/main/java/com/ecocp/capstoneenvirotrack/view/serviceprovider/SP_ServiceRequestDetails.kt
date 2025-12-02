@@ -79,11 +79,11 @@ class SP_ServiceRequestDetails : Fragment() {
         transportDocId = arguments?.getString("transportDocId")
             ?: arguments?.getString("transport_id")
 
-// Only treat as TSD if explicitly passed via tsdDocId or requestId
+        // Only treat as TSD if explicitly passed via tsdDocId or requestId
         tsdDocId = arguments?.getString("tsdDocId")
             ?: arguments?.getString("requestId")
 
-// Force transporter mode if transportDocId was provided
+        // Force transporter mode if transportDocId was provided
         if (!transportDocId.isNullOrBlank()) {
             tsdDocId = null
         }
@@ -105,15 +105,16 @@ class SP_ServiceRequestDetails : Fragment() {
         val isTransporterMode = !transportDocId.isNullOrBlank() && tsdDocId.isNullOrBlank()
 
         if (isTsdMode) {
-            // TSD POV — hide transporter-only fields
-            binding.txtWasteType.visibility = View.GONE
-            binding.txtPackaging.visibility = View.GONE
+            // TSD POV — show waste type (user requested) but hide packaging & transporter-only notes
+            binding.txtWasteType.visibility = View.VISIBLE    // show wasteType
+            binding.txtPackaging.visibility = View.GONE      // packaging hidden for TSD
             binding.txtSpecialInstructions.visibility = View.GONE
             ensureTreatmentInfoViews()
 
             // subscribe to the TSD doc for live updates
             subscribeToTsdRequest(tsdDocId!!)
         } else if (isTransporterMode) {
+            // transporter behaviour unchanged
             binding.txtWasteType.visibility = View.VISIBLE
             binding.txtPackaging.visibility = View.VISIBLE
             binding.txtSpecialInstructions.visibility = View.VISIBLE
@@ -121,8 +122,7 @@ class SP_ServiceRequestDetails : Fragment() {
             // Use the unified loader: transport → TSD → bundle
             loadBookingFromTransportOrBundle(transportDocId!!, binding.root)
         } else {
-            // Fallback: if you passed a generic "bookingId" try to load either collection;
-            // otherwise bind from bundle/defaults.
+            // Fallback...
             val generic = arguments?.getString("bookingId") ?: arguments?.getString("id")
             if (!generic.isNullOrBlank()) {
                 loadBookingFromFirestore(generic)
@@ -131,8 +131,6 @@ class SP_ServiceRequestDetails : Fragment() {
             }
         }
     }
-
-
 
     /**
      * Programmatically create treatment info views and insert in the card info area (if missing).
@@ -282,7 +280,6 @@ class SP_ServiceRequestDetails : Fragment() {
 
         // Wire TSD upload buttons if present in layout (they may be null if not included)
 
-
         // Update status dialog for TSD (if button exists)
 
     }
@@ -351,18 +348,13 @@ class SP_ServiceRequestDetails : Fragment() {
             }
     }
 
-    /* ----------------------------
-       Transporter: one-time load for transport_bookings/{transportId}
-       (replaced with a snapshot listener so transport booking updates reflect immediately)
-       ---------------------------- */
-
-
     /**
      * Subscribe to TSD booking document and populate treatmentInfo + other fields. (live listener)
-     * (UNCHANGED - TSD handling kept exactly as before)
      */
     private fun subscribeToTsdRequest(tsdId: String) {
         binding.txtAttachments.text = "Loading attachments..."
+        // Ensure packaging hidden for TSD POV
+        binding.txtPackaging.visibility = View.GONE
         tsdListener?.remove()
         val ref = db.collection("tsd_bookings").document(tsdId)
         tsdListener = ref.addSnapshotListener { snap, err ->
@@ -386,18 +378,30 @@ class SP_ServiceRequestDetails : Fragment() {
             binding.txtDateRequested.text = pref ?: ((m["dateCreated"] as? Timestamp)?.toDate()
                 ?.let { DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString() } ?: "")
 
+            // Prefer tsdName, fallback facilityName/companyName
+            val tsdNameRaw = (m["tsdName"] as? String)?.trim().orEmpty()
             val facilityName = (m["facilityName"] as? String).orEmpty()
             val companyNameField = (m["companyName"] as? String).orEmpty()
-            val contactNumber = (m["contactNumber"] as? String).orEmpty()
-            val contactPersonName = (m["contactPerson"] as? String).orEmpty()
 
+            // Determine waste/treatment
+            val wasteRaw = (m["wasteType"] as? String)?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: (m["treatmentInfo"] as? String)?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: (m["treatment"] as? String)?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: ""
+
+            // company display: prefer tsdName, fallback facility/company, then waste, else empty
             val companyDisplay = when {
+                tsdNameRaw.isNotBlank() -> tsdNameRaw
                 facilityName.isNotBlank() -> facilityName
                 companyNameField.isNotBlank() -> companyNameField
+                wasteRaw.isNotBlank() -> wasteRaw
                 else -> ""
             }
             binding.txtCompanyName.text = companyDisplay
 
+            // Contact display unchanged
+            val contactNumber = (m["contactNumber"] as? String).orEmpty()
+            val contactPersonName = (m["contactPerson"] as? String).orEmpty()
             val contactDisplay = when {
                 contactNumber.isNotBlank() && contactPersonName.isNotBlank() -> "$contactPersonName — $contactNumber"
                 contactNumber.isNotBlank() -> contactNumber
@@ -406,8 +410,13 @@ class SP_ServiceRequestDetails : Fragment() {
             }
             binding.txtContactPerson.text = contactDisplay
 
-            // Hide transporter-only fields for TSD
-            binding.txtWasteType.visibility = View.GONE
+            // TSD: show waste type and set service type line to waste
+            val serviceTypeText = if (wasteRaw.isNotBlank()) "TSD - $wasteRaw" else "TSD Treatment"
+            binding.txtServiceType.text = serviceTypeText
+            binding.txtWasteType.visibility = View.VISIBLE
+            binding.txtWasteType.text = if (wasteRaw.isNotBlank()) wasteRaw else "-"
+
+            // hide transporter-only packaging & specialInstructions for TSD
             binding.txtPackaging.visibility = View.GONE
             binding.txtSpecialInstructions.visibility = View.GONE
 
@@ -425,14 +434,14 @@ class SP_ServiceRequestDetails : Fragment() {
                 else -> (m["amount"] as? String) ?: ""
             }
 
-            // show treatment info
+            // show treatment info in generated view
             ensureTreatmentInfoViews()
             val treatment = (m["treatmentInfo"] as? String) ?: (m["treatment"] as? String) ?: ""
             txtTreatmentInfoView?.text = treatment
             labelTreatmentInfoView?.visibility = View.VISIBLE
             txtTreatmentInfoView?.visibility = View.VISIBLE
 
-            // attachments combine
+            // attachments combine (unchanged)
             val attachments = mutableListOf<String>()
             (m["collectionProof"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
             (m["certificateUrl"] as? String)?.let { attachments.add(it) }
@@ -447,17 +456,14 @@ class SP_ServiceRequestDetails : Fragment() {
             currentCertificateUrl = (m["certificateUrl"] as? String)?.ifEmpty { null }
             currentPreviousRecordUrl = (m["previousRecordUrl"] as? String)?.ifEmpty { null }
 
-            // ------ STATUS: prefer bookingStatus, then status, else "Pending" ------
+            // status resolution (unchanged)
             val bookingStatus = when {
                 ((m["bookingStatus"] as? String)?.trim()?.isNotEmpty() == true) -> (m["bookingStatus"] as String).trim()
                 ((m["status"] as? String)?.trim()?.isNotEmpty() == true)        -> (m["status"] as String).trim()
                 else -> "Pending"
             }
-
-            // set the UI status pill so details reflect Firestore immediately
             binding.txtStatusPill.text = bookingStatus
 
-            // Visibility decision based on bookingStatus
             val finalStates = setOf("confirmed", "treated", "rejected", "received", "completed")
             val nonActionable = finalStates.contains(bookingStatus.lowercase())
 
@@ -467,17 +473,15 @@ class SP_ServiceRequestDetails : Fragment() {
                     binding.btnReject.visibility = View.GONE
                     binding.btnAccept.isEnabled = false
                     binding.btnReject.isEnabled = false
-                    Log.d(TAG, "TSD DECIDER: HIDING buttons because bookingStatus='$bookingStatus'")
                 } else {
                     binding.btnAccept.visibility = View.VISIBLE
                     binding.btnReject.visibility = View.VISIBLE
                     binding.btnAccept.isEnabled = true
                     binding.btnReject.isEnabled = true
-                    Log.d(TAG, "TSD DECIDER: SHOWING buttons because bookingStatus='$bookingStatus'")
                 }
             }
 
-            // clicking attachments opens first available
+            // attachments click handler (unchanged)
             val attText = binding.txtAttachments
             if (firstAttachment.isNotBlank()) {
                 attText.setOnClickListener {
@@ -593,7 +597,6 @@ class SP_ServiceRequestDetails : Fragment() {
                 callback(false)
             }
     }
-
 
     // Transporter helpers
     private fun acceptBooking(bookingId: String, callback: (Boolean) -> Unit) {
@@ -726,7 +729,6 @@ class SP_ServiceRequestDetails : Fragment() {
        Show status update dialog (TSD)
        (left intentionally as in your code)
        ---------------------------- */
-
 
     /* ----------------------------
        Helper: load TSD doc once (not listener) for refresh after upload/status change
@@ -883,7 +885,6 @@ class SP_ServiceRequestDetails : Fragment() {
             }
         }
     }
-
 
     private fun handleTsdReject(
         bookingId: String,
@@ -1054,13 +1055,16 @@ class SP_ServiceRequestDetails : Fragment() {
         binding.txtStatusPill.text = bookingStatus
         binding.txtNotes.text = notes
 
+        // Transporter must show waste/quantity/packaging
+        binding.txtWasteType.visibility = View.VISIBLE
         binding.txtWasteType.text = wasteType.ifEmpty { "-" }
         binding.txtQuantity.text = quantity.ifEmpty { "-" }
+        binding.txtPackaging.visibility = View.VISIBLE
         binding.txtPackaging.text = packaging.ifEmpty { "-" }
 
         // --- Payment status: if paymentStatus == "Paid" show "Paid" in amount, else show numeric amount ---
         // Prefer explicit "amount" field (number or string). Fallback to totalPayment / rate.
-// Only use paymentStatus as a last resort.
+        // Only use paymentStatus as a last resort.
         val amountField = m["amount"]
 
         val paymentStatusLower = (m["paymentStatus"] as? String)
@@ -1105,7 +1109,6 @@ class SP_ServiceRequestDetails : Fragment() {
             }
         }
 
-
         val firstAttachment = transportPlanUrl ?: storagePermitUrl ?: DEV_ATTACHMENT_URL
         setupAttachmentUI(firstAttachment)
 
@@ -1129,8 +1132,6 @@ class SP_ServiceRequestDetails : Fragment() {
         }
     }
 
-
-
     // ---------- REPLACE existing bindFromBundle() with this ----------
     private fun bindFromBundle() {
         // clear any previous ids so actions are not applied to a stale doc
@@ -1138,7 +1139,7 @@ class SP_ServiceRequestDetails : Fragment() {
         transportDocId = null
         // prefer explicit bundle args
         var companyName = arguments?.getString("companyName") ?: ""
-        val serviceType = arguments?.getString("serviceTitle") ?: "Transport Booking"
+        val serviceTypeArg = arguments?.getString("serviceTitle") ?: "Transport Booking"
         val location = arguments?.getString("origin") ?: "N/A"
         val dateRequested = arguments?.getString("dateRequested") ?: "N/A"
         val providerContact = arguments?.getString("providerContact") ?: "N/A"
@@ -1170,6 +1171,16 @@ class SP_ServiceRequestDetails : Fragment() {
                 .addOnFailureListener { /* ignore quietly */ }
         }
 
+        // Determine if args indicate TSD mode (tsdDocId/requestId present)
+        val isArgsTsd = (arguments?.containsKey("tsdDocId") == true) || (arguments?.containsKey("requestId") == true)
+
+        // If TSD and wasteType available, prefer TSD service type label
+        val serviceType = if (isArgsTsd && wasteTypeArg.isNotBlank()) {
+            "TSD - $wasteTypeArg"
+        } else {
+            serviceTypeArg
+        }
+
         // Set UI values (bundle-first)
         binding.txtCompanyName.text = if (companyName.isNotBlank()) companyName else "Unknown"
         binding.txtServiceType.text = serviceType
@@ -1185,9 +1196,23 @@ class SP_ServiceRequestDetails : Fragment() {
         // populate wasteType/quantity/packaging from args (fallback to placeholders)
         binding.txtWasteType.text = if (wasteTypeArg.isNotBlank()) wasteTypeArg else "-"
         binding.txtQuantity.text = if (quantityArg.isNotBlank()) quantityArg else "-"
-        binding.txtPackaging.text = if (packagingArg.isNotBlank()) packagingArg else "-"
-    }
 
+        // Show/hide transporter-only fields according to whether args indicate TSD
+        if (isArgsTsd) {
+            // TSD: show waste type, hide packaging & special instructions
+            binding.txtWasteType.visibility = View.VISIBLE
+            binding.txtPackaging.visibility = View.GONE
+            binding.txtSpecialInstructions.visibility = View.GONE
+            // clear packaging text to avoid stale values
+            binding.txtPackaging.text = ""
+        } else {
+            // Transporter/bundle view: show all
+            binding.txtWasteType.visibility = View.VISIBLE
+            binding.txtPackaging.visibility = View.VISIBLE
+            binding.txtSpecialInstructions.visibility = View.VISIBLE
+            binding.txtPackaging.text = if (packagingArg.isNotBlank()) packagingArg else "-"
+        }
+    }
 
     /* ----------------------------
        Utility: load booking by id (public) - tries tsd then transport
