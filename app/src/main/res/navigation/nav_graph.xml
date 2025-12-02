@@ -109,7 +109,7 @@
     <!-- Global action -->
     <action
         android:id="@+id/action_global_notificationsFragment"
-        app:destination="@id/notificationsFragment" />
+        app:destination="@id/notificationsFragment"/>
 
     <fragment
         android:id="@+id/embnotificationsFragment"
@@ -155,6 +155,9 @@
         <action
             android:id="@+id/action_embDashboard_to_embPCOFragment"
             app:destination="@id/embPCOFragment" />
+        <action
+            android:id="@+id/action_embDashboard_to_embnotificationsFragment"
+            app:destination="@id/embnotificationsFragment"/>
     </fragment>
 
     <!-- CNC DASHBOARD -->
@@ -261,6 +264,9 @@
         <action
             android:id="@+id/action_pcoDashboard_to_aboutUsFragment"
             app:destination="@id/aboutUsFragment" />
+        <action
+            android:id="@+id/action_COMP_Dashboard_to_notificationsFragment"
+            app:destination="@id/notificationsFragment"/>
     </fragment>
 
     <!-- CNC DASHBOARD -->

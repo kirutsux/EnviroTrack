@@ -139,7 +139,7 @@ class EMB_Dashboard : Fragment() {
                 .setPopEnterAnim(R.anim.slide_in_right)
                 .setPopExitAnim(R.anim.slide_out_left)
                 .build()
-            navController.navigate(R.id.action_global_embnotificationsFragment, bundle, options)
+            navController.navigate(R.id.action_embDashboard_to_embnotificationsFragment, bundle, options)
 
         }
     }
