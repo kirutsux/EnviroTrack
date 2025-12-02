@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.storage.FirebaseStorage
 
 class CncReviewDetailsFragment : Fragment() {
@@ -302,33 +303,32 @@ class CncReviewDetailsFragment : Fragment() {
                         val companyName = doc.getString("companyName") ?: "Unknown Company"
                         val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notifPCO = hashMapOf(
-                            "receiverId" to pcoId,
-                            "receiverType" to "pco",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "Application Approved" else "Application Rejected",
-                            "message" to if (isApproved)
+                        // PCO Notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = pcoId,
+                            title = if (isApproved) "Application Approved" else "Application Rejected",
+                            message = if (isApproved)
                                 "Your CNC application has been approved. Certificate is now available."
                             else
                                 "Your CNC application has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                            category = "approval",
+                            priority = "high",
+                            module = "CNC",
+                            documentId = id,
+                            actionLink = "cncDashboard/$id" // example deep link
                         )
 
-                        val notifEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "CNC Application ${status.uppercase()}",
-                            "message" to "You have $status a CNC application by $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // EMB Notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = embUid,
+                            title = "CNC Application ${status.uppercase()}",
+                            message = "You have $status a CNC application by $companyName.",
+                            category = "approval",
+                            priority = "high",
+                            module = "CNC",
+                            documentId = id,
+                            actionLink = "cncEmbDashboard/$id"
                         )
-
-                        db.collection("notifications").add(notifPCO)
-                        db.collection("notifications").add(notifEMB)
                     }
 
                 // ✅ Return to dashboard
@@ -338,6 +338,8 @@ class CncReviewDetailsFragment : Fragment() {
                 }
             }
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

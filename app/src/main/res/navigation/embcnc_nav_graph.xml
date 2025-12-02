@@ -17,6 +17,10 @@
             app:destination="@id/cncReviewDetailsFragment" />
     </fragment>
 
+    <action
+        android:id="@+id/action_global_embcncDashboardFragment"
+        app:destination="@id/cncEmbDashboardFragment" />
+
     <!-- CNC REVIEW DETAILS -->
     <fragment
         android:id="@+id/cncReviewDetailsFragment"

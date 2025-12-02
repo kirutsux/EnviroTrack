@@ -1,14 +1,18 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.notifications
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.NotificationAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentNotificationsBinding
 import com.ecocp.capstoneenvirotrack.model.NotificationModel
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -46,12 +50,11 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = NotificationAdapter(notifList)
-        binding.recyclerNotifications.layoutManager = LinearLayoutManager(requireContext())
+        adapter = NotificationAdapter(notifList, findNavController())
         binding.recyclerNotifications.adapter = adapter
+        binding.recyclerNotifications.layoutManager = LinearLayoutManager(requireContext())
+
     }
-
-
     private fun fetchNotifications() {
         val userId = auth.currentUser?.uid ?: return
 

@@ -299,7 +299,6 @@ class COMP_Dashboard : Fragment() {
         return (diffMillis / (1000.0 * 60 * 60 * 24)).toLong() + 1 // +1 to include today
     }
 
-
     private fun sendExpiryNotification(type: String, daysLeft: Long) {
         val userId = auth.currentUser?.uid ?: return
         val message = when(type) {

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoReviewBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -144,32 +145,36 @@ class PtoReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
+                // ----------------------------------------------------------------------
                 // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "PTO Submission",
+                // ----------------------------------------------------------------------
+                NotificationManager.sendNotificationToUser(
+                    receiverId = uid!!,
+                    title = "PTO Submitted",
                     message = "You have successfully submitted a Permit to Operate application.",
-                    type = "submission"
+                    category = "submission",
+                    priority = "medium",
+                    module = "OPMS",
+                    documentId = currentDocId!!,
+                    actionLink = "opms/pto/$currentDocId"
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New PTO Application",
-                                message = "A new Permit to Operate has been submitted by a PCO.",
-                                type = "alert"
-                            )
-                        }
-                    }
+                // ----------------------------------------------------------------------
+                // ✅ Notify all EMB admins
+                // ----------------------------------------------------------------------
+                NotificationManager.sendToAllEmb(
+                    title = "New PTO Application",
+                    message = "A new Permit to Operate has been submitted by a PCO.",
+                    category = "alert",
+                    priority = "high",
+                    module = "OPMS",
+                    documentId = currentDocId!!,
+                    actionLink = "emb/pto/$currentDocId"
+                )
 
-                // ✅ Navigate to OPMS Dashboard and clear back stack
+                // ----------------------------------------------------------------------
+                // ✅ Navigate back to OPMS Dashboard and clear back stack
+                // ----------------------------------------------------------------------
                 findNavController().navigate(
                     R.id.opmsDashboardFragment,
                     null,
@@ -182,35 +187,6 @@ class PtoReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
             }
     }
-
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.ecocp.capstoneenvirotrack.view.all.COMP_PCO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -216,29 +217,36 @@ class COMP_PCOAccreditation : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()
 
-                sendNotification(
+                // ----------------------------------------------------------------------
+                // ✅ Notify PCO (self)
+                // ----------------------------------------------------------------------
+                NotificationManager.sendNotificationToUser(
                     receiverId = uid,
-                    receiverType = "PCO",
                     title = "PCO Accreditation Submitted",
                     message = "You have successfully submitted your PCO accreditation application.",
-                    type = "submission"
+                    category = "submission",
+                    priority = "medium",
+                    module = "PCO_Accreditation",
+                    documentId = accreditationId,
+                    actionLink = "accreditation/$accreditationId"
                 )
 
-                firestore.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New PCO Accreditation Application",
-                                message = "A new PCO Accreditation application has been submitted by ${fullName.text}.",
-                                type = "alert"
-                            )
-                        }
-                    }
+                // ----------------------------------------------------------------------
+                // ✅ Notify all EMB admins
+                // ----------------------------------------------------------------------
+                NotificationManager.sendToAllEmb(
+                    title = "New PCO Accreditation Application",
+                    message = "A new PCO Accreditation application has been submitted by ${fullName.text}.",
+                    category = "alert",
+                    priority = "high",
+                    module = "PCO_Accreditation",
+                    documentId = accreditationId,
+                    actionLink = "emb/accreditation/$accreditationId"
+                )
 
+                // ----------------------------------------------------------------------
+                // ✅ Navigate back to PCO dashboard
+                // ----------------------------------------------------------------------
                 val compPCOFragment = COMP_PCO()
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.nav_host_fragment, compPCOFragment)
@@ -249,26 +257,5 @@ class COMP_PCOAccreditation : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Failed to save application: ${it.message}", Toast.LENGTH_SHORT).show()
             }
-    }
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to com.google.firebase.Timestamp.now()
-        )
-
-        firestore.collection("notifications")
-            .add(notificationData)
     }
 }

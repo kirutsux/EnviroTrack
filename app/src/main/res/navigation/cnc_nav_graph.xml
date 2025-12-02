@@ -32,7 +32,14 @@
         <action
             android:id="@+id/action_cncFormFragment_to_cncPaymentFragment"
             app:destination="@id/cncPaymentFragment" />
+        <action
+            android:id="@+id/action_cncFormFragment_to_cncReviewFragment"
+            app:destination="@id/cncReviewFragment"/>
     </fragment>
+
+    <action
+        android:id="@+id/action_global_cncDashboardFragment"
+        app:destination="@id/cncDashboardFragment" />
 
     <!-- CNC PAYMENT -->
     <fragment

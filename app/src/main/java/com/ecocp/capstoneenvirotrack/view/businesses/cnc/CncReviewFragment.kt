@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -154,32 +155,36 @@ class CncReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "CNC Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
+                // ----------------------------------------------------------------------
                 // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "CNC Submission",
+                // ----------------------------------------------------------------------
+                NotificationManager.sendNotificationToUser(
+                    receiverId = uid!!,
+                    title = "CNC Submitted",
                     message = "You have successfully submitted a Certificate of Non-Coverage application.",
-                    type = "submission"
+                    category = "submission",
+                    priority = "medium",
+                    module = "CNC",
+                    documentId = currentDocId!!,
+                    actionLink = "cnc/$currentDocId"
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New CNC Application",
-                                message = "A new Certificate of Non-Coverage has been submitted by a PCO.",
-                                type = "alert"
-                            )
-                        }
-                    }
+                // ----------------------------------------------------------------------
+                // ✅ Notify all EMB admins
+                // ----------------------------------------------------------------------
+                NotificationManager.sendToAllEmb(
+                    title = "New CNC Application",
+                    message = "A new Certificate of Non-Coverage has been submitted by a PCO.",
+                    category = "alert",
+                    priority = "high",
+                    module = "CNC",
+                    documentId = currentDocId!!,
+                    actionLink = "emb/cnc/$currentDocId"
+                )
 
-                // ✅ Navigate to CNC Dashboard and clear back stack
+                // ----------------------------------------------------------------------
+                // ✅ Navigate back to CNC Dashboard and clear back stack
+                // ----------------------------------------------------------------------
                 findNavController().navigate(
                     R.id.cncDashboardFragment,
                     null,
@@ -192,36 +197,6 @@ class CncReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to submit CNC application.", Toast.LENGTH_SHORT).show()
             }
     }
-
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-
 
 
     override fun onDestroyView() {
