@@ -261,8 +261,13 @@ class SP_Servicerequest : Fragment() {
             }
             .addOnFailureListener { e ->
                 e.printStackTrace()
-                binding.progressLoading.visibility = View.GONE
-                binding.txtEmptyState.visibility = View.VISIBLE
+                // SAFELY update UI only if binding still exists
+                val b = _binding ?: run {
+                    Log.w("SP_Servicerequest", "UI gone while handling transporter failure, skipping UI update")
+                    return@addOnFailureListener
+                }
+                b.progressLoading.visibility = View.GONE
+                b.txtEmptyState.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
@@ -279,6 +284,11 @@ class SP_Servicerequest : Fragment() {
             .whereEqualTo("providerType", "Transporter")
             .get()
             .addOnSuccessListener { qs ->
+                // SAFELY update UI only if binding still exists
+                val b = _binding ?: run {
+                    Log.w("SP_Servicerequest", "UI gone while fetching fallback transport bookings, skipping UI update")
+                    return@addOnSuccessListener
+                }
 
                 val filtered = qs.documents.filter {
                     val c = it.getString("serviceProviderCompany")?.trim().orEmpty()
@@ -294,8 +304,12 @@ class SP_Servicerequest : Fragment() {
                 )
             }
             .addOnFailureListener { e ->
-                binding.progressLoading.visibility = View.GONE
-                binding.txtEmptyState.visibility = View.VISIBLE
+                val b = _binding ?: run {
+                    Log.w("SP_Servicerequest", "UI gone while handling fallback transport failure, skipping UI update")
+                    return@addOnFailureListener
+                }
+                b.progressLoading.visibility = View.GONE
+                b.txtEmptyState.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
@@ -355,8 +369,13 @@ class SP_Servicerequest : Fragment() {
     private fun loadTsdBookingsOnly(tsdUid: String) {
         val db = FirebaseFirestore.getInstance()
 
-        binding.progressLoading.visibility = View.VISIBLE
-        binding.txtEmptyState.visibility = View.GONE
+        // show loading safely
+        val bStart = _binding ?: run {
+            Log.w("SP_Servicerequest", "UI gone before starting loadTsdBookingsOnly(), aborting")
+            return
+        }
+        bStart.progressLoading.visibility = View.VISIBLE
+        bStart.txtEmptyState.visibility = View.GONE
 
         // 1) Try facilityId == tsdUid
         db.collection("tsd_bookings")
@@ -381,8 +400,12 @@ class SP_Servicerequest : Fragment() {
                                         handleBookingsResult(items2)
                                     }
                                     .addOnFailureListener { e ->
-                                        binding.progressLoading.visibility = View.GONE
-                                        binding.txtEmptyState.visibility = View.VISIBLE
+                                        val b = _binding ?: run {
+                                            Log.w("SP_Servicerequest", "UI gone while handling tsd facilityName fallback failure, skipping update")
+                                            return@addOnFailureListener
+                                        }
+                                        b.progressLoading.visibility = View.GONE
+                                        b.txtEmptyState.visibility = View.VISIBLE
                                         Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
                                     }
                             } else {
@@ -390,15 +413,23 @@ class SP_Servicerequest : Fragment() {
                             }
                         }
                         .addOnFailureListener { e ->
-                            binding.progressLoading.visibility = View.GONE
-                            binding.txtEmptyState.visibility = View.VISIBLE
+                            val b = _binding ?: run {
+                                Log.w("SP_Servicerequest", "UI gone while fetching service_providers for tsd fallback, skipping update")
+                                return@addOnFailureListener
+                            }
+                            b.progressLoading.visibility = View.GONE
+                            b.txtEmptyState.visibility = View.VISIBLE
                             Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                 }
             }
             .addOnFailureListener { e ->
-                binding.progressLoading.visibility = View.GONE
-                binding.txtEmptyState.visibility = View.VISIBLE
+                val b = _binding ?: run {
+                    Log.w("SP_Servicerequest", "UI gone while loading tsd bookings primary query, skipping update")
+                    return@addOnFailureListener
+                }
+                b.progressLoading.visibility = View.GONE
+                b.txtEmptyState.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
@@ -461,11 +492,16 @@ class SP_Servicerequest : Fragment() {
     // Apply sorting & update UI
     // ---------------------------
     private fun handleBookingsResult(list: List<ServiceRequest>) {
+        // SAFELY bail if view gone
+        val b = _binding ?: run {
+            Log.w("SP_Servicerequest", "UI gone while handling bookings result, skipping update")
+            return
+        }
 
         masterList.clear()
         masterList.addAll(list)
 
-        val selected = binding.spinnerSort.selectedItem?.toString() ?: "All"
+        val selected = b.spinnerSort.selectedItem?.toString() ?: "All"
 
         val filtered = when (selected) {
             "Sort by Pending" -> masterList.filter { it.bookingStatus?.contains("pending", true) == true }
@@ -476,8 +512,8 @@ class SP_Servicerequest : Fragment() {
 
         adapter.updateList(filtered)
 
-        binding.progressLoading.visibility = View.GONE
-        binding.txtEmptyState.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+        b.progressLoading.visibility = View.GONE
+        b.txtEmptyState.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
     }
 
     // ---------------------------

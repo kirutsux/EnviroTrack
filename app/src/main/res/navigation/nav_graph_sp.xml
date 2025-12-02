@@ -17,6 +17,9 @@
         <action
             android:id="@+id/action_SP_Dashboard_to_SP_CompletedServices"
             app:destination="@id/SP_CompletedServices" />
+        <action
+            android:id="@+id/action_SP_Dashboard_to_SP_Payments"
+            app:destination="@id/SP_Payments" />
     </fragment>
 
     <!-- Login -->
@@ -139,4 +142,19 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/SP_Payments"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Payments"
+        android:label="Payments"
+        tools:layout="@layout/fragment_sp__payments" />
+    <fragment
+        android:id="@+id/TSD_Bookings"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.TSD_Bookings"
+        android:label="TSD Bookings" />
+    <!-- Router: single booking entry that forwards user to SP_Bookings or TSD_Bookings -->
+    <fragment
+        android:id="@+id/BookingsRouter"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.BookingsRouterFragment"
+        android:label="Bookings Router"
+        tools:layout="@android:layout/simple_list_item_1" />
 </navigation>

@@ -35,13 +35,9 @@
                 <!-- KEEP Company Logo -->
                 <ImageView
                     android:id="@+id/imgCompanyLogo"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/dunkin"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="Company logo"
-                    android:background="@drawable/circle_bg"
-                    android:layout_marginEnd="12dp"/>
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"/>
 
                 <LinearLayout
                     android:orientation="vertical"

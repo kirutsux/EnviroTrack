@@ -9,15 +9,17 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.R
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.android.gms.tasks.Tasks
 
 class SP_TaskUpdateDetails : Fragment() {
 
     private var bookingId: String? = null
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     private val uploadedFiles = mutableListOf<Uri>()
 
@@ -28,6 +30,9 @@ class SP_TaskUpdateDetails : Fragment() {
     private lateinit var btnSaveStatus: Button
     private lateinit var btnCancel: Button
     private lateinit var btnUpload: Button
+
+    private enum class BookingSource { TRANSPORT, TSD, UNKNOWN }
+    private var bookingSource = BookingSource.UNKNOWN
 
     private val filePickerLauncher =
         registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
@@ -105,6 +110,9 @@ class SP_TaskUpdateDetails : Fragment() {
         }
     }
 
+    // -------------------------------------------------------------
+    // LOAD BOOKING
+    // -------------------------------------------------------------
     private fun loadBookingDetails(
         txtCompanyName: TextView,
         txtCompanyAddress: TextView,
@@ -117,18 +125,22 @@ class SP_TaskUpdateDetails : Fragment() {
         txtSpecialInstructions: TextView
     ) {
         bookingId?.let { id ->
-            db.collection("transport_bookings")
-                .document(id)
+            db.collection("transport_bookings").document(id)
                 .get()
                 .addOnSuccessListener { doc ->
-
-                    if (doc != null && doc.exists()) {
+                    if (doc.exists()) {
+                        // ---------------- TRANSPORTER MODE ----------------
+                        bookingSource = BookingSource.TRANSPORT
 
                         txtCompanyName.text = doc.getString("serviceProviderCompany") ?: ""
                         txtCompanyAddress.text = ""
-                        txtTaskRef.text = "Ref: ${doc.getString("bookingId") ?: ""}"
+                        txtTaskRef.text = "Ref: ${doc.getString("bookingId") ?: id}"
 
-                        val savedStatus = doc.getString("wasteStatus") ?: "Pending"
+                        // Robust: read either wasteStatus or bookingStatus (some writers use either)
+                        val savedStatus = doc.getString("wasteStatus")
+                            ?: doc.getString("bookingStatus")
+                            ?: "Pending"
+
                         updateStatusPill(savedStatus)
                         applyDeliveredLock(savedStatus)
 
@@ -141,70 +153,274 @@ class SP_TaskUpdateDetails : Fragment() {
                         txtSpecialInstructions.text = doc.getString("specialInstructions") ?: ""
 
                         uploadedFiles.clear()
-                        val existingProof = doc.get("collectionProof") as? List<String> ?: emptyList()
-                        uploadedFiles.addAll(existingProof.map { Uri.parse(it) })
+                        val existing = doc.get("collectionProof") as? List<String> ?: emptyList()
+                        uploadedFiles.addAll(existing.map { Uri.parse(it) })
                         displayUploadedFiles()
 
-                        val statusOptions = resources.getStringArray(R.array.transporter_status_options)
-                        val index = statusOptions.indexOf(savedStatus)
-                        spinnerStatus.setSelection(if (index >= 0) index else 0)
+                        // spinner: case-insensitive matching and safe fallback
+                        val options = resources.getStringArray(R.array.transporter_status_options)
+                        val idx = options.indexOfFirst { it.equals(savedStatus, ignoreCase = true) }.let { if (it >= 0) it else 0 }
+                        spinnerStatus.setSelection(idx)
+
+                    } else {
+                        // ---------------- TSD MODE ----------------
+                        loadTsdBookingForTaskUpdate(
+                            id, txtCompanyName, txtCompanyAddress, txtTaskRef,
+                            txtStatusPill, txtOriginDestination, txtWasteType,
+                            txtQuantity, txtPackaging, txtSpecialInstructions
+                        )
                     }
+                }
+                .addOnFailureListener {
+                    loadTsdBookingForTaskUpdate(
+                        id, txtCompanyName, txtCompanyAddress, txtTaskRef,
+                        txtStatusPill, txtOriginDestination, txtWasteType,
+                        txtQuantity, txtPackaging, txtSpecialInstructions
+                    )
                 }
         }
     }
 
-    private fun saveStatus() {
-        val newStatus = spinnerStatus.selectedItem.toString()
-
-        bookingId?.let { id ->
-            val updateMap = mutableMapOf<String, Any>("wasteStatus" to newStatus)
-
-            val newFiles = uploadedFiles.filter { it.scheme == "content" || it.scheme == "file" }
-            val oldUrls = uploadedFiles.filter { it.scheme == "https" }.map { it.toString() }
-
-            if (newFiles.isNotEmpty()) {
-                val uploadTasks = newFiles.map { uri ->
-                    val ref = storage.reference.child("transport_bookings/$id/booking_proofs/${uri.lastPathSegment}")
-                    ref.putFile(uri).continueWithTask { task ->
-                        if (!task.isSuccessful) task.exception?.let { throw it }
-                        ref.downloadUrl
-                    }
+    // -------------------------------------------------------------
+    // LOAD TSD BOOKING (WITH FIELD REMAPPING)
+    // -------------------------------------------------------------
+    private fun loadTsdBookingForTaskUpdate(
+        id: String,
+        txtCompanyName: TextView,
+        txtCompanyAddress: TextView,
+        txtTaskRef: TextView,
+        txtStatusPill: TextView,
+        txtOriginDestination: TextView,
+        txtWasteType: TextView,
+        txtQuantity: TextView,
+        txtPackaging: TextView,
+        txtSpecialInstructions: TextView
+    ) {
+        db.collection("tsd_bookings").document(id)
+            .get()
+            .addOnSuccessListener { doc ->
+                if (!doc.exists()) {
+                    Toast.makeText(requireContext(), "Booking not found", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
                 }
 
-                Tasks.whenAllSuccess<Uri>(uploadTasks)
-                    .addOnSuccessListener { uris ->
-                        val merged = oldUrls + uris.map { it.toString() }
-                        updateMap["collectionProof"] = merged
+                bookingSource = BookingSource.TSD
+                val m = doc.data ?: emptyMap<String, Any>()
 
-                        updateBookingInFirestore(id, updateMap)
-                        updateStatusPill(newStatus)
-                        applyDeliveredLock(newStatus)
+                fun s(key: String, alt: String = "") =
+                    (m[key] as? String)?.trim().takeUnless { it.isNullOrEmpty() } ?: alt
+
+                // ---------------------------------
+                // UPDATE LABELS FOR TSD MODE ONLY
+                // ---------------------------------
+                try {
+                    val card = requireView().findViewById<View>(R.id.cardTaskInfo)
+                    if (card is ViewGroup) {
+                        fun walk(vg: ViewGroup) {
+                            for (i in 0 until vg.childCount) {
+                                val ch = vg.getChildAt(i)
+                                if (ch is TextView) {
+                                    val label = ch.text?.toString()?.trim() ?: ""
+                                    when (label) {
+                                        "Origin / Destination" -> ch.text = "Treatment Info"
+                                        "Packaging" -> ch.text = "Amount (PHP)"
+                                    }
+                                }
+                                if (ch is ViewGroup) walk(ch)
+                            }
+                        }
+                        walk(card)
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(requireContext(), "File upload failed!", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) {}
+
+                // ---------------------------------
+                // FIELDS
+                // ---------------------------------
+                txtCompanyName.text = s("facilityName", s("facility", "Unknown"))
+                txtCompanyAddress.text = s("location", "")
+                txtTaskRef.text = "Ref: ${s("refNumber", s("bookingId", id))}"
+
+                val status = s("status", s("bookingStatus", "Pending"))
+                updateStatusPill(status)
+                applyDeliveredLock(status)
+
+                val treatment = s("treatmentInfo", s("treatment", s("notes", "-")))
+                txtOriginDestination.text = treatment.ifEmpty { "-" }
+
+                val waste = s("wasteType", s("waste", ""))
+                txtWasteType.text = if (waste.isNotEmpty()) waste else treatment
+
+                txtQuantity.text = when (val q = m["quantity"]) {
+                    is Number -> q.toString()
+                    is String -> q
+                    else -> ""
+                }
+
+                // Payment mapping
+                val total = (m["totalPayment"] as? Number)?.toDouble()
+                val rate = (m["rate"] as? Number)?.toDouble()
+                txtPackaging.text =
+                    when {
+                        total != null -> "₱ ${"%,.2f".format(total)}"
+                        rate != null -> "₱ ${"%,.2f".format(rate)}"
+                        else -> s("amount", "-")
                     }
 
-            } else {
-                updateMap["collectionProof"] = oldUrls
-                updateBookingInFirestore(id, updateMap)
-                updateStatusPill(newStatus)
-                applyDeliveredLock(newStatus)
+                txtSpecialInstructions.text = s("specialInstructions", s("notes", "-"))
+
+                // Attachments
+                uploadedFiles.clear()
+
+                (m["previousRecordUrl"] as? String)?.let { if (it.isNotBlank()) uploadedFiles.add(Uri.parse(it)) }
+                (m["certificateUrl"] as? String)?.let { if (it.isNotBlank()) uploadedFiles.add(Uri.parse(it)) }
+
+                val cp = m["collectionProof"]
+                if (cp is List<*>) cp.mapNotNull { it as? String }.forEach { uploadedFiles.add(Uri.parse(it)) }
+
+                displayUploadedFiles()
+
+                val options = resources.getStringArray(R.array.transporter_status_options)
+                spinnerStatus.setSelection(options.indexOf(status).coerceAtLeast(0))
             }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to load booking.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+
+    // -------------------------------------------------------------
+    // SAVE STATUS + FILES
+    // -------------------------------------------------------------
+    // -------------------------------------------------------------
+// SAVE STATUS + FILES (UPDATED: no optimistic UI lock; only lock after successful write)
+// -------------------------------------------------------------
+    private fun saveStatus() {
+        val newStatus = spinnerStatus.selectedItem.toString().trim()
+        val id = bookingId ?: return
+
+        val collectionName =
+            if (bookingSource == BookingSource.TSD) "tsd_bookings"
+            else "transport_bookings"
+
+        // Prepare update map
+        val updateMap = mutableMapOf<String, Any>()
+        if (collectionName == "transport_bookings") {
+            updateMap["wasteStatus"] = newStatus
+            // keep bookingStatus in sync so other screens that check bookingStatus behave correctly
+            updateMap["bookingStatus"] = newStatus
+        } else {
+            updateMap["status"] = newStatus
+            updateMap["bookingStatus"] = newStatus
+        }
+
+        // Disable controls while saving to prevent double clicks
+        btnSaveStatus.isEnabled = false
+        spinnerStatus.isEnabled = false
+
+        val newFiles = uploadedFiles.filter { it.scheme == "content" || it.scheme == "file" }
+        val oldUrls = uploadedFiles.filter { it.scheme == "https" }.map { it.toString() }
+
+        fun finishWithSuccess() {
+            // Only now update the pill and possibly lock UI
+            updateStatusPill(newStatus)
+            applyDeliveredLock(newStatus)
+
+            Toast.makeText(requireContext(), "Update saved!", Toast.LENGTH_SHORT).show()
+            btnSaveStatus.isEnabled = true
+        }
+
+        fun finishWithFailure() {
+            Toast.makeText(requireContext(), "Failed to save update!", Toast.LENGTH_SHORT).show()
+            // re-enable controls so user can retry
+            btnSaveStatus.isEnabled = true
+            spinnerStatus.isEnabled = true
+        }
+
+        if (newFiles.isNotEmpty()) {
+            // Upload new files first
+            val uploadTasks = newFiles.map { uri ->
+                // use timestamp to avoid collisions
+                val dest = "$collectionName/$id/booking_proofs/${System.currentTimeMillis()}_${uri.lastPathSegment}"
+                val ref = storage.reference.child(dest)
+                ref.putFile(uri).continueWithTask { t ->
+                    if (!t.isSuccessful) throw t.exception ?: Exception("Upload failed")
+                    ref.downloadUrl
+                }
+            }
+
+            com.google.android.gms.tasks.Tasks.whenAllSuccess<android.net.Uri>(uploadTasks)
+                .addOnSuccessListener { uris ->
+                    val merged = oldUrls + uris.map { it.toString() }
+
+                    if (collectionName == "transport_bookings") {
+                        updateMap["collectionProof"] = merged
+                    } else {
+                        updateMap["previousRecordUrl"] = merged.firstOrNull() ?: ""
+                        updateMap["collectionProof"] = merged
+                    }
+
+                    // persist after uploads
+                    db.collection(collectionName).document(id)
+                        .update(updateMap)
+                        .addOnSuccessListener {
+                            finishWithSuccess()
+                        }
+                        .addOnFailureListener {
+                            finishWithFailure()
+                        }
+                }
+                .addOnFailureListener {
+                    // upload failed — let user retry
+                    finishWithFailure()
+                }
+
+        } else {
+            // no new files — update immediately
+            if (collectionName == "transport_bookings") {
+                updateMap["collectionProof"] = oldUrls
+            } else {
+                updateMap["previousRecordUrl"] = oldUrls.firstOrNull() ?: ""
+                updateMap["collectionProof"] = oldUrls
+            }
+
+            db.collection(collectionName).document(id)
+                .update(updateMap)
+                .addOnSuccessListener {
+                    finishWithSuccess()
+                }
+                .addOnFailureListener {
+                    finishWithFailure()
+                }
         }
     }
 
-    /** 🔥 Shows correct pill text and color */
+
+    /** Map raw status strings to the pill text (case-insensitive, tolerant) */
     private fun updateStatusPill(status: String) {
-        txtStatusPill.text = when (status) {
-            "Delivered" -> "Completed"
-            "In Transit" -> "In Transit"
+        val s = status.trim().lowercase()
+        txtStatusPill.text = when {
+            s.contains("delivered") || s.contains("completed") -> "Delivered"
+            s.contains("in transit") || s.contains("transit") -> "In Transit"
+            s.contains("received") || s.contains("confirmed") -> "Confirmed"
+            s.contains("treated") -> "Treated"
+            s.contains("rejected") -> "Rejected"
             else -> "Pending"
         }
     }
 
-    /** 🔥 If Delivered → lock UI (hide buttons + disable spinner) */
+
+    /** If status is a final/completed state -> lock UI (hide buttons + disable spinner)
+     *  NOTE: transit/in transit is treated as final for transporter to match TSD behavior you requested.
+     */
     private fun applyDeliveredLock(status: String) {
-        if (status == "Delivered") {
+        val s = status.trim().lowercase()
+        val isFinal = s.contains("delivered") ||
+                s.contains("completed") ||
+                s.contains("treated") ||
+                s.contains("rejected")
+
+        if (isFinal) {
             btnSaveStatus.visibility = View.GONE
             btnCancel.visibility = View.GONE
             btnUpload.visibility = View.GONE
@@ -217,10 +433,10 @@ class SP_TaskUpdateDetails : Fragment() {
         }
     }
 
-    private fun updateBookingInFirestore(id: String, updateMap: Map<String, Any>) {
-        db.collection("transport_bookings")
-            .document(id)
-            .update(updateMap)
+
+    private fun updateBookingInFirestore(collection: String, id: String, map: Map<String, Any>) {
+        db.collection(collection).document(id)
+            .update(map)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Update saved!", Toast.LENGTH_SHORT).show()
             }

@@ -242,24 +242,7 @@
                         android:textColor="#212121"
                         android:layout_marginTop="6dp"/>
 
-                    <!-- Destination -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Destination"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        android:layout_marginTop="12dp"/>
 
-                    <TextView
-                        android:id="@+id/txtDestination"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_field"
-                        android:padding="10dp"
-                        android:text="TSD Facility - Demo"
-                        android:textColor="#212121"
-                        android:layout_marginTop="6dp"/>
 
                     <!-- Amount -->
                     <TextView
@@ -346,50 +329,6 @@
                         android:text="Storage Permit: Not uploaded"
                         android:textColor="#616161"
                         android:layout_marginTop="4dp"/>
-
-                    <!-- TSD-only action buttons (hidden by default) -->
-                    <LinearLayout
-                        android:id="@+id/tsdActionRow"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="12dp"
-                        android:visibility="gone">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnUploadCertificate"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Upload Certificate"
-                            android:textAllCaps="false"
-                            style="@style/Widget.MaterialComponents.Button"
-                            app:cornerRadius="8dp"
-                            android:layout_marginBottom="8dp"/>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnUploadPreviousRecord"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Upload Previous Record"
-                            android:textAllCaps="false"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                            app:cornerRadius="8dp"
-                            app:strokeColor="#1976D2"
-                            app:strokeWidth="1dp"
-                            android:layout_marginBottom="8dp"/>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnUpdateStatus"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Update Status"
-                            android:textAllCaps="false"
-                            style="@style/Widget.MaterialComponents.Button"
-                            app:cornerRadius="8dp"
-                            app:backgroundTint="#1565C0"
-                            android:textColor="#FFFFFF"
-                            android:layout_marginBottom="4dp"/>
-                    </LinearLayout>
 
                     <!-- Notes / Instructions -->
                     <TextView

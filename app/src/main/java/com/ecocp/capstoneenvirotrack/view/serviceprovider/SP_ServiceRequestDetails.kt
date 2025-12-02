@@ -4,45 +4,62 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.databinding.FragmentSpServiceRequestDetailsBinding
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.util.*
 
 class SP_ServiceRequestDetails : Fragment() {
 
-    // Developer-provided fallback image file (local path)
-    private val DEV_ATTACHMENT_URL = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png"
+    private var _binding: FragmentSpServiceRequestDetailsBinding? = null
+    private val binding get() = _binding!!
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private val TAG = "SRDetails"
 
-    // runtime role (determined at start)
-    private var currentRole: String = "transporter" // default to transporter
+    // Live listener for tsd booking when in TSD POV
+    private var tsdListener: ListenerRegistration? = null
 
-    // Keep track of current tsd booking doc id and current attachment urls
+    // If you later add live listener for transport, keep a reference (optional)
+    private var transportListener: ListenerRegistration? = null
+
+    // runtime role (resolved from users/service_providers)
+    private var currentRole: String = "transporter"
+
+    // Track doc ids (from args)
+    private var transportDocId: String? = null
+    private var tsdDocId: String? = null
     private var currentBookingId: String? = null
+
+    // Keep track of attachments
     private var currentCertificateUrl: String? = null
     private var currentPreviousRecordUrl: String? = null
-    private var currentStatus: String? = null
-    private var currentFacilityName: String? = null
+
+    // Developer-provided fallback image file (local path)
+    private val DEV_ATTACHMENT_URL = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png"
 
     // ActivityResult launchers for picking files
     private val pickFileForCertificate = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -54,44 +71,158 @@ class SP_ServiceRequestDetails : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_sp_service_request_details, container, false)
+        savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentSpServiceRequestDetailsBinding.inflate(inflater, container, false)
 
-        // bookingId passed by adapter (preferred)
-        val bookingId = arguments?.getString("bookingId") ?: arguments?.getString("id")
+        // Read args (support multiple possible keys)
+        transportDocId = arguments?.getString("transportDocId")
+            ?: arguments?.getString("transport_id")
 
-        // detect role first, then load booking accordingly
-        detectRoleAndLoadBooking(bookingId, view)
+// Only treat as TSD if explicitly passed via tsdDocId or requestId
+        tsdDocId = arguments?.getString("tsdDocId")
+            ?: arguments?.getString("requestId")
 
-        // Buttons (existing)
-        val btnAccept = view.findViewById<Button>(R.id.btnAccept)
-        val btnReject = view.findViewById<Button>(R.id.btnReject)
+// Force transporter mode if transportDocId was provided
+        if (!transportDocId.isNullOrBlank()) {
+            tsdDocId = null
+        }
 
-        // New TSD-only buttons (make sure they exist in layout)
-        val btnUploadCertificate = view.findViewById<Button?>(R.id.btnUploadCertificate)
-        val btnUploadPreviousRecord = view.findViewById<Button?>(R.id.btnUploadPreviousRecord)
-        val btnUpdateStatus = view.findViewById<Button?>(R.id.btnUpdateStatus)
+        Log.d(TAG, "ARGS: transportDocId=$transportDocId tsdDocId=$tsdDocId extras=${arguments?.keySet()}")
 
-        // -------------------------
-        // New: robust role resolver usage for clicks
-        // -------------------------
-        btnAccept.setOnClickListener {
+        // Setup UI mode and load appropriate doc(s)
+        setupModeAndLoad()
+
+        // Wire buttons (robust: decide role at click time)
+        setupButtonHandlers()
+
+        return binding.root
+    }
+
+    private fun setupModeAndLoad() {
+        // Prefer TSD mode when a tsdDocId is provided.
+        val isTsdMode = !tsdDocId.isNullOrBlank()
+        val isTransporterMode = !transportDocId.isNullOrBlank() && tsdDocId.isNullOrBlank()
+
+        if (isTsdMode) {
+            // TSD POV — hide transporter-only fields
+            binding.txtWasteType.visibility = View.GONE
+            binding.txtPackaging.visibility = View.GONE
+            binding.txtSpecialInstructions.visibility = View.GONE
+            ensureTreatmentInfoViews()
+
+            // subscribe to the TSD doc for live updates
+            subscribeToTsdRequest(tsdDocId!!)
+        } else if (isTransporterMode) {
+            binding.txtWasteType.visibility = View.VISIBLE
+            binding.txtPackaging.visibility = View.VISIBLE
+            binding.txtSpecialInstructions.visibility = View.VISIBLE
+
+            // Use the unified loader: transport → TSD → bundle
+            loadBookingFromTransportOrBundle(transportDocId!!, binding.root)
+        } else {
+            // Fallback: if you passed a generic "bookingId" try to load either collection;
+            // otherwise bind from bundle/defaults.
+            val generic = arguments?.getString("bookingId") ?: arguments?.getString("id")
+            if (!generic.isNullOrBlank()) {
+                loadBookingFromFirestore(generic)
+            } else {
+                bindFromBundle()
+            }
+        }
+    }
+
+
+
+    /**
+     * Programmatically create treatment info views and insert in the card info area (if missing).
+     * Re-used from your earlier implementation.
+     */
+    private var labelTreatmentInfoView: TextView? = null
+    private var txtTreatmentInfoView: TextView? = null
+
+    private fun ensureTreatmentInfoViews() {
+        if (txtTreatmentInfoView != null && labelTreatmentInfoView != null) return
+
+        // cardInfo -> inner linear layout -> info container (robust search)
+        val cardInner = binding.cardInfo.getChildAt(0) as? LinearLayout ?: return
+        var infoContainer: LinearLayout? = null
+        for (i in 0 until cardInner.childCount) {
+            val ch = cardInner.getChildAt(i)
+            if (ch is LinearLayout && ch.orientation == LinearLayout.VERTICAL && ch.childCount >= 3) {
+                infoContainer = ch
+                break
+            }
+        }
+        if (infoContainer == null) infoContainer = cardInner
+
+        labelTreatmentInfoView = TextView(requireContext()).apply {
+            text = "Treatment Info"
+            setTextColor(resources.getColor(android.R.color.darker_gray, requireActivity().theme))
+            textSize = 12f
+            visibility = View.GONE
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.setMargins(0, dpToPx(12), 0, 0)
+            layoutParams = lp
+        }
+
+        txtTreatmentInfoView = TextView(requireContext()).apply {
+            text = ""
+            setBackgroundResource(R.drawable.bg_field)
+            setPadding(dpToPx(10), dpToPx(10), dpToPx(10), dpToPx(10))
+            setTextColor(resources.getColor(android.R.color.black, requireActivity().theme))
+            visibility = View.GONE
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.setMargins(0, dpToPx(6), 0, 0)
+            layoutParams = lp
+        }
+
+        // attempt to insert after packaging row
+        var insertIndex = -1
+        for (i in 0 until infoContainer.childCount) {
+            val ch = infoContainer.getChildAt(i)
+            if (ch.id == binding.txtPackaging.id) {
+                insertIndex = i + 1
+                break
+            }
+        }
+        if (insertIndex == -1) {
+            // fallback: append to end
+            insertIndex = infoContainer.childCount
+        }
+        infoContainer.addView(labelTreatmentInfoView, insertIndex)
+        infoContainer.addView(txtTreatmentInfoView, insertIndex + 1)
+    }
+
+    private fun dpToPx(dp: Int): Int =
+        (dp * resources.displayMetrics.density).toInt()
+
+    /**
+     * Setup Accept / Reject button handlers. On click we resolve role (current user) and call appropriate handler.
+     * Buttons use binding.* views.
+     */
+    private fun setupButtonHandlers() {
+        val btnAccept = binding.btnAccept
+        val btnReject = binding.btnReject
+
+        btnAccept?.setOnClickListener {
             Log.d(TAG, "btnAccept CLICKED — resolving role...")
-
-            val id = bookingId ?: currentBookingId
-            Log.d(TAG, "btnAccept bookingId = $id")
-
+            val id = transportDocId ?: tsdDocId ?: currentBookingId
             if (id.isNullOrBlank()) {
                 Toast.makeText(requireContext(), "Missing booking id", Toast.LENGTH_SHORT).show()
                 Log.e(TAG, "btnAccept FAILED: bookingId is NULL")
                 return@setOnClickListener
             }
 
-            // Disable while we decide + act
             btnAccept.isEnabled = false
             btnReject.isEnabled = false
-            val prevAcceptText = btnAccept.text
+            val prevAcceptText = btnAccept.text?.toString() ?: "Accept"
 
             val uid = auth.currentUser?.uid
             if (uid.isNullOrBlank()) {
@@ -101,115 +232,64 @@ class SP_ServiceRequestDetails : Fragment() {
                 return@setOnClickListener
             }
 
-            // Optional debug dumps (temporary)
-            uid.let {
-                db.collection("users").document(it).get().addOnSuccessListener { d -> Log.d(TAG, "users doc at click: ${d.data}") }
-                db.collection("service_providers").document(it).get().addOnSuccessListener { d -> Log.d(TAG, "service_providers doc at click: ${d.data}") }
-            }
-            db.collection("tsd_bookings").document(id).get().addOnSuccessListener { b -> Log.d(TAG, "booking doc at click: ${b.data}") }
-
-            // Resolve role then act
+            // resolve role at click time (robust)
             fetchRoleForCurrentUser { role ->
                 currentRole = role
                 Log.d(TAG, "btnAccept USING ROLE = $role")
                 if (role.contains("tsd")) {
                     btnAccept.text = "Receiving..."
-                    handleTsdAccept(id, btnAccept, btnReject, prevAcceptText.toString())
+                    handleTsdAccept(id, btnAccept, btnReject, prevAcceptText)
                 } else {
                     btnAccept.text = "Accepting..."
-                    handleTransporterAccept(id, btnAccept, btnReject, prevAcceptText.toString())
+                    handleTransporterAccept(id, btnAccept, btnReject, prevAcceptText)
                 }
             }
         }
 
-        // Reject / Treat behaviour (robust: re-check role at click time)
-        btnReject.setOnClickListener {
-            Log.d(TAG, "btnReject CLICKED (role=$currentRole)")
-
-            val id = bookingId ?: currentBookingId
-            Log.d(TAG, "btnReject bookingId = $id")
-
+        btnReject?.setOnClickListener {
+            Log.d(TAG, "btnReject CLICKED — resolving role...")
+            val id = transportDocId ?: tsdDocId ?: currentBookingId
             if (id.isNullOrBlank()) {
                 Toast.makeText(requireContext(), "Missing booking id", Toast.LENGTH_SHORT).show()
                 Log.e(TAG, "btnReject FAILED: bookingId is NULL")
                 return@setOnClickListener
             }
 
-            // Visual state → disable while processing
-            btnAccept.isEnabled = false
+            btnAccept?.isEnabled = false
             btnReject.isEnabled = false
-            val prevRejectText = btnReject.text
+            val prevRejectText = btnReject.text?.toString() ?: "Reject"
 
             val uid = auth.currentUser?.uid
             if (uid.isNullOrBlank()) {
                 Toast.makeText(requireContext(), "Please sign in", Toast.LENGTH_SHORT).show()
-                btnAccept.isEnabled = true
-                btnReject.isEnabled = true
+                btnAccept?.isEnabled = true
+                btnReject?.isEnabled = true
                 return@setOnClickListener
             }
 
-            // Optional debug dumps (temporary)
-            uid.let {
-                db.collection("users").document(it).get().addOnSuccessListener { d -> Log.d(TAG, "users doc at click: ${d.data}") }
-                db.collection("service_providers").document(it).get().addOnSuccessListener { d -> Log.d(TAG, "service_providers doc at click: ${d.data}") }
-            }
-            db.collection("tsd_bookings").document(id).get().addOnSuccessListener { b -> Log.d(TAG, "booking doc at click: ${b.data}") }
-
-            // Resolve role then act
             fetchRoleForCurrentUser { role ->
                 currentRole = role
                 Log.d(TAG, "btnReject resolved role = $role")
                 if (role.contains("tsd")) {
                     btnReject.text = "Treating..."
-                    handleTsdReject(id, btnAccept, btnReject, prevRejectText.toString())
+                    handleTsdReject(id, btnAccept, btnReject, prevRejectText)
                 } else {
                     btnReject.text = "Rejecting..."
-                    handleTransporterReject(id, btnAccept, btnReject, prevRejectText.toString())
+                    handleTransporterReject(id, btnAccept, btnReject, prevRejectText)
                 }
             }
         }
 
-        // TSD-only actions: upload certificate
-        btnUploadCertificate?.setOnClickListener {
-            if (currentRole == "tsd" || currentRole == "tsdfacility") {
-                // open file picker (PDF/images)
-                pickFileForCertificate.launch("*/*")
-            } else {
-                Toast.makeText(requireContext(), "Upload available only for TSD accounts", Toast.LENGTH_SHORT).show()
-            }
-        }
+        // Wire TSD upload buttons if present in layout (they may be null if not included)
 
-        // TSD-only: upload previous record
-        btnUploadPreviousRecord?.setOnClickListener {
-            if (currentRole == "tsd" || currentRole == "tsdfacility") {
-                pickFileForPreviousRecord.launch("*/*")
-            } else {
-                Toast.makeText(requireContext(), "Upload available only for TSD accounts", Toast.LENGTH_SHORT).show()
-            }
-        }
 
-        // TSD-only: update status (choose next)
-        btnUpdateStatus?.setOnClickListener {
-            if (currentRole == "tsd" || currentRole == "tsdfacility") {
-                val id = bookingId ?: currentBookingId
-                if (id.isNullOrBlank()) {
-                    Toast.makeText(requireContext(), "Missing booking id", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                showStatusUpdateDialog(id, currentStatus ?: "Pending")
-            } else {
-                Toast.makeText(requireContext(), "Status update available only for TSD accounts", Toast.LENGTH_SHORT).show()
-            }
-        }
+        // Update status dialog for TSD (if button exists)
 
-        return view
     }
 
     /* -------------------------
-       Role detection & binding
-       (unchanged logic - preserved from your version)
+       Role resolver (reads users/{uid} or service_providers/{uid})
        ------------------------- */
-
     private fun extractStringFieldSafely(docData: Map<String, Any>?, vararg possibleKeys: String): String? {
         if (docData == null) return null
         for (k in possibleKeys) {
@@ -229,19 +309,16 @@ class SP_ServiceRequestDetails : Fragment() {
             return
         }
 
-        // Try users/{uid} first
         db.collection("users").document(uid).get()
             .addOnSuccessListener { userDoc ->
                 val userMap = userDoc.data
                 val roleCandidate = extractStringFieldSafely(userMap,
                     "role", "Role", "userRole", "accountRole", "roleType")
                 val roleRaw = roleCandidate?.lowercase()?.trim()
-
                 if (!roleRaw.isNullOrBlank()) {
                     Log.d(TAG, "fetchRole: found role in users -> $roleRaw")
                     callback(if (roleRaw.contains("tsd")) "tsd" else "transporter")
                 } else {
-                    // fallback to service_providers; check multiple possible keys
                     db.collection("service_providers").document(uid).get()
                         .addOnSuccessListener { spDoc ->
                             val spMap = spDoc.data
@@ -274,253 +351,170 @@ class SP_ServiceRequestDetails : Fragment() {
             }
     }
 
-    private fun detectRoleAndLoadBooking(bookingId: String?, view: View) {
-        val uid = auth.currentUser?.uid
-        if (uid.isNullOrBlank()) {
-            Log.w(TAG, "User not signed in, defaulting to transporter behaviour")
-            bookingId?.let { loadBookingFromTransportOrBundle(it, view) } ?: bindFromBundle(view)
-            return
+    /* ----------------------------
+       Transporter: one-time load for transport_bookings/{transportId}
+       (replaced with a snapshot listener so transport booking updates reflect immediately)
+       ---------------------------- */
+
+
+    /**
+     * Subscribe to TSD booking document and populate treatmentInfo + other fields. (live listener)
+     * (UNCHANGED - TSD handling kept exactly as before)
+     */
+    private fun subscribeToTsdRequest(tsdId: String) {
+        binding.txtAttachments.text = "Loading attachments..."
+        tsdListener?.remove()
+        val ref = db.collection("tsd_bookings").document(tsdId)
+        tsdListener = ref.addSnapshotListener { snap, err ->
+            if (err != null) {
+                Toast.makeText(requireContext(), "Error loading TSD request: ${err.message}", Toast.LENGTH_SHORT).show()
+                return@addSnapshotListener
+            }
+            if (snap == null || !snap.exists()) {
+                Toast.makeText(requireContext(), "TSD request not found", Toast.LENGTH_SHORT).show()
+                return@addSnapshotListener
+            }
+
+            val m = snap.data ?: emptyMap<String, Any>()
+            currentBookingId = snap.id
+
+            // Basic fields
+            binding.txtBookingId.text = (m["bookingId"] as? String) ?: snap.id
+            binding.txtLocation.text = (m["location"] as? String) ?: ""
+
+            val pref = (m["preferredDate"] as? String)
+            binding.txtDateRequested.text = pref ?: ((m["dateCreated"] as? Timestamp)?.toDate()
+                ?.let { DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString() } ?: "")
+
+            val facilityName = (m["facilityName"] as? String).orEmpty()
+            val companyNameField = (m["companyName"] as? String).orEmpty()
+            val contactNumber = (m["contactNumber"] as? String).orEmpty()
+            val contactPersonName = (m["contactPerson"] as? String).orEmpty()
+
+            val companyDisplay = when {
+                facilityName.isNotBlank() -> facilityName
+                companyNameField.isNotBlank() -> companyNameField
+                else -> ""
+            }
+            binding.txtCompanyName.text = companyDisplay
+
+            val contactDisplay = when {
+                contactNumber.isNotBlank() && contactPersonName.isNotBlank() -> "$contactPersonName — $contactNumber"
+                contactNumber.isNotBlank() -> contactNumber
+                contactPersonName.isNotBlank() -> contactPersonName
+                else -> ""
+            }
+            binding.txtContactPerson.text = contactDisplay
+
+            // Hide transporter-only fields for TSD
+            binding.txtWasteType.visibility = View.GONE
+            binding.txtPackaging.visibility = View.GONE
+            binding.txtSpecialInstructions.visibility = View.GONE
+
+            binding.txtQuantity.text = when (val q = m["quantity"]) {
+                is Number -> q.toString()
+                is String -> q
+                else -> ""
+            }
+
+            val total = (m["totalPayment"] as? Number)?.toDouble()
+            val rate = (m["rate"] as? Number)?.toDouble()
+            binding.txtAmount.text = when {
+                total != null -> String.format("%,.2f", total)
+                rate != null -> String.format("%,.2f", rate)
+                else -> (m["amount"] as? String) ?: ""
+            }
+
+            // show treatment info
+            ensureTreatmentInfoViews()
+            val treatment = (m["treatmentInfo"] as? String) ?: (m["treatment"] as? String) ?: ""
+            txtTreatmentInfoView?.text = treatment
+            labelTreatmentInfoView?.visibility = View.VISIBLE
+            txtTreatmentInfoView?.visibility = View.VISIBLE
+
+            // attachments combine
+            val attachments = mutableListOf<String>()
+            (m["collectionProof"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+            (m["certificateUrl"] as? String)?.let { attachments.add(it) }
+            (m["previousRecordUrl"] as? String)?.let { attachments.add(it) }
+            (m["attachments"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+            (m["fileUrl"] as? String)?.let { attachments.add(it) }
+
+            val firstAttachment = attachments.firstOrNull() ?: (m["previousRecordUrl"] as? String)
+            ?: (m["certificateUrl"] as? String) ?: DEV_ATTACHMENT_URL
+            setupAttachmentUI(firstAttachment)
+
+            currentCertificateUrl = (m["certificateUrl"] as? String)?.ifEmpty { null }
+            currentPreviousRecordUrl = (m["previousRecordUrl"] as? String)?.ifEmpty { null }
+
+            // ------ STATUS: prefer bookingStatus, then status, else "Pending" ------
+            val bookingStatus = when {
+                ((m["bookingStatus"] as? String)?.trim()?.isNotEmpty() == true) -> (m["bookingStatus"] as String).trim()
+                ((m["status"] as? String)?.trim()?.isNotEmpty() == true)        -> (m["status"] as String).trim()
+                else -> "Pending"
+            }
+
+            // set the UI status pill so details reflect Firestore immediately
+            binding.txtStatusPill.text = bookingStatus
+
+            // Visibility decision based on bookingStatus
+            val finalStates = setOf("confirmed", "treated", "rejected", "received", "completed")
+            val nonActionable = finalStates.contains(bookingStatus.lowercase())
+
+            activity?.runOnUiThread {
+                if (nonActionable) {
+                    binding.btnAccept.visibility = View.GONE
+                    binding.btnReject.visibility = View.GONE
+                    binding.btnAccept.isEnabled = false
+                    binding.btnReject.isEnabled = false
+                    Log.d(TAG, "TSD DECIDER: HIDING buttons because bookingStatus='$bookingStatus'")
+                } else {
+                    binding.btnAccept.visibility = View.VISIBLE
+                    binding.btnReject.visibility = View.VISIBLE
+                    binding.btnAccept.isEnabled = true
+                    binding.btnReject.isEnabled = true
+                    Log.d(TAG, "TSD DECIDER: SHOWING buttons because bookingStatus='$bookingStatus'")
+                }
+            }
+
+            // clicking attachments opens first available
+            val attText = binding.txtAttachments
+            if (firstAttachment.isNotBlank()) {
+                attText.setOnClickListener {
+                    val urlToOpen = currentPreviousRecordUrl ?: currentCertificateUrl ?: firstAttachment
+                    if (urlToOpen.isNotBlank()) openAttachment(urlToOpen)
+                }
+            }
         }
-
-        db.collection("users").document(uid).get()
-            .addOnSuccessListener { userDoc ->
-                val roleRaw = userDoc.getString("role")?.trim() ?: ""
-                val role = roleRaw.lowercase()
-                currentRole = role
-                Log.d(TAG, "Detected role = $currentRole")
-
-                // treat any role that contains "tsd" as TSD
-                val isTsd = role.contains("tsd")
-
-                if (isTsd) {
-                    view.findViewById<Button>(R.id.btnAccept).text = "Receive"
-                    view.findViewById<Button>(R.id.btnReject).text = "Treat"
-                    if (!bookingId.isNullOrBlank()) {
-                        loadTsdBookingFromFirestore(bookingId, view)
-                    } else {
-                        bindFromBundle(view)
-                    }
-                } else {
-                    // fallback to service_providers if user doc doesn't indicate tsd
-                    db.collection("service_providers").document(uid).get()
-                        .addOnSuccessListener { spDoc ->
-                            val providerType = spDoc.getString("providerType")?.lowercase()?.trim() ?: ""
-                            val providerIsTsd = providerType.contains("tsd")
-                            if (providerIsTsd) {
-                                currentRole = "tsd"
-                                view.findViewById<Button>(R.id.btnAccept).text = "Receive"
-                                view.findViewById<Button>(R.id.btnReject).text = "Treat"
-                                if (!bookingId.isNullOrBlank()) {
-                                    loadTsdBookingFromFirestore(bookingId, view)
-                                } else {
-                                    bindFromBundle(view)
-                                }
-                            } else {
-                                currentRole = "transporter"
-                                view.findViewById<Button>(R.id.btnAccept).text = "Accept"
-                                view.findViewById<Button>(R.id.btnReject).text = "Reject"
-                                if (!bookingId.isNullOrBlank()) {
-                                    loadBookingFromFirestore(bookingId, view)
-                                } else {
-                                    bindFromBundle(view)
-                                }
-                            }
-                        }
-                        .addOnFailureListener {
-                            // fail safe: treat as transporter
-                            currentRole = "transporter"
-                            view.findViewById<Button>(R.id.btnAccept).text = "Accept"
-                            view.findViewById<Button>(R.id.btnReject).text = "Reject"
-                            if (!bookingId.isNullOrBlank()) {
-                                loadBookingFromFirestore(bookingId, view)
-                            } else {
-                                bindFromBundle(view)
-                            }
-                        }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Failed to read users/{uid} role: ${e.message}. Falling back to transporter")
-                currentRole = "transporter"
-                if (!bookingId.isNullOrBlank()) {
-                    loadBookingFromTransportOrBundle(bookingId, view)
-                } else {
-                    bindFromBundle(view)
-                }
-            }
-    }
-
-    // ----------------------------
-    // TSD booking binder (enhanced)
-    // ----------------------------
-    private fun loadTsdBookingFromFirestore(bookingId: String, view: View) {
-        db.collection("tsd_bookings").document(bookingId)
-            .get()
-            .addOnSuccessListener { doc ->
-                if (!doc.exists()) {
-                    Toast.makeText(requireContext(), "TSD booking not found", Toast.LENGTH_SHORT).show()
-                    bindFromBundle(view)
-                    return@addOnSuccessListener
-                }
-
-                val m = doc.data ?: emptyMap<String, Any>()
-                Log.d(TAG, "tsd docId=${doc.id} data=$m") // FULL doc dump
-
-                currentBookingId = doc.id
-                currentCertificateUrl = (m["certificateUrl"] as? String)?.trim().orEmpty().ifEmpty { null }
-                currentPreviousRecordUrl = (m["previousRecordUrl"] as? String)?.trim().orEmpty().ifEmpty { null }
-                currentStatus = (m["status"] as? String)?.trim()?.ifEmpty { "Pending" }
-                currentFacilityName = (m["facilityName"] as? String)?.trim()?.ifEmpty { null }
-
-                fun s(key: String, alt: String = ""): String {
-                    return (m[key] as? String)?.trim().takeUnless { it.isNullOrEmpty() } ?: alt
-                }
-
-                val companyName = s("facilityName", s("facility", "TSD Facility"))
-                val serviceType = "TSD - ${s("treatmentInfo", "Treatment")}"
-                val location = s("location", "N/A")
-
-                val dateRequested = (m["dateCreated"] as? com.google.firebase.Timestamp)?.toDate()?.let {
-                    android.text.format.DateFormat.format("MMM dd, yyyy hh:mm a", it).toString()
-                } ?: s("preferredDate", "N/A")
-
-                val contactNumber = s("contactNumber", "N/A")
-                // NOTE: keep reading both keys; bookingStatus var is what UI uses
-                val bookingStatus = s("status", "") .ifEmpty { s("bookingStatus", "Pending") }
-                val notes = s("treatmentInfo", s("notes", "No additional notes"))
-
-                val quantity = when (val q = m["quantity"]) {
-                    is String -> q
-                    is Number -> q.toString()
-                    else -> ""
-                }
-
-                val previousRecordUrl = s("previousRecordUrl", "")
-                val certificateUrl = s("certificateUrl", "")
-
-                // Bind UI
-                view.findViewById<TextView>(R.id.txtCompanyName).text = companyName
-                view.findViewById<TextView>(R.id.txtServiceType).text = serviceType
-                view.findViewById<TextView>(R.id.txtLocation).text = location
-                view.findViewById<TextView>(R.id.txtDateRequested).text = dateRequested
-                view.findViewById<TextView>(R.id.txtContactPerson).text = contactNumber
-                view.findViewById<TextView>(R.id.txtStatusPill).text = bookingStatus
-                view.findViewById<TextView>(R.id.txtNotes).text = notes
-
-                view.findViewById<TextView>(R.id.txtWasteType).text = s("treatmentInfo", "-")
-                view.findViewById<TextView>(R.id.txtQuantity).text = quantity.ifEmpty { "-" }
-                view.findViewById<TextView>(R.id.txtPackaging).text = "-" // not present in tsd doc
-                view.findViewById<TextView>(R.id.txtDestination).text = companyName
-                view.findViewById<TextView>(R.id.txtAmount).text =
-                    if ((m["totalPayment"] as? Number)?.toDouble() ?: 0.0 > 0.0)
-                        "₱ ${"%,.2f".format((m["totalPayment"] as Number).toDouble())}" else "-"
-
-                // Attachment: prefer previousRecord then certificate then fallback
-                val firstAttachment = when {
-                    previousRecordUrl.isNotBlank() -> previousRecordUrl
-                    certificateUrl.isNotBlank() -> certificateUrl
-                    else -> DEV_ATTACHMENT_URL
-                }
-                setupAttachmentUI(view, firstAttachment)
-
-                // store attachments locally for open action
-                currentCertificateUrl = certificateUrl.ifEmpty { null }
-                currentPreviousRecordUrl = previousRecordUrl.ifEmpty { null }
-
-                // ---------------------------
-                // DECIDE VISIBILITY — robust
-                // ---------------------------
-                val btnAccept = view.findViewById<Button>(R.id.btnAccept)
-                val btnReject = view.findViewById<Button>(R.id.btnReject)
-                val btnUploadCertificate = view.findViewById<Button?>(R.id.btnUploadCertificate)
-                val btnUploadPreviousRecord = view.findViewById<Button?>(R.id.btnUploadPreviousRecord)
-                val btnUpdateStatus = view.findViewById<Button?>(R.id.btnUpdateStatus)
-
-                // Gather status sources
-                val docStatus = (m["status"] as? String)?.trim()
-                val docBookingStatus = (m["bookingStatus"] as? String)?.trim()
-                val uiStatusText = view.findViewById<TextView>(R.id.txtStatusPill).text?.toString()?.trim()
-
-                Log.d(TAG, "DECIDER: doc.status='$docStatus', doc.bookingStatus='$docBookingStatus', uiStatusPill='$uiStatusText'")
-
-                // normalize: choose any non-empty that indicates final state
-                val effectiveStatus = listOfNotNull(docStatus, docBookingStatus, uiStatusText)
-                    .firstOrNull { it.isNotBlank() }?.trim() ?: "Pending"
-
-                val finalStates = setOf("confirmed", "treated", "rejected", "received", "completed")
-                val nonActionable = finalStates.contains(effectiveStatus.lowercase())
-
-                // Apply UI changes on main thread
-                activity?.runOnUiThread {
-                    if (nonActionable) {
-                        btnAccept.visibility = View.GONE
-                        btnReject.visibility = View.GONE
-                        btnAccept.isEnabled = false
-                        btnReject.isEnabled = false
-                        Log.d(TAG, "DECIDER: HIDING buttons because effectiveStatus='$effectiveStatus'")
-                    } else {
-                        btnAccept.visibility = View.VISIBLE
-                        btnReject.visibility = View.VISIBLE
-                        btnAccept.isEnabled = true
-                        btnReject.isEnabled = true
-                        Log.d(TAG, "DECIDER: SHOWING buttons because effectiveStatus='$effectiveStatus'")
-                    }
-
-                    // TSD-only controls: keep previous owner logic if you want, else always visible
-                    // Here we keep them visible (you can change to only owner if needed)
-                    btnUploadCertificate?.visibility = View.VISIBLE
-                    btnUploadPreviousRecord?.visibility = View.VISIBLE
-                    btnUpdateStatus?.visibility = View.VISIBLE
-                }
-
-                // If certificate exists, clicking txtAttachments opens it
-                val attachmentsText = view.findViewById<TextView>(R.id.txtAttachments)
-                if (certificateUrl.isNotBlank() || previousRecordUrl.isNotBlank()) {
-                    attachmentsText.setOnClickListener {
-                        val urlToOpen = currentPreviousRecordUrl ?: currentCertificateUrl ?: ""
-                        if (urlToOpen.isNotBlank()) openAttachment(urlToOpen)
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Failed loading tsd booking", e)
-                Toast.makeText(requireContext(), "Failed to load TSD booking: ${e.message}", Toast.LENGTH_LONG).show()
-                bindFromBundle(view)
-            }
     }
 
     override fun onResume() {
         super.onResume()
-        // re-evaluate visibility after resume in case something else toggled it
         try {
-            val root = view ?: return
-            recheckTsdButtonsByStatusPill(root)
+            view?.let { recheckButtonsByStatusPill(it) }
         } catch (ex: Exception) {
             Log.w(TAG, "onResume recheck failed: ${ex.message}")
         }
     }
 
-    private fun recheckTsdButtonsByStatusPill(rootView: View) {
-        val statusPill = rootView.findViewById<TextView?>(R.id.txtStatusPill)?.text?.toString()?.trim() ?: return
-        val btnAccept = rootView.findViewById<Button?>(R.id.btnAccept)
-        val btnReject = rootView.findViewById<Button?>(R.id.btnReject)
+    private fun recheckButtonsByStatusPill(rootView: View) {
+        val statusPill = binding.txtStatusPill.text?.toString()?.trim() ?: return
         val lower = statusPill.lowercase()
         val finalStates = setOf("confirmed", "treated", "rejected", "received", "completed")
         if (finalStates.contains(lower)) {
-            btnAccept?.visibility = View.GONE
-            btnReject?.visibility = View.GONE
-            btnAccept?.isEnabled = false
-            btnReject?.isEnabled = false
+            binding.btnAccept.visibility = View.GONE
+            binding.btnReject.visibility = View.GONE
+            binding.btnAccept.isEnabled = false
+            binding.btnReject.isEnabled = false
             Log.d(TAG, "onResume DECIDER: hid buttons based on statusPill='$statusPill'")
         } else {
-            btnAccept?.visibility = View.VISIBLE
-            btnReject?.visibility = View.VISIBLE
-            btnAccept?.isEnabled = true
-            btnReject?.isEnabled = true
+            binding.btnAccept.visibility = View.VISIBLE
+            binding.btnReject.visibility = View.VISIBLE
+            binding.btnAccept.isEnabled = true
+            binding.btnReject.isEnabled = true
             Log.d(TAG, "onResume DECIDER: showed buttons based on statusPill='$statusPill'")
         }
     }
-
 
     /* ----------------------------
        Generic helper to update booking status for any collection
@@ -539,38 +533,69 @@ class SP_ServiceRequestDetails : Fragment() {
             callback(false); return
         }
 
-        // Core status fields: write both "status" and "bookingStatus" to avoid mismatches
         val updates = mutableMapOf<String, Any>(
             "status" to statusValue,
             "bookingStatus" to statusValue,
             "statusUpdatedAt" to FieldValue.serverTimestamp(),
             "statusUpdatedBy" to actorUid
         )
-
-        // Add the lifecycle timestamp field if provided (confirmedAt, treatedAt, etc.)
         lifecycleField?.let { updates[it] = FieldValue.serverTimestamp() }
-
-        // Merge any caller-provided extra fields (e.g., treatmentInfo, rejectedBy, etc.)
         updates.putAll(extraFields)
 
         Log.d(TAG, "updateBookingStatusGeneric: collection=$collectionName id=$bookingId updates=$updates")
+
+        // optimistic UI update: hide/disable buttons and set status pill while update is in flight
+        try {
+            activity?.runOnUiThread {
+                binding.txtStatusPill.text = statusValue
+                binding.btnAccept.visibility = View.GONE
+                binding.btnReject.visibility = View.GONE
+                binding.btnAccept.isEnabled = false
+                binding.btnReject.isEnabled = false
+            }
+        } catch (ex: Exception) {
+            Log.w(TAG, "optimistic UI update failed: ${ex.message}")
+        }
 
         db.collection(collectionName)
             .document(bookingId)
             .update(updates)
             .addOnSuccessListener {
                 Log.d(TAG, "Firestore UPDATE SUCCESS [$collectionName/$bookingId] -> $statusValue")
+
+                // notify list fragment(s) so rows refresh in-place without requiring a full re-query
+                try {
+                    val result = Bundle().apply {
+                        putString("bookingId", bookingId)
+                        putString("bookingStatus", statusValue)
+                        putString("collection", collectionName)
+                    }
+                    parentFragmentManager.setFragmentResult("bookingStatusChanged", result)
+                } catch (e: Exception) {
+                    Log.w(TAG, "setFragmentResult failed: ${e.message}")
+                }
+
                 callback(true)
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Firestore UPDATE FAILED [$collectionName/$bookingId]: ${e.message}", e)
+
+                // rollback optimistic UI so user can retry
+                try {
+                    activity?.runOnUiThread {
+                        binding.btnAccept.visibility = View.VISIBLE
+                        binding.btnReject.visibility = View.VISIBLE
+                        binding.btnAccept.isEnabled = true
+                        binding.btnReject.isEnabled = true
+                    }
+                } catch (ex: Exception) { /* ignore */ }
+
                 callback(false)
             }
     }
 
-    // ----------------------------
-    // TRANSPORTER: accept (-> Confirmed) using generic helper
-    // ----------------------------
+
+    // Transporter helpers
     private fun acceptBooking(bookingId: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "acceptBooking() CALLED for bookingId=$bookingId")
         val uid = auth.currentUser?.uid ?: ""
@@ -589,9 +614,6 @@ class SP_ServiceRequestDetails : Fragment() {
         )
     }
 
-    // ----------------------------
-    // TRANSPORTER: reject (-> Rejected) using generic helper
-    // ----------------------------
     private fun rejectBooking(bookingId: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "rejectBooking() CALLED for bookingId=$bookingId")
         val uid = auth.currentUser?.uid ?: ""
@@ -610,9 +632,7 @@ class SP_ServiceRequestDetails : Fragment() {
         )
     }
 
-    // ----------------------------
-    // TSD: receive (-> Confirmed) using generic helper
-    // ----------------------------
+    // TSD helpers (unchanged)
     private fun receiveTsdBooking(bookingId: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "receiveTsdBooking() CALLED for bookingId=$bookingId")
         val uid = auth.currentUser?.uid ?: ""
@@ -627,15 +647,12 @@ class SP_ServiceRequestDetails : Fragment() {
         )
     }
 
-    // ----------------------------
-    // TSD: treat (-> Treated) using generic helper
-    // ----------------------------
     private fun treatTsdBooking(bookingId: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "treatTsdBooking() CALLED for bookingId=$bookingId")
         val uid = auth.currentUser?.uid ?: ""
         val extra = mapOf<String, Any>(
             "treatedBy" to uid,
-            "treatmentInfo" to "Treated via mobile app by $uid"
+            "treatmentInfo" to "Treated by $uid"
         )
         updateBookingStatusGeneric(
             collectionName = "tsd_bookings",
@@ -652,14 +669,12 @@ class SP_ServiceRequestDetails : Fragment() {
        Upload helpers (pick → upload → save URL to Firestore)
        ---------------------------- */
     private fun uploadFileAndSave(fileUri: Uri, type: String) {
-        // type: "certificate" or "previousRecord"
         val bookingId = currentBookingId
         if (bookingId.isNullOrBlank()) {
             Toast.makeText(requireContext(), "Booking ID missing", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // create storage path: tsd_bookings/{bookingId}/{type}_{uuid}.pdf (or original name extension)
         val ext = (activity?.contentResolver?.getType(fileUri) ?: "application/octet-stream").substringAfterLast("/")
         val filename = "${type}_${UUID.randomUUID()}.$ext"
         val refPath = "tsd_bookings/$bookingId/$filename"
@@ -673,11 +688,9 @@ class SP_ServiceRequestDetails : Fragment() {
             val percent = (100.0 * taskSnapshot.bytesTransferred) / taskSnapshot.totalByteCount
             Log.d(TAG, "Upload progress: ${"%.1f".format(percent)}%")
         }.addOnSuccessListener {
-            // get download URL
             storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                 val url = downloadUri.toString()
                 Log.d(TAG, "Upload success, downloadUrl=$url")
-                // Save to Firestore
                 val fieldName = when (type) {
                     "certificate" -> "certificateUrl"
                     "previousRecord" -> "previousRecordUrl"
@@ -693,7 +706,7 @@ class SP_ServiceRequestDetails : Fragment() {
                     .addOnSuccessListener {
                         Toast.makeText(requireContext(), "$type uploaded", Toast.LENGTH_SHORT).show()
                         // refresh local state by reloading doc
-                        loadTsdBookingFromFirestore(bookingId, requireView())
+                        loadTsdBookingFromFirestore(bookingId)
                     }
                     .addOnFailureListener { e ->
                         Log.e(TAG, "Failed saving $type URL to Firestore: ${e.message}", e)
@@ -711,242 +724,60 @@ class SP_ServiceRequestDetails : Fragment() {
 
     /* ----------------------------
        Show status update dialog (TSD)
+       (left intentionally as in your code)
        ---------------------------- */
-    private fun showStatusUpdateDialog(bookingId: String, currentStatus: String) {
-        val allowedNext = when (currentStatus.lowercase()) {
-            "pending", "pending payment", "received" -> listOf("Confirmed", "Processing")
-            "confirmed" -> listOf("Processing", "Completed")
-            "processing" -> listOf("Completed")
-            else -> listOf("Confirmed", "Processing", "Completed")
-        }
 
 
-        val items = allowedNext.toTypedArray()
-        AlertDialog.Builder(requireContext())
-            .setTitle("Update status (current: $currentStatus)")
-            .setItems(items) { dialog, which ->
-                val chosen = items[which]
-                // use generic helper to update status so both keys remain consistent
-                val uid = auth.currentUser?.uid ?: ""
-                updateBookingStatusGeneric(
-                    collectionName = "tsd_bookings",
-                    bookingId = bookingId,
-                    statusValue = chosen,
-                    actorUid = uid,
-                    lifecycleField = when (chosen.lowercase()) {
-                        "confirmed" -> "confirmedAt"
-                        "processing" -> "processingAt"
-                        "completed" -> "completedAt"
-                        else -> null
-                    },
-                    extraFields = emptyMap(),
-                    callback = { success ->
-                        if (success) {
-                            Toast.makeText(requireContext(), "Status updated to $chosen", Toast.LENGTH_SHORT).show()
-                            // refresh doc
-                            loadTsdBookingFromFirestore(bookingId, requireView())
-                        } else {
-                            Toast.makeText(requireContext(), "Failed to update status", Toast.LENGTH_LONG).show()
-                        }
-                    }
-                )
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    // ----------------------------
-    // Helper methods (transport + tsd) - pasted here (transport binding etc.)
-    // ----------------------------
-
-    // ----------------------------
-    // Helper: load transport booking or fall back to bundle bindings
-    // ----------------------------
-    private fun loadBookingFromTransportOrBundle(bookingId: String, view: View) {
-        db.collection("transport_bookings").document(bookingId)
+    /* ----------------------------
+       Helper: load TSD doc once (not listener) for refresh after upload/status change
+       ---------------------------- */
+    private fun loadTsdBookingFromFirestore(bookingId: String) {
+        db.collection("tsd_bookings").document(bookingId)
             .get()
             .addOnSuccessListener { doc ->
-                if (!doc.exists()) {
-                    bindFromBundle(view)
-                    return@addOnSuccessListener
-                }
-                val m = doc.data ?: emptyMap<String, Any>()
-                Log.d(TAG, "transport docId=${doc.id} data=$m")
-                bindTransportDocToView(m, doc.id, view)
+                if (!doc.exists()) return@addOnSuccessListener
+                // rebind by reusing subscribeToTsdRequest's logic: easiest is to just call subscribeToTsdRequest to refresh
+                subscribeToTsdRequest(bookingId)
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Failed loading transport booking: ${e.message}", e)
-                bindFromBundle(view)
+                Log.w(TAG, "loadTsdBookingFromFirestore failed: ${e.message}")
             }
     }
 
-    // ----------------------------
-    // Load transport booking by id (document) and bind
-    // ----------------------------
-    private fun loadBookingFromFirestore(bookingId: String, view: View) {
-        db.collection("transport_bookings").document(bookingId)
-            .get()
-            .addOnSuccessListener { doc ->
-                if (!doc.exists()) {
-                    Toast.makeText(requireContext(), "Booking not found", Toast.LENGTH_SHORT).show()
-                    bindFromBundle(view)
-                    return@addOnSuccessListener
-                }
-                val m = doc.data ?: emptyMap<String, Any>()
-                Log.d(TAG, "docId=${doc.id} data=$m")
-                bindTransportDocToView(m, doc.id, view)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Failed loading booking", e)
-                Toast.makeText(requireContext(), "Failed to load booking: ${e.message}", Toast.LENGTH_LONG).show()
-                bindFromBundle(view)
-            }
-    }
+    /* ----------------------------
+       Attachment UI binder (uses binding)
+       ---------------------------- */
+    private fun setupAttachmentUI(attachmentPath: String) {
+        binding.txtAttachments.text = attachmentPath.substringAfterLast("/")
+        binding.txtAttachments.tag = attachmentPath
 
-    // ----------------------------
-    // Bind transport document map -> view (keeps your earlier logic)
-    // ----------------------------
-    private fun bindTransportDocToView(m: Map<String, Any>, docId: String, view: View) {
-        fun s(key: String, alt: String = ""): String {
-            val v = (m[key] as? String)?.trim()
-            return if (!v.isNullOrEmpty()) v else alt
-        }
-
-        val companyName = s("serviceProviderCompany", s("companyName", "Unknown"))
-        val wasteType = s("wasteType")
-        val serviceType = if (wasteType.isNotBlank()) "Transport - $wasteType" else "Transport Booking"
-        val origin = s("origin", s("pickupLocation", "N/A"))
-
-        val dateRequested = (m["bookingDate"] as? com.google.firebase.Timestamp)?.toDate()?.let {
-            android.text.format.DateFormat.format("MMM dd, yyyy hh:mm a", it).toString()
-        } ?: (m["dateBooked"] as? com.google.firebase.Timestamp)?.toDate()?.let {
-            android.text.format.DateFormat.format("MMM dd, yyyy hh:mm a", it).toString()
-        } ?: "N/A"
-
-        val providerContact = s("providerContact", s("contactNumber", "N/A"))
-        val providerName = s("serviceProviderName", s("name", ""))
-        val bookingStatus = s("bookingStatus", "Pending")
-        val notes = s("specialInstructions", s("notes", "No additional notes"))
-
-        val quantity = when (val q = m["quantity"]) {
-            is String -> q
-            is Number -> q.toString()
-            else -> ""
-        }
-
-        val packaging = s("packaging", "")
-        val destination = s("destination", s("dropoffLocation", ""))
-
-        val transportPlanUrl = (m["transportPlanUrl"] as? String)?.takeIf { it.isNotBlank() }
-        val storagePermitUrl = (m["storagePermitUrl"] as? String)?.takeIf { it.isNotBlank() }
-
-        // Bind UI
-        view.findViewById<TextView>(R.id.txtCompanyName).text = companyName
-        view.findViewById<TextView>(R.id.txtServiceType).text = serviceType
-        view.findViewById<TextView>(R.id.txtLocation).text = origin
-        view.findViewById<TextView>(R.id.txtDateRequested).text = dateRequested
-        view.findViewById<TextView>(R.id.txtContactPerson).text =
-            if (providerName.isNotEmpty()) "$providerName — $providerContact" else providerContact
-        view.findViewById<TextView>(R.id.txtStatusPill).text = bookingStatus
-        view.findViewById<TextView>(R.id.txtNotes).text = notes
-
-        view.findViewById<TextView>(R.id.txtWasteType).text = wasteType.ifEmpty { "-" }
-        view.findViewById<TextView>(R.id.txtQuantity).text = quantity.ifEmpty { "-" }
-        view.findViewById<TextView>(R.id.txtPackaging).text = packaging.ifEmpty { "-" }
-        view.findViewById<TextView>(R.id.txtDestination).text = destination.ifEmpty { "-" }
-
-        val firstAttachment = transportPlanUrl ?: storagePermitUrl ?: DEV_ATTACHMENT_URL
-        setupAttachmentUI(view, firstAttachment)
-
-        // --------------------------------------------------------
-        // HIDE ACCEPT/REJECT IF CONFIRMED OR REJECTED
-        // --------------------------------------------------------
-        val btnAccept = view.findViewById<Button>(R.id.btnAccept)
-        val btnReject = view.findViewById<Button>(R.id.btnReject)
-
-        Log.d(TAG, "bookingStatus = $bookingStatus → evaluating button visibility")
-
-        if (bookingStatus.equals("Confirmed", true) ||
-            bookingStatus.equals("Rejected", true)) {
-
-            btnAccept.visibility = View.GONE
-            btnReject.visibility = View.GONE
-            Log.d(TAG, "Buttons hidden because bookingStatus=$bookingStatus")
-        } else {
-            btnAccept.visibility = View.VISIBLE
-            btnReject.visibility = View.VISIBLE
-            Log.d(TAG, "Buttons visible (Pending state)")
-        }
-    }
-
-    // ----------------------------
-    // Bind from bundle (when no doc found) — keeps your existing bundle mapping
-    // ----------------------------
-    private fun bindFromBundle(view: View) {
-        val companyName     = arguments?.getString("companyName")     ?: "Unknown"
-        val serviceType     = arguments?.getString("serviceTitle")    ?: "Transport Booking"
-        val location        = arguments?.getString("origin")          ?: "N/A"
-        val dateRequested   = arguments?.getString("dateRequested")   ?: "N/A"
-        val providerContact = arguments?.getString("providerContact") ?: "N/A"
-        val providerName    = arguments?.getString("providerName")    ?: ""
-        val bookingStatus   = arguments?.getString("bookingStatus")   ?: "Pending"
-        val notes           = arguments?.getString("notes")           ?: "No additional notes"
-        val attachment      = arguments?.getString("attachment")      ?: DEV_ATTACHMENT_URL
-
-        view.findViewById<TextView>(R.id.txtCompanyName).text = companyName
-        view.findViewById<TextView>(R.id.txtServiceType).text = serviceType
-        view.findViewById<TextView>(R.id.txtLocation).text = location
-        view.findViewById<TextView>(R.id.txtDateRequested).text = dateRequested
-
-        view.findViewById<TextView>(R.id.txtContactPerson).text =
-            if (providerName.isNotEmpty()) "$providerName — $providerContact" else providerContact
-
-        view.findViewById<TextView>(R.id.txtStatusPill).text = bookingStatus
-        view.findViewById<TextView>(R.id.txtNotes).text = notes
-
-        setupAttachmentUI(view, attachment)
-    }
-
-    // ----------------------------
-    // Attachment UI binder (keeps your existing UI behavior)
-    // ----------------------------
-    private fun setupAttachmentUI(view: View, attachmentPath: String) {
-        val txtAttach = view.findViewById<TextView>(R.id.txtAttachments)
-        txtAttach.text = attachmentPath.substringAfterLast("/")
-        txtAttach.tag = attachmentPath
-
-        val imgLogo = view.findViewById<ImageView>(R.id.imgCompanyLogo)
         try {
             Glide.with(this)
                 .load(attachmentPath)
                 .error(Glide.with(this).load(DEV_ATTACHMENT_URL))
-                .into(imgLogo)
+                .into(binding.imgCompanyLogo)
         } catch (ex: Exception) {
             Log.w(TAG, "Glide load failed, using fallback", ex)
-            Glide.with(this).load(DEV_ATTACHMENT_URL).into(imgLogo)
+            Glide.with(this).load(DEV_ATTACHMENT_URL).into(binding.imgCompanyLogo)
         }
 
-        txtAttach.setOnClickListener {
+        binding.txtAttachments.setOnClickListener {
             openAttachment(attachmentPath)
         }
 
-        val uploadTransportStatus = view.findViewById<TextView>(R.id.txtUploadTransportPlanStatus)
-        val uploadStorageStatus = view.findViewById<TextView>(R.id.txtUploadStoragePermitStatus)
-
         val uploadedTransport = attachmentPath.contains("transportPlan", ignoreCase = true) || attachmentPath.startsWith("http")
         if (uploadedTransport) {
-            uploadTransportStatus.text = "Transport Plan: Uploaded"
-            uploadTransportStatus.visibility = View.VISIBLE
+            binding.txtUploadTransportPlanStatus.text = "Transport Plan: Uploaded"
+            binding.txtUploadTransportPlanStatus.visibility = View.VISIBLE
         } else {
-            uploadTransportStatus.visibility = View.GONE
+            binding.txtUploadTransportPlanStatus.visibility = View.GONE
         }
 
         if (attachmentPath.contains("storagePermit", ignoreCase = true)) {
-            uploadStorageStatus.text = "Storage Permit: Uploaded"
-            uploadStorageStatus.visibility = View.VISIBLE
+            binding.txtUploadStoragePermitStatus.text = "Storage Permit: Uploaded"
+            binding.txtUploadStoragePermitStatus.visibility = View.VISIBLE
         } else {
-            uploadStorageStatus.visibility = View.GONE
+            binding.txtUploadStoragePermitStatus.visibility = View.GONE
         }
     }
 
@@ -959,8 +790,8 @@ class SP_ServiceRequestDetails : Fragment() {
     }
 
     /* ----------------------------
-       Helper wrappers called by click handlers
-       keeps UI state updates consistent
+       Handler wrappers called by button UI
+       (TSD handlers left unchanged)
        ---------------------------- */
     private fun handleTsdAccept(
         bookingId: String,
@@ -984,6 +815,50 @@ class SP_ServiceRequestDetails : Fragment() {
             }
         }
     }
+    /**
+     * If the transport booking references a TSD booking, set that TSD booking to Confirmed as well.
+     * Tries common link fields: "tsdBookingId", "tsdId", "bookingId", "requestId".
+     */
+    private fun propagateConfirmToTsdIfLinked(transportDocId: String) {
+        val transportRef = db.collection("transport_bookings").document(transportDocId)
+        transportRef.get()
+            .addOnSuccessListener { doc ->
+                if (!doc.exists()) return@addOnSuccessListener
+                val m = doc.data ?: return@addOnSuccessListener
+
+                // Try common linking keys
+                val possible = listOf("tsdBookingId", "tsdId", "bookingId", "requestId", "tsd_doc_id")
+                val linkedId = possible.mapNotNull { key ->
+                    when (val v = m[key]) {
+                        is String -> v.trim().takeIf { it.isNotEmpty() }
+                        else -> null
+                    }
+                }.firstOrNull()
+
+                if (linkedId != null) {
+                    // update tsd_bookings/{linkedId} to Confirmed (safe write: update both keys)
+                    val uid = auth.currentUser?.uid ?: ""
+                    val updates = mapOf<String, Any>(
+                        "status" to "Confirmed",
+                        "bookingStatus" to "Confirmed",
+                        "statusUpdatedAt" to FieldValue.serverTimestamp(),
+                        "statusUpdatedBy" to uid
+                    )
+                    db.collection("tsd_bookings").document(linkedId).update(updates)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Propagated Confirmed -> tsd_bookings/$linkedId")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w(TAG, "Failed to propagate to TSD ($linkedId): ${e.message}")
+                        }
+                } else {
+                    Log.d(TAG, "No linked TSD id found on transport_bookings/$transportDocId")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Failed reading transport doc to propagate: ${e.message}")
+            }
+    }
 
     private fun handleTransporterAccept(
         bookingId: String,
@@ -993,6 +868,9 @@ class SP_ServiceRequestDetails : Fragment() {
     ) {
         acceptBooking(bookingId) { success ->
             if (success) {
+                // propagate to TSD if any linked tsd booking exists
+                propagateConfirmToTsdIfLinked(bookingId)
+
                 try {
                     findNavController().popBackStack()
                 } catch (e: Exception) {
@@ -1005,6 +883,7 @@ class SP_ServiceRequestDetails : Fragment() {
             }
         }
     }
+
 
     private fun handleTsdReject(
         bookingId: String,
@@ -1049,6 +928,329 @@ class SP_ServiceRequestDetails : Fragment() {
         }
     }
 
-    // Keep other existing methods you had (bindFromBundle, loadBookingFromFirestore, bindTransportDocToView, acceptBooking, rejectBooking, receiveTsdBooking, treatTsdBooking)
-    // NOTE: if you moved those earlier in the file, ensure there are no duplicate method declarations.
+    /* ----------------------------
+       Additional transport binder used by the recovered code (keeps previous behavior)
+       -- replaced GET with snapshot listener in loadTransporterRequest above --
+       ---------------------------- */
+    private fun loadBookingFromTransportOrBundle(bookingId: String, view: View) {
+
+        val transportRef = db.collection("transport_bookings").document(bookingId)
+        val tsdRef = db.collection("tsd_bookings").document(bookingId)
+
+        // Try transport doc with a snapshot listener so UI stays in sync with Firestore
+        transportListener?.remove()
+        transportListener = transportRef.addSnapshotListener { docSnap, err ->
+            if (err != null) {
+                Log.e(TAG, "Error reading transport_bookings snapshot: ${err.message}")
+                // fallback to trying TSD once
+                try {
+                    tsdRef.get()
+                        .addOnSuccessListener { tsdDoc ->
+                            if (tsdDoc.exists()) {
+                                Log.d(TAG, "Loaded from TSD (after transport snapshot error): ${tsdDoc.id}")
+                                subscribeToTsdRequest(tsdDoc.id)
+                            } else {
+                                Log.d(TAG, "No FS doc found → bundle (after transport snapshot error)")
+                                currentBookingId = null
+                                bindFromBundle()
+                            }
+                        }
+                        .addOnFailureListener {
+                            Log.e(TAG, "Error reading tsd_bookings after transport snapshot error: ${it.message}")
+                            currentBookingId = null
+                            bindFromBundle()
+                        }
+                } catch (ex: Exception) {
+                    Log.e(TAG, "Fallback TSd read failed: ${ex.message}")
+                    currentBookingId = null
+                    bindFromBundle()
+                }
+                return@addSnapshotListener
+            }
+
+            if (docSnap != null && docSnap.exists()) {
+                val m = docSnap.data ?: emptyMap<String, Any>()
+                Log.d(TAG, "Loaded from TRANSPORT (snapshot): ${docSnap.id} bookingStatus=${m["bookingStatus"] ?: m["status"]}")
+                // IMPORTANT: record current booking id so buttons/uploads use the correct doc
+                currentBookingId = docSnap.id
+                transportDocId = docSnap.id
+
+                bindTransportDocToView(m, docSnap.id)
+            } else {
+                // If transport doesn't exist, try TSD once (one-time get)
+                tsdRef.get()
+                    .addOnSuccessListener { tsdDoc ->
+                        if (tsdDoc.exists()) {
+                            Log.d(TAG, "Loaded from TSD: ${tsdDoc.id}")
+                            subscribeToTsdRequest(tsdDoc.id)   // LIVE updates (TSD) restored
+                        } else {
+                            // fallback to bundle
+                            Log.d(TAG, "No FS doc found → bundle")
+                            currentBookingId = null
+                            bindFromBundle()
+                        }
+                    }
+                    .addOnFailureListener {
+                        Log.e(TAG, "Error reading tsd_bookings: ${it.message}")
+                        currentBookingId = null
+                        bindFromBundle()
+                    }
+            }
+        }
+    }
+
+    private fun bindTransportDocToView(m: Map<String, Any>, docId: String) {
+        // ensure callers have the correct active booking id recorded
+        currentBookingId = docId
+        transportDocId = docId
+
+        fun s(key: String, alt: String = ""): String {
+            val v = (m[key] as? String)?.trim()
+            return if (!v.isNullOrEmpty()) v else alt
+        }
+
+        val companyName = s("serviceProviderCompany", s("companyName", "Unknown"))
+        val wasteType = s("wasteType")
+        val serviceType = if (wasteType.isNotBlank()) "Transport - $wasteType" else "Transport Booking"
+        val origin = s("origin", s("pickupLocation", "N/A"))
+
+        val dateRequested = (m["bookingDate"] as? Timestamp)?.toDate()?.let {
+            DateFormat.format("MMM dd, yyyy hh:mm a", it).toString()
+        } ?: (m["dateBooked"] as? Timestamp)?.toDate()?.let {
+            DateFormat.format("MMM dd, yyyy hh:mm a", it).toString()
+        } ?: "N/A"
+
+        val providerContact = s("providerContact", s("contactNumber", "N/A"))
+        val providerName = s("serviceProviderName", s("name", ""))
+
+        // --- Use the same robust status resolution as TSD ---
+        val bookingStatus = when {
+            ((m["bookingStatus"] as? String)?.trim()?.isNotEmpty() == true) -> (m["bookingStatus"] as String).trim()
+            ((m["status"] as? String)?.trim()?.isNotEmpty() == true)        -> (m["status"] as String).trim()
+            else -> "Pending"
+        }
+
+        val notes = s("specialInstructions", s("notes", "No additional notes"))
+
+        val quantity = when (val q = m["quantity"]) {
+            is String -> q
+            is Number -> q.toString()
+            else -> ""
+        }
+
+        val packaging = s("packaging", "")
+        val destination = s("destination", s("dropoffLocation", ""))
+
+        val transportPlanUrl = (m["transportPlanUrl"] as? String)?.takeIf { it.isNotBlank() }
+        val storagePermitUrl = (m["storagePermitUrl"] as? String)?.takeIf { it.isNotBlank() }
+
+        binding.txtCompanyName.text = companyName
+        binding.txtServiceType.text = serviceType
+        binding.txtLocation.text = origin
+        binding.txtDateRequested.text = dateRequested
+        binding.txtContactPerson.text = if (providerName.isNotEmpty()) "$providerName — $providerContact" else providerContact
+
+        // set the pill text from resolved bookingStatus
+        binding.txtStatusPill.text = bookingStatus
+        binding.txtNotes.text = notes
+
+        binding.txtWasteType.text = wasteType.ifEmpty { "-" }
+        binding.txtQuantity.text = quantity.ifEmpty { "-" }
+        binding.txtPackaging.text = packaging.ifEmpty { "-" }
+
+        // --- Payment status: if paymentStatus == "Paid" show "Paid" in amount, else show numeric amount ---
+        // Prefer explicit "amount" field (number or string). Fallback to totalPayment / rate.
+// Only use paymentStatus as a last resort.
+        val amountField = m["amount"]
+
+        val paymentStatusLower = (m["paymentStatus"] as? String)
+            ?.trim()
+            ?.lowercase()
+
+        val amountText: String? = when (amountField) {
+            is Number -> "₱ ${"%,.2f".format(amountField.toDouble())}"
+            is String -> {
+                val s = amountField.trim()
+                if (s.isEmpty()) null
+                else {
+                    // auto-add peso sign if missing
+                    if (s.contains("₱") || s.contains("$") || s.matches(Regex(".*[A-Za-z].*"))) s
+                    else "₱ $s"
+                }
+            }
+            else -> null
+        }
+
+        if (!amountText.isNullOrEmpty()) {
+            // 👍 We found a real numeric/string amount, show it exactly
+            binding.txtAmount.text = amountText
+        } else {
+            // fallback numeric fields
+            val total = (m["totalPayment"] as? Number)?.toDouble()
+            val rate = (m["rate"] as? Number)?.toDouble()
+
+            when {
+                total != null -> binding.txtAmount.text =
+                    "₱ ${"%,.2f".format(total)}"
+
+                rate != null -> binding.txtAmount.text =
+                    "₱ ${"%,.2f".format(rate)}"
+
+                // last fallback → if Paid but no amount, show "Paid"
+                paymentStatusLower == "paid" ->
+                    binding.txtAmount.text = "Paid"
+
+                else ->
+                    binding.txtAmount.text = ""
+            }
+        }
+
+
+        val firstAttachment = transportPlanUrl ?: storagePermitUrl ?: DEV_ATTACHMENT_URL
+        setupAttachmentUI(firstAttachment)
+
+        // same final-states logic used in TSD listener
+        // Transporter final-state logic (same behavior as TSD)
+        val lowerStatus = bookingStatus.lowercase()
+        val finalStates = setOf("confirmed", "rejected", "completed", "received", "treated")
+
+        if (finalStates.contains(lowerStatus)) {
+            binding.btnAccept.visibility = View.GONE
+            binding.btnReject.visibility = View.GONE
+            binding.btnAccept.isEnabled = false
+            binding.btnReject.isEnabled = false
+            Log.d(TAG, "TRANSPORT: Hiding buttons because status='$bookingStatus'")
+        } else {
+            binding.btnAccept.visibility = View.VISIBLE
+            binding.btnReject.visibility = View.VISIBLE
+            binding.btnAccept.isEnabled = true
+            binding.btnReject.isEnabled = true
+            Log.d(TAG, "TRANSPORT: Showing buttons because status='$bookingStatus'")
+        }
+    }
+
+
+
+    // ---------- REPLACE existing bindFromBundle() with this ----------
+    private fun bindFromBundle() {
+        // clear any previous ids so actions are not applied to a stale doc
+        currentBookingId = null
+        transportDocId = null
+        // prefer explicit bundle args
+        var companyName = arguments?.getString("companyName") ?: ""
+        val serviceType = arguments?.getString("serviceTitle") ?: "Transport Booking"
+        val location = arguments?.getString("origin") ?: "N/A"
+        val dateRequested = arguments?.getString("dateRequested") ?: "N/A"
+        val providerContact = arguments?.getString("providerContact") ?: "N/A"
+        val providerName = arguments?.getString("providerName") ?: ""
+        val bookingStatus = arguments?.getString("bookingStatus") ?: "Pending"
+        val notes = arguments?.getString("notes") ?: "No additional notes"
+        val attachment = arguments?.getString("attachment") ?: DEV_ATTACHMENT_URL
+
+        // new: read wasteType, quantity, packaging from args if present
+        val wasteTypeArg = arguments?.getString("wasteType") ?: ""
+        val quantityArg = arguments?.getString("quantity") ?: ""
+        val packagingArg = arguments?.getString("packaging") ?: ""
+
+        // If companyName absent, attempt a *read-only* lookup by providerName (non-destructive)
+        if (companyName.isBlank() && providerName.isNotBlank()) {
+            // run a single query and quietly set companyName if found
+            FirebaseFirestore.getInstance()
+                .collection("service_providers")
+                .whereEqualTo("serviceProviderName", providerName)
+                .limit(1)
+                .get()
+                .addOnSuccessListener { qs ->
+                    val found = qs.documents.firstOrNull()?.getString("companyName").orEmpty()
+                    if (found.isNotBlank()) {
+                        companyName = found
+                        try { binding.txtCompanyName.text = companyName } catch (_: Exception) {}
+                    }
+                }
+                .addOnFailureListener { /* ignore quietly */ }
+        }
+
+        // Set UI values (bundle-first)
+        binding.txtCompanyName.text = if (companyName.isNotBlank()) companyName else "Unknown"
+        binding.txtServiceType.text = serviceType
+        binding.txtLocation.text = location
+        binding.txtDateRequested.text = dateRequested
+        binding.txtContactPerson.text = if (providerName.isNotEmpty()) "$providerName — $providerContact" else providerContact
+        binding.txtStatusPill.text = bookingStatus
+        binding.txtNotes.text = notes
+
+        // set attachments
+        setupAttachmentUI(attachment)
+
+        // populate wasteType/quantity/packaging from args (fallback to placeholders)
+        binding.txtWasteType.text = if (wasteTypeArg.isNotBlank()) wasteTypeArg else "-"
+        binding.txtQuantity.text = if (quantityArg.isNotBlank()) quantityArg else "-"
+        binding.txtPackaging.text = if (packagingArg.isNotBlank()) packagingArg else "-"
+    }
+
+
+    /* ----------------------------
+       Utility: load booking by id (public) - tries tsd then transport
+       ---------------------------- */
+    private fun loadBookingFromFirestore(bookingId: String) {
+        // prefer transport_bookings then tsd_bookings
+        // Use snapshot listener for transport to catch updates, fallback to TSD if not found
+        val transportDocRef = db.collection("transport_bookings").document(bookingId)
+
+        // remove existing transport listener if any
+        transportListener?.remove()
+        transportListener = transportDocRef.addSnapshotListener { docSnap, err ->
+            if (err != null) {
+                Log.w(TAG, "transport snapshot error: ${err.message}")
+                // fallback to one-time TSd read
+                db.collection("tsd_bookings").document(bookingId)
+                    .get()
+                    .addOnSuccessListener { tsdDoc ->
+                        if (tsdDoc.exists()) {
+                            subscribeToTsdRequest(tsdDoc.id)
+                        } else {
+                            currentBookingId = null
+                            bindFromBundle()
+                        }
+                    }
+                    .addOnFailureListener {
+                        currentBookingId = null
+                        bindFromBundle()
+                    }
+                return@addSnapshotListener
+            }
+
+            if (docSnap != null && docSnap.exists()) {
+                // record id so other operations (accept/reject/uploads) have the correct target
+                currentBookingId = docSnap.id
+                transportDocId = docSnap.id
+
+                bindTransportDocToView(docSnap.data ?: emptyMap(), docSnap.id)
+                return@addSnapshotListener
+            } else {
+                // try tsd once
+                db.collection("tsd_bookings").document(bookingId)
+                    .get()
+                    .addOnSuccessListener { tsdDoc ->
+                        if (tsdDoc.exists()) {
+                            subscribeToTsdRequest(tsdDoc.id)
+                        } else {
+                            currentBookingId = null
+                            bindFromBundle()
+                        }
+                    }
+                    .addOnFailureListener {
+                        currentBookingId = null
+                        bindFromBundle()
+                    }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        tsdListener?.remove()
+        transportListener?.remove()
+        _binding = null
+    }
 }

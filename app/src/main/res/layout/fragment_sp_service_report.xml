@@ -71,12 +71,11 @@
 
                 <ImageView
                     android:id="@+id/imgCompanyLogo"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@drawable/dunkin"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/circle_bg"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"
                     android:contentDescription="Company logo"/>
+
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -173,8 +172,9 @@
                     android:textColor="#212121"
                     android:layout_marginTop="6dp"/>
 
-                <!-- Provider name & contact -->
+                <!-- Provider label (dynamic) -->
                 <TextView
+                    android:id="@+id/txtProviderLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Service Provider"
@@ -210,7 +210,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Report Details Card -->
+        <!-- Report Details Card (updated) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardReport"
             android:layout_width="match_parent"
@@ -233,10 +233,7 @@
                     android:textSize="16sp"
                     android:textColor="#212121"/>
 
-
-
-
-                <!-- Booking / Completion Date -->
+                <!-- Booking Date -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -254,7 +251,9 @@
                     android:textColor="#212121"
                     android:layout_marginTop="6dp"/>
 
+                <!-- Date Completed (will be hidden for TSD view) -->
                 <TextView
+                    android:id="@+id/labelCompletionDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Date Completed"
@@ -271,24 +270,32 @@
                     android:textColor="#212121"
                     android:layout_marginTop="6dp"/>
 
-                <!-- Waste Type & Quantity -->
-                <TextView
+                <!-- Waste Type (grouped so we can hide it) -->
+                <LinearLayout
+                    android:id="@+id/wasteTypeRow"
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Waste Type"
-                    android:textSize="12sp"
-                    android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
-                <TextView
-                    android:id="@+id/txtWasteType"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_field"
-                    android:padding="10dp"
-                    android:text="test37"
-                    android:textColor="#212121"
-                    android:layout_marginTop="6dp"/>
+                    android:layout_marginTop="12dp">
+                    <TextView
+                        android:id="@+id/labelWasteType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Waste Type"
+                        android:textSize="12sp"
+                        android:textColor="#757575"/>
+                    <TextView
+                        android:id="@+id/txtWasteType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="test37"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+                </LinearLayout>
 
+                <!-- Quantity -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -306,23 +313,69 @@
                     android:textColor="#212121"
                     android:layout_marginTop="6dp"/>
 
-                <!-- Packaging -->
-                <TextView
+                <!-- TSD-only section: Payment, Treatment Info, Location.
+                     This entire block will be GONE in transporter POV. -->
+                <LinearLayout
+                    android:id="@+id/tsdSection"
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Packaging"
-                    android:textSize="12sp"
-                    android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
-                <TextView
-                    android:id="@+id/txtPackaging"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_field"
-                    android:padding="10dp"
-                    android:text="test37"
-                    android:textColor="#212121"
-                    android:layout_marginTop="6dp"/>
+                    android:layout_marginTop="12dp">
+
+                    <!-- Payment -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Payment"
+                        android:textSize="12sp"
+                        android:textColor="#757575"/>
+                    <TextView
+                        android:id="@+id/txtPayment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text="₱0"
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Treatment Info -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Treatment Info"
+                        android:textSize="12sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="12dp"/>
+                    <TextView
+                        android:id="@+id/txtTreatmentInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text=""
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                    <!-- Location (TSD explicit) -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Location (TSD)"
+                        android:textSize="12sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="12dp"/>
+                    <TextView
+                        android:id="@+id/txtLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_field"
+                        android:padding="10dp"
+                        android:text=""
+                        android:textColor="#212121"
+                        android:layout_marginTop="6dp"/>
+
+                </LinearLayout>
 
                 <!-- Remarks / Notes -->
                 <TextView
