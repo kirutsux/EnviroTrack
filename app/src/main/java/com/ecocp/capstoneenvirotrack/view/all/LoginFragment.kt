@@ -164,21 +164,31 @@ class LoginFragment : Fragment() {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
-                FirebaseFirestore.getInstance()
-                    .collection("users")
-                    .document(currentUser.uid)
-                    .update("fcmToken", token)
+                val userRef = FirebaseFirestore.getInstance().collection("users").document(currentUser.uid)
+
+                // Use arrayUnion to store multiple tokens without duplicates
+                userRef.update("fcmTokens", com.google.firebase.firestore.FieldValue.arrayUnion(token))
                     .addOnSuccessListener {
-                        Log.d("LoginFragment", "FCM token saved successfully")
+                        Log.d("LoginFragment", "FCM token added to fcmTokens array successfully")
                     }
                     .addOnFailureListener { e ->
-                        Log.e("LoginFragment", "Error saving FCM token", e)
+                        // If the document doesn't exist, create it with fcmTokens array
+                        userRef.set(mapOf("fcmTokens" to listOf(token)), com.google.firebase.firestore.SetOptions.merge())
+                            .addOnSuccessListener {
+                                Log.d("LoginFragment", "FCM token created successfully for new user document")
+                            }
+                            .addOnFailureListener { ex ->
+                                Log.e("LoginFragment", "Error creating FCM token array", ex)
+                            }
+
+                        Log.e("LoginFragment", "Error updating FCM token array", e)
                     }
             } else {
                 Log.e("LoginFragment", "Failed to get FCM token", task.exception)
             }
         }
     }
+
 
     private fun saveUserTypeToPrefs(userType: String) {
         val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
