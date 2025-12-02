@@ -5,5 +5,9 @@ data class OpenAiResponse(
 )
 
 data class OpenAiChoice(
-    val message: OpenAiMessage
+    val message: Messages
+)
+
+data class Messages(
+    val content: String
 )

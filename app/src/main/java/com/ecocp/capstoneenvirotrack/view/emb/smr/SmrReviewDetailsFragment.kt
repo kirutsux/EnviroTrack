@@ -1,14 +1,21 @@
 package com.ecocp.capstoneenvirotrack.view.emb.smr
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.ecocp.capstoneenvirotrack.MyApplication
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.adapter.ModuleAdapter
 import com.ecocp.capstoneenvirotrack.api.OpenAiClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.model.AirPollution
@@ -19,55 +26,65 @@ import com.ecocp.capstoneenvirotrack.model.OpenAiRequest
 import com.ecocp.capstoneenvirotrack.model.Others
 import com.ecocp.capstoneenvirotrack.model.Smr
 import com.ecocp.capstoneenvirotrack.model.WaterPollution
-import com.ecocp.capstoneenvirotrack.utils.*
+import com.ecocp.capstoneenvirotrack.utils.airPollutionText
+import com.ecocp.capstoneenvirotrack.utils.generalInfoText
+import com.ecocp.capstoneenvirotrack.utils.hazardousWasteText
+import com.ecocp.capstoneenvirotrack.utils.othersText
+import com.ecocp.capstoneenvirotrack.utils.waterPollutionText
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import java.util.Locale
 
-@Suppress("UNCHECKED_CAST")
-class SmrReviewDetailsFragment: Fragment() {
+@Suppress("UNCHECKED_CAST", "PrivatePropertyName")
+class SmrReviewDetailsFragment : Fragment() {
     private var _binding: FragmentSmrReviewDetailsBinding? = null
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
     private var submissionId: String? = null
+    private lateinit var smr: Smr
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-       _binding =  FragmentSmrReviewDetailsBinding.inflate(inflater, container, false)
+        _binding = FragmentSmrReviewDetailsBinding.inflate(inflater, container, false)
         submissionId = arguments?.getString("submissionId")
         return binding.root
     }
 
-    override fun onViewCreated( view:View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if(submissionId != null){
-            fetchSmrDetails(submissionId!!)
-        } else{
-            Snackbar.make(binding.root, "No submissions selected", Snackbar.LENGTH_SHORT).show()
-        }
+        binding.btnAnalyze.isEnabled = false
+        binding.tvAiAnalysis.visibility = View.GONE
 
-        binding.btnBack.setOnClickListener{
-            findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
+        if (submissionId != null) {
+            fetchSmrDetails(submissionId!!)
+        } else {
+            Snackbar.make(binding.root, "No submissions selected", Snackbar.LENGTH_SHORT).show()
         }
     }
 
-    private fun fetchSmrDetails(submissionId:String){
+    private fun fetchSmrDetails(submissionId: String) {
         db.collection("smr_submissions").document(submissionId)
             .get()
             .addOnSuccessListener { doc ->
-                if(!doc.exists()) {
-                    Snackbar.make(binding.root, "No submissions selected", Snackbar.LENGTH_SHORT).show()
+                if (!doc.exists()) {
+                    Snackbar.make(binding.root, "No submissions selected", Snackbar.LENGTH_SHORT)
+                        .show()
                     return@addOnSuccessListener
                 }
 
                 val generalInfoMap = doc.get("generalInfo") as? Map<*, *>
-                val generalInfo = generalInfoMap?.let{
+                val generalInfo = generalInfoMap?.let {
                     GeneralInfo(
                         establishmentName = it["establishmentName"] as? String ?: "",
                         address = it["address"] as? String ?: "",
@@ -102,22 +119,23 @@ class SmrReviewDetailsFragment: Fragment() {
                     )
                 } ?: emptyList()
 
-                val waterPollutionRecords = (doc.get("waterPollutionRecords") as? List<Map<String, Any>>)?.map {
-                    WaterPollution(
-                        domesticWastewater = (it["domesticWastewater"] as? Double) ?: 0.0,
-                        processWastewater = (it["processWastewater"] as? Double) ?: 0.0,
-                        // Map other fields as needed
-                        date1 = it["date1"] as? String ?: "",
-                        flow1 = it["flow1"] as? String ?: "",
-                        bod1 = it["bod1"] as? String ?: "",
-                        tss1 = it["tss1"] as? String ?: "",
-                        color1 = it["color1"] as? String ?: "",
-                        ph1 = it["ph1"] as? String ?: "",
-                        oilGrease1 = it["oilGrease1"] as? String ?: "",
-                        tempRise1 = it["tempRise1"] as? String ?: "",
-                        do1 = it["do1"] as? String ?: ""
-                    )
-                } ?: emptyList()
+                val waterPollutionRecords =
+                    (doc.get("waterPollutionRecords") as? List<Map<String, Any>>)?.map {
+                        WaterPollution(
+                            domesticWastewater = (it["domesticWastewater"] as? Double) ?: 0.0,
+                            processWastewater = (it["processWastewater"] as? Double) ?: 0.0,
+                            // Map other fields as needed
+                            date1 = it["date1"] as? String ?: "",
+                            flow1 = it["flow1"] as? String ?: "",
+                            bod1 = it["bod1"] as? String ?: "",
+                            tss1 = it["tss1"] as? String ?: "",
+                            color1 = it["color1"] as? String ?: "",
+                            ph1 = it["ph1"] as? String ?: "",
+                            oilGrease1 = it["oilGrease1"] as? String ?: "",
+                            tempRise1 = it["tempRise1"] as? String ?: "",
+                            do1 = it["do1"] as? String ?: ""
+                        )
+                    } ?: emptyList()
 
                 val airPollution = (doc.get("airPollution") as? Map<String, Any>)?.let {
                     AirPollution(
@@ -166,59 +184,203 @@ class SmrReviewDetailsFragment: Fragment() {
                     id = doc.id
                 )
 
-                displaySmrData(smr)
-                performAiAnalysis(smr)
+                this.smr = smr
+                displaySummary(smr)
+
+                binding.btnAnalyze.isEnabled = true
+                setupButtons()
             }.addOnFailureListener {
-                Snackbar.make(binding.root, "Error loading SMR details", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, "Error loading SMR details", Snackbar.LENGTH_SHORT)
+                    .show()
             }
+
     }
 
-    private fun displaySmrData(smr: Smr){
-        binding.tvGeneralInfo.text = smr.generalInfo.generalInfoText()
-        binding.tvHazardousWastes.text = smr.hazardousWastes.hazardousWasteText()
-        binding.tvWaterPollution.text = smr.waterPollutionRecords.waterPollutionText()
-        binding.tvAirPollution.text = smr.airPollution.airPollutionText()
-        binding.tvOthers.text = smr.others.othersText()
+    private fun setupButtons() {
+        binding.btnBack.setOnClickListener {
+            findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
+        }
+        binding.btnAnalyze.setOnClickListener {
+            performAiAnalysis(smr)
+        }
     }
+
+    private fun displaySummary(smr: Smr) {
+        val totalModules = 5
+        var completedModules = 0
+        if (smr.generalInfo.establishmentName.isNotEmpty()) completedModules++
+        if (smr.hazardousWastes.isNotEmpty()) completedModules++
+        if (smr.waterPollutionRecords.isNotEmpty()) completedModules++
+        if (smr.airPollution.processEquipment.isNotEmpty()) completedModules++
+        if (smr.others.accidentDate.isNotEmpty()) completedModules++
+        val percentage = (completedModules.toFloat() / totalModules * 100).toInt()
+
+        val modules = listOf(
+            "General Information" to smr.generalInfo.generalInfoText(),
+            "Hazardous Wastes" to smr.hazardousWastes.hazardousWasteText(),
+            "Water Pollution" to smr.waterPollutionRecords.waterPollutionText(),
+            "Air Pollution" to smr.airPollution.airPollutionText(),
+            "Others" to smr.others.othersText()
+        )
+
+        val adapter = ModuleAdapter(modules) { moduleName, details ->
+            showModuleDetailsDialog(moduleName, details)
+        }
+        binding.recyclerModules.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerModules.adapter = adapter
+    }
+
+    private fun showModuleDetailsDialog(moduleName: String, details: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(moduleName)
+            .setMessage(details)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    @Suppress("PrivatePropertyName")
+    private val KEY_LAST_PROMPT_HASH = stringPreferencesKey("last_prompt_hash")
+    private val KEY_LAST_AI_OUTPUT = stringPreferencesKey("last_ai_output")
 
     @SuppressLint("SetTextI18n")
     private fun performAiAnalysis(smr: Smr) {
-        val prompt = """
-            You are an Environmental Compliance Analyst for the EMB (Environmental Management Bureau).
-            Review this SMR submission for compliance with environmental regulations.
-            Provide a structured analysis including:
-            1. Overall Compliance Assessment
-            2. Identified Issues or Violations
-            3. Recommendations for Improvement
-            4. Suggested Follow-up Actions
-            
-            SMR Data:
-            ${buildFullSummary(smr)}
-        """.trimIndent()
+        val modules = listOf(
+            "General Information" to smr.generalInfo.generalInfoText(),
+            "Hazardous Wastes" to smr.hazardousWastes.hazardousWasteText(),
+            "Water Pollution" to smr.waterPollutionRecords.waterPollutionText(),
+            "Air Pollution" to smr.airPollution.airPollutionText(),
+            "Others" to smr.others.othersText()
+        )
 
-        CoroutineScope(Dispatchers.IO).launch{
-            try{
-                val request = OpenAiRequest(
-                    model = "gpt-4.1-mini",
-                    messages = listOf(OpenAiMessage(role = "user", content = prompt)),
-                    max_tokens = 1000
-                )
-                val response = OpenAiClient.instance.getChatCompletion(request)
-                val analysis = response.choices.firstOrNull()?.message?.content ?: "No analysis generated."
+        val analyses = mutableListOf<String>()
+        var currentModuleIndex = 0
 
-                withContext(Dispatchers.Main){
-                    binding.tvAiAnalysis.text = analysis
+        val progressDialog = AlertDialog.Builder(requireContext())
+            .setTitle("Analyzing...")
+            .setMessage("Please wait while we analyze the SMR.")
+            .setCancelable(false)
+            .create()
+        val progressBar = ProgressBar(requireContext()).apply {
+            isIndeterminate = true
+        }
+        progressDialog.setView(progressBar)
+        progressDialog.show()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                for ((moduleName, moduleData) in modules) {
+                    withContext(Dispatchers.Main) {
+                        progressDialog.setMessage("Analyzing $moduleName...")
+                    }
+
+                    val prompt = """
+                        You are an Environmental Compliance Analyst for the EMB (Environmental Management Bureau).
+                        Here are a list of different modules from an accredited PCO for their quarterly requirements.
+                        Provide a short and structured compliance assessment of each:
+                        Module Name:${moduleName}
+                        Module Data:${moduleData}
+                    """.trimIndent()
+
+                    val request = OpenAiRequest(
+                        model = "gpt-3.5-turbo",
+                        messages = listOf(OpenAiMessage(role = "user", content = prompt)),
+                        max_tokens = 500
+                    )
+
+                    val response = withTimeout(120_000){
+                        OpenAiClient.instance.getChatCompletion(request)
+                    }
+
+                    val moduleAnalysis = response.choices.firstOrNull()?.message?.content?:"No analysis for $moduleName"
+
+                    analyses.add("$moduleName: $moduleAnalysis")
+                    currentModuleIndex++
+
+                    withContext(Dispatchers.Main){
+                        progressDialog.setMessage("Completed $moduleName. Processing next...")
+                    }
                 }
-            }catch(e:Exception){
-                Log.e("AI Analysis", "Error: ${e.message}")
+
+                val fullAnalysis = analyses.joinToString("\n\n") {it}
+                val finalPrompt = """
+                    Compile the following module analyses into a comprehensive SMR compliance report:
+                    $fullAnalysis
+                    Provide an overall assessment with structured criticism. Provide an assessment on their issues, recommendations, and follow-up steps.
+                """.trimIndent()
+
+                val finalRequest = OpenAiRequest(
+                    model = "gpt-3.5-turbo",
+                    messages = listOf(OpenAiMessage(role = "user", content = finalPrompt)),
+                    max_tokens = 1500
+                )
+
                 withContext(Dispatchers.Main){
+                    progressDialog.setMessage("Finalizing analysis...")
+                }
+
+                val finalResponse = withTimeout(120_000){
+                    OpenAiClient.instance.getChatCompletion(finalRequest)
+                }
+                val compiledAnalysis = finalResponse.choices.firstOrNull()?.message?.content ?: "Compilation failed."
+
+                withContext(Dispatchers.Main){
+                    binding.tvAiAnalysis.text = compiledAnalysis
+                    progressDialog.dismiss()
+
+                    binding.tvCompletionPercentage.visibility = View.GONE
+                    binding.recyclerModules.visibility = View.GONE
+                    binding.btnAnalyze.visibility = View.GONE
+                    binding.tvAiAnalysis.visibility = View.VISIBLE
+
+                    db.collection("smr_submissions").document(smr.id!!)
+                        .update("status", "Reviewed")
+                        .addOnSuccessListener { Log.d("Status Update", "Status updated to Reviewed for ${smr.id}") }
+                        .addOnFailureListener { e -> Log.d("Status Update", "Status update failed. ${e.message}}") }
+                }
+
+                saveToCache("full_analysis_${smr.id}", compiledAnalysis)
+            }  catch (_: TimeoutCancellationException) {
+                withContext(Dispatchers.Main) {
+                    binding.tvAiAnalysis.text = "AI analysis timed out."
+                    progressDialog.dismiss()
+                }
+            } catch (e: retrofit2.HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                withContext(Dispatchers.Main) {
+                    binding.tvAiAnalysis.text = "AI analysis failed: HTTP ${e.code()} - $errorBody"
+                    progressDialog.dismiss()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
                     binding.tvAiAnalysis.text = "AI analysis failed: ${e.localizedMessage}"
+                    progressDialog.dismiss()
                 }
             }
         }
     }
 
-    private fun buildFullSummary(smr:Smr):String{
+    @SuppressLint("UseKtx")
+    private suspend fun saveToCache(promptHash: String, aiOutput: String) {
+        val app = requireContext().applicationContext as? MyApplication
+            ?: throw IllegalStateException("Application context is not MyApplication. Check AndroidManifest.xml and rebuild.")
+        app.smrDataStore.edit { prefs ->
+            prefs[KEY_LAST_PROMPT_HASH] = promptHash
+            prefs[KEY_LAST_AI_OUTPUT] = aiOutput
+        }
+    }
+
+    private suspend fun loadCached(): Pair<String?, String?> {
+        val app = requireContext().applicationContext as? MyApplication
+            ?: throw IllegalStateException("Application context is not MyApplication. Check AndroidManifest.xml and rebuild.")
+        val prefs = app.smrDataStore.data.first()
+        return Pair(
+            prefs[KEY_LAST_PROMPT_HASH],
+            prefs[KEY_LAST_AI_OUTPUT]
+        )
+    }
+
+
+    private fun buildFullSummary(smr: Smr): String {
         return """
             SELF-MONITORING REPORT SUMMARY
             --- MODULE 1: GENERAL INFORMATION ---
@@ -234,7 +396,7 @@ class SmrReviewDetailsFragment: Fragment() {
         """.trimIndent()
     }
 
-    override fun onDestroyView(){
+    override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }

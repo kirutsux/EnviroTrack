@@ -1,6 +1,6 @@
 package com.ecocp.capstoneenvirotrack.adapter
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,18 +32,23 @@ class SmrEmbAdapter(
         return ViewHolder(view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val smr = smrList[position]
-        val context: Context = holder.itemView.context
+        holder.itemView.context
         val sdf = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
 
-        holder.tvEstablishmentName.text = smr.generalInfo.establishmentName ?: "No Establishment"
-        holder.tvAddress.text = smr.generalInfo.address ?: "No Address"
+        holder.tvEstablishmentName.text = smr.generalInfo.establishmentName
+        holder.tvAddress.text = smr.generalInfo.address
         holder.tvDateSubmitted.text = "Submitted: ${sdf.format(Date(smr.submittedAt ?: 0L))}"
 
-        val status = "Pending"
-        holder.tvStatus.text = status
-        holder.tvStatus.setBackgroundResource(R.drawable.bg_status_badge)
+        holder.tvStatus.text = smr.status
+        val statusColor = when (smr.status) {
+            "Reviewed" -> R.color.status_approved
+            "Pending" -> R.color.status_pending
+            else -> R.color.status_pending
+        }
+        holder.tvStatus.setBackgroundResource(statusColor)
 
         holder.card.setOnClickListener {onItemClick(smr)}
     }

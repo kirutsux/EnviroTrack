@@ -31,7 +31,7 @@ class SmrEmbDashboardFragment : Fragment() {
     private lateinit var adapter: SmrEmbAdapter
     private val smrList = mutableListOf<Smr>()
     private val filteredList = mutableListOf<Smr>()
-    private var selectedStatus: String = "All"
+    private var selectedStatus: String? = ""
 
     private var snapshotListener: ListenerRegistration? = null
 
@@ -138,12 +138,15 @@ class SmrEmbDashboardFragment : Fragment() {
                             )
                         } ?: emptyList()
 
+                        val status = data["status"] as? String ?: "Pending"
+
                         val smr = Smr(
                             generalInfo = generalInfo,
                             hazardousWastes = hazardousWastes,
                             submittedAt = submittedTimestamp.toDate().time,
                             uid = data["uid"] as? String,
-                            id = doc.id
+                            id = doc.id,
+                            status = status
                         )
                         smrList.add(smr)
                     }
@@ -162,7 +165,7 @@ class SmrEmbDashboardFragment : Fragment() {
         filteredList.clear()
 
         smrList.forEach { smr ->
-            val matchesStatus = selectedStatus == "All"
+            val matchesStatus = selectedStatus == "All" || smr.status == selectedStatus
             val matchesSearch = query.isEmpty() || listOfNotNull(
                 smr.generalInfo.establishmentName,
                 smr.generalInfo.address
