@@ -2,12 +2,16 @@ package com.ecocp.capstoneenvirotrack.viewmodel
 
 import android.app.Application
 import android.util.Log
+import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.*
+import com.ecocp.capstoneenvirotrack.MyApplication
 //import androidx.datastore.preferences.core.*
 //import androidx.datastore.preferences.preferencesDataStore
-import com.ecocp.capstoneenvirotrack.api.OpenAiClient
+//import com.ecocp.capstoneenvirotrack.api.OpenAiClient
 import com.ecocp.capstoneenvirotrack.model.*
+import com.google.gson.Gson
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -31,16 +35,35 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
     val aiAnalysis: LiveData<String> get() = _aiAnalysis
 
     // Track Module Progress
-    private val _moduleProgress = MutableLiveData(
-        mapOf(
-            "module1" to 0,
-            "module2" to 0,
-            "module3" to 0,
-            "module4" to 0,
-            "module5" to 0
-        )
-    )
+    private val _moduleProgress = MutableLiveData<Map<String,Int>>()
     val moduleProgress: LiveData<Map<String, Int>> get() = _moduleProgress
+    private val gson = Gson()
+    private val dataStore = (application as MyApplication).smrDataStore
+    private val SMR_DATA_KEY = stringPreferencesKey("smr_data")
+
+    init{
+        viewModelScope.launch {
+            loadPersistedSmr()
+        }
+    }
+
+    private suspend fun loadPersistedSmr() {
+        val json = dataStore.data.first()[SMR_DATA_KEY]
+        json?.let {
+            try {
+                val persistedSmr = gson.fromJson(it, Smr::class.java)
+                _smr.value = persistedSmr
+                updateProgress()
+            } catch (e: Exception) {
+                dataStore.edit { it.remove(SMR_DATA_KEY) }
+            }
+        }
+    }
+
+    private suspend fun saveSmrToDataStore(smr: Smr) {
+        val json = gson.toJson(smr)
+        dataStore.edit {preferences -> preferences[SMR_DATA_KEY] = json }
+    }
 
 //     ---------------------------------------------------------
 //     DATASTORE KEYS
@@ -135,49 +158,31 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
     // SMR MODULE UPDATES
     // =========================================================
 
-    fun updateGeneralInfo(info: GeneralInfo) {
-        val current = _smr.value ?: Smr()
-        _smr.value = current.copy(generalInfo = info)
-        updateModuleProgress("module1", calculateGeneralInfoPercentage(info))
+    fun updateGeneralInfo(generalInfo: GeneralInfo) {
+        val currentSmr = _smr.value ?: Smr()
+        val updatedSmr = currentSmr.copy(generalInfo = generalInfo)
+        _smr.value = updatedSmr
+        updateProgress()
+        viewModelScope.launch{saveSmrToDataStore(updatedSmr)}
     }
 
     // ---------------- MODULE 2 ----------------
-    fun addHazardousWaste(item: HazardousWaste) {
-        val current = _smr.value ?: Smr()
-        val updatedList = current.hazardousWastes.toMutableList().apply { add(item) }
-        _smr.value = current.copy(hazardousWastes = updatedList)
-        updateModuleProgress("module2", calculateListModulePercentage(updatedList))
-    }
-
-    fun updateHazardousWastes(list: List<HazardousWaste>) {
-        Log.d("SmrViewModel", "updateHazardousWastes called (vm=${System.identityHashCode(this)}) size=${list.size}")
-        val current = _smr.value ?: Smr()
-        _smr.value = current.copy(hazardousWastes = list)
-        updateModuleProgress("module2", calculateListModulePercentage(list))
-        Log.d("SmrViewModel", "after updateHazardousWastes smr.hazardousWastes.size=${_smr.value?.hazardousWastes?.size}")
-    }
-
-    fun removeHazardousWaste(item: HazardousWaste) {
-        val current = _smr.value ?: Smr()
-        val updatedList = current.hazardousWastes.toMutableList().apply { remove(item) }
-        _smr.value = current.copy(hazardousWastes = updatedList)
-        updateModuleProgress("module2", calculateListModulePercentage(updatedList))
+    fun updateHazardousWastes(hazardousWastes: List<HazardousWaste>) {
+        val currentSmr = _smr.value ?: Smr()
+        val updatedSmr = currentSmr.copy(hazardousWastes = hazardousWastes)
+        _smr.value = updatedSmr
+        updateProgress()
+        viewModelScope.launch{saveSmrToDataStore(updatedSmr)}
     }
 
     // ---------------- MODULE 3 ----------------
-    fun addWaterPollutionRecord(record: WaterPollution) {
-        val current = _smr.value ?: Smr()
-        val updatedList = current.waterPollutionRecords.toMutableList().apply { add(record) }
-        _smr.value = current.copy(waterPollutionRecords = updatedList)
-        updateModuleProgress("module3", calculateListModulePercentage(updatedList))
-    }
 
-    fun updateWaterPollutionRecords(list: List<WaterPollution>) {
-        Log.d("SmrViewModel", "updateWaterPollutionRecords called (vm=${System.identityHashCode(this)}) size=${list.size}")
-        val current = _smr.value ?: Smr()
-        _smr.value = current.copy(waterPollutionRecords = list)
-        updateModuleProgress("module3", calculateListModulePercentage(list))
-        Log.d("SmrViewModel", "after updateWaterPollutionRecords smr.waterPollutionRecords.size=${_smr.value?.waterPollutionRecords?.size}")
+    fun updateWaterPollutionRecords(waterPollutionRecords: List<WaterPollution>) {
+        val currentSmr = _smr.value ?: Smr()
+        val updatedSmr = currentSmr.copy(waterPollutionRecords = waterPollutionRecords)
+        _smr.value = updatedSmr
+        updateProgress()
+        viewModelScope.launch{saveSmrToDataStore(updatedSmr)}
     }
 
     fun clearWaterPollutionRecords() {
@@ -187,26 +192,42 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     // ---------------- MODULE 4 ----------------
-    fun updateAirPollution(data: AirPollution) {
-        val current = _smr.value ?: Smr()
-        _smr.value = current.copy(airPollution = data)
-        updateModuleProgress("module4", calculateAirPollutionPercentage(data))
+    fun updateAirPollution(airPollution: AirPollution) {
+        val currentSmr = _smr.value ?: Smr()
+        val updatedSmr = currentSmr.copy(airPollution = airPollution)
+        _smr.value = updatedSmr
+        updateProgress()
+        viewModelScope.launch{saveSmrToDataStore(updatedSmr)}
     }
 
     // ---------------- MODULE 5 ----------------
-    fun updateOthers(data: Others) {
-        val current = _smr.value ?: Smr()
-        _smr.value = current.copy(others = data)
-        updateModuleProgress("module5", calculateOthersPercentage(data))
+    fun updateOthers(others: Others) {
+        val currentSmr = _smr.value ?: Smr()
+        val updatedSmr = currentSmr.copy(others = others)
+        _smr.value = updatedSmr
+        updateProgress()
+        viewModelScope.launch{saveSmrToDataStore(updatedSmr)}
+    }
+
+    fun updateProgress(){
+        val currentSmr = _smr.value ?: return
+        val progress = mapOf(
+            "module1" to calculateGeneralInfoPercentage(currentSmr.generalInfo),
+            "module2" to calculateListModulePercentage(currentSmr.hazardousWastes),
+            "module3" to calculateListModulePercentage(currentSmr.waterPollutionRecords),
+            "module4" to calculateAirPollutionProgress(currentSmr.airPollution),
+            "module5" to calculateOthersProgress(currentSmr.others)
+        )
+        _moduleProgress.value = progress
     }
 
     // ---------------- CLEAR ALL ----------------
     fun clearSmr() {
         _smr.value = Smr()
-        _moduleProgress.value = mapOf(
-            "module1" to 0, "module2" to 0, "module3" to 0,
-            "module4" to 0, "module5" to 0
-        )
+        _moduleProgress.value = mapOf()
+        viewModelScope.launch{
+            dataStore.edit { it.remove(SMR_DATA_KEY) }
+        }
     }
 
     // =========================================================
@@ -219,30 +240,67 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
         _moduleProgress.value = map
     }
 
-    private fun calculateGeneralInfoPercentage(info: GeneralInfo): Int {
+    private fun calculateGeneralInfoPercentage(generalInfo: GeneralInfo): Int {
         val fields = listOf(
-            info.establishmentName, info.address, info.ownerName,
-            info.phone, info.email, info.typeOfBusiness,
-            info.ceoName, info.ceoPhone, info.ceoEmail,
-            info.pcoName, info.pcoPhone, info.pcoEmail,
-            info.pcoAccreditationNo, info.legalClassification
+            generalInfo.establishmentName,
+            generalInfo.address,
+            generalInfo.ownerName,
+            generalInfo.phone,
+            generalInfo.email,
+            generalInfo.typeOfBusiness,
+            generalInfo.ceoName,
+            generalInfo.ceoPhone,
+            generalInfo.ceoEmail,
+            generalInfo.pcoName,
+            generalInfo.pcoPhone,
+            generalInfo.pcoEmail,
+            generalInfo.pcoAccreditationNo,
+            generalInfo.legalClassification
         )
-        val filled = fields.count { !it.isNullOrEmpty() }
-        return (filled / fields.size.toFloat() * 100).toInt()
+        val filled = fields.count { it!!.isNotEmpty() }
+        return (filled.toFloat() / fields.size * 100).toInt()
     }
 
     private fun calculateListModulePercentage(list: List<*>): Int =
         ((list.size.coerceAtMost(5) / 5f) * 100).toInt()
 
-    private fun calculateAirPollutionPercentage(a: AirPollution): Int {
-        val fields = listOf(a.processEquipment, a.location, a.emissionDescription)
-        val filled = fields.count { !it.isNullOrEmpty() }
-        return (filled / fields.size.toFloat() * 100).toInt()
+    private fun calculateAirPollutionProgress(airPollution: AirPollution): Int {
+        val fields = listOf(
+            airPollution.processEquipment,
+            airPollution.location,
+            airPollution.hoursOperation,
+            airPollution.fuelEquipment,
+            airPollution.fuelUsed,
+            airPollution.fuelQuantity,
+            airPollution.fuelHours,
+            airPollution.pcfName,
+            airPollution.pcfLocation,
+            airPollution.pcfHours,
+            airPollution.totalElectricity,
+            airPollution.overheadCost,
+            airPollution.emissionDescription,
+            airPollution.emissionDate,
+            airPollution.flowRate,
+            airPollution.co,
+            airPollution.nox,
+            airPollution.particulates
+        )
+        val filled = fields.count { it.isNotEmpty() }
+        return (filled.toFloat() / fields.size * 100).toInt()
     }
 
-    private fun calculateOthersPercentage(o: Others): Int {
-        val fields = listOf(o.accidentDate, o.accidentArea, o.trainingDescription)
-        val filled = fields.count { !it.isNullOrEmpty() }
-        return (filled / fields.size.toFloat() * 100).toInt()
+    private fun calculateOthersProgress(others: Others): Int {
+        val fields = listOf(
+            others.accidentDate,
+            others.accidentArea,
+            others.findings,
+            others.actionsTaken,
+            others.remarks,
+            others.trainingDate,
+            others.trainingDescription,
+            others.personnelTrained
+        )
+        val filled = fields.count { it.isNotEmpty() }
+        return (filled.toFloat() / fields.size * 100).toInt()
     }
 }
