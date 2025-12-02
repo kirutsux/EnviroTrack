@@ -136,6 +136,17 @@
             app:destination="@id/embPCOFragment" />
     </fragment>
 
+    <!-- CNC DASHBOARD -->
+    <fragment
+        android:id="@+id/cncEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.cnc.CncEmbDashboardFragment"
+        android:label="EMB CNC Dashboard"
+        tools:layout="@layout/fragment_cnc_emb_dashboard"/>
+
+    <action
+        android:id="@+id/action_global_embcncDashboardFragment"
+        app:destination="@id/cncEmbDashboardFragment" />
+
     <!-- 🧰 Service Provider Dashboard -->
     <fragment
         android:id="@+id/serviceProviderDashboard"
@@ -153,6 +164,21 @@
             app:popUpTo="@id/COMP_PCO"
             app:popUpToInclusive="true" />
     </fragment>
+    <action
+        android:id="@+id/action_global_pcoaccDashboardFragment"
+        app:destination="@id/COMP_PCOAccreditation" />
+
+    <!-- EMB PCO Dashboard -->
+    <fragment
+        android:id="@+id/pcoEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.pcoacc.PcoEmbDashboardFragment"
+        android:label="EMB PCO Dashboard"
+        tools:layout="@layout/fragment_pco_emb_dashboard"/>
+
+        <action
+            android:id="@+id/action_global_embpcoaccDashboardFragment"
+            app:destination="@id/pcoEmbDashboardFragment" />
+
 
     <!-- 🗂️ Business: PCO Table/List -->
     <fragment
@@ -207,6 +233,18 @@
         <action
             android:id="@+id/action_pcoDashboard_to_aboutUsFragment"
             app:destination="@id/aboutUsFragment" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_cncDashboardFragment"
+        app:destination="@id/cncDashboardFragment" />
+
+    <!-- CNC DASHBOARD -->
+    <fragment
+        android:id="@+id/cncDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.cnc.CncDashboardFragment"
+        android:label="CNC Dashboard"
+        tools:layout="@layout/fragment_cnc_dashboard">
+
     </fragment>
 
     <fragment
@@ -390,6 +428,43 @@
             android:id="@+id/action_COMP_CRS_to_COMP_CRSApplication"
             app:destination="@id/COMP_CRSApplication" />
     </fragment>
+    <action
+        android:id="@+id/action_global_crsDashboardFragment"
+        app:destination="@id/COMP_CRS" />
+
+    <!-- EMB CRS Dashboard -->
+    <fragment
+        android:id="@+id/crsEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.crs.CrsEmbDashboardFragment"
+        android:label="EMB CRS Dashboard"
+        tools:layout="@layout/fragment_crs_emb_dashboard">
+    </fragment>
+
+    <action
+        android:id="@+id/action_global_embcrsDashboardFragment"
+        app:destination="@id/crsEmbDashboardFragment" />
+
+    <fragment
+        android:id="@+id/opmsDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsDashboardFragment"
+        android:label="OPMS Dashboard"
+        tools:layout="@layout/fragment_opms_dashboard"/>
+
+    <action
+        android:id="@+id/action_global_opmsDashboardFragment"
+        app:destination="@id/opmsDashboardFragment" />
+
+    <!-- OPMS EMB Dashboard -->
+    <fragment
+        android:id="@+id/opmsEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.OpmsEmbDashboardFragment"
+        android:label="EMB OPMS Dashboard"
+        tools:layout="@layout/fragment_opms_emb_dashboard"/>
+
+    <action
+        android:id="@+id/action_global_embopmsDashboardFragment"
+        app:destination="@id/opmsEmbDashboardFragment" />
+
 
     <fragment
         android:id="@+id/COMP_CRSApplication"

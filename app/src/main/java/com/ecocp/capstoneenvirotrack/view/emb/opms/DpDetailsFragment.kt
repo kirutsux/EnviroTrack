@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentDpDetailsBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -314,46 +315,45 @@ class DpDetailsFragment : Fragment() {
                 // Reload details so upload button and filename update immediately
                 loadDischargePermitDetails()
 
-                // Optionally navigate back to dashboard (kept behavior from your previous code)
+                // Optionally navigate back to dashboard
                 if (isAdded) {
                     val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // Send Notifications
+                // ✅ Send notifications using NotificationManager
                 db.collection("opms_discharge_permits").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
                         val companyName = doc.getString("companyName") ?: "Unknown Establishment"
                         val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notificationForPCO = hashMapOf(
-                            "receiverId" to pcoUid,
-                            "receiverType" to "pco",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "Discharge Permit Approved" else "Discharge Permit Rejected",
-                            "message" to if (isApproved)
+                        // PCO notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = pcoUid,
+                            title = if (isApproved) "Discharge Permit Approved" else "Discharge Permit Rejected",
+                            message = if (isApproved)
                                 "Your Discharge Permit application has been approved."
                             else
                                 "Your Discharge Permit application has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                            category = "approval",
+                            priority = "high",
+                            module = "OPMS",
+                            documentId = id,
+                            actionLink = "dpDashboard/$id" // deep link for PCO
                         )
 
-                        val notificationForEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "Discharge Permit ${status.uppercase()}",
-                            "message" to "You have $status a Discharge Permit for $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // EMB notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = embUid,
+                            title = "Discharge Permit ${status.uppercase()}",
+                            message = "You have $status a Discharge Permit for $companyName.",
+                            category = "system",
+                            priority = "high",
+                            module = "OPMS",
+                            documentId = id,
+                            actionLink = "dpEmbDashboard/$id" // deep link for EMB
                         )
-
-                        db.collection("notifications").add(notificationForPCO)
-                        db.collection("notifications").add(notificationForEMB)
                     }
             }
             .addOnFailureListener { e ->
@@ -361,6 +361,7 @@ class DpDetailsFragment : Fragment() {
                 Log.e("DP_REVIEW", "❌ Failed to update DP status", e)
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

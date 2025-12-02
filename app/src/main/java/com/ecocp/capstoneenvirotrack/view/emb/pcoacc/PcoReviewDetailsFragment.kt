@@ -11,6 +11,7 @@ import com.google.firebase.Timestamp
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPcoReviewDetailsBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
@@ -154,40 +155,39 @@ class PcoEmbReviewDetailsFragment : Fragment() {
                     requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
 
-                // ✅ Send Notifications to PCO and EMB
+                // ✅ Send notifications using NotificationManager
                 db.collection("accreditations").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
                         val pcoName = doc.getString("fullName") ?: "Unknown PCO"
                         val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notificationForPCO = hashMapOf(
-                            "receiverId" to pcoUid,
-                            "receiverType" to "pco",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "Accreditation Approved" else "Accreditation Rejected",
-                            "message" to if (isApproved)
+                        // PCO notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = pcoUid,
+                            title = if (isApproved) "Accreditation Approved" else "Accreditation Rejected",
+                            message = if (isApproved)
                                 "Your PCO Accreditation has been approved."
                             else
                                 "Your PCO Accreditation has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                            category = "approval",
+                            priority = "high",
+                            module = "Accreditation",
+                            documentId = id,
+                            actionLink = "accreditationDashboard/$id" // deep link for PCO
                         )
 
-                        val notificationForEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "Accreditation ${status.uppercase()}",
-                            "message" to "You have $status a PCO accreditation application for $pcoName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // EMB notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = embUid,
+                            title = "Accreditation ${status.uppercase()}",
+                            message = "You have $status a PCO accreditation application for $pcoName.",
+                            category = "system",
+                            priority = "high",
+                            module = "Accreditation",
+                            documentId = id,
+                            actionLink = "accreditationEmbDashboard/$id" // deep link for EMB
                         )
-
-                        db.collection("notifications").add(notificationForPCO)
-                        db.collection("notifications").add(notificationForEMB)
                     }
             }
             .addOnFailureListener { e ->
@@ -195,7 +195,6 @@ class PcoEmbReviewDetailsFragment : Fragment() {
                 Log.e("PCO_REVIEW", "❌ Failed to update accreditation status", e)
             }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

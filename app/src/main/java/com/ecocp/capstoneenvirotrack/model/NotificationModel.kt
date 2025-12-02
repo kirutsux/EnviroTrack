@@ -11,5 +11,6 @@ data class NotificationModel(
     var timestamp: Timestamp? = null,
     var type: String = "",
     var isRead: Boolean = false,
-    var isHeader: Boolean = false // 👈 add this
+    var isHeader: Boolean = false, // 👈 add this
+    val actionLink: String? = null  // <-- add this
 )

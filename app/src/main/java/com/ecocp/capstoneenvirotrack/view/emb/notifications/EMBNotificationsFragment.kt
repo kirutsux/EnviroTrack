@@ -1,11 +1,14 @@
 package com.ecocp.capstoneenvirotrack.view.emb.notifications
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.NotificationAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentEmbNotificationsBinding
 import com.ecocp.capstoneenvirotrack.model.NotificationModel
@@ -45,10 +48,12 @@ class EMBNotificationsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = NotificationAdapter(notifList)
-        binding.recyclerembNotifications.layoutManager = LinearLayoutManager(requireContext())
+        adapter = NotificationAdapter(notifList, findNavController())
         binding.recyclerembNotifications.adapter = adapter
+        binding.recyclerembNotifications.layoutManager = LinearLayoutManager(requireContext())
+
     }
+
 
     private fun fetchNotifications() {
         val userId = auth.currentUser?.uid ?: return

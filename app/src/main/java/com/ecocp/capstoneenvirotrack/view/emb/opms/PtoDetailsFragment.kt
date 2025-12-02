@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoDetails2Binding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -330,45 +331,45 @@ class PtoDetailsFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
+                // Navigate back to EMB dashboard
                 if (isAdded) {
                     val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
                     navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
                 }
 
-                // ✅ Notifications
+                // ✅ Send notifications using NotificationManager
                 db.collection("opms_pto_applications").document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
                         val companyName = doc.getString("establishmentName") ?: "Unknown Establishment"
                         val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notificationForPCO = hashMapOf(
-                            "receiverId" to pcoUid,
-                            "receiverType" to "pco",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
-                            "message" to if (isApproved)
+                        // PCO notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = pcoUid,
+                            title = if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
+                            message = if (isApproved)
                                 "Your Permit to Operate application has been approved."
                             else
                                 "Your Permit to Operate application has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                            category = "approval",
+                            priority = "high",
+                            module = "PTO",
+                            documentId = id,
+                            actionLink = "ptoDashboard/$id" // deep link for PCO
                         )
 
-                        val notificationForEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "PTO Application ${status.uppercase()}",
-                            "message" to "You have $status a PTO application for $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // EMB notification
+                        NotificationManager.sendNotificationToUser(
+                            receiverId = embUid,
+                            title = "PTO Application ${status.uppercase()}",
+                            message = "You have $status a PTO application for $companyName.",
+                            category = "system",
+                            priority = "high",
+                            module = "PTO",
+                            documentId = id,
+                            actionLink = "ptoEmbDashboard/$id" // deep link for EMB
                         )
-
-                        db.collection("notifications").add(notificationForPCO)
-                        db.collection("notifications").add(notificationForEMB)
                     }
             }
             .addOnFailureListener { e ->
@@ -376,6 +377,7 @@ class PtoDetailsFragment : Fragment() {
                 Log.e("PTO_REVIEW", "❌ Failed to update PTO status", e)
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
