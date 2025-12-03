@@ -13,13 +13,19 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.SmrEmbAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrEmbDashboardBinding
 import com.ecocp.capstoneenvirotrack.model.*
+import com.ecocp.capstoneenvirotrack.workers.QuarterlyReminderWorker
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import java.util.concurrent.TimeUnit
 
 @Suppress("UNCHECKED_CAST")
 class SmrEmbDashboardFragment : Fragment() {
@@ -54,6 +60,8 @@ class SmrEmbDashboardFragment : Fragment() {
             )
         }
 
+        scheduleQuarterlyReminders()
+
         binding.recyclerSmrList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerSmrList.adapter = adapter
 
@@ -63,6 +71,24 @@ class SmrEmbDashboardFragment : Fragment() {
         loadAllSmrSubmissions()
     }
 
+    private fun scheduleQuarterlyReminders() {
+        val workRequest = PeriodicWorkRequestBuilder<QuarterlyReminderWorker>(1, TimeUnit.DAYS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+                    .setRequiresCharging(false)
+                    .build()
+            )
+            .build()
+
+        WorkManager.getInstance(requireContext()).enqueueUniquePeriodicWork(
+            "quarterly_reminder_work",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+
     private fun setupSpinner() {
         val statusOptions = listOf("All", "Pending", "Reviewed")
         val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, statusOptions)
@@ -70,10 +96,16 @@ class SmrEmbDashboardFragment : Fragment() {
         binding.spinnerStatus.adapter = spinnerAdapter
 
         binding.spinnerStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedStatus = statusOptions[position]
                 applyFilters()
             }
+
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
@@ -84,6 +116,7 @@ class SmrEmbDashboardFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 applyFilters()
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
     }

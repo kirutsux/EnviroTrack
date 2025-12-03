@@ -37,6 +37,7 @@
         android:layout_marginTop="16dp" />
 
     <ScrollView
+        android:id="@+id/finalResultsView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -47,5 +48,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="AI analysis will appear here." />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnApprove"
+                android:text="Approve"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#00FF00" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btnReject"
+                android:text="Reject"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#FF0000" />
+        </LinearLayout>
     </ScrollView>
 </LinearLayout>

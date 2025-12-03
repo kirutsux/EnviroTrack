@@ -202,6 +202,52 @@ class SmrReviewDetailsFragment : Fragment() {
         binding.btnAnalyze.setOnClickListener {
             performAiAnalysis(smr)
         }
+        binding.btnApprove.setOnClickListener {
+            updateSmrStatus("Approved", null)
+        }
+
+        binding.btnReject.setOnClickListener {
+            showRejectionDialog()
+        }
+    }
+
+    private fun updateSmrStatus(newStatus: String, rejectionReason: String?) {
+        val updates = mutableMapOf<String, Any>("status" to newStatus)
+        rejectionReason?.let{ updates["rejectionReason"] = it }
+
+        db.collection("smr_submissions").document(smr.id!!)
+            .update(updates)
+            .addOnSuccessListener {
+                Snackbar.make(binding.root, "SMR status updated to $newStatus", Snackbar.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
+            }
+            .addOnFailureListener{e->
+                Snackbar.make(binding.root, "Failed to update status: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                Log.e("StatusUpdate", "Failed to update status: ${e.message}")
+            }
+    }
+
+    private fun showRejectionDialog(){
+
+        val input = android.widget.EditText(requireContext()).apply {
+            hint = "Enter rejection reason"
+            setSingleLine(false)
+            maxLines = 5
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle("Reject SMR")
+            .setMessage("Provide a reason for rejection:")
+            .setView(input)
+            .setPositiveButton("Reject") { _, _ ->
+                val reason = input.text.toString().trim()
+                if (reason.isNotEmpty()) {
+                    updateSmrStatus("Rejected", reason)
+                } else {
+                    Snackbar.make(binding.root, "Rejection reason is required", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun displaySummary(smr: Smr) {

@@ -1,28 +1,34 @@
 package com.ecocp.capstoneenvirotrack.viewmodel
 
-import android.app.Application
-import android.util.Log
-import androidx.datastore.dataStore
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.lifecycle.*
-import com.ecocp.capstoneenvirotrack.MyApplication
 //import androidx.datastore.preferences.core.*
 //import androidx.datastore.preferences.preferencesDataStore
 //import com.ecocp.capstoneenvirotrack.api.OpenAiClient
-import com.ecocp.capstoneenvirotrack.model.*
+import android.app.Application
+import android.util.Log
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.application
+import androidx.lifecycle.viewModelScope
+import com.ecocp.capstoneenvirotrack.MyApplication
+import com.ecocp.capstoneenvirotrack.model.AirPollution
+import com.ecocp.capstoneenvirotrack.model.GeneralInfo
+import com.ecocp.capstoneenvirotrack.model.HazardousWaste
+import com.ecocp.capstoneenvirotrack.model.Others
+import com.ecocp.capstoneenvirotrack.model.Smr
+import com.ecocp.capstoneenvirotrack.model.WaterPollution
 import com.google.gson.Gson
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 
 // --------------------------------------------
 // DATASTORE EXTENSION
 // --------------------------------------------
 //private val Application.smrDataStore by preferencesDataStore("smr_ai_cache")
 
-class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
+class SmrViewModel(app: Application) : AndroidViewModel(app) {
     init {
         Log.d("SmrViewModel", "SmrViewModel CREATED — instance=${System.identityHashCode(this)}")
     }
@@ -34,13 +40,14 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _aiAnalysis = MutableLiveData<String>()
     val aiAnalysis: LiveData<String> get() = _aiAnalysis
 
+    private val gson = Gson()
     // Track Module Progress
     private val _moduleProgress = MutableLiveData<Map<String,Int>>()
     val moduleProgress: LiveData<Map<String, Int>> get() = _moduleProgress
-    private val gson = Gson()
-    private val dataStore = (application as MyApplication).smrDataStore
+    private val _fileUrls = MutableLiveData<List<String>>(emptyList())
+    val fileUrls: LiveData<List<String>> get() = _fileUrls
     private val SMR_DATA_KEY = stringPreferencesKey("smr_data")
-
+    private val dataStore = (application as MyApplication).smrDataStore
     init{
         viewModelScope.launch {
             loadPersistedSmr()
@@ -54,7 +61,7 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
                 val persistedSmr = gson.fromJson(it, Smr::class.java)
                 _smr.value = persistedSmr
                 updateProgress()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 dataStore.edit { it.remove(SMR_DATA_KEY) }
             }
         }
@@ -302,5 +309,26 @@ class SmrViewModel(private val app: Application) : AndroidViewModel(app) {
         )
         val filled = fields.count { it.isNotEmpty() }
         return (filled.toFloat() / fields.size * 100).toInt()
+    }
+
+    fun addFileUrl(url:String){
+        val current = _fileUrls.value ?: emptyList()
+        _fileUrls.value = current + url
+        updateSmrWithFiles()
+    }
+
+    fun removeFileUrl(url: String) {
+        val current = _fileUrls.value ?: emptyList()
+        _fileUrls.value = current - url
+        updateSmrWithFiles()
+    }
+
+    private fun updateSmrWithFiles() {
+        val currentSmr = _smr.value ?: Smr()
+        _smr.value = currentSmr.copy(fileUrls = _fileUrls.value ?: emptyList())
+    }
+
+    fun clearFiles() {
+        _fileUrls.value = emptyList()
     }
 }

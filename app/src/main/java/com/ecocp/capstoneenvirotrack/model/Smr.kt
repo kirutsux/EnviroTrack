@@ -9,6 +9,7 @@ data class Smr(
     val submittedAt: Long? = null,
     val uid: String? = null, // just store the Firebase UID
     var id: String? = null,
-    val status: String = "Pending"
+    val status: String = "Pending",
+    val fileUrls: List<String> = emptyList()
 )
 
