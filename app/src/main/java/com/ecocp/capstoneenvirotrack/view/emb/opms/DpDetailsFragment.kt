@@ -13,6 +13,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentDpDetailsBinding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
@@ -20,6 +23,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -295,72 +299,72 @@ class DpDetailsFragment : Fragment() {
     // Approve / Reject + Notifications
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
 
-        val updateData = mapOf(
+        // Always check fragment state
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_discharge_permits").document(id)
+        // Discharge Permit applications only
+        val collectionName = "opms_discharge_permits"
+
+        // Update Firestore first
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // Reload details so upload button and filename update immediately
-                loadDischargePermitDetails()
-
-                // Optionally navigate back to dashboard
                 if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
-                    navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
+                    Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
                 }
 
-                // ✅ Send notifications using NotificationManager
-                db.collection("opms_discharge_permits").document(id).get()
+                // Reload details for immediate UI update
+                loadDischargePermitDetails()
+
+                // Fetch PCO uid from document
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
-                        val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("companyName") ?: "Unknown Establishment"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
+                        val pcoId = doc.getString("uid") ?: return@addOnSuccessListener
 
-                        // PCO notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = pcoUid,
-                            title = if (isApproved) "Discharge Permit Approved" else "Discharge Permit Rejected",
-                            message = if (isApproved)
-                                "Your Discharge Permit application has been approved."
-                            else
-                                "Your Discharge Permit application has been rejected. Please review the feedback.",
-                            category = "approval",
-                            priority = "high",
-                            module = "OPMS",
-                            documentId = id
+                        // ⚠ Call backend endpoint for status update (not send-notification)
+                        val url = "http://10.0.2.2:5000/update-status"
+                        val json = JSONObject().apply {
+                            put("applicationId", id)
+                            put("newStatus", status)
+                            put("pcoId", pcoId)
+                            put("embId", embUid)
+                            put("module", "DISCHARGE")
+                            put("feedback", feedback)
+                        }
+
+                        Volley.newRequestQueue(safeContext).add(
+                            JsonObjectRequest(Request.Method.POST, url, json,
+                                { /* success */ },
+                                { error ->
+                                    Toast.makeText(safeContext, "Failed to notify: ${error.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
                         )
 
-                        // EMB notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = embUid,
-                            title = "Discharge Permit ${status.uppercase()}",
-                            message = "You have $status a Discharge Permit for $companyName.",
-                            category = "system",
-                            priority = "high",
-                            module = "OPMS",
-                            documentId = id
-                        )
+                        // Navigate back safely
+                        if (isAdded) {
+                            val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
+                            navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
+                        }
                     }
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("DP_REVIEW", "❌ Failed to update DP status", e)
+            .addOnFailureListener {
+                if (isAdded) {
+                    Toast.makeText(safeContext, "Failed to update status: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

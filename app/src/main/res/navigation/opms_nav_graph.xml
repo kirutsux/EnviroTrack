@@ -11,7 +11,9 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsDashboardFragment"
         android:label="OPMS Dashboard"
         tools:layout="@layout/fragment_opms_dashboard">
-
+        <action
+            android:id="@+id/action_opmsdb_to_pcodashboard"
+            app:destination="@id/COMP_Dashboard" />
         <action
             android:id="@+id/action_dashboard_to_dischargePermitForm"
             app:destination="@id/dischargePermitFormFragment" />
@@ -147,6 +149,17 @@
     <fragment
         android:id="@+id/COMP_Dashboard"
         android:name="com.ecocp.capstoneenvirotrack.view.all.COMP_Dashboard"
-        android:label="PCO Dasgboard"
-        tools:layout="@layout/pco_dashboard" />
+        android:label="PCO Dashoard"
+        tools:layout="@layout/pco_dashboard" >
+
+        <action
+            android:id="@+id/action_COMP_Dashboard_to_notificationsFragment"
+            app:destination="@id/notificationsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.NotificationsFragment"
+        tools:layout="@layout/fragment_notifications">
+    </fragment>
+
 </navigation>

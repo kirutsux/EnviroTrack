@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewBinding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
@@ -14,6 +16,8 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import org.json.JSONObject
+import com.android.volley.Request
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -155,34 +159,30 @@ class CncReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "CNC Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ----------------------------------------------------------------------
-                // ✅ Notify PCO (self)
-                // ----------------------------------------------------------------------
-                NotificationManager.sendNotificationToUser(
-                    receiverId = uid!!,
-                    title = "CNC Submitted",
-                    message = "You have successfully submitted a Certificate of Non-Coverage application.",
-                    category = "submission",
-                    priority = "medium",
-                    module = "CNC",
-                    documentId = currentDocId!!
+                // -------------------------------
+                // 🔔 Call backend for submission notifications (PCO + EMB)
+                // -------------------------------
+                val url = "http://10.0.2.2:5000/send-notification"
+                val json = JSONObject().apply {
+                    put("receiverId", uid!!)          // The PCO
+                    put("module", "CNC")             // Module
+                    put("documentId", currentDocId!!) // Firestore document ID
+                }
+
+                Volley.newRequestQueue(requireContext()).add(
+                    JsonObjectRequest(Request.Method.POST, url, json,
+                        { /* success */ },
+                        { error ->
+                            Toast.makeText(requireContext(),
+                                "Failed to send submission notifications: ${error.message}",
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    )
                 )
 
-                // ----------------------------------------------------------------------
-                // ✅ Notify all EMB admins
-                // ----------------------------------------------------------------------
-                NotificationManager.sendToAllEmb(
-                    title = "New CNC Application",
-                    message = "A new Certificate of Non-Coverage has been submitted by a PCO.",
-                    category = "alert",
-                    priority = "high",
-                    module = "CNC",
-                    documentId = currentDocId!!
-                )
-
-                // ----------------------------------------------------------------------
-                // ✅ Navigate back to CNC Dashboard and clear back stack
-                // ----------------------------------------------------------------------
+                // -------------------------------
+                // Navigate back to dashboard
+                // -------------------------------
                 findNavController().navigate(
                     R.id.cncDashboardFragment,
                     null,

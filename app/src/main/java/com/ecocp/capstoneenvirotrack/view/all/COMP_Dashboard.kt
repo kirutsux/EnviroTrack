@@ -202,8 +202,7 @@ class COMP_Dashboard : Fragment() {
                 .setPopEnterAnim(R.anim.slide_in_right)
                 .setPopExitAnim(R.anim.slide_out_left)
                 .build()
-            navController.navigate(R.id.action_COMP_Dashboard_to_notificationsFragment, bundle, options)
-
+            findNavController().navigate(R.id.action_COMP_Dashboard_to_notificationsFragment)
         }
     }
 

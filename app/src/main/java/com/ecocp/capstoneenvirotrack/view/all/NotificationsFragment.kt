@@ -1,4 +1,4 @@
-package com.ecocp.capstoneenvirotrack.view.businesses.notifications
+package com.ecocp.capstoneenvirotrack.view.all
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,7 +24,6 @@ class NotificationsFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
 
     private lateinit var adapter: NotificationAdapter
-    private val notifList = mutableListOf<NotificationModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,17 +35,13 @@ class NotificationsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-        }
-        setupRecyclerView()
-        fetchNotifications()
-    }
+        binding.btnBack.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
-    private fun setupRecyclerView() {
-        adapter = NotificationAdapter(notifList)
+        adapter = NotificationAdapter(emptyList())
         binding.recyclerNotifications.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerNotifications.adapter = adapter
+
+        fetchNotifications()
     }
 
     private fun fetchNotifications() {
@@ -58,23 +53,24 @@ class NotificationsFragment : Fragment() {
             .addSnapshotListener { snapshot, e ->
                 if (e != null || snapshot == null) return@addSnapshotListener
 
+                // Prevent crash when fragment is destroyed
+                if (_binding == null) return@addSnapshotListener
+
                 val notifications = snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(NotificationModel::class.java)?.apply {
-                        // Only set documentId if you need the Firestore doc ID in your app
-                        if (documentId.isNullOrEmpty()) {
-                            documentId = doc.id
-                        }
-                    }
+                    doc.toObject(NotificationModel::class.java)?.apply { documentId = doc.id }
                 }
 
-                displayGroupedNotifications(notifications)
+                val uniqueNotifications = notifications.distinctBy { it.documentId }
+                val groupedNotifications = groupNotificationsByDate(uniqueNotifications)
+
+                adapter.addNotifications(groupedNotifications)
+
+                binding.emptyNotificationsText.visibility =
+                    if (groupedNotifications.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 
-
-    private fun displayGroupedNotifications(notifications: List<NotificationModel>) {
-        notifList.clear()
-
+    private fun groupNotificationsByDate(notifications: List<NotificationModel>): List<NotificationModel> {
         val today = mutableListOf<NotificationModel>()
         val yesterday = mutableListOf<NotificationModel>()
         val earlier = mutableListOf<NotificationModel>()
@@ -93,19 +89,12 @@ class NotificationsFragment : Fragment() {
             }
         }
 
-        notifList.addAll(buildSection("Today", today))
-        notifList.addAll(buildSection("Yesterday", yesterday))
-        notifList.addAll(buildSection("Earlier", earlier))
+        val result = mutableListOf<NotificationModel>()
+        if (today.isNotEmpty()) result.add(NotificationModel(title = "Today", isHeader = true)); result.addAll(today)
+        if (yesterday.isNotEmpty()) result.add(NotificationModel(title = "Yesterday", isHeader = true)); result.addAll(yesterday)
+        if (earlier.isNotEmpty()) result.add(NotificationModel(title = "Earlier", isHeader = true)); result.addAll(earlier)
 
-        adapter.notifyDataSetChanged()
-        binding.emptyNotificationsText.visibility =
-            if (notifList.isEmpty()) View.VISIBLE else View.GONE
-    }
-
-    private fun buildSection(title: String, items: List<NotificationModel>): List<NotificationModel> {
-        if (items.isEmpty()) return emptyList()
-        val header = NotificationModel(title = title, isHeader = true)
-        return listOf(header) + items
+        return result
     }
 
     private fun getDayString(date: Date): String {

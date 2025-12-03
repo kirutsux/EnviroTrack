@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentDischargePermitReviewBinding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
@@ -14,6 +17,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -129,13 +133,13 @@ class DischargePermitReviewFragment : Fragment() {
     }
 
     private fun submitApplication() {
-        if (uid == null) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (currentDocId == null) {
-            Toast.makeText(requireContext(), "No application found to update.", Toast.LENGTH_SHORT).show()
+        val docId = currentDocId ?: run {
+            Toast.makeText(requireContext(), "No application found to submit.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -144,41 +148,35 @@ class DischargePermitReviewFragment : Fragment() {
             "submittedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_discharge_permits")
-            .document(currentDocId!!)
+        db.collection("opms_discharge_permits").document(docId)
             .update(updateData)
             .addOnSuccessListener {
-
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ----------------------------------------------------------------------
-                // ✅ SEND NOTIFICATION — PCO (SELF)
-                // ----------------------------------------------------------------------
-                NotificationManager.sendNotificationToUser(
-                    receiverId = uid!!,
-                    title = "Discharge Permit Submitted",
-                    message = "You have successfully submitted a Discharge Permit application.",
-                    category = "submission",
-                    priority = "medium",
-                    module = "OPMS",
-                    documentId = currentDocId!!
+                // -------------------------------
+                // 🔔 Notify PCO + ALL EMB via backend endpoint
+                // -------------------------------
+                val url = "http://10.0.2.2:5000/send-notification"
+                val json = JSONObject().apply {
+                    put("receiverId", uid)       // PCO
+                    put("module", "OPMS")
+                    put("documentId", docId)
+                }
+
+                Volley.newRequestQueue(requireContext()).add(
+                    JsonObjectRequest(Request.Method.POST, url, json,
+                        { /* success */ },
+                        { error ->
+                            Toast.makeText(requireContext(),
+                                "Failed to send submission notifications: ${error.message}",
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    )
                 )
 
-                // ----------------------------------------------------------------------
-                // ✅ SEND NOTIFICATION TO ALL EMB ADMINS
-                // ----------------------------------------------------------------------
-                NotificationManager.sendToAllEmb(
-                    title = "New Discharge Permit Application",
-                    message = "A new Discharge Permit application has been submitted by a PCO.",
-                    category = "alert",
-                    priority = "high",
-                    module = "OPMS",
-                    documentId = currentDocId!!
-                )
-
-                // ----------------------------------------------------------------------
-                // ✅ NAVIGATE BACK TO DASHBOARD (CLEAR BACK STACK)
-                // ----------------------------------------------------------------------
+                // -------------------------------
+                // Navigate back to dashboard
+                // -------------------------------
                 findNavController().navigate(
                     R.id.opmsDashboardFragment,
                     null,
@@ -191,6 +189,8 @@ class DischargePermitReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
             }
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

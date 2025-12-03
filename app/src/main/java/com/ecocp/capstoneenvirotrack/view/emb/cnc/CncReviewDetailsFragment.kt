@@ -12,6 +12,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewDetailsBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -21,6 +24,7 @@ import java.util.*
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
 
 class CncReviewDetailsFragment : Fragment() {
 
@@ -284,6 +288,10 @@ class CncReviewDetailsFragment : Fragment() {
         val id = applicationId ?: return
         val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+        // Always check fragment state
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
         val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
@@ -291,52 +299,56 @@ class CncReviewDetailsFragment : Fragment() {
         )
         certificateUrl?.let { updateData["certificateUrl"] = it }
 
-        db.collection("cnc_applications").document(id)
+        // CNC applications only
+        val collectionName = "cnc_applications"
+
+        // Update Firestore first
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // 🔔 Notifications
-                db.collection("cnc_applications").document(id).get()
+                if (isAdded) {
+                    Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
+                }
+
+                // Fetch PCO uid from document
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoId = doc.getString("uid") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("companyName") ?: "Unknown Company"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        // PCO Notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = pcoId,
-                            title = if (isApproved) "Application Approved" else "Application Rejected",
-                            message = if (isApproved)
-                                "Your CNC application has been approved. Certificate is now available."
-                            else
-                                "Your CNC application has been rejected. Please review the feedback.",
-                            category = "approval",
-                            priority = "high",
-                            module = "CNC",
-                            documentId = id
+                        // ⚠ Call backend endpoint for status update (not send-notification)
+                        val url = "http://10.0.2.2:5000/update-status"
+                        val json = JSONObject().apply {
+                            put("applicationId", id)
+                            put("newStatus", status)
+                            put("pcoId", pcoId)
+                            put("embId", embUid)
+                            put("module", "CNC")
+                            put("feedback", feedback)
+                        }
+
+                        Volley.newRequestQueue(safeContext).add(
+                            JsonObjectRequest(Request.Method.POST, url, json,
+                                { /* success */ },
+                                { error ->
+                                    Toast.makeText(safeContext, "Failed to notify: ${error.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
                         )
 
-                        // EMB Notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = embUid,
-                            title = "CNC Application ${status.uppercase()}",
-                            message = "You have $status a CNC application by $companyName.",
-                            category = "approval",
-                            priority = "high",
-                            module = "CNC",
-                            documentId = id
-                        )
+                        // Navigate back safely
+                        if (isAdded) {
+                            val navController = requireActivity().findNavController(R.id.embcnc_nav_host_fragment)
+                            navController.popBackStack(R.id.cncEmbDashboardFragment, false)
+                        }
                     }
-
-                // ✅ Return to dashboard
+            }
+            .addOnFailureListener {
                 if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embcnc_nav_host_fragment)
-                    navController.popBackStack(R.id.cncEmbDashboardFragment, false)
+                    Toast.makeText(safeContext, "Failed to update status: ${it.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
-
 
 
     override fun onDestroyView() {

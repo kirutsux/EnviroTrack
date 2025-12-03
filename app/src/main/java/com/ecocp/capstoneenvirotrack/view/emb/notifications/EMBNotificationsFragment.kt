@@ -36,19 +36,13 @@ class EMBNotificationsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.btnBack.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
-        binding.btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-        }
-
-        setupRecyclerView()
-        fetchNotifications()
-    }
-
-    private fun setupRecyclerView() {
-        adapter = NotificationAdapter(notifList)
+        adapter = NotificationAdapter(emptyList())
         binding.recyclerembNotifications.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerembNotifications.adapter = adapter
+
+        fetchNotifications()
     }
 
     private fun fetchNotifications() {
@@ -60,30 +54,31 @@ class EMBNotificationsFragment : Fragment() {
             .addSnapshotListener { snapshot, e ->
                 if (e != null || snapshot == null) return@addSnapshotListener
 
+                // Prevent crash when fragment is destroyed
+                if (_binding == null) return@addSnapshotListener
+
                 val notifications = snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(NotificationModel::class.java)?.apply {
-                        // Only set documentId if you need the Firestore doc ID in your app
-                        if (documentId.isNullOrEmpty()) {
-                            documentId = doc.id
-                        }
-                    }
+                    doc.toObject(NotificationModel::class.java)?.apply { documentId = doc.id }
                 }
 
-                displayGroupedNotifications(notifications)
+                val uniqueNotifications = notifications.distinctBy { it.documentId }
+                val groupedNotifications = groupNotificationsByDate(uniqueNotifications)
+
+                adapter.addNotifications(groupedNotifications)
+
+                binding.emptyNotificationsText.visibility =
+                    if (groupedNotifications.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 
 
-    private fun displayGroupedNotifications(notifications: List<NotificationModel>) {
-        notifList.clear()
-
+    private fun groupNotificationsByDate(notifications: List<NotificationModel>): List<NotificationModel> {
         val today = mutableListOf<NotificationModel>()
         val yesterday = mutableListOf<NotificationModel>()
         val earlier = mutableListOf<NotificationModel>()
 
         val cal = Calendar.getInstance()
         val todayStr = getDayString(cal.time)
-
         cal.add(Calendar.DATE, -1)
         val yesterdayStr = getDayString(cal.time)
 
@@ -96,19 +91,12 @@ class EMBNotificationsFragment : Fragment() {
             }
         }
 
-        notifList.addAll(buildSection("Today", today))
-        notifList.addAll(buildSection("Yesterday", yesterday))
-        notifList.addAll(buildSection("Earlier", earlier))
+        val result = mutableListOf<NotificationModel>()
+        if (today.isNotEmpty()) result.add(NotificationModel(title = "Today", isHeader = true)); result.addAll(today)
+        if (yesterday.isNotEmpty()) result.add(NotificationModel(title = "Yesterday", isHeader = true)); result.addAll(yesterday)
+        if (earlier.isNotEmpty()) result.add(NotificationModel(title = "Earlier", isHeader = true)); result.addAll(earlier)
 
-        adapter.notifyDataSetChanged()
-        binding.emptyNotificationsText.visibility =
-            if (notifList.isEmpty()) View.VISIBLE else View.GONE
-    }
-
-    private fun buildSection(title: String, items: List<NotificationModel>): List<NotificationModel> {
-        if (items.isEmpty()) return emptyList()
-        val header = NotificationModel(title = title, message = "", isHeader = true)
-        return listOf(header) + items
+        return result
     }
 
     private fun getDayString(date: Date): String {

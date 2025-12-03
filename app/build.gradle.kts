@@ -119,6 +119,9 @@ dependencies {
     implementation(libs.filament.android)
     implementation(libs.google.material)
     implementation(libs.androidx.animation.core)
+    implementation(libs.volley)
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // Stripe

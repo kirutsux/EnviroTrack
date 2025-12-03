@@ -103,7 +103,7 @@
 
     <fragment
         android:id="@+id/notificationsFragment"
-        android:name="com.ecocp.capstoneenvirotrack.view.businesses.notifications.NotificationsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.NotificationsFragment"
         tools:layout="@layout/fragment_notifications">
     </fragment>
     <!-- Global action -->
@@ -265,8 +265,12 @@
             android:id="@+id/action_pcoDashboard_to_aboutUsFragment"
             app:destination="@id/aboutUsFragment" />
         <action
+            android:id="@+id/action_pcoDashboard_to_notificationsFragment"
+            app:destination="@id/notificationsFragment"/>
+        <action
             android:id="@+id/action_COMP_Dashboard_to_notificationsFragment"
             app:destination="@id/notificationsFragment"/>
+
     </fragment>
 
     <!-- CNC DASHBOARD -->
@@ -487,8 +491,9 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsDashboardFragment"
         android:label="OPMS Dashboard"
         tools:layout="@layout/fragment_opms_dashboard">
-        <deepLink
-            app:uri="myapp://opms/{documentId}" />
+        <action
+            android:id="@+id/action_opmsdb_to_pcodashboard"
+            app:destination="@id/pcoDashboard" />
     </fragment>
     <action
         android:id="@+id/action_global_opmsDashboardFragment"
@@ -500,10 +505,6 @@
     android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.OpmsEmbDashboardFragment"
     android:label="EMB OPMS Dashboard"
     tools:layout="@layout/fragment_opms_emb_dashboard">
-    <deepLink
-        app:uri="myapp://emb/pto/{documentId}" />
-    <deepLink
-        app:uri="myapp://emb/discharge-permit/{documentId}" />
 </fragment>
     <action
         android:id="@+id/action_global_embopmsDashboardFragment"
@@ -515,6 +516,4 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.crs.COMP_CRSApplication"
         android:label="Add Company"
         tools:layout="@layout/fragment_comp_crs_application" />
-
-
 </navigation>
