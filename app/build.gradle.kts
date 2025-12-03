@@ -123,6 +123,9 @@ dependencies {
     implementation(libs.filament.android)
     implementation(libs.google.material)
     implementation(libs.androidx.animation.core)
+    implementation ("com.google.firebase:firebase-messaging-ktx")
+
+
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // Stripe
