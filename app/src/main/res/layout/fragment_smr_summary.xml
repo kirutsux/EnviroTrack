@@ -88,6 +88,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Attach Files (Recommended)"
+            android:textStyle="bold" />
+        <Button
+            android:id="@+id/btnAttachFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Select File for Submission" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerAttachedFiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
         <!-- SUBMIT BUTTON -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSubmitSmr"

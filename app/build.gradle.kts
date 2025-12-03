@@ -92,6 +92,9 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
+    //OkHTTP
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
@@ -107,7 +110,8 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation ("com.google.firebase:firebase-messaging-ktx")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
     //completed
@@ -119,9 +123,9 @@ dependencies {
     implementation(libs.filament.android)
     implementation(libs.google.material)
     implementation(libs.androidx.animation.core)
-    implementation(libs.volley)
-    implementation(libs.navigation.fragment.ktx)
-    implementation(libs.navigation.ui.ktx)
+    implementation ("com.google.firebase:firebase-messaging-ktx")
+
+
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // Stripe
