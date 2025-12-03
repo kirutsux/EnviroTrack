@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
@@ -44,12 +45,10 @@ class PttApplicationFragment : Fragment() {
 
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
-    // Stripe
     private lateinit var paymentSheet: PaymentSheet
     private var clientSecret: String? = null
 
-    // Fixed PTT Fee
-    private val PTT_FEE = 2500.0  // Change as needed
+    private val PTT_FEE = 2500.0
 
     private lateinit var pendingPttData: Map<String, Any>
 
@@ -66,7 +65,9 @@ class PttApplicationFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentPttApplicationBinding.inflate(inflater, container, false)
 
         PaymentConfiguration.init(
@@ -154,7 +155,7 @@ class PttApplicationFragment : Fragment() {
                     genDoc.getString("companyName") ?: "Unknown Generator"
                 } else "Unknown Generator"
 
-                displayNames.add("$transporter to $companyName")
+                displayNames.add("$transporter → $companyName")
             }
 
             MaterialAlertDialogBuilder(requireContext())
@@ -276,20 +277,36 @@ class PttApplicationFragment : Fragment() {
         }
     }
 
+    // FINAL & BEST VERSION — SAVES NAMES DIRECTLY
     private fun finalizePttSubmission() = scope.launch {
         binding.progressBar.visibility = View.VISIBLE
         try {
             val newDocRef = db.collection("ptt_applications").document()
             val pttId = newDocRef.id
 
-            // FIXED: Use pendingPttData directly (it already has userId!)
+            // Fetch human-readable names once at submission time
+            val generatorDoc = db.collection("HazardousWasteGenerator")
+                .document(selectedGeneratorId!!).get().await()
+            val transportDoc = db.collection("transport_bookings")
+                .document(selectedTransportBookingId!!).get().await()
+            val tsdDoc = db.collection("tsd_bookings")
+                .document(selectedTsdBookingId!!).get().await()
+
+            val generatorName = generatorDoc.getString("companyName") ?: "Unknown Generator"
+            val transporterName = transportDoc.getString("serviceProviderName") ?: "Unknown Transporter"
+            val tsdName = tsdDoc.getString("tsdName") ?: "Unknown TSD Facility"
+
             val finalData = pendingPttData.toMutableMap().apply {
                 this["pttId"] = pttId
                 this["paymentStatus"] = "Paid"
-                // userId is already here from pendingPttData — no need to add again!
+
+                // Save names — this makes dashboard instant & beautiful
+                this["generatorName"] = generatorName
+                this["transporterName"] = transporterName
+                this["tsdFacilityName"] = tsdName
             }
 
-            // Upload files if selected
+            // Upload files
             generatorCertUri?.let {
                 val url = uploadFile(it, "ptt_requirements/$pttId/generator_certificate.pdf")
                 finalData["generatorCertificateUrl"] = url
@@ -299,13 +316,11 @@ class PttApplicationFragment : Fragment() {
                 finalData["transportPlanUrl"] = url
             }
 
-            // Save everything — including userId
+            // Save to Firestore
             newDocRef.set(finalData).await()
 
             Toast.makeText(requireContext(), "PTT Application submitted successfully!", Toast.LENGTH_LONG).show()
             resetForm()
-
-            // Go back to dashboard
             findNavController().popBackStack(R.id.HWMSDashboardFragment, false)
 
         } catch (e: Exception) {
@@ -343,11 +358,13 @@ class PttApplicationFragment : Fragment() {
     }
 
     private fun updateCardSelected(card: com.google.android.material.card.MaterialCardView, selected: Boolean) {
-        card.strokeWidth = if (selected) 3 else 1
-        card.strokeColor = requireContext().getColor(
-            if (selected) com.google.android.material.R.color.material_dynamic_primary60
-            else android.R.color.darker_gray
-        )
+        card.strokeWidth = if (selected) 4 else 2
+        card.strokeColor = if (selected) {
+            // Beautiful blue accent from your theme — already exists!
+            ContextCompat.getColor(requireContext(), R.color.accent)
+        } else {
+            ContextCompat.getColor(requireContext(), R.color.darker_gray)
+        }
     }
 
     private fun resetForm() {
