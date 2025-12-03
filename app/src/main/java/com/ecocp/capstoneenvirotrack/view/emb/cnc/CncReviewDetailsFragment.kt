@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.navOptions
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -338,8 +339,7 @@ class CncReviewDetailsFragment : Fragment() {
 
                         // Navigate back safely
                         if (isAdded) {
-                            val navController = requireActivity().findNavController(R.id.embcnc_nav_host_fragment)
-                            navController.popBackStack(R.id.cncEmbDashboardFragment, false)
+                            navigateToDashboard()
                         }
                     }
             }
@@ -349,6 +349,18 @@ class CncReviewDetailsFragment : Fragment() {
                 }
             }
     }
+
+    private fun navigateToDashboard() {
+        val navController = requireActivity().findNavController(R.id.embhwms_nav_host_fragment)
+        navController.navigate(
+            R.id.hwmsEmbDashboardFragment,
+            null,
+            navOptions {
+                popUpTo(R.id.hwmsEmbDashboardFragment) { inclusive = true } // Clear everything above dashboard
+            }
+        )
+    }
+
 
 
     override fun onDestroyView() {

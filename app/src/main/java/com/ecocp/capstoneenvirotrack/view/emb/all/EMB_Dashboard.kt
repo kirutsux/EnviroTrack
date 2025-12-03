@@ -17,6 +17,7 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.cnc.embcncactivity
 import com.ecocp.capstoneenvirotrack.view.emb.crs.EmbcrsActivity
+import com.ecocp.capstoneenvirotrack.view.emb.hwms.EmbhwmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.notifications.EMBNotificationsFragment
 import com.ecocp.capstoneenvirotrack.view.emb.opms.EmbopmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.pcoacc.EmbpcoActivity
@@ -88,9 +89,9 @@ class EMB_Dashboard : Fragment() {
             startActivity(Intent(requireContext(), EmbopmsActivity::class.java))
         }
 
-//        hazewasteCard.setOnClickListener {
-//            navController.navigate(R.id.action_embDashboard_to_embHMSFragment)
-//        }
+        hazewasteCard.setOnClickListener {
+            startActivity(Intent(requireContext(), EmbhwmsActivity::class.java))
+        }
 
         crsCard.setOnClickListener {
             startActivity(Intent(requireContext(), EmbcrsActivity::class.java))
