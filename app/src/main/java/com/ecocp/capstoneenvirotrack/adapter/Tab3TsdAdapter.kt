@@ -17,8 +17,8 @@ class Tab3TsdAdapter(
         fun bind(item: DisplayItem) = with(binding) {
             tvFacility.text = item.tsdFacility
             tvSubtitle.text = item.subtitle
-            tvTransporter.text = item.transporter
-            tvStatus.text = item.status
+            tvTransporter.text = "Transporter: ${item.transporter}"
+            tvStatus.text = "Status: ${item.status.capitalize()}"
 
             root.setOnClickListener { onClick(item) }
         }

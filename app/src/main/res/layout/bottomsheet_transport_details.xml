@@ -1,0 +1,100 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottomsheet"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:text="Transport Booking"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dp"/>
+
+        <!-- Info Card -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_card_bottomsheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tvQuantity"
+                android:text="Quantity: "
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tvTransporter"
+                android:text="Transporter: "
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tvOrigin"
+                android:text="Pickup Address: "
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tvBookingDate"
+                android:text="Booking Date: "
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tvSpecialInstructions"
+                android:text="Instructions: "
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:text="Booking Status: "
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"/>
+        </LinearLayout>
+
+        <!-- Proceed Button -->
+        <Button
+            android:id="@+id/btnProceedStep3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Proceed TSD"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@color/white"
+            android:enabled="false"/>
+    </LinearLayout>
+</ScrollView>

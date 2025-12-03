@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     card_view:cardCornerRadius="12dp"
-    card_view:cardElevation="4dp">
+    card_view:cardElevation="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,33 +23,53 @@
             android:textSize="18sp"
             android:textColor="#1E1E1E"/>
 
-        <!-- Transport Info -->
+        <!-- Subtitle (Generator Company) -->
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="ABC Chemicals Inc."
+            android:textSize="15sp"
+            android:textColor="#333333"/>
+
+        <!-- Transport -->
         <TextView
             android:id="@+id/tvTransport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Transport Booking:"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
+            android:text="Transport: J&amp;T Hazardous Transport"
             android:textColor="#555555"/>
 
-        <!-- TSD Info -->
+        <!-- TSD Facility -->
         <TextView
             android:id="@+id/tvTsd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TSD Booking:"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="4dp"
+            android:text="TSD: CleanHarbors Facility"
             android:textColor="#555555"/>
+
+        <!-- Permit Number -->
+        <TextView
+            android:id="@+id/tvPermitNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Permit: ABC123456"
+            android:textStyle="italic"
+            android:textColor="#0066CC"/>
 
         <!-- Status -->
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Status: Active"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="12dp"
+            android:text="Status: Pending"
             android:textStyle="bold"
-            android:textColor="#0066CC"/>
+            android:textSize="15sp"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

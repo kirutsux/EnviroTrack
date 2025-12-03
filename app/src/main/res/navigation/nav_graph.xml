@@ -396,6 +396,10 @@
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.crs.COMP_CRSApplication"
         android:label="Add Company"
         tools:layout="@layout/fragment_comp_crs_application" />
+    <fragment
+        android:id="@+id/pttApplicationFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.PttApplicationFragment"
+        tools:layout="@layout/fragment_ptt_application" />
 
 
 </navigation>
