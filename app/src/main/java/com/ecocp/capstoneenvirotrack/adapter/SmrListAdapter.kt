@@ -37,7 +37,7 @@ class SmrListAdapter(
                 val sdf =
                     java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault())
                 sdf.format(java.util.Date(timestamp))
-            } ?: "Not submitted"
+            } ?: "Submitted"
 
             tvSmrDate.text = dateText
 
