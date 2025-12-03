@@ -92,6 +92,9 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
+    //OkHTTP
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
@@ -107,14 +110,12 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation ("com.google.firebase:firebase-messaging-ktx")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
     //completed
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
-
 
 
     // Glide

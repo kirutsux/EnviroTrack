@@ -1,13 +1,13 @@
-package com.ecocp.capstoneenvirotrack.view.emb.pcoacc
+package com.ecocp.capstoneenvirotrack.view.emb.smr
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.ecocp.capstoneenvirotrack.R
 
-class EmbpcoActivity : AppCompatActivity() {
+class EmbSmrActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_embpco)
+        setContentView(R.layout.activity_embsmr)
     }
 }

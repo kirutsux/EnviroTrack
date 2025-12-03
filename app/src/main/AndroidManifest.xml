@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
@@ -36,6 +37,10 @@
             android:name=".view.emb.pcoacc.EmbpcoActivity"
             android:exported="false"
             android:theme="@style/Theme.CapstoneEnviroTrack" />
+        <activity
+            android:name=".view.emb.smr.EmbSmrActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CapstoneEnviroTrack"/>
         <activity
             android:name=".view.serviceprovider.SPMainActivity"
             android:exported="false" />
