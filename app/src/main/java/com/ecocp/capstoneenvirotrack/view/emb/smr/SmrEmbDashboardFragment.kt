@@ -90,7 +90,7 @@ class SmrEmbDashboardFragment : Fragment() {
 
 
     private fun setupSpinner() {
-        val statusOptions = listOf("All", "Pending", "Reviewed", "Rejected")
+        val statusOptions = listOf("All", "Pending", "Approved", "Rejected")
         val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, statusOptions)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerStatus.adapter = spinnerAdapter

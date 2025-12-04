@@ -44,7 +44,7 @@ class SmrEmbAdapter(
 
         holder.tvStatus.text = smr.status
         val statusColor = when (smr.status) {
-            "Reviewed" -> R.color.status_approved
+            "Approved" -> R.color.status_approved
             "Rejected" -> R.color.status_rejected
             "Pending" -> R.color.status_pending
             else -> R.color.status_pending

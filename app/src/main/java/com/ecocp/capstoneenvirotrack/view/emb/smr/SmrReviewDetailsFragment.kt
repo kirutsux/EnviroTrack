@@ -323,10 +323,12 @@ class SmrReviewDetailsFragment : Fragment() {
                             binding.tvAiAnalysis.text = cachedAnalysis
                             binding.recyclerModules.visibility = View.GONE
                             binding.btnAnalyze.visibility = View.GONE
+                            binding.finalResultsView.visibility = View.VISIBLE
                             binding.tvAiAnalysis.visibility = View.VISIBLE
                             binding.btnApprove.visibility = View.GONE
                             binding.btnReject.visibility = View.GONE
                             Snackbar.make(binding.root, "AI analysis loaded from cache", Snackbar.LENGTH_SHORT).show()
+                            progressDialog.dismiss()
                         }
                     }
                     return@launch
@@ -402,6 +404,7 @@ class SmrReviewDetailsFragment : Fragment() {
 
                         binding.recyclerModules.visibility = View.GONE
                         binding.btnAnalyze.visibility = View.GONE
+                        binding.finalResultsView.visibility = View.VISIBLE
                         binding.tvAiAnalysis.visibility = View.VISIBLE
 
                         db.collection("smr_submissions").document(smr.id!!)
