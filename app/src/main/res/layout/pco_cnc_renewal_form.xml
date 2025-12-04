@@ -90,8 +90,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Enter CNC Certificate Number"
                     android:inputType="text"
-                    android:padding="12dp"
-                    android:contentDescription="Enter CNC Certificate Number" />
+                    android:padding="12dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Original Issuance Date -->
@@ -274,8 +273,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Enter Business Address"
                     android:inputType="textPostalAddress"
-                    android:padding="12dp"
-                    android:contentDescription="Enter Business Address" />
+                    android:padding="12dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Industry Type -->

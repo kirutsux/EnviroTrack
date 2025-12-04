@@ -23,11 +23,6 @@ import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-// --------------------------------------------
-// DATASTORE EXTENSION
-// --------------------------------------------
-//private val Application.smrDataStore by preferencesDataStore("smr_ai_cache")
-
 class SmrViewModel(app: Application) : AndroidViewModel(app) {
     init {
         Log.d("SmrViewModel", "SmrViewModel CREATED — instance=${System.identityHashCode(this)}")
@@ -35,10 +30,6 @@ class SmrViewModel(app: Application) : AndroidViewModel(app) {
     // SMR LiveData
     private val _smr = MutableLiveData(Smr())
     val smr: LiveData<Smr> get() = _smr
-
-    // AI Analysis
-    private val _aiAnalysis = MutableLiveData<String>()
-    val aiAnalysis: LiveData<String> get() = _aiAnalysis
 
     private val gson = Gson()
     // Track Module Progress
@@ -72,95 +63,6 @@ class SmrViewModel(app: Application) : AndroidViewModel(app) {
         dataStore.edit {preferences -> preferences[SMR_DATA_KEY] = json }
     }
 
-//     ---------------------------------------------------------
-//     DATASTORE KEYS
-//     ---------------------------------------------------------
-//    private val KEY_LAST_PROMPT_HASH = stringPreferencesKey("last_prompt_hash")
-//    private val KEY_LAST_AI_OUTPUT = stringPreferencesKey("last_ai_output")
-
-//     ---------------------------------------------------------
-//     SAVE TO DATASTORE
-//     ---------------------------------------------------------
-//    private suspend fun saveToCache(promptHash: String, aiOutput: String) {
-//        app.smrDataStore.edit { prefs ->
-//            prefs[KEY_LAST_PROMPT_HASH] = promptHash
-//            prefs[KEY_LAST_AI_OUTPUT] = aiOutput
-//        }
-//    }
-
-    // ---------------------------------------------------------
-    // LOAD FROM CACHE
-    // ---------------------------------------------------------
-//    private suspend fun loadCached(): Pair<String?, String?> {
-//        val prefs = app.smrDataStore.data.first()
-//        return Pair(
-//            prefs[KEY_LAST_PROMPT_HASH],
-//            prefs[KEY_LAST_AI_OUTPUT]
-//        )
-//    }
-
-    // =========================================================
-    // AI ANALYSIS WITH TIMEOUT + CACHE
-    // =========================================================
-//    fun analyzeSummary(prompt: String) {
-//        viewModelScope.launch {
-
-//            val promptHash = prompt.hashCode().toString()
-
-//             LOAD CACHE FIRST
-//            val (cachedHash, cachedOutput) = loadCached()
-
-//             ---------------------------------------------
-//             USE CACHE IF PROMPT DIDN’T CHANGE
-//             ---------------------------------------------
-//            if (cachedHash == promptHash && !cachedOutput.isNullOrEmpty()) {
-//                _aiAnalysis.value = cachedOutput
-//                return@launch
-//            }
-
-//             ---------------------------------------------
-//             OTHERWISE → NEW AI REQUEST WITH TIMEOUT
-//             ---------------------------------------------
-//            try {
-//                val request = ChatRequest(
-//                    model = "gpt-4.1-mini",
-//                    messages = listOf(
-//                        ApiMessage(
-//                            role = "system",
-//                            content = "You are an environmental compliance AI assistant..."
-//                        ),
-//                        ApiMessage(
-//                            role = "user",
-//                            content = prompt
-//                        )
-//                    )
-//                )
-//
-//                val response = withTimeout(10_000) {
-//                    OpenAiClient.instance.getChatCompletion(request)
-//                }
-//
-//                val output = response.choices.firstOrNull()?.message?.content
-//                    ?: "No analysis generated."
-//
-//                _aiAnalysis.value = output
-//                saveToCache(promptHash, output)
-
-//            } catch (e: TimeoutCancellationException) {
-//                if (!cachedOutput.isNullOrEmpty()) {
-//                    _aiAnalysis.value =
-//                        "⚠️ AI request timed out. Loaded cached analysis.\n\n$cachedOutput"
-//                } else {
-//                    _aiAnalysis.value =
-//                        "⚠️ AI request timed out and no cached analysis is available."
-//                }
-//
-//            } catch (e: Exception) {
-//                _aiAnalysis.value = "AI analysis failed: ${e.message}"
-//            }
-//        }
-//    }
-//
     // =========================================================
     // SMR MODULE UPDATES
     // =========================================================
@@ -268,8 +170,9 @@ class SmrViewModel(app: Application) : AndroidViewModel(app) {
         return (filled.toFloat() / fields.size * 100).toInt()
     }
 
-    private fun calculateListModulePercentage(list: List<*>): Int =
-        ((list.size.coerceAtMost(5) / 5f) * 100).toInt()
+    private fun calculateListModulePercentage(list: List<*>): Int {
+        return if (list.isEmpty()) 0 else 100
+    }
 
     private fun calculateAirPollutionProgress(airPollution: AirPollution): Int {
         val fields = listOf(

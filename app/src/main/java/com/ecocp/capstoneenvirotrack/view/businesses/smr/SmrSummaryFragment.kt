@@ -87,70 +87,11 @@ class SmrSummaryFragment : Fragment() {
         smrViewModel.smr.observe(viewLifecycleOwner) { smr ->
             // update UI from the latest smr
             displaySmrData(smr)
-
-            // rebuild summary and run AI analysis (optional: move analyzeSummary call to a button if you
-            // want to avoid running analysis on every small change)
-            val smrSummary = buildFullSmrSummary(smr)
-
-            val aiPrompt = """
-                ROLE:
-                You are an Environmental Compliance Analyst for the Environmental Management Bureau (EMB).
-                Your task is to evaluate Self-Monitoring Reports (SMR) for Modules 1–5.
-                Provide strictly evidence-based insights ONLY from the supplied SMR summary.
-                Do NOT fabricate missing information, values, or environmental limits.
-
-                INPUT:
-                Here is the complete SMR submitted by the facility:
-                --- BEGIN SMR DATA ---
-                $smrSummary
-                --- END SMR DATA ---
-
-                IMPORTANT RULES:
-                - Each module (1 to 5) MUST include an **Initial Findings** section.
-                - Each Initial Finding must be **1–2 sentences** summarizing ONLY the most important SMR data.
-                - Use ONLY the data available in the SMR summary.
-                - No assumptions or invented values.
-                - Output must remain consistent when the same data is provided (supports caching).
-
-                STEPS:
-                1. Read the entire SMR.
-                2. Extract only factual entries.
-                3. Identify important values per module and convert them into sentence-form initial findings.
-                4. Identify missing data, contradictions, unusual patterns, or suspicious values.
-                5. Only flag compliance concerns when the SMR itself provides supporting evidence.
-
-                EXPECTED OUTPUT FORMAT:
-
-                **MODULE 1 — Initial Findings**
-                - 1–2 sentences summarizing Module 1 data.
-
-                **MODULE 2 — Initial Findings**
-                - 1–2 sentences summarizing Module 2 data.
-
-                **MODULE 3 — Initial Findings**
-                - 1–2 sentences summarizing Module 3 data.
-
-                **MODULE 4 — Initial Findings**
-                - 1–2 sentences summarizing Module 4 data.
-
-                **MODULE 5 — Initial Findings**
-                - 1–2 sentences summarizing Module 5 data.
-
-                ---
-                **Overall Automated Analysis & Observations**
-                **Potential Compliance Concerns**
-                **Recommended Actions for EMB Review**
-                **Confidence Level**
-            """.trimIndent()
-
-//            smrViewModel.analyzeSummary(aiPrompt)
         }
 
         binding.btnSubmitSmr.setOnClickListener {
             submitSmrToFirebase()
         }
-
-        observeAiAnalysis()
     }
 
     private fun checkPermissionAndPickFile() {
@@ -177,7 +118,11 @@ class SmrSummaryFragment : Fragment() {
     }
 
     private fun uploadFile(uri: Uri){
-        val userId = FirebaseAuth.getInstance().currentUser?.uid?: return
+        val userId = FirebaseAuth.getInstance().currentUser?.uid?: run {
+            Snackbar.make(binding.root, "User unauthorized.", Snackbar.LENGTH_SHORT).show()
+            return
+        }
+
         val fileName = "smr_files/$userId/${System.currentTimeMillis()}_${uri.lastPathSegment}"
         val storageRef: StorageReference = storage.reference.child(fileName)
 
@@ -186,10 +131,16 @@ class SmrSummaryFragment : Fragment() {
                 storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
                     smrViewModel.addFileUrl(downloadUrl.toString())
                     Snackbar.make(binding.root, "File uploaded successfully!", Snackbar.LENGTH_SHORT).show()
+                    binding.progressBar.visibility = View.GONE
                 }
             }
             .addOnFailureListener { e ->
                 Snackbar.make(binding.root, "Upload failed: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                binding.progressBar.visibility = View.GONE
+            }
+            .addOnProgressListener{ taskSnapshot ->
+                val progress = (100.0 * taskSnapshot.bytesTransferred/taskSnapshot.totalByteCount).toInt()
+                binding.progressBar.progress = progress
             }
     }
 
@@ -227,32 +178,6 @@ class SmrSummaryFragment : Fragment() {
         android.util.Log.d("SMRDisplay", "Module 5: $module5Text")
     }
 
-    private fun buildFullSmrSummary(smr: Smr): String {
-        return """
-            SELF-MONITORING REPORT SUMMARY
-            --- MODULE 1: GENERAL INFORMATION ---
-            ${smr.generalInfo.generalInfoText()}
-
-            --- MODULE 2: HAZARDOUS WASTE ---
-            ${smr.hazardousWastes.hazardousWasteText()}
-
-            --- MODULE 3: WATER POLLUTION ---
-            ${smr.waterPollutionRecords.waterPollutionText()}
-
-            --- MODULE 4: AIR POLLUTION ---
-            ${smr.airPollution.airPollutionText()}
-
-            --- MODULE 5: OTHERS ---
-            ${smr.others.othersText()}
-        """.trimIndent()
-    }
-
-    private fun observeAiAnalysis() {
-        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
-            binding.module6Container.tvAiAnalysis.text =
-                analysis ?: "No AI analysis provided."
-        }
-    }
 
     /** --- SAVE TO FIREBASE --- **/
     private fun submitSmrToFirebase() {

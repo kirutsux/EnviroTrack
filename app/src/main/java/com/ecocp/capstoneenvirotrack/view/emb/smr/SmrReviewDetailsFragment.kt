@@ -63,7 +63,7 @@ class SmrReviewDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnAnalyze.isEnabled = false
-        binding.tvAiAnalysis.visibility = View.GONE
+        binding.finalResultsView.visibility = View.GONE
 
         if (submissionId != null) {
             fetchSmrDetails(submissionId!!)
@@ -207,6 +207,7 @@ class SmrReviewDetailsFragment : Fragment() {
         }
 
         binding.btnReject.setOnClickListener {
+            updateSmrStatus("Rejected", null)
             showRejectionDialog()
         }
     }
@@ -313,6 +314,24 @@ class SmrReviewDetailsFragment : Fragment() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                val (cachedHash, cachedAnalysis) = loadCached()
+                val expectedHash = "full_analysis_${smr.id}"
+
+                if(cachedHash==expectedHash && !cachedAnalysis.isNullOrEmpty()){
+                    withContext(Dispatchers.Main) {
+                        if(_binding!=null){
+                            binding.tvAiAnalysis.text = cachedAnalysis
+                            binding.recyclerModules.visibility = View.GONE
+                            binding.btnAnalyze.visibility = View.GONE
+                            binding.tvAiAnalysis.visibility = View.VISIBLE
+                            binding.btnApprove.visibility = View.GONE
+                            binding.btnReject.visibility = View.GONE
+                            Snackbar.make(binding.root, "AI analysis loaded from cache", Snackbar.LENGTH_SHORT).show()
+                        }
+                    }
+                    return@launch
+                }
+
                 for ((moduleName, moduleData) in modules) {
                     withContext(Dispatchers.Main) {
                         if (_binding != null) {
@@ -354,6 +373,10 @@ class SmrReviewDetailsFragment : Fragment() {
                     Compile the following module analyses into a comprehensive SMR compliance report:
                     $fullAnalysis
                     Provide an overall assessment with structured criticism. Provide an assessment on their issues, recommendations, and follow-up steps.
+                    Before the final analysis, give a short, enumerated analysis summary per module.
+                    i.e. Module 1: lorem ipsum dolor
+                         Module 2: lorem ipsum dolor
+                    For readability, use horizontal/vertical lines (___ ||||) to separate the summaries.
                 """.trimIndent()
 
                 val finalRequest = OpenAiRequest(
@@ -377,7 +400,6 @@ class SmrReviewDetailsFragment : Fragment() {
                         binding.tvAiAnalysis.text = compiledAnalysis
                         progressDialog.dismiss()
 
-                        binding.tvCompletionPercentage.visibility = View.GONE
                         binding.recyclerModules.visibility = View.GONE
                         binding.btnAnalyze.visibility = View.GONE
                         binding.tvAiAnalysis.visibility = View.VISIBLE
@@ -445,23 +467,6 @@ class SmrReviewDetailsFragment : Fragment() {
             prefs[KEY_LAST_PROMPT_HASH],
             prefs[KEY_LAST_AI_OUTPUT]
         )
-    }
-
-
-    private fun buildFullSummary(smr: Smr): String {
-        return """
-            SELF-MONITORING REPORT SUMMARY
-            --- MODULE 1: GENERAL INFORMATION ---
-            ${smr.generalInfo.generalInfoText()}
-            --- MODULE 2: HAZARDOUS WASTE ---
-            ${smr.hazardousWastes.hazardousWasteText()}
-            --- MODULE 3: WATER POLLUTION ---
-            ${smr.waterPollutionRecords.waterPollutionText()}
-            --- MODULE 4: AIR POLLUTION ---
-            ${smr.airPollution.airPollutionText()}
-            --- MODULE 5: OTHERS ---
-            ${smr.others.othersText()}
-        """.trimIndent()
     }
 
     override fun onDestroyView() {

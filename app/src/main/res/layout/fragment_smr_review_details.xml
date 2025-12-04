@@ -13,67 +13,68 @@
         android:layout_height="wrap_content"
         android:text="Back" />
 
-    <TextView
-        android:id="@+id/tvCompletionPercentage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Completion:"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerModules"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="20"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:layout_weight="1" />
 
     <Button
         android:id="@+id/btnAnalyze"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Analyze with AI"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:text="Analyze with AI" />
 
     <ScrollView
         android:id="@+id/finalResultsView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="16dp"
         android:layout_weight="1"
-        android:fillViewport="true"
-        android:layout_marginTop="16dp">
-        <TextView
-            android:id="@+id/tvAiAnalysis"
+        android:fillViewport="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="AI analysis will appear here." />
-        <LinearLayout
-            android:orientation="horizontal"
-            android:gravity="center"
             android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:gravity="top"
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnApprove"
-                android:text="Approve"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <TextView
+                android:id="@+id/tvAiAnalysis"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#00FF00" />
+                android:text="AI analysis will appear here." />
 
-            <View
-                android:layout_width="8dp"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:id="@+id/btnReject"
-                android:text="Reject"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#FF0000" />
+                android:layout_marginTop="5dp"
+                android:gravity="top"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnApprove"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="#00FF00"
+                    android:text="Approve" />
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/btnReject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="#FF0000"
+                    android:text="Reject" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
