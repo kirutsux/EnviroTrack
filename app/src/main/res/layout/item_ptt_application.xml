@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@color/white"
+    android:layout_marginBottom="6dp">
+
+    <!-- Generator / Company Name -->
+    <TextView
+        android:id="@+id/tvGeneratorName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Generator Name"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="@color/black" />
+
+    <!-- Amount -->
+    <TextView
+        android:id="@+id/tvAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Amount: 2500"
+        android:textSize="14sp"
+        android:textColor="@color/darker_gray"
+        android:layout_marginTop="2dp" />
+
+    <!-- Payment Status -->
+    <TextView
+        android:id="@+id/tvPaymentStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Payment: Paid"
+        android:textSize="14sp"
+        android:textColor="@color/darker_gray"
+        android:layout_marginTop="2dp" />
+
+    <!-- Status -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: Pending Review"
+        android:textSize="14sp"
+        android:textColor="@color/darker_gray"
+        android:layout_marginTop="2dp" />
+
+    <!-- Submitted At -->
+    <TextView
+        android:id="@+id/tvSubmittedAt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submitted: Dec 3, 2025 6:23 AM"
+        android:textSize="12sp"
+        android:textColor="@color/darker_gray"
+        android:layout_marginTop="2dp"/>
+</LinearLayout>
+

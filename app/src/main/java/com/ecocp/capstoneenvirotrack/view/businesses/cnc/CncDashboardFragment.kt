@@ -120,7 +120,6 @@ class CncDashboardFragment : Fragment() {
                     return@addSnapshotListener
                 }
 
-                // Use null-safe binding
                 _binding?.let { binding ->
 
                     cncList.clear()
@@ -129,23 +128,11 @@ class CncDashboardFragment : Fragment() {
                         try {
                             val data = doc.data ?: return@forEach
 
-                            val submittedTimestamp = when (val value = data["submittedTimestamp"]) {
-                                is Timestamp -> value
-                                is String -> {
-                                    try {
-                                        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                                        Timestamp(sdf.parse(value) ?: Date())
-                                    } catch (_: Exception) {
-                                        Timestamp.now()
-                                    }
-                                }
-                                else -> Timestamp.now()
-                            }
+                            val submittedTimestamp = data["submittedTimestamp"] as? Timestamp
+                            // Skip applications without submittedTimestamp
+                            if (submittedTimestamp == null) return@forEach
 
-                            val timestamp = when (val value = data["timestamp"]) {
-                                is Timestamp -> value
-                                else -> Timestamp.now()
-                            }
+                            val timestamp = data["timestamp"] as? Timestamp ?: Timestamp.now()
 
                             val cnc = CncApplication(
                                 applicationId = doc.id,
@@ -205,6 +192,7 @@ class CncDashboardFragment : Fragment() {
                 }
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

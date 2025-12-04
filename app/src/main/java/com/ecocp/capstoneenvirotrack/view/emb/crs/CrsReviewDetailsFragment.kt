@@ -10,10 +10,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCrsReviewDetailsBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -150,68 +155,66 @@ class CrsReviewDetailsFragment : Fragment() {
 
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
 
-        val updateData = mapOf(
+        // Always check fragment state
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
-            "reviewedBy" to embUid,
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        // ✅ Update CRS Application status
-        db.collection("crs_applications").document(id)
+        // CRS applications only
+        val collectionName = "crs_applications"
+
+        // Update Firestore first
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
                 if (isAdded) {
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
+                    Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
                 }
 
-                // ✅ Send Notifications to Company and EMB
-                db.collection("crs_applications").document(id).get()
+                // Fetch PCO uid from document
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
-                        val pcoUid = doc.getString("userId") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("companyName") ?: "Unknown Company"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
+                        val pcoId = doc.getString("userId") ?: return@addOnSuccessListener
 
-                        val notificationForPCO = hashMapOf(
-                            "receiverId" to pcoUid,
-                            "receiverType" to "company",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "Company Registration Approved" else "Company Registration Rejected",
-                            "message" to if (isApproved)
-                                "Your Company Registration has been approved."
-                            else
-                                "Your Company Registration has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // ⚠ Call backend endpoint for status update (not send-notification)
+                        val url = "http://10.0.2.2:5000/update-status"
+                        val json = JSONObject().apply {
+                            put("applicationId", id)
+                            put("newStatus", status)
+                            put("pcoId", pcoId)
+                            put("embId", embUid)
+                            put("module", "CRS")
+                            put("feedback", feedback)
+                        }
+
+                        Volley.newRequestQueue(safeContext).add(
+                            JsonObjectRequest(Request.Method.POST, url, json,
+                                { /* success */ },
+                                { error ->
+                                    Toast.makeText(safeContext, "Failed to notify: ${error.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
                         )
 
-                        val notificationForEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "Company Registration ${status.uppercase()}",
-                            "message" to "You have $status a company registration application for $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
-                        )
-
-                        db.collection("notifications").add(notificationForPCO)
-                        db.collection("notifications").add(notificationForEMB)
+                        // Navigate back safely
+                        if (isAdded) {
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
                     }
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("CRS_REVIEW", "❌ Failed to update CRS application status", e)
+            .addOnFailureListener {
+                if (isAdded) {
+                    Toast.makeText(safeContext, "Failed to update status: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
 

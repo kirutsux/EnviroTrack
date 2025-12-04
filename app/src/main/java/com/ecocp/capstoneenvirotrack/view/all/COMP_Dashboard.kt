@@ -29,6 +29,9 @@ import java.util.*
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavOptions
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.SendNotificationRequest
 import com.ecocp.capstoneenvirotrack.view.businesses.smr.SmrActivity
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -185,19 +188,24 @@ class COMP_Dashboard : Fragment() {
     // ---------------- NOTIFICATIONS -----------------
     private fun setupNotificationIcon() {
         notificationIcon.setOnClickListener {
-            val fragment = com.ecocp.capstoneenvirotrack.view.businesses.notifications.NotificationsFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .setCustomAnimations(
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right,
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left
-                )
-                .replace(R.id.nav_host_fragment, fragment)
-                .addToBackStack(null)
-                .commit()
+            // Use NavController to navigate to NotificationsFragment
+            val navController = findNavController() // if inside a fragment
+            // OR: requireActivity().findNavController(R.id.nav_host_fragment) if inside activity
+
+            // Optional: create a Bundle if you want to pass data
+            val bundle = Bundle() // add args if needed
+
+            // Navigate using global action or direct fragment ID
+            val options = NavOptions.Builder()
+                .setEnterAnim(R.anim.slide_in_left)
+                .setExitAnim(R.anim.slide_out_right)
+                .setPopEnterAnim(R.anim.slide_in_right)
+                .setPopExitAnim(R.anim.slide_out_left)
+                .build()
+            findNavController().navigate(R.id.action_COMP_Dashboard_to_notificationsFragment)
         }
     }
+
 
     // ---------------- CARD LISTENERS -----------------
     private fun setupCardListeners() {
@@ -299,7 +307,6 @@ class COMP_Dashboard : Fragment() {
         return (diffMillis / (1000.0 * 60 * 60 * 24)).toLong() + 1 // +1 to include today
     }
 
-
     private fun sendExpiryNotification(type: String, daysLeft: Long) {
         val userId = auth.currentUser?.uid ?: return
         val message = when(type) {
@@ -307,6 +314,7 @@ class COMP_Dashboard : Fragment() {
             "PCO Accreditation" -> "Your PCO accreditation will expire in $daysLeft day(s)."
             else -> "$type will expire in $daysLeft day(s)."
         }
+
         val notification = hashMapOf(
             "receiverId" to userId,
             "receiverType" to "pco",
@@ -316,11 +324,33 @@ class COMP_Dashboard : Fragment() {
             "timestamp" to Timestamp.now(),
             "isRead" to false
         )
+
+        // Save to Firestore
         db.collection("notifications").add(notification)
             .addOnSuccessListener { Log.d("COMP_Dashboard", "✅ Expiry notification sent: $type") }
             .addOnFailureListener { e -> Log.e("COMP_Dashboard", "❌ Failed sending expiry notification: ${e.message}") }
-    }
 
+        // Send push notification via backend
+        val api = RetrofitClient.instance
+        val request = SendNotificationRequest(
+            receiverId = userId,
+            title = "$type Expiry Alert",
+            message = message
+        )
+        api.sendNotification(request).enqueue(object : retrofit2.Callback<Void> {
+            override fun onResponse(call: retrofit2.Call<Void>, response: retrofit2.Response<Void>) {
+                if (response.isSuccessful) {
+                    Log.d("COMP_Dashboard", "✅ Push notification sent for $type expiry")
+                } else {
+                    Log.e("COMP_Dashboard", "❌ Push failed for $type expiry")
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<Void>, t: Throwable) {
+                Log.e("COMP_Dashboard", "❌ Push error for $type expiry", t)
+            }
+        })
+    }
 
     // Smooth pulsating red effect
     private fun flashDashboardRed() {

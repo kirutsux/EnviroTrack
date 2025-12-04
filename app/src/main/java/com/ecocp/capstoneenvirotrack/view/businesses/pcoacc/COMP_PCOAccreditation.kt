@@ -11,11 +11,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.ecocp.capstoneenvirotrack.view.all.COMP_PCO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -192,7 +197,7 @@ class COMP_PCOAccreditation : Fragment() {
         dateFormat.timeZone = TimeZone.getTimeZone("Asia/Manila")
         val formattedTimestamp = dateFormat.format(Date())
 
-        // ✅ Save "Pending" status
+        // ✅ Prepare "Pending" application data
         val data = hashMapOf(
             "accreditationId" to accreditationId,
             "fullName" to fullName.text.toString(),
@@ -216,29 +221,31 @@ class COMP_PCOAccreditation : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_LONG).show()
 
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "PCO Accreditation Submitted",
-                    message = "You have successfully submitted your PCO accreditation application.",
-                    type = "submission"
+                // -------------------------------
+                // 🔔 Notify PCO + ALL EMB via backend endpoint
+                // -------------------------------
+                val url = "http://10.0.2.2:5000/send-notification"
+                val json = JSONObject().apply {
+                    put("receiverId", uid)       // PCO
+                    put("module", "OPMS")
+                    put("documentId", accreditationId)
+                }
+
+                Volley.newRequestQueue(requireContext()).add(
+                    JsonObjectRequest(Request.Method.POST, url, json,
+                        { /* success */ },
+                        { error ->
+                            Toast.makeText(requireContext(),
+                                "Failed to send submission notifications: ${error.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
                 )
 
-                firestore.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New PCO Accreditation Application",
-                                message = "A new PCO Accreditation application has been submitted by ${fullName.text}.",
-                                type = "alert"
-                            )
-                        }
-                    }
-
+                // -------------------------------
+                // Navigate back to PCO dashboard
+                // -------------------------------
                 val compPCOFragment = COMP_PCO()
                 requireActivity().supportFragmentManager.beginTransaction()
                     .replace(R.id.nav_host_fragment, compPCOFragment)
@@ -251,24 +258,5 @@ class COMP_PCOAccreditation : Fragment() {
             }
     }
 
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to com.google.firebase.Timestamp.now()
-        )
 
-        firestore.collection("notifications")
-            .add(notificationData)
-    }
 }

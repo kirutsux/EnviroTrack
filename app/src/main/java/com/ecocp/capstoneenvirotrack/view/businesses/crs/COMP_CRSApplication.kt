@@ -18,13 +18,18 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
 import java.util.*
 
 class COMP_CRSApplication : Fragment() {
@@ -246,7 +251,12 @@ class COMP_CRSApplication : Fragment() {
     ) {
         val uid = auth.currentUser?.uid ?: return
 
+        // Generate a unique Firestore application ID
+        val docRef = db.collection("crs_applications").document()
+        val applicationId = docRef.id
+
         val applicationData = hashMapOf(
+            "applicationId" to applicationId,
             "userId" to uid,
             "companyName" to companyName,
             "companyType" to companyType,
@@ -273,70 +283,39 @@ class COMP_CRSApplication : Fragment() {
             "dateSubmitted" to Date()
         )
 
-        db.collection("crs_applications")
-            .document(uid)
-            .set(applicationData)
+        progressDialog.show()
+
+        docRef.set(applicationData)
             .addOnSuccessListener {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
                 clearFields()
                 findNavController().navigateUp()
 
-                // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "CRS Submission",
-                    message = "You have successfully submitted a Company Registration application.",
-                    type = "submission"
-                )
+                // -------------------------------
+                // 🔔 Notify PCO + ALL EMB via backend endpoint
+                // -------------------------------
+                val url = "http://10.0.2.2:5000/send-notification"
+                val json = JSONObject().apply {
+                    put("receiverId", uid)          // PCO
+                    put("module", "CRS")
+                    put("documentId", applicationId)
+                }
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New CRS Application",
-                                message = "A new Company Registration System application has been submitted by a PCO.",
-                                type = "alert"
-                            )
+                Volley.newRequestQueue(requireContext()).add(
+                    JsonObjectRequest(Request.Method.POST, url, json,
+                        { /* success */ },
+                        { error ->
+                            Toast.makeText(requireContext(),
+                                "Failed to send submission notifications: ${error.message}",
+                                Toast.LENGTH_SHORT).show()
                         }
-                    }
+                    )
+                )
             }
             .addOnFailureListener { e ->
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Error submitting: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-    }
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

@@ -8,6 +8,8 @@ data class Smr(
     val others: Others = Others(),
     val submittedAt: Long? = null,
     val uid: String? = null, // just store the Firebase UID
-    var id: String = ""
+    var id: String? = null,
+    val status: String = "Pending",
+    val fileUrls: List<String> = emptyList()
 )
 

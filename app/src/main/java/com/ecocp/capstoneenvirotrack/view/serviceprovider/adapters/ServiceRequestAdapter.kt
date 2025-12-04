@@ -1,6 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider.adapters
 
 import android.content.res.ColorStateList
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -31,10 +32,14 @@ class ServiceRequestAdapter(
 
     // ⭐ Called by Sorting / Filtering
     fun updateList(newList: List<ServiceRequest>) {
+        Log.d("TSD_DEBUG", "Adapter.updateList called -> newList.size=${newList.size}. Sample statuses: ${
+            newList.take(5).map { it.bookingStatus }.joinToString()
+        }")
         requests.clear()
         requests.addAll(newList)
         notifyDataSetChanged()
     }
+
 
     // NEW: allow fragment to change role at runtime (call after role detection)
     fun setRole(role: String) {

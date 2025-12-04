@@ -242,24 +242,7 @@
                         android:textColor="#212121"
                         android:layout_marginTop="6dp"/>
 
-                    <!-- Destination -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Destination"
-                        android:textColor="#757575"
-                        android:textSize="12sp"
-                        android:layout_marginTop="12dp"/>
 
-                    <TextView
-                        android:id="@+id/txtDestination"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_field"
-                        android:padding="10dp"
-                        android:text="TSD Facility - Demo"
-                        android:textColor="#212121"
-                        android:layout_marginTop="6dp"/>
 
                     <!-- Amount -->
                     <TextView

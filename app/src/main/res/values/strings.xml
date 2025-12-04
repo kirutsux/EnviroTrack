@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">EnviroTrack</string>
     <string name="self_monitoring_report_smr_management">Self-Monitoring Report (SMR) Management</string>
     <string name="certificate_of_non_coverage_cnc_management">Certificate of Non-Coverage (CNC) Management</string>
     <string name="recent">Recent</string>
@@ -25,7 +24,7 @@
     <string name="previous">Previous</string>
 
     <string name="lorem_ipsum">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem...
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem…
     </string>
     <!-- PCO STATUS -->
     <string-array name="status_options">
@@ -173,6 +172,7 @@
     <string name="feedback_prompt">Care to share more about your experience?</string>
     <string name="publish_button">Publish</string>
 
-    <string name="feedback_hint">Share your thoughts...</string>
+    <string name="feedback_hint">Share your thoughts…</string>
     <string name="feedback_char_count">%1$d/500</string>
+    <string name="ai_analysis_recommendations"><![CDATA[AI Analysis & Recommendations]]></string>
 </resources>

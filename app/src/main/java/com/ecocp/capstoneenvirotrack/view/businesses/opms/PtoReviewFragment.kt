@@ -7,12 +7,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoReviewBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,12 +42,23 @@ class PtoReviewFragment : Fragment() {
         fetchPtoDetails()
 
         binding.btnEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.ptoFormFragment, false)
+            if (currentDocId != null) {
+                val bundle = Bundle().apply {
+                    putString("applicationId", currentDocId) // Pass the document ID only
+                }
+                findNavController().navigate(
+                    R.id.action_ptoReviewFragment_to_ptoEditInfoFragment,
+                    bundle
+                )
+            } else {
+                Toast.makeText(requireContext(), "No application found to edit.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.btnSubmitApplication.setOnClickListener {
             submitApplication()
         }
+
     }
 
     private fun fetchPtoDetails() {
@@ -84,7 +100,7 @@ class PtoReviewFragment : Fragment() {
                 // --- Equipment Info ---
                 val equipmentName = doc.getString("equipmentName") ?: "-"
                 val fuelType = doc.getString("fuelType") ?: "-"
-                val emissions = doc.getString("emissions") ?: "-"
+                val emissions = doc.getString("emissionsSummary") ?: "-"
 
                 // --- Payment Info ---
                 val amount = doc.getDouble("amount") ?: 0.0
@@ -118,7 +134,12 @@ class PtoReviewFragment : Fragment() {
     }
 
     private fun submitApplication() {
-        if (uid == null || currentDocId == null) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val docId = currentDocId ?: run {
             Toast.makeText(requireContext(), "No application found to submit.", Toast.LENGTH_SHORT).show()
             return
         }
@@ -128,37 +149,44 @@ class PtoReviewFragment : Fragment() {
             "submittedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_pto_applications").document(currentDocId!!)
+        db.collection("opms_pto_applications")
+            .document(docId)
             .update(updateData)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "PTO Submission",
-                    message = "You have successfully submitted a Permit to Operate application.",
-                    type = "submission"
+                // -------------------------------
+                // 🔔 Notify PCO + ALL EMB via backend endpoint
+                // -------------------------------
+                val url = "http://10.0.2.2:5000/send-notification"
+                val json = JSONObject().apply {
+                    put("receiverId", uid)       // PCO
+                    put("module", "OPMS")
+                    put("documentId", docId)
+                }
+
+                Volley.newRequestQueue(requireContext()).add(
+                    JsonObjectRequest(Request.Method.POST, url, json,
+                        { /* success */ },
+                        { error ->
+                            Toast.makeText(requireContext(),
+                                "Failed to send submission notifications: ${error.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New PTO Application",
-                                message = "A new Permit to Operate has been submitted by a PCO.",
-                                type = "alert"
-                            )
-                        }
-                    }
-
-                findNavController().navigate(R.id.opmsDashboardFragment)
+                // -------------------------------
+                // Navigate back to dashboard
+                // -------------------------------
+                findNavController().navigate(
+                    R.id.opmsDashboardFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.opmsDashboardFragment, true)
+                        .build()
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
@@ -166,32 +194,6 @@ class PtoReviewFragment : Fragment() {
     }
 
 
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
 
 
     override fun onDestroyView() {

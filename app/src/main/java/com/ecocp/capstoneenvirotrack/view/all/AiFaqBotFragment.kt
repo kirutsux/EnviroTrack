@@ -17,6 +17,7 @@ import org.json.JSONObject
 import java.io.IOException
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 class AiFaqBotFragment : Fragment() {
 
@@ -129,12 +130,12 @@ class AiFaqBotFragment : Fragment() {
                 json.put("module", module)
 
                 val body = RequestBody.create(
-                    MediaType.parse("application/json; charset=utf-8"),
+                    "application/json; charset=utf-8".toMediaTypeOrNull(),
                     json.toString()
                 )
 
                 val request = Request.Builder()
-                    .url("http://10.0.2.2:5000/ask")
+                    .url("http://10.0.2.2:3000/ask")
                     .post(body)
                     .build()
 
@@ -149,7 +150,7 @@ class AiFaqBotFragment : Fragment() {
                     }
 
                     override fun onResponse(call: Call, response: Response) {
-                        val respText = response.body()?.string()
+                        val respText = response.body?.string()
                         val answer = try {
                             JSONObject(respText).getString("answer")
                         } catch (e: Exception) {

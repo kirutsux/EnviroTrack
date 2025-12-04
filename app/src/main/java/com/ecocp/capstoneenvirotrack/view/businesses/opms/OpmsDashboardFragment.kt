@@ -39,6 +39,10 @@ class OpmsDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener {
+            findNavController().navigate(R.id.action_opmsdb_to_pcodashboard)
+        }
+
         // Navigation buttons
         binding.btnApplyDischargePermit.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_dischargePermitForm)
@@ -120,6 +124,7 @@ class OpmsDashboardFragment : Fragment() {
 
     /**
      * Loads both Discharge Permit and PTO applications for the logged-in user.
+     * Only applications with a submittedTimestamp are included.
      */
     private fun listenToApplications() {
         val uid = auth.currentUser?.uid ?: return
@@ -131,8 +136,12 @@ class OpmsDashboardFragment : Fragment() {
             .addSnapshotListener { snapshot, error ->
                 if (error != null) return@addSnapshotListener
                 snapshot?.documents?.forEach { doc ->
-                    val app = mapToApplication(doc.id, doc.data, "Discharge Permit")
-                    addOrUpdateApplication(app)
+                    val data = doc.data ?: return@forEach
+                    val submittedTs = data["submittedTimestamp"] as? Timestamp
+                    if (submittedTs != null) { // Only include submitted applications
+                        val app = mapToApplication(doc.id, data, "Discharge Permit")
+                        addOrUpdateApplication(app)
+                    }
                 }
                 adapter.notifyDataSetChanged()
             }
@@ -143,12 +152,17 @@ class OpmsDashboardFragment : Fragment() {
             .addSnapshotListener { snapshot, error ->
                 if (error != null) return@addSnapshotListener
                 snapshot?.documents?.forEach { doc ->
-                    val app = mapToApplication(doc.id, doc.data, "Permit to Operate")
-                    addOrUpdateApplication(app)
+                    val data = doc.data ?: return@forEach
+                    val submittedTs = data["submittedTimestamp"] as? Timestamp
+                    if (submittedTs != null) { // Only include submitted applications
+                        val app = mapToApplication(doc.id, data, "Permit to Operate")
+                        addOrUpdateApplication(app)
+                    }
                 }
                 adapter.notifyDataSetChanged()
             }
     }
+
 
     /**
      * Maps Firestore data to SubmittedApplication model
