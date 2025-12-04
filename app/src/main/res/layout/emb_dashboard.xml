@@ -7,8 +7,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    tools:context=".view.all.COMP_Dashboard">
+    android:fitsSystemWindows="true"
+    tools:context=".view.emb.all.EMB_Dashboard">
 
+    <!-- MAIN CONTENT + BOTTOM NAVIGATION -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
     <!-- Main Content -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -384,5 +390,5 @@
         android:background="@color/white"
         app:itemIconTint="@color/nav_item_tint"
         app:itemTextColor="@color/nav_item_text" />
-
+    </LinearLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
