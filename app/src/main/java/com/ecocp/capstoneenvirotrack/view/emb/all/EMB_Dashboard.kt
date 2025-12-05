@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
@@ -31,6 +32,7 @@ class EMB_Dashboard : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+
 
     private lateinit var cncCard: CardView
     private lateinit var smrCard: CardView
@@ -70,6 +72,7 @@ class EMB_Dashboard : Fragment() {
         notificationIcon = view.findViewById(R.id.emb_notification_icon)
 
         fetchGreetingMessage()
+        setupDrawer()
         setupNotificationIcon()
 
         val navController = findNavController()
@@ -121,6 +124,12 @@ class EMB_Dashboard : Fragment() {
             in 0..11 -> "Good Morning"
             in 12..17 -> "Good Afternoon"
             else -> "Good Evening"
+        }
+    }
+
+    private fun setupDrawer() {
+        drawerMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
         }
     }
 

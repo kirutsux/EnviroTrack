@@ -96,5 +96,18 @@
             android:backgroundTint="@color/teal_700"
             android:textColor="@color/white"
             android:enabled="false"/>
+        <!-- Send PTT Certificate Button -->
+        <Button
+            android:id="@+id/btnViewPTTCert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send PTT Certificate"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/purple_500"
+            android:textColor="@color/white"
+            android:enabled="false"/>
+
     </LinearLayout>
 </ScrollView>

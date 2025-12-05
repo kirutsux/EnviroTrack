@@ -40,6 +40,7 @@ class TsdFacilitySelectionFragment : Fragment() {
     private lateinit var binding: FragmentTsdFacilitySelectionBinding
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     private val tsdList = mutableListOf<TSDFacility>()
     private lateinit var adapter: TSDFacilityAdapter
     private var selectedFacility: TSDFacility? = null
@@ -52,15 +53,18 @@ class TsdFacilitySelectionFragment : Fragment() {
     private lateinit var paymentSheet: PaymentSheet
     private var clientSecret: String? = null
     private var paymentAmount: Double = 0.0
-    private lateinit var bookingData: HashMap<String, Any>
+    private lateinit var bookingData: HashMap<String, Any?>
 
-    // ✅ Selected waste generator IDs for linking (same as transport booking)
+    // Selected waste generator IDs for linking
     private var selectedWasteGenIds = mutableListOf<String>()
 
     // Optional transporter data from transport booking
     private var transportBookingIdArg: String? = null
     private var transporterNameArg: String? = null
     private var transporterCompanyArg: String? = null
+
+    // Store the user's full name for bookedBy field
+    private var currentUserFullName: String = "PCO User"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -89,6 +93,9 @@ class TsdFacilitySelectionFragment : Fragment() {
         )
         paymentSheet = PaymentSheet(this, ::onPaymentResult)
 
+        // Fetch user's name early
+        fetchCurrentUserFullName()
+
         setupRecyclerView()
         setupListeners()
         fetchTSDFacilities()
@@ -96,8 +103,27 @@ class TsdFacilitySelectionFragment : Fragment() {
         return binding.root
     }
 
+    // Fetch current user's full name from users collection
+    private fun fetchCurrentUserFullName() {
+        val user = auth.currentUser ?: return
+        db.collection("users").document(user.uid).get()
+            .addOnSuccessListener { document ->
+                val firstName = document.getString("firstName")?.trim() ?: ""
+                val lastName = document.getString("lastName")?.trim() ?: ""
+                currentUserFullName = when {
+                    firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
+                    firstName.isNotEmpty() -> firstName
+                    lastName.isNotEmpty() -> lastName
+                    else -> "PCO User"
+                }
+            }
+            .addOnFailureListener {
+                currentUserFullName = "PCO User"
+            }
+    }
+
     /**
-     * ✅ Update transporter display with info from transport booking
+     * Update transporter display with info from transport booking
      */
     private fun updateTransporterDisplay() {
         if (transportBookingIdArg != null) {
@@ -140,16 +166,16 @@ class TsdFacilitySelectionFragment : Fragment() {
         binding.btnUploadCertificate.setOnClickListener { pickFile(REQUEST_CERTIFICATE) }
         binding.btnUploadPreviousRecord.setOnClickListener { pickFile(REQUEST_PREV_RECORD) }
         binding.btnSubmitBooking.setOnClickListener {
-            // ✅ Show waste generator selection first
+            // Show waste generator selection first
             showWasteGenSelectionDialog()
         }
     }
 
     /**
-     * ✅ NEW: Show waste generator selection dialog (same as transport booking)
+     * Show waste generator selection dialog (same as transport booking)
      */
     private fun showWasteGenSelectionDialog() {
-        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val currentUser = auth.currentUser ?: return
 
         progressDialog.setMessage("Loading your waste applications...")
         progressDialog.show()
@@ -278,7 +304,7 @@ class TsdFacilitySelectionFragment : Fragment() {
     }
 
     private fun validateAndProceed() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+        val userId = auth.currentUser?.uid ?: run {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
             return
         }
@@ -309,9 +335,12 @@ class TsdFacilitySelectionFragment : Fragment() {
             return
         }
 
-        // ✅ Prepare bookingData with consistent fields
+        // Prepare bookingData with consistent fields (FIXED TYPE)
         bookingData = hashMapOf(
             "generatorId" to userId,
+            "generatorEmail" to (auth.currentUser?.email ?: ""),
+            "bookedBy" to currentUserFullName,
+            "bookedByUid" to auth.currentUser?.uid,
             "tsdId" to facility.id,
             "tsdName" to facility.companyName,
             "contactNumber" to facility.contactNumber,
@@ -327,7 +356,7 @@ class TsdFacilitySelectionFragment : Fragment() {
             "timestamp" to FieldValue.serverTimestamp()
         )
 
-        // ✅ Attach transporter information if present
+        // Attach transporter information if present
         transportBookingIdArg?.let { bookingData["transportBookingId"] = it }
         transporterNameArg?.let { bookingData["transporterName"] = it }
         transporterCompanyArg?.let { bookingData["transporterCompany"] = it }
@@ -414,7 +443,7 @@ class TsdFacilitySelectionFragment : Fragment() {
             newDocRef.set(bookingData)
                 .addOnSuccessListener {
                     Toast.makeText(requireContext(), "TSD Booking successful!", Toast.LENGTH_SHORT).show()
-                    // ✅ Link to waste generators, then go back to dashboard
+                    // Link to waste generators, then go back to dashboard
                     linkBookingToWasteGenerators(bookingId)
                 }
                 .addOnFailureListener { e ->
@@ -424,7 +453,7 @@ class TsdFacilitySelectionFragment : Fragment() {
     }
 
     /**
-     * ✅ Link TSD booking to selected waste generator(s) - same pattern as transport
+     * Link TSD booking to selected waste generator(s) - same pattern as transport
      */
     private fun linkBookingToWasteGenerators(tsdBookingId: String) {
         if (selectedWasteGenIds.isEmpty()) {
@@ -471,7 +500,7 @@ class TsdFacilitySelectionFragment : Fragment() {
     }
 
     /**
-     * ✅ Navigate back to HWMS Dashboard
+     * Navigate back to HWMS Dashboard
      */
     private fun navigateToDashboard() {
         try {
@@ -487,10 +516,10 @@ class TsdFacilitySelectionFragment : Fragment() {
         bookingId: String,
         certificate: Uri?,
         previousRecord: Uri?,
-        callback: (Boolean, Map<String, Any>) -> Unit
+        callback: (Boolean, Map<String, Any?>) -> Unit
     ) {
         val storageRef = storage.reference
-        val uploadedUrls = mutableMapOf<String, Any>()
+        val uploadedUrls = mutableMapOf<String, Any?>()
         val uploadTasks = mutableListOf<com.google.android.gms.tasks.Task<*>>()
 
         fun extFromUri(uri: Uri): String {

@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.navigation.fragment.findNavController
-import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.BottomsheetTransportDetailsBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class TransportDetailsBottomSheet(
-    private val transportBookingId: String // pass the Firestore document ID
+    private val transportBookingId: String
 ) : BottomSheetDialogFragment() {
 
     private var _binding: BottomsheetTransportDetailsBinding? = null
@@ -25,52 +26,109 @@ class TransportDetailsBottomSheet(
     ): View {
         _binding = BottomsheetTransportDetailsBinding.inflate(inflater, container, false)
 
-        // Initially disable button
-        binding.btnProceedStep3.isEnabled = false
-        binding.btnProceedStep3.alpha = 0.5f
+        disableButton(binding.btnProceedStep3)
+        disableButton(binding.btnViewPTTCert)
 
-        // Fetch booking data from Firestore
+        loadTransportBooking()
+        checkForPTTCertificate()
+
+        // Proceed to Step 3
+        binding.btnProceedStep3.setOnClickListener {
+            findNavController().navigate(
+                TransportDetailsBottomSheetDirections
+                    .actionTransportDetailsBottomSheetToTsdFacilitySelectionFragment(transportBookingId)
+            )
+        }
+
+        // SEND PTT CERTIFICATE ONLY (NO NAVIGATION)
+        binding.btnViewPTTCert.setOnClickListener {
+            sendPTTCertificateToTransporter()
+        }
+
+        return binding.root
+    }
+
+    private fun loadTransportBooking() {
         db.collection("transport_bookings").document(transportBookingId)
             .get()
             .addOnSuccessListener { doc ->
                 if (doc != null && doc.exists()) {
-                    val wasteType = doc.getString("wasteType") ?: "Transport Booking"
-                    val quantity = doc.getString("quantity") ?: ""
-                    val transporter = doc.getString("serviceProviderName") ?: ""
-                    val origin = doc.getString("origin") ?: "N/A"
-                    val bookingDate = doc.getTimestamp("bookingDate")?.toDate()?.toString() ?: "N/A"
-                    val instructions = doc.getString("specialInstructions") ?: ""
-                    val bookingStatus = doc.getString("bookingStatus") ?: "Pending"
 
-                    // Populate fields
-                    binding.tvTitle.text = wasteType
-                    binding.tvQuantity.text = "Quantity: $quantity"
-                    binding.tvTransporter.text = "Transporter: $transporter"
-                    binding.tvOrigin.text = "Pickup Address: $origin"
-                    binding.tvBookingDate.text = "Booking Date: $bookingDate"
-                    binding.tvSpecialInstructions.text = "Instructions: $instructions"
+                    binding.tvTitle.text = doc.getString("wasteType") ?: "Transport Booking"
+                    binding.tvQuantity.text = "Quantity: ${doc.getString("quantity") ?: ""}"
+                    binding.tvTransporter.text = "Transporter: ${doc.getString("serviceProviderName") ?: ""}"
+                    binding.tvOrigin.text = "Pickup Address: ${doc.getString("origin") ?: "N/A"}"
+                    binding.tvBookingDate.text = "Booking Date: ${doc.getTimestamp("bookingDate")?.toDate() ?: "N/A"}"
+                    binding.tvSpecialInstructions.text = "Instructions: ${doc.getString("specialInstructions") ?: ""}"
+
+                    val bookingStatus = doc.getString("bookingStatus") ?: "Pending"
                     binding.tvStatus.text = "Booking Status: $bookingStatus"
 
-                    // Enable Proceed button only if bookingStatus is "Confirmed"
-                    if (bookingStatus == "Confirmed") {
-                        binding.btnProceedStep3.isEnabled = true
-                        binding.btnProceedStep3.alpha = 1.0f
+                    if (bookingStatus == "Confirmed") enableButton(binding.btnProceedStep3)
+                }
+            }
+    }
+
+    private fun checkForPTTCertificate() {
+        db.collection("ptt_applications")
+            .whereEqualTo("transportBookingId", transportBookingId)
+            .get()
+            .addOnSuccessListener { snap ->
+                if (!snap.isEmpty) {
+                    val doc = snap.documents.first()
+                    val cert = doc.getString("pttCertificate")
+
+                    if (!cert.isNullOrEmpty()) {
+                        enableButton(binding.btnViewPTTCert)
                     }
                 }
             }
-            .addOnFailureListener {
-                binding.tvStatus.text = "Failed to load booking"
+    }
+
+    // ----------------------------------------------------
+    // SAVE PTT CERTIFICATE FROM ptt_applications TO BOOKING
+    // ----------------------------------------------------
+    private fun sendPTTCertificateToTransporter() {
+
+        db.collection("ptt_applications")
+            .whereEqualTo("transportBookingId", transportBookingId)
+            .get()
+            .addOnSuccessListener { snap ->
+                if (snap.isEmpty) {
+                    Toast.makeText(requireContext(), "No PTT Certificate found.", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
+                }
+
+                val pttDoc = snap.documents.first()
+                val pttCertValue = pttDoc.getString("pttCertificate") ?: ""
+
+                if (pttCertValue.isEmpty()) {
+                    Toast.makeText(requireContext(), "PTT Certificate is empty.", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
+                }
+
+                // Save certificate to transport_bookings
+                db.collection("transport_bookings")
+                    .document(transportBookingId)
+                    .set(mapOf("pttCertificate" to pttCertValue), SetOptions.merge())
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "PTT Certificate successfully sent to transporter.", Toast.LENGTH_SHORT).show()
+                        enableButton(binding.btnViewPTTCert)
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Failed to send PTT certificate.", Toast.LENGTH_SHORT).show()
+                    }
             }
+    }
 
+    private fun enableButton(button: View) {
+        button.isEnabled = true
+        button.alpha = 1f
+    }
 
-
-        // Button click
-        binding.btnProceedStep3.setOnClickListener {
-            // Navigate to Step 3 fragment (replace R.id.hwmsStep3Fragment with your actual ID)
-            findNavController().navigate(R.id.tsdFacilitySelectionFragment)
-        }
-
-        return binding.root
+    private fun disableButton(button: View) {
+        button.isEnabled = false
+        button.alpha = 0.5f
     }
 
     override fun onDestroyView() {

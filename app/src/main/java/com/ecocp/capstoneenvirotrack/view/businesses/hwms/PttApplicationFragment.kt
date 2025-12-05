@@ -220,7 +220,7 @@ class PttApplicationFragment : Fragment() {
             "tsdBookingId" to selectedTsdBookingId!!,
             "userId" to auth.currentUser!!.uid,
             "remarks" to binding.etRemarks.text.toString().ifEmpty { "None" },
-            "status" to "Pending Review",
+            "status" to "Pending",
             "paymentStatus" to "Pending",
             "amount" to PTT_FEE,
             "submittedAt" to FieldValue.serverTimestamp()

@@ -39,6 +39,7 @@ class TransporterStep2Fragment : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     private val providers = mutableListOf<ServiceProvider>()
     private lateinit var adapter: ServiceProviderAdapter
     private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
@@ -66,8 +67,11 @@ class TransporterStep2Fragment : Fragment() {
     private var currentDialogView: View? = null
     private var bookingDialog: androidx.appcompat.app.AlertDialog? = null
 
-    // ✅ Selected waste generator IDs for linking
+    // Selected waste generator IDs for linking
     private var selectedWasteGenIds = mutableListOf<String>()
+
+    // NEW: Store the user's full name for bookedBy field
+    private var currentUserFullName: String = "PCO User"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,7 +81,6 @@ class TransporterStep2Fragment : Fragment() {
         recycler = v.findViewById(R.id.recyclerViewTransporters)
         recycler.layoutManager = LinearLayoutManager(requireContext())
 
-        // ✅ Changed to show selection dialog first
         adapter = ServiceProviderAdapter(providers) { provider ->
             showWasteGenSelectionDialog(provider)
         }
@@ -95,8 +98,30 @@ class TransporterStep2Fragment : Fragment() {
         )
         paymentSheet = PaymentSheet(this, ::onPaymentResult)
 
+        // NEW: Fetch user's name early
+        fetchCurrentUserFullName()
+
         fetchTransporters()
         return v
+    }
+
+    // NEW: Fetch current user's full name from users collection
+    private fun fetchCurrentUserFullName() {
+        val user = auth.currentUser ?: return
+        db.collection("users").document(user.uid).get()
+            .addOnSuccessListener { document ->
+                val firstName = document.getString("firstName")?.trim() ?: ""
+                val lastName = document.getString("lastName")?.trim() ?: ""
+                currentUserFullName = when {
+                    firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
+                    firstName.isNotEmpty() -> firstName
+                    lastName.isNotEmpty() -> lastName
+                    else -> "PCO User"
+                }
+            }
+            .addOnFailureListener {
+                currentUserFullName = "PCO User"
+            }
     }
 
     private fun fetchTransporters() {
@@ -118,11 +143,11 @@ class TransporterStep2Fragment : Fragment() {
     }
 
     /**
-     * ✅ NEW: Show dialog to let user select which waste generator(s) to book transport for.
+     * Show dialog to let user select which waste generator(s) to book transport for.
      * Call this BEFORE showing the booking dialog.
      */
     private fun showWasteGenSelectionDialog(provider: ServiceProvider) {
-        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val currentUser = auth.currentUser ?: return
 
         progressDialog.setMessage("Loading your waste applications...")
         progressDialog.show()
@@ -303,15 +328,18 @@ class TransporterStep2Fragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val currentUser = FirebaseAuth.getInstance().currentUser ?: run {
+            val currentUser = auth.currentUser ?: run {
                 Toast.makeText(requireContext(), "User not logged in.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             selectedProvider = provider
 
-            // create bookingData skeleton
+            // create bookingData skeleton (UPDATED WITH bookedBy)
             bookingData = hashMapOf(
                 "pcoId" to currentUser.uid,
+                "pcoEmail" to (currentUser.email ?: ""),
+                "bookedBy" to currentUserFullName,                    // NEW: Full name here
+                "bookedByUid" to currentUser.uid,                     // NEW: UID for filtering
                 "serviceProviderName" to provider.name,
                 "serviceProviderCompany" to provider.companyName,
                 "providerType" to provider.role,
@@ -325,6 +353,7 @@ class TransporterStep2Fragment : Fragment() {
                 "dateBooked" to FieldValue.serverTimestamp(),
                 "bookingStatus" to "pending",
                 "amount" to paymentAmount,
+                "paymentStatus" to "pending",
                 "status" to "pending"
             )
 
@@ -466,8 +495,8 @@ class TransporterStep2Fragment : Fragment() {
         val tvPermitStatus = root.findViewById<TextView?>(R.id.tvPermitStatus)
         val btnConfirm = root.findViewById<Button?>(R.id.btnConfirmBooking)
 
-        tvPlanStatus?.text = if (transportPlanUri != null) "✅ Selected" else "Not uploaded"
-        tvPermitStatus?.text = if (storagePermitUri != null) "✅ Selected" else "Not uploaded"
+        tvPlanStatus?.text = if (transportPlanUri != null) "Selected" else "Not uploaded"
+        tvPermitStatus?.text = if (storagePermitUri != null) "Selected" else "Not uploaded"
         btnConfirm?.isEnabled = (transportPlanUri != null && storagePermitUri != null)
     }
 
@@ -561,7 +590,7 @@ class TransporterStep2Fragment : Fragment() {
     }
 
     /**
-     * ✅ UPDATED: Link bookingId to selected waste generator(s) only.
+     * Link bookingId to selected waste generator(s) only.
      * Uses selectedWasteGenIds populated by the selection dialog.
      */
     private fun linkBookingToHazardousWasteGenerator(bookingId: String) {
