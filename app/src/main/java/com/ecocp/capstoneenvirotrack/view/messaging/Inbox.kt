@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.InboxAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentInboxBinding
+import com.ecocp.capstoneenvirotrack.model.Message
 import com.ecocp.capstoneenvirotrack.model.Provider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -28,7 +29,8 @@ class Inbox : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requireActivity().onBackPressedDispatcher.addCallback(this,
+        requireActivity().onBackPressedDispatcher.addCallback(
+            this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     findNavController().navigateUp()
@@ -102,26 +104,24 @@ class Inbox : Fragment() {
     }
 
     private fun fetchLastMessage(currentUserId: String, provider: Provider) {
-        // Check for both directions: currentUserId/providerId and providerId/currentUserId
-        val path1 = realtimeDb.child(currentUserId).child(provider.id)
-        val path2 = realtimeDb.child(provider.id).child(currentUserId)
+        val chatId = "${minOf(currentUserId, provider.id)}_${maxOf(currentUserId, provider.id)}"
+        val messagesRef = realtimeDb.child(currentUserId).child(chatId).child("messages")
 
-        path1.child("lastMessage").get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) {
-                    updateProviderLastMessage(provider.id, snapshot.value.toString())
-                } else {
-                    // Try the reversed path
-                    path2.child("lastMessage").get()
-                        .addOnSuccessListener { reversedSnap ->
-                            if (reversedSnap.exists()) {
-                                updateProviderLastMessage(provider.id, reversedSnap.value.toString())
-                            } else {
-                                updateProviderLastMessage(provider.id, "No messages yet")
-                            }
-                        }
+        messagesRef.get().addOnSuccessListener { snapshot ->
+            var latestMessage = "No messages yet"
+            var latestTimeStamp = ""
+
+            for (msgSnapshot in snapshot.children) {
+                val message = msgSnapshot.getValue(Message::class.java)
+                if (message != null && message.timestamp > latestTimeStamp) {
+                    latestTimeStamp = message.timestamp
+                    latestMessage = message.message
                 }
             }
+            updateProviderLastMessage(provider.id, latestMessage)
+        }.addOnFailureListener {
+            updateProviderLastMessage(provider.id, "No messages yet")
+        }
     }
 
     private fun updateProviderLastMessage(providerId: String, message: String) {
