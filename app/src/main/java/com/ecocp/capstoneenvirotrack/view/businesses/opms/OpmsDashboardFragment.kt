@@ -40,7 +40,7 @@ class OpmsDashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnBack.setOnClickListener {
-            findNavController().navigate(R.id.COMP_Dashboard)
+            findNavController().navigate(R.id.action_opmsdb_to_pcodashboard)
         }
 
         // Navigation buttons

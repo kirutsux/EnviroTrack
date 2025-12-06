@@ -13,7 +13,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Title -->
         <TextView
             android:id="@+id/tvCompanyName"
             android:layout_width="wrap_content"
@@ -23,7 +22,6 @@
             android:textSize="18sp"
             android:textColor="#1E1E1E" />
 
-        <!-- EMB Reg No -->
         <TextView
             android:id="@+id/tvEmbNo"
             android:layout_width="wrap_content"
@@ -32,25 +30,24 @@
             android:layout_marginTop="4dp"
             android:textColor="#555555" />
 
-        <!-- List of Wastes -->
         <LinearLayout
             android:id="@+id/containerWasteList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="10dp" />
+            android:padding="8dp"
+            android:background="@drawable/bg_card_bottomsheet"
+            android:layout_marginTop="8dp" />
 
-        <!-- Status -->
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Status: Draft"
             android:textStyle="bold"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:textColor="#0066CC" />
 
-        <!-- Timestamp -->
         <TextView
             android:id="@+id/tvDate"
             android:layout_width="wrap_content"

@@ -25,6 +25,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 class LoginFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
@@ -80,6 +81,7 @@ class LoginFragment : Fragment() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Log.d("LoginFragment", "Login successful for email: $email")
+                        saveFcmTokenForCurrentUser()
                         checkUserType(email)
                     } else {
                         Toast.makeText(requireContext(), "Login failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
@@ -147,6 +149,7 @@ class LoginFragment : Fragment() {
                         .addOnCompleteListener { authTask ->
                             if (authTask.isSuccessful) {
                                 Log.d("LoginFragment", "Google auth successful for email: $email")
+                                saveFcmTokenForCurrentUser()
                                 checkUserType(email)
                             } else {
                                 Toast.makeText(requireContext(), "Authentication failed!", Toast.LENGTH_SHORT).show()
@@ -162,6 +165,43 @@ class LoginFragment : Fragment() {
                 Log.e("LoginFragment", "Error checking user existence", e)
                 Toast.makeText(requireContext(), "Error checking user: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun saveFcmTokenForCurrentUser() {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                val userRef = FirebaseFirestore.getInstance().collection("users").document(currentUser.uid)
+
+                // Use arrayUnion to store multiple tokens without duplicates
+                userRef.update("fcmTokens", com.google.firebase.firestore.FieldValue.arrayUnion(token))
+                    .addOnSuccessListener {
+                        Log.d("LoginFragment", "FCM token added to fcmTokens array successfully")
+                    }
+                    .addOnFailureListener { e ->
+                        // If the document doesn't exist, create it with fcmTokens array
+                        userRef.set(mapOf("fcmTokens" to listOf(token)), com.google.firebase.firestore.SetOptions.merge())
+                            .addOnSuccessListener {
+                                Log.d("LoginFragment", "FCM token created successfully for new user document")
+                            }
+                            .addOnFailureListener { ex ->
+                                Log.e("LoginFragment", "Error creating FCM token array", ex)
+                            }
+
+                        Log.e("LoginFragment", "Error updating FCM token array", e)
+                    }
+            } else {
+                Log.e("LoginFragment", "Failed to get FCM token", task.exception)
+            }
+        }
+    }
+
+
+    private fun saveUserTypeToPrefs(userType: String) {
+        val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("userType", userType.lowercase()).apply()
     }
 
     // ✅ Check user type from Firestore and navigate to the correct dashboard
@@ -188,14 +228,20 @@ class LoginFragment : Fragment() {
                     Log.d("LoginFragment", "User found in users: $email ($userType)")
 
                     when (userType) {
-                        "emb" -> findNavController().navigate(R.id.action_loginFragment_to_embDashboard)
-                        "pco" -> findNavController().navigate(R.id.action_loginFragment_to_pcoDashboard)
-                        else -> Toast.makeText(
-                            requireContext(),
-                            "Unknown user type: $userType",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        "emb" -> {
+                            saveUserTypeToPrefs("emb")
+                            findNavController().navigate(R.id.action_loginFragment_to_embDashboard)
+                        }
+                        "pco" -> {
+                            saveUserTypeToPrefs("pco")
+                            findNavController().navigate(R.id.action_loginFragment_to_pcoDashboard)
+                        }
+                        "service_provider" -> {
+                            saveUserTypeToPrefs("service_provider")
+                            findNavController().navigate(R.id.action_loginFragment_to_serviceProviderDashboard)
+                        }
                     }
+
                 } else {
                     // 2️⃣ Not found in users → check service_providers
                     firestore.collection("service_providers")

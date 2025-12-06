@@ -12,6 +12,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoDetails2Binding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
@@ -19,6 +22,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -310,75 +314,74 @@ class PtoDetailsFragment : Fragment() {
     }
 
     // ------------------------------------------------------------
-    // APPROVE / REJECT STATUS UPDATE
-    // ------------------------------------------------------------
+// APPROVE / REJECT STATUS UPDATE
+// ------------------------------------------------------------
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
 
+        // Always check fragment state
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        // PTO applications collection
+        val collectionName = "opms_pto_applications"
+
+        // Update Firestore first (optional, keeps data in sync)
         val updateData = mapOf(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_pto_applications").document(id)
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // Navigate back to EMB dashboard
-                if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
-                    navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
-                }
-
-                // ✅ Send notifications using NotificationManager
-                db.collection("opms_pto_applications").document(id).get()
+                // Fetch PCO UID from document
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("establishmentName") ?: "Unknown Establishment"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        // PCO notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = pcoUid,
-                            title = if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
-                            message = if (isApproved)
-                                "Your Permit to Operate application has been approved."
-                            else
-                                "Your Permit to Operate application has been rejected. Please review the feedback.",
-                            category = "approval",
-                            priority = "high",
-                            module = "PTO",
-                            documentId = id,
-                            actionLink = "ptoDashboard/$id" // deep link for PCO
-                        )
+                        // ⚠ Call backend endpoint for status update
+                        val url = "http://10.0.2.2:5000/update-status"
+                        val json = JSONObject().apply {
+                            put("applicationId", id)
+                            put("newStatus", status)
+                            put("feedback", feedback)
+                            put("embId", embUid)
+                            put("pcoId", pcoUid)
+                            put("module", "PTO")
+                        }
 
-                        // EMB notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = embUid,
-                            title = "PTO Application ${status.uppercase()}",
-                            message = "You have $status a PTO application for $companyName.",
-                            category = "system",
-                            priority = "high",
-                            module = "PTO",
-                            documentId = id,
-                            actionLink = "ptoEmbDashboard/$id" // deep link for EMB
+                        Volley.newRequestQueue(safeContext).add(
+                            JsonObjectRequest(Request.Method.POST, url, json,
+                                { /* success */
+                                    Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
+
+                                    // Navigate back safely
+                                    if (isAdded) {
+                                        val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
+                                        navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
+                                    }
+                                },
+                                { error ->
+                                    Toast.makeText(safeContext, "Failed to notify: ${error.message}", Toast.LENGTH_SHORT).show()
+                                    Log.e("PTO_REVIEW", "❌ Failed to update PTO status", error)
+                                }
+                            )
                         )
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(safeContext, "Failed to fetch application data: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("PTO_REVIEW", "❌ Failed to fetch PTO application", e)
                     }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("PTO_REVIEW", "❌ Failed to update PTO status", e)
+                Toast.makeText(safeContext, "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottomsheet"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:text="TSD Booking Details"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dp"/>
+
+        <!-- Info Card -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_card_bottomsheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Waste type -->
+            <TextView
+                android:id="@+id/tvWasteType"
+                android:text="Waste Type:"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Treatment Info -->
+            <TextView
+                android:id="@+id/tvTreatment"
+                android:text="Treatment Info:"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:paddingTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Quantity -->
+            <TextView
+                android:id="@+id/tvQuantity"
+                android:text="Quantity:"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:paddingTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Rate -->
+            <TextView
+                android:id="@+id/tvRate"
+                android:text="Rate:"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:paddingTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Amount -->
+            <TextView
+                android:id="@+id/tvAmount"
+                android:text="Total Amount:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:paddingTop="6dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Preferred date -->
+            <TextView
+                android:id="@+id/tvPreferredDate"
+                android:text="Preferred Date:"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:paddingTop="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Location -->
+            <TextView
+                android:id="@+id/tvLocation"
+                android:text="Location:"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:paddingTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Payment Status -->
+            <TextView
+                android:id="@+id/tvPaymentStatus"
+                android:text="Payment Status:"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:paddingTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Status -->
+            <TextView
+                android:id="@+id/tvStatus"
+                android:text="Booking Status:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:paddingTop="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Certificate Link -->
+            <TextView
+                android:id="@+id/tvCertificate"
+                android:text="View Certificate"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/teal_700"
+                android:paddingTop="12dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Previous Record Link -->
+            <TextView
+                android:id="@+id/tvPreviousRecord"
+                android:text="View Previous Record"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/teal_700"
+                android:paddingTop="6dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <!-- Proceed Button -->
+            <Button
+                android:id="@+id/btnProceedStep3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Proceed PTT"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/teal_700"
+                android:textColor="@color/white"
+                android:enabled="false"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

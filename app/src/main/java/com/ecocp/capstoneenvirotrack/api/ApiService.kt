@@ -62,6 +62,13 @@ data class TreatRequest(
     val treatedQuantity: Double? = null
 )
 
+// ----------------- Push Notification -----------------
+data class SendNotificationRequest(
+    val receiverId: String,
+    val title: String,
+    val message: String
+)
+
 interface ApiService {
     // Send email
     @Headers("Content-Type: application/json")
@@ -121,4 +128,9 @@ interface ApiService {
         @Path("id") bookingId: String,
         @Body body: Map<String, String>
     ): Call<Void>
+
+    // ----------------- Push Notification -----------------
+    @Headers("Content-Type: application/json")
+    @POST("/send-notification")
+    fun sendNotification(@Body request: SendNotificationRequest): Call<Void>
 }
