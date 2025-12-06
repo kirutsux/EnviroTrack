@@ -64,6 +64,11 @@ class SmrDashboardFragment : Fragment(R.layout.fragment_smr_dashboard) {
         }
     }
 
+    override fun onResume(){
+        super.onResume()
+        loadSubmittedSmrs()
+    }
+
     /** --- Setup RecyclerView for submitted SMRs --- */
     private fun setupRecyclerView() {
         smrAdapter = SmrListAdapter(onItemClick = { smr ->
@@ -83,7 +88,8 @@ class SmrDashboardFragment : Fragment(R.layout.fragment_smr_dashboard) {
                 .whereEqualTo("uid", uid)
                 .get()
                 .addOnSuccessListener { snapshot ->
-                    val smrList = snapshot.documents.mapNotNull { it.toObject(Smr::class.java) }
+                    val smrList = snapshot.documents.mapNotNull { doc->doc.toObject(Smr::class.java)?.copy(id = doc.id) }
+                    android.util.Log.d("Dashboard", "Loaded ${smrList.size} SMRs")
                     if (smrList.isEmpty()) {
                         binding.txtNoApplications.visibility = View.VISIBLE
                     } else {

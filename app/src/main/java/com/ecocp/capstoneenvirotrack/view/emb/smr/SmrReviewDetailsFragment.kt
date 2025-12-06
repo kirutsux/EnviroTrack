@@ -11,11 +11,13 @@ import android.widget.ProgressBar
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.MyApplication
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ModuleAdapter
+import com.ecocp.capstoneenvirotrack.adapter.SmrFileListAdapter
 import com.ecocp.capstoneenvirotrack.api.OpenAiClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.model.AirPollution
@@ -31,6 +33,7 @@ import com.ecocp.capstoneenvirotrack.utils.generalInfoText
 import com.ecocp.capstoneenvirotrack.utils.hazardousWasteText
 import com.ecocp.capstoneenvirotrack.utils.othersText
 import com.ecocp.capstoneenvirotrack.utils.waterPollutionText
+import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +50,9 @@ class SmrReviewDetailsFragment : Fragment() {
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
     private var submissionId: String? = null
+    private val smrViewModel: SmrViewModel by activityViewModels()
     private lateinit var smr: Smr
+    private lateinit var fileAdapter: SmrFileListAdapter
 
 
     override fun onCreateView(
@@ -65,6 +70,15 @@ class SmrReviewDetailsFragment : Fragment() {
         binding.btnAnalyze.isEnabled = false
         binding.finalResultsView.visibility = View.GONE
 
+        fileAdapter = SmrFileListAdapter{url->
+            binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
+            binding.recyclerAttachedFiles.adapter = fileAdapter
+        }
+
+        smrViewModel.fileUrls.observe(viewLifecycleOwner){urls->
+            fileAdapter.submitList(urls)
+        }
+
         if (submissionId != null) {
             fetchSmrDetails(submissionId!!)
         } else {
@@ -73,6 +87,7 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun fetchSmrDetails(submissionId: String) {
+        smrViewModel.setFileUrls(smr.fileUrls)
         db.collection("smr_submissions").document(submissionId)
             .get()
             .addOnSuccessListener { doc ->
@@ -178,7 +193,7 @@ class SmrReviewDetailsFragment : Fragment() {
                     waterPollutionRecords = waterPollutionRecords,
                     airPollution = airPollution,
                     others = others,
-                    submittedAt = (doc.getTimestamp("dateSubmitted")?.toDate()?.time) ?: 0L,
+                    dateSubmitted = (doc.getTimestamp("dateSubmitted")),
                     uid = doc.getString("uid"),
                     id = doc.id
                 )
@@ -232,7 +247,7 @@ class SmrReviewDetailsFragment : Fragment() {
 
         val input = android.widget.EditText(requireContext()).apply {
             hint = "Enter rejection reason"
-            setSingleLine(false)
+            isSingleLine = false
             maxLines = 5
         }
         AlertDialog.Builder(requireContext())
@@ -252,14 +267,6 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun displaySummary(smr: Smr) {
-        val totalModules = 5
-        var completedModules = 0
-        if (smr.generalInfo.establishmentName.isNotEmpty()) completedModules++
-        if (smr.hazardousWastes.isNotEmpty()) completedModules++
-        if (smr.waterPollutionRecords.isNotEmpty()) completedModules++
-        if (smr.airPollution.processEquipment.isNotEmpty()) completedModules++
-        if (smr.others.accidentDate.isNotEmpty()) completedModules++
-        val percentage = (completedModules.toFloat() / totalModules * 100).toInt()
 
         val modules = listOf(
             "General Information" to smr.generalInfo.generalInfoText(),
@@ -406,21 +413,6 @@ class SmrReviewDetailsFragment : Fragment() {
                         binding.btnAnalyze.visibility = View.GONE
                         binding.finalResultsView.visibility = View.VISIBLE
                         binding.tvAiAnalysis.visibility = View.VISIBLE
-
-                        db.collection("smr_submissions").document(smr.id!!)
-                            .update("status", "Reviewed")
-                            .addOnSuccessListener {
-                                Log.d(
-                                    "Status Update",
-                                    "Status updated to Reviewed for ${smr.id}"
-                                )
-                            }
-                            .addOnFailureListener { e ->
-                                Log.d(
-                                    "Status Update",
-                                    "Status update failed. ${e.message}}"
-                                )
-                            }
                     }
                 }
 

@@ -176,7 +176,7 @@ class SmrEmbDashboardFragment : Fragment() {
                         val smr = Smr(
                             generalInfo = generalInfo,
                             hazardousWastes = hazardousWastes,
-                            submittedAt = submittedTimestamp.toDate().time,
+                            dateSubmitted = submittedTimestamp,
                             uid = data["uid"] as? String,
                             id = doc.id,
                             status = status
@@ -185,7 +185,7 @@ class SmrEmbDashboardFragment : Fragment() {
                     }
                 }
 
-                smrList.sortByDescending { it.submittedAt }
+                smrList.sortByDescending { it.dateSubmitted }
                 applyFilters()
             }
     }

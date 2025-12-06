@@ -102,6 +102,9 @@
         android:label="SMR Summary"
         tools:layout="@layout/fragment_smr_summary" />
     <action
+        android:id="@+id/action_smrSummaryFragment_to_module1GeneralInfoFragment"
+        app:destination="@id/module1GeneralInfoFragment"/>
+    <action
         android:id="@+id/action_smrSummaryFragment_to_smrDashboardFragment"
         app:destination="@id/smrDashboardFragment" />
 </navigation>

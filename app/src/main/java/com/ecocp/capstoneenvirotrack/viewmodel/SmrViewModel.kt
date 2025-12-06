@@ -1,8 +1,7 @@
+@file:Suppress("PrivatePropertyName")
+
 package com.ecocp.capstoneenvirotrack.viewmodel
 
-//import androidx.datastore.preferences.core.*
-//import androidx.datastore.preferences.preferencesDataStore
-//import com.ecocp.capstoneenvirotrack.api.OpenAiClient
 import android.app.Application
 import android.util.Log
 import androidx.datastore.preferences.core.edit
@@ -51,9 +50,10 @@ class SmrViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 val persistedSmr = gson.fromJson(it, Smr::class.java)
                 _smr.value = persistedSmr
+                _fileUrls.value = persistedSmr.fileUrls
                 updateProgress()
             } catch (_: Exception) {
-                dataStore.edit { it.remove(SMR_DATA_KEY) }
+                dataStore.edit { it -> it.remove(SMR_DATA_KEY) }
             }
         }
     }
@@ -143,6 +143,7 @@ class SmrViewModel(app: Application) : AndroidViewModel(app) {
     // UTILITY FUNCTIONS
     // =========================================================
 
+    @Suppress("SameParameterValue")
     private fun updateModuleProgress(key: String, percent: Int) {
         val map = _moduleProgress.value!!.toMutableMap()
         map[key] = percent.coerceIn(0, 100)
@@ -231,7 +232,16 @@ class SmrViewModel(app: Application) : AndroidViewModel(app) {
         _smr.value = currentSmr.copy(fileUrls = _fileUrls.value ?: emptyList())
     }
 
+    fun updateSmr(smr: Smr) {
+        _smr.value = smr
+        updateProgress()
+    }
+
     fun clearFiles() {
         _fileUrls.value = emptyList()
+    }
+
+    fun setFileUrls(urls: List<String>) {
+        _fileUrls.value = urls
     }
 }

@@ -82,12 +82,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <include
-            layout="@layout/item_aisummary_module"
-            android:id="@+id/module6Container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
 
         <TextView
             android:layout_width="wrap_content"
@@ -128,5 +122,23 @@
             app:backgroundTint="@color/primary"
             android:textColor="@color/bg_white"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Pending"
+            android:layout_marginTop="24dp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnEditSmr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Edit SMR"
+            android:visibility="gone"/>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

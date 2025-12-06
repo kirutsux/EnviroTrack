@@ -33,10 +33,10 @@ class SmrListAdapter(
             tvSmrTitle.text = "SMR Submission"
 
             // Format submittedAt timestamp to readable date
-            val dateText = smr.submittedAt?.let { timestamp ->
+            val dateText = smr.dateSubmitted?.let { timestamp ->
                 val sdf =
                     java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault())
-                sdf.format(java.util.Date(timestamp))
+                "Submitted on ${sdf.format(timestamp.toDate())}"
             } ?: "Not submitted"
 
             tvSmrDate.text = dateText
@@ -49,7 +49,7 @@ class SmrListAdapter(
 
     class SmrDiffCallback : DiffUtil.ItemCallback<Smr>() {
         override fun areItemsTheSame(oldItem: Smr, newItem: Smr): Boolean {
-            return oldItem.submittedAt == newItem.submittedAt
+            return oldItem.dateSubmitted == newItem.dateSubmitted
         }
 
         override fun areContentsTheSame(oldItem: Smr, newItem: Smr): Boolean {
