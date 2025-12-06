@@ -72,7 +72,6 @@ class SmrSummaryFragment : Fragment() {
         } else {
             binding.tvStatus.visibility = View.GONE
             binding.btnEditSmr.visibility = View.GONE
-            binding.tvRejectionReason.visibility = View.GONE
 
             smrViewModel.smr.observe(viewLifecycleOwner){ smr->
                 displaySmrData(smr)
@@ -115,16 +114,8 @@ class SmrSummaryFragment : Fragment() {
 
                     binding.btnSubmitSmr.visibility = View.GONE
                     val initialStatus = document.getString("status") ?: "Pending"
-                    val rejectionReason = document.getString("rejectionReason")?: ""
                     binding.tvStatus.text = "Status: $initialStatus"
                     binding.tvStatus.visibility = View.VISIBLE
-
-                    if(initialStatus == "Rejected" && rejectionReason.isNotEmpty()){
-                        binding.tvRejectionReason.text = "Rejection Reason: $rejectionReason"
-                        binding.tvRejectionReason.visibility = View.VISIBLE
-                    }else{
-                        binding.tvRejectionReason.visibility = View.GONE
-                    }
 
                     if (initialStatus == "Rejected") {
                         binding.btnEditSmr.visibility = View.VISIBLE
@@ -132,13 +123,8 @@ class SmrSummaryFragment : Fragment() {
                     } else {
                         binding.btnEditSmr.visibility = View.GONE
                         binding.btnAttachFile.visibility = View.GONE
-
-                        smrViewModel.smr.observe(viewLifecycleOwner){smr->
-                            displaySmrData(smr)
-                        }
                     }
 
-                    currentSmrDocumentId = smrId
                     setupStatusListener(smrId)
                 }?:run {
                     Snackbar.make(binding.root, "No SMR data found", Snackbar.LENGTH_SHORT).show()
@@ -232,7 +218,6 @@ class SmrSummaryFragment : Fragment() {
 
 
     /** --- SAVE TO FIREBASE --- **/
-    @SuppressLint("SetTextI18n")
     private fun submitSmrToFirebase() {
         val smr = smrViewModel.smr.value
         val userUid = FirebaseAuth.getInstance().currentUser?.uid
@@ -276,7 +261,6 @@ class SmrSummaryFragment : Fragment() {
             }
     }
 
-    @SuppressLint("SetTextI18n")
     private fun setupStatusListener(documentId: String) {
         statusListener?.remove()
         statusListener = firestore.collection("smr_submissions").document(documentId)
@@ -287,16 +271,8 @@ class SmrSummaryFragment : Fragment() {
                     return@addSnapshotListener
                 }
                 val status = snapshot?.getString("status") ?: "Pending"
-                val rejectionReason = snapshot?.getString("rejectionReason") ?: ""
                 binding.tvStatus.text = "Status: $status"
                 binding.tvStatus.visibility = View.VISIBLE
-
-                if(status == "Rejected" && rejectionReason.isNotEmpty()){
-                    binding.tvRejectionReason.text = "Rejection Reason: $rejectionReason"
-                    binding.tvRejectionReason.visibility = View.VISIBLE
-                }else{
-                    binding.tvRejectionReason.visibility = View.GONE
-                }
 
                 when (status) {
                     "Rejected" -> {
@@ -316,26 +292,6 @@ class SmrSummaryFragment : Fragment() {
                 }
             }
     }
-
-    private fun updateSmrStatus(status: String, reason:String? = null){
-        if (currentSmrDocumentId == null) {
-            Snackbar.make(binding.root, "No SMR document ID available.", Snackbar.LENGTH_SHORT).show()
-            return
-        }
-
-        val updateData = mutableMapOf<String, Any>("status" to status)
-        reason?.let{updateData["rejectionReason"]=it}
-
-        firestore.collection("smr_submissions").document(currentSmrDocumentId!!)
-            .update(updateData)
-            .addOnSuccessListener {
-                Snackbar.make(binding.root, "SMR status updated to $status", Snackbar.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Snackbar.make(binding.root, "Failed to update status: ${it.message}", Snackbar.LENGTH_SHORT).show()
-            }
-    }
-
 
     /** --- CLEAR ALL MODULE INPUT FIELDS --- **/
     private fun clearAllInputs() {

@@ -87,6 +87,7 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun fetchSmrDetails(submissionId: String) {
+        smrViewModel.setFileUrls(smr.fileUrls)
         db.collection("smr_submissions").document(submissionId)
             .get()
             .addOnSuccessListener { doc ->
@@ -199,7 +200,6 @@ class SmrReviewDetailsFragment : Fragment() {
 
                 this.smr = smr
                 displaySummary(smr)
-                smrViewModel.setFileUrls(smr.fileUrls)
 
                 binding.btnAnalyze.isEnabled = true
                 setupButtons()
@@ -222,6 +222,7 @@ class SmrReviewDetailsFragment : Fragment() {
         }
 
         binding.btnReject.setOnClickListener {
+            updateSmrStatus("Rejected", null)
             showRejectionDialog()
         }
     }
@@ -247,7 +248,7 @@ class SmrReviewDetailsFragment : Fragment() {
         val input = android.widget.EditText(requireContext()).apply {
             hint = "Enter rejection reason"
             isSingleLine = false
-            maxLines = 10
+            maxLines = 5
         }
         AlertDialog.Builder(requireContext())
             .setTitle("Reject SMR")
