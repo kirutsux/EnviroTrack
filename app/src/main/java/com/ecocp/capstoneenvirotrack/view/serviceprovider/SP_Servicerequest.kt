@@ -63,6 +63,8 @@ class SP_Servicerequest : Fragment() {
                     putString("bookingStatus", selected.bookingStatus)
                     putString("notes", selected.notes)
                     putString("attachment", selected.attachments?.firstOrNull() ?: DEV_ATTACHMENT)
+                    putString("bookedBy", selected.clientName)   // or selected.bookedBy if you added that field
+                    putString("wasteType", selected.wasteType)
                 }
 
                 findNavController().navigate(
@@ -317,17 +319,52 @@ class SP_Servicerequest : Fragment() {
     // ---------------------------
     // Convert Firestore → Model (Transporter mapping)
     // ---------------------------
-    private fun mapToServiceRequest(docId: String, m: Map<String, Any>): ServiceRequest {
+    private fun mapToServiceRequest(
+        docId: String,
+        m: Map<String, Any>,
+        crs: Map<String, Any>? = null // pass the crs_application doc map when you already have it
+    ): ServiceRequest {
 
+        fun s(map: Map<String, Any>, key: String, alt: String = ""): String {
+            return (map[key] as? String)?.trim().takeUnless { it.isNullOrEmpty() } ?: alt
+        }
         fun s(key: String, alt: String = ""): String {
-            return (m[key] as? String)?.trim().takeUnless { it.isNullOrEmpty() } ?: alt
+            return s(m, key, alt)
         }
 
-        val bookingStatus = s("bookingStatus", "Pending")
-        val wasteType = s("wasteType")
-        val serviceTitle =
-            if (wasteType.isNotBlank()) "Transport - $wasteType" else "Transport Booking"
+        // human-readable bookedBy (same as you had)
+        val bookedBy = s(
+            "bookedBy",
+            s(
+                "bookedById",
+                s(
+                    "generatorId",
+                    s(
+                        "requestedBy",
+                        s("clientName", s("name", "Unknown"))
+                    )
+                )
+            )
+        )
 
+        // pcoId for lookup (from transport booking fields)
+        val pcoId = s(
+            "pcoId",
+            s(
+                "clientId",
+                s("bookedById", s("generatorId", s("requestedBy", "")))
+            )
+        ).ifBlank { "" }
+
+        // prefer companyName from CRS doc if provided, otherwise fall back to booking's serviceProviderCompany or booking-level companyName
+        val crsCompanyName = crs?.let { (it["companyName"] as? String)?.trim() }?.takeUnless { it.isEmpty() }
+        val companyName = crsCompanyName
+            ?: s("serviceProviderCompany", s("companyName"))
+
+        val wasteType = s("wasteType")
+        val finalWasteType = if (wasteType.isNotBlank()) wasteType else s("waste", s("waste_type"))
+
+        // ... date formatting and attachments (same as yours)
         val dateBooked = (m["bookingDate"] as? com.google.firebase.Timestamp)
             ?: (m["dateBooked"] as? com.google.firebase.Timestamp)
 
@@ -343,24 +380,34 @@ class SP_Servicerequest : Fragment() {
         return ServiceRequest(
             id = docId,
             bookingId = s("bookingId", docId),
-            clientName = s("pcoId", s("clientId")),
-            companyName = s("serviceProviderCompany", s("companyName")),
+
+            clientName = bookedBy,
+            pcoId = pcoId,              // you can keep it for internal use but don't display it in UI
+            companyName = companyName,  // <-- prefer CRS companyName
             providerName = s("serviceProviderName", s("name")),
             providerContact = s("providerContact", s("contactNumber")),
-            serviceTitle = serviceTitle,
-            bookingStatus = bookingStatus,
+
+            serviceTitle = if (finalWasteType.isNotBlank()) "Transport - $finalWasteType" else "Transport Booking",
+            bookingStatus = s("bookingStatus", "Pending"),
+
             origin = s("origin", s("pickupLocation")),
             destination = s("destination", s("dropoffLocation")),
             dateRequested = dateRequested,
-            wasteType = wasteType,
+            dateBooked = dateBooked,
+
+            wasteType = finalWasteType,
             quantity = s("quantity"),
             packaging = s("packaging"),
+
             notes = s("specialInstructions", s("notes", "No notes")),
             compliance = "Qty: ${s("quantity").ifEmpty { "-" }}",
+
             attachments = attachments,
             imageUrl = attachments.first()
         )
     }
+
+
 
     // ---------------------------
     // Load TSD bookings and map to ServiceRequest for UI

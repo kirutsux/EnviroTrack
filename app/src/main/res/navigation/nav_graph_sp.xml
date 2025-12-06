@@ -54,6 +54,25 @@
         android:label="Profile"
         tools:layout="@layout/fragment_sp_profile" />
 
+    <!-- Feedback (Service Provider) -->
+    <fragment
+        android:id="@+id/SP_Feedback"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.Feedback"
+        android:label="Feedback"
+        tools:layout="@layout/fragment_feedback" />
+
+    <fragment
+        android:id="@+id/SP_Files"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.Files"
+        android:label="Feedback"
+        tools:layout="@layout/fragment_files" />
+
+    <fragment
+        android:id="@+id/SP_AboutUs"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.AboutUs"
+        android:label="About Us"
+        tools:layout="@layout/fragment_about_us" />
+
     <!-- Account -->
     <fragment
         android:id="@+id/SP_Account"
@@ -157,4 +176,5 @@
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.BookingsRouterFragment"
         android:label="Bookings Router"
         tools:layout="@android:layout/simple_list_item_1" />
+
 </navigation>

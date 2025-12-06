@@ -8,11 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.all.MainActivity
+import com.ecocp.capstoneenvirotrack.view.all.Files   // <-- use your existing Files fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -37,6 +39,64 @@ class SP_Profile : Fragment() {
         // ✅ Go to account fragment
         view.findViewById<View>(R.id.btnAccount).setOnClickListener {
             findNavController().navigate(R.id.SP_Account)
+        }
+
+        // ✅ Feedback
+        view.findViewById<View>(R.id.btnFeedback).setOnClickListener {
+            try {
+                val bundle = Bundle().apply { putString("userType", "ServiceProvider") }
+                findNavController().navigate(R.id.SP_Feedback, bundle)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Unable to open Feedback. Check nav_graph for SP_Feedback.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        // ✅ Files (robust: nav graph preferred, fallback to existing Files fragment)
+        view.findViewById<View>(R.id.btnFiles).setOnClickListener {
+            // Optional: pass args if you want
+            val bundle = Bundle().apply { putString("from", "SP_Profile") }
+
+            try {
+                // Preferred: navigate via nav_graph (requires SP_Files destination in nav_graph_sp.xml)
+                findNavController().navigate(R.id.SP_Files, bundle)
+            } catch (e: Exception) {
+                // Fallback: use the existing Files fragment (com.ecocp.capstoneenvirotrack.view.all.Files)
+                val filesFragment = Files()
+                filesFragment.arguments = bundle
+
+                // try to find a container id (primary navigation fragment's id) to replace
+                val containerId = requireActivity().supportFragmentManager.primaryNavigationFragment?.id
+
+                if (containerId != null && containerId != View.NO_ID) {
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(containerId, filesFragment)
+                        .addToBackStack(null)
+                        .commit()
+                } else {
+                    // Last fallback: helpful toast so you can add the nav_graph entry
+                    Toast.makeText(
+                        requireContext(),
+                        "Unable to open Files. Add SP_Files to nav_graph or provide a fragment container id.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+        // ✅ About Us
+        view.findViewById<View>(R.id.btnAboutUs).setOnClickListener {
+            try {
+                findNavController().navigate(R.id.SP_AboutUs)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Unable to open About Us. Check nav_graph for SP_AboutUs.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         // ✅ Logout button
@@ -75,14 +135,11 @@ class SP_Profile : Fragment() {
 
         auth.signOut()
 
-        // ✅ Start MainActivity, which hosts the LoginFragment
+        // ✅ Start MainActivity (login host)
         val intent = Intent(requireContext(), MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         startActivity(intent)
         requireActivity().finish()
     }
-
-
-
 }
