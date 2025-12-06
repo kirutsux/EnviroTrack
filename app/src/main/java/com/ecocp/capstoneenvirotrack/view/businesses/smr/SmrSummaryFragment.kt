@@ -119,8 +119,10 @@ class SmrSummaryFragment : Fragment() {
 
                     if (initialStatus == "Rejected") {
                         binding.btnEditSmr.visibility = View.VISIBLE
+                        binding.btnAttachFile.visibility = View.VISIBLE
                     } else {
                         binding.btnEditSmr.visibility = View.GONE
+                        binding.btnAttachFile.visibility = View.GONE
                     }
 
                     setupStatusListener(smrId)
