@@ -115,7 +115,6 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun fetchSmrDetails(submissionId: String) {
-        smrViewModel.setFileUrls(smr.fileUrls)
         db.collection("smr_submissions").document(submissionId)
             .get()
             .addOnSuccessListener { doc ->
@@ -166,7 +165,17 @@ class SmrReviewDetailsFragment : Fragment() {
                         WaterPollution(
                             domesticWastewater = (it["domesticWastewater"] as? Double) ?: 0.0,
                             processWastewater = (it["processWastewater"] as? Double) ?: 0.0,
-                            // Map other fields as needed
+                            coolingWater = it["coolingWater"] as? String ?: "",
+                            otherSource = it["otherSource"] as? String ?: "",
+                            washEquipment = it["washEquipment"] as? String ?: "",
+                            washFloor = it["washFloor"] as? String ?: "",
+                            employees = (it["employees"] as? Long)?.toInt() ?: 0,
+                            costEmployees = it["costEmployees"] as? String ?: "",
+                            utilityCost = it["utilityCost"] as? String ?: "",
+                            newInvestmentCost = it["newInvestmentCost"] as? String ?: "",
+                            outletNo = (it["outletNo"] as? Long)?.toInt() ?: 0,
+                            outletLocation = it["outletLocation"] as? String ?: "",
+                            waterBody = it["waterBody"] as? String ?: "",
                             date1 = it["date1"] as? String ?: "",
                             flow1 = it["flow1"] as? String ?: "",
                             bod1 = it["bod1"] as? String ?: "",
@@ -309,13 +318,6 @@ class SmrReviewDetailsFragment : Fragment() {
                                     Snackbar.make(binding.root, "Failed to send notification", Snackbar.LENGTH_SHORT).show()
                                 }
                             })
-
-                        // Step 3: Navigate back to dashboard
-                        if (isAdded) {
-                            findNavController().navigate(
-                                R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment
-                            )
-                        }
                     }
                     .addOnFailureListener { e ->
                         Snackbar.make(binding.root, "Failed to fetch SMR data: ${e.message}", Snackbar.LENGTH_SHORT).show()
@@ -448,7 +450,7 @@ class SmrReviewDetailsFragment : Fragment() {
                     """.trimIndent()
 
                     val request = OpenAiRequest(
-                        model = "gpt-3.5-turbo",
+                        model = "gpt-4.1-nano",
                         messages = listOf(OpenAiMessage(role = "user", content = prompt)),
                         max_tokens = 500
                     )
@@ -488,12 +490,12 @@ class SmrReviewDetailsFragment : Fragment() {
                             
                     Replace the Module assessment placeholders with the actual results from previously done analyses. After the compiled analyses, put the final analysis generated for overall assessment.            
                     At the very end, put a decision of whether the submission/application should be approved or not.
-                    i.e. Final approval decision: For approval/rejection. If for approval, don't list anything else other than approve. If for rejection, list the reason for rejection and afterwards, put an enumerated list of follow-up actions.
-                    
+                    i.e. Final approval decision: For approval/rejection. If for approval, list nothing other than approve. If for rejection, list the reasons for rejection and put an enumerated list of follow-up actions.
+                    Note: If there are conditions or follow up actions, do not approve even if the conditions are minor.
                 """.trimIndent()
 
                 val finalRequest = OpenAiRequest(
-                    model = "gpt-4o",
+                    model = "gpt-4.1-nano",
                     messages = listOf(OpenAiMessage(role = "user", content = finalPrompt)),
                     max_tokens = 1500
                 )
