@@ -15,6 +15,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.SmrFileListAdapter
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrSummaryBinding
 import com.ecocp.capstoneenvirotrack.model.AirPollution
 import com.ecocp.capstoneenvirotrack.model.GeneralInfo
@@ -33,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import retrofit2.Call
 
 
 class SmrSummaryFragment : Fragment() {
@@ -231,8 +234,7 @@ class SmrSummaryFragment : Fragment() {
         val userUid = FirebaseAuth.getInstance().currentUser?.uid
 
         if (smr == null || userUid == null) {
-            Snackbar.make(binding.root, "No SMR data or user UID found.", Snackbar.LENGTH_SHORT)
-                .show()
+            Snackbar.make(binding.root, "No SMR data or user UID found.", Snackbar.LENGTH_SHORT).show()
             return
         }
 
@@ -244,30 +246,56 @@ class SmrSummaryFragment : Fragment() {
             "waterPollutionRecords" to smr.waterPollutionRecords,
             "airPollution" to smr.airPollution,
             "others" to smr.others,
-            "fileUrls" to smr.fileUrls
+            "fileUrls" to smr.fileUrls,
+            "status" to "Pending"
         )
 
+        // Step 1: Save to Firestore
         firestore.collection("smr_submissions")
             .add(smrData)
             .addOnSuccessListener { documentReference ->
-                currentSmrDocumentId = documentReference.id
-                Snackbar.make(binding.root, "SMR successfully submitted!", Snackbar.LENGTH_SHORT)
-                    .show()
+                val smrDocId = documentReference.id
+                currentSmrDocumentId = smrDocId
+
+                Snackbar.make(binding.root, "SMR successfully submitted!", Snackbar.LENGTH_SHORT).show()
                 binding.btnSubmitSmr.visibility = View.GONE
                 binding.tvStatus.visibility = View.VISIBLE
                 binding.tvStatus.text = "Status: Pending"
 
-                setupStatusListener(currentSmrDocumentId!!)
+                // Optional: real-time status listener
+                setupStatusListener(smrDocId)
 
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = userUid,      // PCO UID
+                    module = "SMR", // Module name for SMR
+                    documentId = smrDocId      // Firestore document ID
+                )
+
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "SMR submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
+                                Snackbar.make(binding.root, "Notification error: ${response.code()}", Snackbar.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Error sending notifications: ${t.message}")
+                            Snackbar.make(binding.root, "Failed to send notifications", Snackbar.LENGTH_SHORT).show()
+                        }
+                    })
             }
             .addOnFailureListener { e ->
-                Snackbar.make(
-                    binding.root,
-                    "Failed to submit SMR: ${e.message}",
-                    Snackbar.LENGTH_SHORT
-                ).show()
+                Snackbar.make(binding.root, "Failed to submit SMR: ${e.message}", Snackbar.LENGTH_SHORT).show()
             }
     }
+
 
     private fun setupStatusListener(documentId: String) {
         statusListener?.remove()

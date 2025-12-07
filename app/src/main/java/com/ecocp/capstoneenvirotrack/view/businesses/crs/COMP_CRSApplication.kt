@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,8 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -30,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import org.json.JSONObject
+import retrofit2.Call
 import java.util.*
 
 class COMP_CRSApplication : Fragment() {
@@ -251,7 +255,7 @@ class COMP_CRSApplication : Fragment() {
     ) {
         val uid = auth.currentUser?.uid ?: return
 
-        // Generate a unique Firestore application ID
+        // Generate Firestore application ID
         val docRef = db.collection("crs_applications").document()
         val applicationId = docRef.id
 
@@ -285,39 +289,47 @@ class COMP_CRSApplication : Fragment() {
 
         progressDialog.show()
 
+        // Save to Firestore
         docRef.set(applicationData)
             .addOnSuccessListener {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
+
                 clearFields()
                 findNavController().navigateUp()
 
-                // -------------------------------
-                // 🔔 Notify PCO + ALL EMB via backend endpoint
-                // -------------------------------
-                val url = "http://10.0.2.2:5000/send-notification"
-                val json = JSONObject().apply {
-                    put("receiverId", uid)          // PCO
-                    put("module", "CRS")
-                    put("documentId", applicationId)
-                }
-
-                Volley.newRequestQueue(requireContext()).add(
-                    JsonObjectRequest(Request.Method.POST, url, json,
-                        { /* success */ },
-                        { error ->
-                            Toast.makeText(requireContext(),
-                                "Failed to send submission notifications: ${error.message}",
-                                Toast.LENGTH_SHORT).show()
-                        }
-                    )
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = uid,         // PCO UID
+                    module = "CRS",           // Module name
+                    documentId = applicationId
                 )
+
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "CRS submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
+                                Toast.makeText(requireContext(), "Notification error: ${response.code()}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Error sending notifications: ${t.message}")
+                            Toast.makeText(requireContext(), "Failed to send notifications", Toast.LENGTH_SHORT).show()
+                        }
+                    })
             }
             .addOnFailureListener { e ->
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Error submitting: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
+
 
     private fun clearFields() {
         listOf(

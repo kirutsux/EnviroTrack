@@ -24,6 +24,8 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ModuleAdapter
 import com.ecocp.capstoneenvirotrack.adapter.SmrFileListAdapter
 import com.ecocp.capstoneenvirotrack.api.OpenAiClient
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.model.AirPollution
 import com.ecocp.capstoneenvirotrack.model.GeneralInfo
@@ -40,6 +42,8 @@ import com.ecocp.capstoneenvirotrack.utils.othersText
 import com.ecocp.capstoneenvirotrack.utils.waterPollutionText
 import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +52,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import retrofit2.Call
 import androidx.core.net.toUri
 import kotlin.Double
 
@@ -165,11 +170,11 @@ class SmrReviewDetailsFragment : Fragment() {
                             otherSource = it["otherSource"] as? String ?: "",
                             washEquipment = it["washEquipment"] as? String ?: "",
                             washFloor = it["washFloor"] as? String ?: "",
-                            employees = it["employees"] as? Int ?: 0,
+                            employees = (it["employees"] as? Long)?.toInt() ?: 0,
                             costEmployees = it["costEmployees"] as? String ?: "",
                             utilityCost = it["utilityCost"] as? String ?: "",
                             newInvestmentCost = it["newInvestmentCost"] as? String ?: "",
-                            outletNo = it["outletNo"] as? Int ?: 0,
+                            outletNo = (it["outletNo"] as? Long)?.toInt() ?: 0,
                             outletLocation = it["outletLocation"] as? String ?: "",
                             waterBody = it["waterBody"] as? String ?: "",
                             date1 = it["date1"] as? String ?: "",
@@ -263,25 +268,66 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun updateSmrStatus(newStatus: String, rejectionReason: String?) {
-        val updates = mutableMapOf<String, Any>("status" to newStatus)
-        rejectionReason?.let { updates["rejectionReason"] = it }
+        val smrId = smr.id ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        db.collection("smr_submissions").document(smr.id!!)
-            .update(updates)
+        // Always check fragment state
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        // Step 1: Update Firestore first (optional, keeps data in sync)
+        val updateData = mutableMapOf<String, Any>(
+            "status" to newStatus,
+            "reviewedTimestamp" to Timestamp.now()
+        )
+        rejectionReason?.let { updateData["rejectionReason"] = it }
+
+        db.collection("smr_submissions").document(smrId)
+            .update(updateData)
             .addOnSuccessListener {
-                Snackbar.make(
-                    binding.root,
-                    "SMR status updated to $newStatus",
-                    Snackbar.LENGTH_SHORT
-                ).show()
+
+                // Step 2: Fetch PCO UID from the SMR document
+                db.collection("smr_submissions").document(smrId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
+
+                        // --------------------------------------------------------
+                        // 🔔 CALL BACKEND API — NOTIFY PCO OF STATUS UPDATE
+                        // --------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = smrId,
+                            newStatus = newStatus,
+                            pcoId = pcoUid,
+                            embId = embUid,
+                            module = "SMR",
+                            feedback = rejectionReason ?: ""
+                        )
+
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "SMR status update notification sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Failed to send notification: ${response.code()}")
+                                        Snackbar.make(binding.root, "Notification error: ${response.code()}", Snackbar.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Snackbar.make(binding.root, "Failed to send notification", Snackbar.LENGTH_SHORT).show()
+                                }
+                            })
+                    }
+                    .addOnFailureListener { e ->
+                        Snackbar.make(binding.root, "Failed to fetch SMR data: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                        Log.e("SMR_REVIEW", "Failed to fetch SMR application: ${e.message}", e)
+                    }
             }
             .addOnFailureListener { e ->
-                Snackbar.make(
-                    binding.root,
-                    "Failed to update status: ${e.message}",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-                Log.e("StatusUpdate", "Failed to update status: ${e.message}")
+                Snackbar.make(binding.root, "Failed to update status: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                Log.e("SMR_REVIEW", "Failed to update SMR status: ${e.message}", e)
             }
     }
 
@@ -405,7 +451,7 @@ class SmrReviewDetailsFragment : Fragment() {
                     """.trimIndent()
 
                     val request = OpenAiRequest(
-                        model = "gpt-4o",
+                        model = "gpt-4.1-nano",
                         messages = listOf(OpenAiMessage(role = "user", content = prompt)),
                         max_tokens = 500
                     )
@@ -443,14 +489,14 @@ class SmrReviewDetailsFragment : Fragment() {
                             (Module 2 assessment)
                             
                             
-                    Replace the Module assessment placeholders with the actual results from previously done analyses. After the compiled analyses, put the final analysis generated for overall assessment.
-                    Afterwards, put an enumerated list of follow-up actions.
+                    Replace the Module assessment placeholders with the actual results from previously done analyses. After the compiled analyses, put the final analysis generated for overall assessment.            
                     At the very end, put a decision of whether the submission/application should be approved or not.
-                    i.e. Final approval decision: For approval/rejection.
+                    i.e. Final approval decision: For approval/rejection. If for approval, list nothing other than approve. If for rejection, list the reasons for rejection and put an enumerated list of follow-up actions.
+                    Note: If there are conditions or follow up actions, do not approve even if the conditions are minor.
                 """.trimIndent()
 
                 val finalRequest = OpenAiRequest(
-                    model = "gpt-4o",
+                    model = "gpt-4.1-nano",
                     messages = listOf(OpenAiMessage(role = "user", content = finalPrompt)),
                     max_tokens = 1500
                 )
@@ -525,17 +571,6 @@ class SmrReviewDetailsFragment : Fragment() {
             prefs[KEY_LAST_AI_OUTPUT]
         )
     }
-
-    private suspend fun clearCache() {
-        val app = requireContext().applicationContext as? MyApplication
-            ?: throw IllegalStateException("Application context is not MyApplication. Check AndroidManifest.xml and rebuild.")
-        app.smrDataStore.edit { prefs ->
-            prefs.remove(KEY_LAST_PROMPT_HASH)
-            prefs.remove(KEY_LAST_AI_OUTPUT)
-        }
-        Log.d("CacheClear", "Cached prompts and analyses cleared.")
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
