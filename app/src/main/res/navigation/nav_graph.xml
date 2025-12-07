@@ -452,6 +452,10 @@
         <action
             android:id="@+id/action_tsdFacilitySelectionFragment_to_pttApplicationFragment"
             app:destination="@id/pttApplicationFragment" />
+
+        <argument
+            android:name="transportBookingId"
+            app:argType="string" />
     </fragment>
 
     <!-- ☣️ HWMS Step 4: PTT Application -->
@@ -544,6 +548,19 @@
             android:id="@+id/action_embProfile_to_aboutUsFragment"
             app:destination="@id/aboutUsFragment" />
     </fragment>
+
+
+    <!-- 🚚 BottomSheet: Transport Details -->
+    <fragment
+        android:id="@+id/transportDetailsBottomSheet"
+        android:name="com.ecocp.capstoneenvirotrack.view.businesses.dialogs.TransportDetailsBottomSheet"
+        tools:layout="@layout/bottomsheet_transport_details">
+
+        <action
+            android:id="@+id/action_transportDetailsBottomSheet_to_tsdFacilitySelectionFragment"
+            app:destination="@id/tsdFacilitySelectionFragment" />
+    </fragment>
+
 
     <!-- EMB OFFICER ACCOUNT SETTINGS (Dedicated EMB version) -->
     <!--    <fragment-->

@@ -36,15 +36,19 @@ class SmrEmbAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val smr = smrList[position]
         holder.itemView.context
-        val sdf = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
+        val timestamp = smr.dateSubmitted?.let{timestamp->
+            val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+            sdf.format(timestamp.toDate())  // Convert Timestamp to Date for formatting
+        } ?: "Not submitted"
 
         holder.tvEstablishmentName.text = smr.generalInfo.establishmentName
         holder.tvAddress.text = smr.generalInfo.address
-        holder.tvDateSubmitted.text = "Submitted: ${sdf.format(Date(smr.submittedAt ?: 0L))}"
+        holder.tvDateSubmitted.text = "Submitted: $timestamp"
 
         holder.tvStatus.text = smr.status
         val statusColor = when (smr.status) {
-            "Reviewed" -> R.color.status_approved
+            "Approved" -> R.color.status_approved
+            "Rejected" -> R.color.status_rejected
             "Pending" -> R.color.status_pending
             else -> R.color.status_pending
         }

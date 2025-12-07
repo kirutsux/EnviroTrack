@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.all
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -65,6 +66,8 @@ class LoginFragment : Fragment() {
             togglePasswordVisibility(etPassword, showPassword, isPasswordVisible)
         }
 
+        forTesting(etEmail, etPassword)
+
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -92,6 +95,12 @@ class LoginFragment : Fragment() {
         }
 
         return view
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun forTesting(etEmail: EditText, etPassword: EditText){
+        etEmail.setText("iandanegomez012@gmail.com")
+        etPassword.setText("12345678")
     }
 
     // ✅ Google Sign-In Intent with forced popup
