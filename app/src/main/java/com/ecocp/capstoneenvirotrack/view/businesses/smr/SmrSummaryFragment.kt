@@ -97,6 +97,7 @@ class SmrSummaryFragment : Fragment() {
 
         binding.btnSubmitSmr.setOnClickListener {
             submitSmrToFirebase()
+            clearAllInputs()
         }
 
         binding.btnEditSmr.setOnClickListener {
@@ -295,11 +296,12 @@ class SmrSummaryFragment : Fragment() {
 
     /** --- CLEAR ALL MODULE INPUT FIELDS --- **/
     private fun clearAllInputs() {
-        smrViewModel.updateGeneralInfo(GeneralInfo())
-        smrViewModel.updateHazardousWastes(emptyList())
-        smrViewModel.clearWaterPollutionRecords()
-        smrViewModel.updateAirPollution(AirPollution())
-        smrViewModel.updateOthers(Others())
+//        smrViewModel.updateGeneralInfo(GeneralInfo())
+//        smrViewModel.updateHazardousWastes(emptyList())
+//        smrViewModel.clearWaterPollutionRecords()
+//        smrViewModel.updateAirPollution(AirPollution())
+//        smrViewModel.updateOthers(Others())
+        smrViewModel.clearSmr()
     }
 
     override fun onDestroyView() {

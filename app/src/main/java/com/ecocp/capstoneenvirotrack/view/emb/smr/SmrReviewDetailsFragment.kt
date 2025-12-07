@@ -87,7 +87,6 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun fetchSmrDetails(submissionId: String) {
-        smrViewModel.setFileUrls(smr.fileUrls)
         db.collection("smr_submissions").document(submissionId)
             .get()
             .addOnSuccessListener { doc ->
@@ -199,6 +198,7 @@ class SmrReviewDetailsFragment : Fragment() {
                 )
 
                 this.smr = smr
+                smrViewModel.setFileUrls(smr.fileUrls)
                 displaySummary(smr)
 
                 binding.btnAnalyze.isEnabled = true
@@ -324,22 +324,22 @@ class SmrReviewDetailsFragment : Fragment() {
                 val (cachedHash, cachedAnalysis) = loadCached()
                 val expectedHash = "full_analysis_${smr.id}"
 
-                if(cachedHash==expectedHash && !cachedAnalysis.isNullOrEmpty()){
-                    withContext(Dispatchers.Main) {
-                        if(_binding!=null){
-                            binding.tvAiAnalysis.text = cachedAnalysis
-                            binding.recyclerModules.visibility = View.GONE
-                            binding.btnAnalyze.visibility = View.GONE
-                            binding.finalResultsView.visibility = View.VISIBLE
-                            binding.tvAiAnalysis.visibility = View.VISIBLE
-                            binding.btnApprove.visibility = View.GONE
-                            binding.btnReject.visibility = View.GONE
-                            Snackbar.make(binding.root, "AI analysis loaded from cache", Snackbar.LENGTH_SHORT).show()
-                            progressDialog.dismiss()
-                        }
-                    }
-                    return@launch
-                }
+//                if(cachedHash==expectedHash && !cachedAnalysis.isNullOrEmpty()){
+//                    withContext(Dispatchers.Main) {
+//                        if(_binding!=null){
+//                            binding.tvAiAnalysis.text = cachedAnalysis
+//                            binding.recyclerModules.visibility = View.GONE
+//                            binding.btnAnalyze.visibility = View.GONE
+//                            binding.finalResultsView.visibility = View.VISIBLE
+//                            binding.tvAiAnalysis.visibility = View.VISIBLE
+//                            binding.btnApprove.visibility = View.GONE
+//                            binding.btnReject.visibility = View.GONE
+//                            Snackbar.make(binding.root, "AI analysis loaded from cache", Snackbar.LENGTH_SHORT).show()
+//                            progressDialog.dismiss()
+//                        }
+//                    }
+//                    return@launch
+//                }
 
                 for ((moduleName, moduleData) in modules) {
                     withContext(Dispatchers.Main) {
@@ -357,7 +357,7 @@ class SmrReviewDetailsFragment : Fragment() {
                     """.trimIndent()
 
                     val request = OpenAiRequest(
-                        model = "gpt-3.5-turbo",
+                        model = "gpt-4o",
                         messages = listOf(OpenAiMessage(role = "user", content = prompt)),
                         max_tokens = 500
                     )
@@ -382,10 +382,20 @@ class SmrReviewDetailsFragment : Fragment() {
                     Compile the following module analyses into a comprehensive SMR compliance report:
                     $fullAnalysis
                     Provide an overall assessment with structured criticism. Provide an assessment on their issues, recommendations, and follow-up steps.
-                    Before the final analysis, give a short, enumerated analysis summary per module.
-                    i.e. Module 1: lorem ipsum dolor
-                         Module 2: lorem ipsum dolor
-                    For readability, use horizontal/vertical lines (___ ||||) to separate the summaries.
+                    Before the final analysis, enumerate the assessments from the previous analyses.
+                    i.e. Module 1: Module 1 assessment
+                         Module 2: Module 2 assessment
+                    For readability, use horizontal/vertical lines (______ or ||) as line breaks and separators to separate the summaries.
+                    i.e.
+                        ____________________________________
+                        Module 1:
+                            (Module 1 assessment)
+                        ____________________________________
+                        Module 2:
+                            (Module 2 assessment)
+                            
+                            
+                    Replace the Module assessment placeholders with the actual results from previously done analyses. After the compiled analyses, put the final analysis generated for overall assessment.
                 """.trimIndent()
 
                 val finalRequest = OpenAiRequest(
@@ -463,6 +473,16 @@ class SmrReviewDetailsFragment : Fragment() {
             prefs[KEY_LAST_AI_OUTPUT]
         )
     }
+    private suspend fun clearCache() {
+        val app = requireContext().applicationContext as? MyApplication
+            ?: throw IllegalStateException("Application context is not MyApplication. Check AndroidManifest.xml and rebuild.")
+        app.smrDataStore.edit { prefs ->
+            prefs.remove(KEY_LAST_PROMPT_HASH)
+            prefs.remove(KEY_LAST_AI_OUTPUT)
+        }
+        Log.d("CacheClear", "Cached prompts and analyses cleared.")
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
