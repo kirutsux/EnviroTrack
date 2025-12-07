@@ -94,12 +94,6 @@ class SmrViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch{saveSmrToDataStore(updatedSmr)}
     }
 
-    fun clearWaterPollutionRecords() {
-        val current = _smr.value ?: Smr()
-        _smr.value = current.copy(waterPollutionRecords = emptyList())
-        updateModuleProgress("module3", 0)
-    }
-
     // ---------------- MODULE 4 ----------------
     fun updateAirPollution(airPollution: AirPollution) {
         val currentSmr = _smr.value ?: Smr()

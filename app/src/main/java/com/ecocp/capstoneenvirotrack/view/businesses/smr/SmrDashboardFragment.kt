@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.smr
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
@@ -105,12 +106,23 @@ class SmrDashboardFragment : Fragment(R.layout.fragment_smr_dashboard) {
     }
 
     /** --- Update module progress UI --- */
+    @SuppressLint("SetTextI18n")
     private fun updateModuleProgress(progressMap: Map<String, Int>) {
-        progressMap["module1"]?.let { binding.progressModule1.progress = it; binding.tvModule1Status.text = "$it%" }
-        progressMap["module2"]?.let { binding.progressModule2.progress = it; binding.tvModule2Status.text = "$it%" }
-        progressMap["module3"]?.let { binding.progressModule3.progress = it; binding.tvModule3Status.text = "$it%" }
-        progressMap["module4"]?.let { binding.progressModule4.progress = it; binding.tvModule4Status.text = "$it%" }
-        progressMap["module5"]?.let { binding.progressModule5.progress = it; binding.tvModule5Status.text = "$it%" }
+        val module1 = progressMap["module1"] ?: 0
+        binding.progressModule1.progress = module1
+        binding.tvModule1Status.text = "$module1%"
+        val module2 = progressMap["module2"] ?: 0
+        binding.progressModule2.progress = module2
+        binding.tvModule2Status.text = "$module2%"
+        val module3 = progressMap["module3"] ?: 0
+        binding.progressModule3.progress = module3
+        binding.tvModule3Status.text = "$module3%"
+        val module4 = progressMap["module4"] ?: 0
+        binding.progressModule4.progress = module4
+        binding.tvModule4Status.text = "$module4%"
+        val module5 = progressMap["module5"] ?: 0
+        binding.progressModule5.progress = module5
+        binding.tvModule5Status.text = "$module5%"
     }
 
     override fun onDestroyView() {
