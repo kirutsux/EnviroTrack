@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import androidx.core.net.toUri
+import kotlin.Double
 
 @Suppress("UNCHECKED_CAST", "PrivatePropertyName")
 class SmrReviewDetailsFragment : Fragment() {
@@ -160,7 +161,17 @@ class SmrReviewDetailsFragment : Fragment() {
                         WaterPollution(
                             domesticWastewater = (it["domesticWastewater"] as? Double) ?: 0.0,
                             processWastewater = (it["processWastewater"] as? Double) ?: 0.0,
-                            // Map other fields as needed
+                            coolingWater = it["coolingWater"] as? String ?: "",
+                            otherSource = it["otherSource"] as? String ?: "",
+                            washEquipment = it["washEquipment"] as? String ?: "",
+                            washFloor = it["washFloor"] as? String ?: "",
+                            employees = it["employees"] as? Int ?: 0,
+                            costEmployees = it["costEmployees"] as? String ?: "",
+                            utilityCost = it["utilityCost"] as? String ?: "",
+                            newInvestmentCost = it["newInvestmentCost"] as? String ?: "",
+                            outletNo = it["outletNo"] as? Int ?: 0,
+                            outletLocation = it["outletLocation"] as? String ?: "",
+                            waterBody = it["waterBody"] as? String ?: "",
                             date1 = it["date1"] as? String ?: "",
                             flow1 = it["flow1"] as? String ?: "",
                             bod1 = it["bod1"] as? String ?: "",

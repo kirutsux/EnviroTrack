@@ -138,6 +138,15 @@
             android:layout_marginTop="24dp"
             android:textStyle="bold"
             android:visibility="gone"/>
+        <TextView
+            android:id="@+id/tvRejectionReason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Just cause"
+            android:layout_marginTop="8dp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/btnEditSmr"

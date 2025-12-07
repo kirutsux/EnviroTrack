@@ -116,12 +116,15 @@ class SmrSummaryFragment : Fragment() {
 
                     binding.btnSubmitSmr.visibility = View.GONE
                     val initialStatus = document.getString("status") ?: "Pending"
+                    val rejectionReason = document.getString("rejectionReason") ?: ""
                     binding.tvStatus.text = "Status: $initialStatus"
+                    binding.tvRejectionReason.text = "Reason: $rejectionReason"
                     binding.tvStatus.visibility = View.VISIBLE
 
                     if (initialStatus == "Rejected") {
                         binding.btnEditSmr.visibility = View.VISIBLE
                         binding.btnAttachFile.visibility = View.VISIBLE
+                        binding.tvRejectionReason.visibility = View.VISIBLE
                     } else {
                         binding.btnEditSmr.visibility = View.GONE
                         binding.btnAttachFile.visibility = View.GONE
