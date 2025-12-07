@@ -3,6 +3,7 @@ package com.ecocp.capstoneenvirotrack.view.businesses.hwms
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPttApplicationBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +27,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
+import retrofit2.Call
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -281,10 +285,15 @@ class PttApplicationFragment : Fragment() {
     private fun finalizePttSubmission() = scope.launch {
         binding.progressBar.visibility = View.VISIBLE
         try {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+                Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
             val newDocRef = db.collection("ptt_applications").document()
             val pttId = newDocRef.id
 
-            // Fetch human-readable names once at submission time
+            // Fetch human-readable names
             val generatorDoc = db.collection("HazardousWasteGenerator")
                 .document(selectedGeneratorId!!).get().await()
             val transportDoc = db.collection("transport_bookings")
@@ -299,8 +308,6 @@ class PttApplicationFragment : Fragment() {
             val finalData = pendingPttData.toMutableMap().apply {
                 this["pttId"] = pttId
                 this["paymentStatus"] = "Paid"
-
-                // Save names — this makes dashboard instant & beautiful
                 this["generatorName"] = generatorName
                 this["transporterName"] = transporterName
                 this["tsdFacilityName"] = tsdName
@@ -319,6 +326,36 @@ class PttApplicationFragment : Fragment() {
             // Save to Firestore
             newDocRef.set(finalData).await()
 
+            // --------------------------------------------------------
+            // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+            // --------------------------------------------------------
+            val request = PcoSendNotificationRequest(
+                receiverId = uid,      // PCO UID
+                module = "PTT",        // Module name for PTT / Hazardous Waste
+                documentId = pttId
+            )
+
+            RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                .enqueue(object : retrofit2.Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                        if (response.isSuccessful) {
+                            Log.d("NOTIF", "PTT submission notifications sent.")
+                        } else {
+                            Log.e("NOTIF", "Notification error: ${response.code()}")
+                            Toast.makeText(requireContext(),
+                                "Notification failed: ${response.code()}",
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Log.e("NOTIF", "Notification error: ${t.message}")
+                        Toast.makeText(requireContext(),
+                            "Failed to send notifications",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                })
+
             Toast.makeText(requireContext(), "PTT Application submitted successfully!", Toast.LENGTH_LONG).show()
             resetForm()
             findNavController().popBackStack(R.id.HWMSDashboardFragment, false)
@@ -329,6 +366,7 @@ class PttApplicationFragment : Fragment() {
             binding.progressBar.visibility = View.GONE
         }
     }
+
 
     private suspend fun uploadFile(uri: Uri, path: String): String {
         val ref = storage.child(path)

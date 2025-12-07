@@ -23,9 +23,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.storage.FirebaseStorage
 import org.json.JSONObject
+import retrofit2.Call
 
 class CncReviewDetailsFragment : Fragment() {
 
@@ -289,7 +292,6 @@ class CncReviewDetailsFragment : Fragment() {
         val id = applicationId ?: return
         val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        // Always check fragment state
         if (!isAdded || context == null) return
         val safeContext = requireContext()
 
@@ -300,47 +302,55 @@ class CncReviewDetailsFragment : Fragment() {
         )
         certificateUrl?.let { updateData["certificateUrl"] = it }
 
-        // CNC applications only
         val collectionName = "cnc_applications"
 
-        // Update Firestore first
+        // Step 1: Firestore update
         db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
 
-                if (isAdded) {
-                    Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // Fetch PCO uid from document
+                // Step 2: Fetch PCO UID
                 db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoId = doc.getString("uid") ?: return@addOnSuccessListener
 
-                        // ⚠ Call backend endpoint for status update (not send-notification)
-                        val url = "http://10.0.2.2:5000/update-status"
-                        val json = JSONObject().apply {
-                            put("applicationId", id)
-                            put("newStatus", status)
-                            put("pcoId", pcoId)
-                            put("embId", embUid)
-                            put("module", "CNC")
-                            put("feedback", feedback)
-                        }
-
-                        Volley.newRequestQueue(safeContext).add(
-                            JsonObjectRequest(Request.Method.POST, url, json,
-                                { /* success */ },
-                                { error ->
-                                    Toast.makeText(safeContext, "Failed to notify: ${error.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            )
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoId,
+                            embId = embUid,
+                            module = "CNC",
+                            feedback = feedback
                         )
 
-                        // Navigate back safely
-                        if (isAdded) {
-                            navigateToDashboard()
-                        }
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "Status update notifications sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Notification error: ${response.code()}")
+                                        Toast.makeText(safeContext,
+                                            "Notification failed: ${response.code()}",
+                                            Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext,
+                                        "Notification failed: ${t.message}",
+                                        Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Return to dashboard
+                        if (isAdded) navigateToDashboard()
                     }
             }
             .addOnFailureListener {

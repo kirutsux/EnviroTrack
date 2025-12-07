@@ -19,6 +19,8 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ModuleAdapter
 import com.ecocp.capstoneenvirotrack.adapter.SmrFileListAdapter
 import com.ecocp.capstoneenvirotrack.api.OpenAiClient
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.model.AirPollution
 import com.ecocp.capstoneenvirotrack.model.GeneralInfo
@@ -35,6 +37,8 @@ import com.ecocp.capstoneenvirotrack.utils.othersText
 import com.ecocp.capstoneenvirotrack.utils.waterPollutionText
 import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +47,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import retrofit2.Call
 
 @Suppress("UNCHECKED_CAST", "PrivatePropertyName")
 class SmrReviewDetailsFragment : Fragment() {
@@ -228,20 +233,76 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun updateSmrStatus(newStatus: String, rejectionReason: String?) {
-        val updates = mutableMapOf<String, Any>("status" to newStatus)
-        rejectionReason?.let{ updates["rejectionReason"] = it }
+        val smrId = smr.id ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        db.collection("smr_submissions").document(smr.id!!)
-            .update(updates)
+        // Always check fragment state
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        // Step 1: Update Firestore first (optional, keeps data in sync)
+        val updateData = mutableMapOf<String, Any>(
+            "status" to newStatus,
+            "reviewedTimestamp" to Timestamp.now()
+        )
+        rejectionReason?.let { updateData["rejectionReason"] = it }
+
+        db.collection("smr_submissions").document(smrId)
+            .update(updateData)
             .addOnSuccessListener {
-                Snackbar.make(binding.root, "SMR status updated to $newStatus", Snackbar.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
+
+                // Step 2: Fetch PCO UID from the SMR document
+                db.collection("smr_submissions").document(smrId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
+
+                        // --------------------------------------------------------
+                        // 🔔 CALL BACKEND API — NOTIFY PCO OF STATUS UPDATE
+                        // --------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = smrId,
+                            newStatus = newStatus,
+                            pcoId = pcoUid,
+                            embId = embUid,
+                            module = "SMR",
+                            feedback = rejectionReason ?: ""
+                        )
+
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "SMR status update notification sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Failed to send notification: ${response.code()}")
+                                        Snackbar.make(binding.root, "Notification error: ${response.code()}", Snackbar.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Snackbar.make(binding.root, "Failed to send notification", Snackbar.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Navigate back to dashboard
+                        if (isAdded) {
+                            findNavController().navigate(
+                                R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment
+                            )
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Snackbar.make(binding.root, "Failed to fetch SMR data: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                        Log.e("SMR_REVIEW", "Failed to fetch SMR application: ${e.message}", e)
+                    }
             }
-            .addOnFailureListener{e->
+            .addOnFailureListener { e ->
                 Snackbar.make(binding.root, "Failed to update status: ${e.message}", Snackbar.LENGTH_SHORT).show()
-                Log.e("StatusUpdate", "Failed to update status: ${e.message}")
+                Log.e("SMR_REVIEW", "Failed to update SMR status: ${e.message}", e)
             }
     }
+
 
     private fun showRejectionDialog(){
 

@@ -69,6 +69,24 @@ data class SendNotificationRequest(
     val message: String
 )
 
+// ----------------- Notification: PCO Submission -----------------
+data class PcoSendNotificationRequest(
+    val receiverId: String,   // PCO UID
+    val module: String,       // PTO, DISCHARGE, CNC, SMR, HMS, CRS, PCO
+    val documentId: String    // ID of submitted record
+)
+
+// ----------------- Notification: EMB Status Update -----------------
+data class UpdateStatusRequest(
+    val applicationId: String,
+    val newStatus: String,    // approved / rejected
+    val pcoId: String,        // Notify PCO
+    val embId: String,        // Notify EMB
+    val module: String,       // PTO / CNC / SMR etc.
+    val feedback: String? = null
+)
+
+
 interface ApiService {
     // Send email
     @Headers("Content-Type: application/json")
@@ -133,4 +151,19 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     @POST("/send-notification")
     fun sendNotification(@Body request: SendNotificationRequest): Call<Void>
+
+    // =============== NOTIFICATIONS (PCO → EMB + PCO) ===============
+    @Headers("Content-Type: application/json")
+    @POST("/send-notification")
+    fun sendPcoSubmissionNotification(
+        @Body request: PcoSendNotificationRequest
+    ): Call<Void>
+
+    // =============== UPDATE STATUS (EMB → PCO + EMB) ===============
+    @Headers("Content-Type: application/json")
+    @POST("/update-status")
+    fun updateStatus(
+        @Body request: UpdateStatusRequest
+    ): Call<Void>
+
 }

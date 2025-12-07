@@ -1,6 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.cnc
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +18,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import org.json.JSONObject
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
 import com.android.volley.Request
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -159,30 +163,35 @@ class CncReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "CNC Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // -------------------------------
-                // 🔔 Call backend for submission notifications (PCO + EMB)
-                // -------------------------------
-                val url = "http://10.0.2.2:5000/send-notification"
-                val json = JSONObject().apply {
-                    put("receiverId", uid!!)          // The PCO
-                    put("module", "CNC")             // Module
-                    put("documentId", currentDocId!!) // Firestore document ID
-                }
-
-                Volley.newRequestQueue(requireContext()).add(
-                    JsonObjectRequest(Request.Method.POST, url, json,
-                        { /* success */ },
-                        { error ->
-                            Toast.makeText(requireContext(),
-                                "Failed to send submission notifications: ${error.message}",
-                                Toast.LENGTH_SHORT).show()
-                        }
-                    )
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = uid!!,          // PCO UID
+                    module = "CNC",              // Module name
+                    documentId = currentDocId!!  // Firestore document ID
                 )
 
-                // -------------------------------
-                // Navigate back to dashboard
-                // -------------------------------
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "CNC submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
+                                Toast.makeText(requireContext(), "Notification error: ${response.code()}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Error sending notifications: ${t.message}")
+                            Toast.makeText(requireContext(), "Failed to send notifications", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+
+                // --------------------------------------------------------
+                // ✅ Navigate back to CNC Dashboard
+                // --------------------------------------------------------
                 findNavController().navigate(
                     R.id.cncDashboardFragment,
                     null,
@@ -195,6 +204,7 @@ class CncReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to submit CNC application.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
 
     override fun onDestroyView() {

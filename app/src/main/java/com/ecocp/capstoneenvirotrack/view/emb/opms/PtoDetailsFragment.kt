@@ -16,6 +16,8 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoDetails2Binding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
@@ -23,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import org.json.JSONObject
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -321,14 +324,12 @@ class PtoDetailsFragment : Fragment() {
         val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
 
-        // Always check fragment state
         if (!isAdded || context == null) return
         val safeContext = requireContext()
 
-        // PTO applications collection
         val collectionName = "opms_pto_applications"
 
-        // Update Firestore first (optional, keeps data in sync)
+        // Step 1: Update Firestore
         val updateData = mapOf(
             "status" to status,
             "feedback" to feedback,
@@ -339,39 +340,46 @@ class PtoDetailsFragment : Fragment() {
             .update(updateData)
             .addOnSuccessListener {
 
-                // Fetch PCO UID from document
+                // Step 2: Fetch PCO UID
                 db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
 
-                        // ⚠ Call backend endpoint for status update
-                        val url = "http://10.0.2.2:5000/update-status"
-                        val json = JSONObject().apply {
-                            put("applicationId", id)
-                            put("newStatus", status)
-                            put("feedback", feedback)
-                            put("embId", embUid)
-                            put("pcoId", pcoUid)
-                            put("module", "PTO")
-                        }
-
-                        Volley.newRequestQueue(safeContext).add(
-                            JsonObjectRequest(Request.Method.POST, url, json,
-                                { /* success */
-                                    Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
-
-                                    // Navigate back safely
-                                    if (isAdded) {
-                                        val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
-                                        navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
-                                    }
-                                },
-                                { error ->
-                                    Toast.makeText(safeContext, "Failed to notify: ${error.message}", Toast.LENGTH_SHORT).show()
-                                    Log.e("PTO_REVIEW", "❌ Failed to update PTO status", error)
-                                }
-                            )
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoUid,
+                            embId = embUid,
+                            module = "PTO",
+                            feedback = feedback
                         )
+
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "PTO status update notifications sent.")
+                                        Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Log.e("NOTIF", "Notification error: ${response.code()}")
+                                        Toast.makeText(safeContext, "Notification failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext, "Notification failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Navigate back to dashboard safely
+                        if (isAdded) {
+                            val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
+                            navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
+                        }
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(safeContext, "Failed to fetch application data: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -382,6 +390,7 @@ class PtoDetailsFragment : Fragment() {
                 Toast.makeText(safeContext, "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

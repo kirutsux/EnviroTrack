@@ -22,11 +22,14 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import org.json.JSONObject
+import retrofit2.Call
 
 class PttReviewDetailsFragment : Fragment() {
 
@@ -151,29 +154,71 @@ class PttReviewDetailsFragment : Fragment() {
         db.collection("ptt_applications").document(pttId)
             .update(data)
             .addOnSuccessListener {
+
                 Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
                 Log.d("PTTReview", "Firestore updated successfully for $pttId with status $status")
 
-                // Navigate back to HwmsEmbDashboardFragment and clear PttReviewDetailsFragment
+                // Step 1: Fetch PCO UID
+                db.collection("ptt_applications").document(pttId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
+
+                        // ------------------------------------------------------
+                        // 🔔 CALL BACKEND API — SEND STATUS UPDATE NOTIFICATION
+                        // ------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = pttId,
+                            newStatus = status,
+                            pcoId = pcoUid,
+                            embId = embUid,
+                            module = "HMS", // Hazardous Waste / PTT
+                            feedback = feedback
+                        )
+
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("PTTReview", "Status update notification sent successfully.")
+                                    } else {
+                                        Log.e("PTTReview", "Notification failed: ${response.code()}")
+                                        Toast.makeText(requireContext(),
+                                            "Notification failed: ${response.code()}",
+                                            Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("PTTReview", "Notification error: ${t.message}")
+                                    Toast.makeText(requireContext(),
+                                        "Failed to send notifications",
+                                        Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("PTTReview", "Failed to fetch PCO UID: ${e.message}")
+                    }
+
+                // Step 2: Navigate back to HWMS EMB Dashboard
                 if (isAdded) {
                     val navController = findNavController()
-                    Log.d("PTTReview", "Navigating to HwmsEmbDashboardFragment and clearing PttReviewDetailsFragment")
                     navController.navigate(
                         R.id.hwmsEmbDashboardFragment,
                         null,
                         navOptions {
-                            popUpTo(R.id.PttReviewDetailsFragment) {
-                                inclusive = true
-                            }
+                            popUpTo(R.id.PttReviewDetailsFragment) { inclusive = true }
                         }
                     )
                 }
+
             }
             .addOnFailureListener { exception ->
                 Log.e("PTTReview", "Failed to update Firestore: ${exception.message}")
                 Toast.makeText(requireContext(), "Failed to update status: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
 
 
