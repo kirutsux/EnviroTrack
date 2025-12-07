@@ -2,12 +2,17 @@ package com.ecocp.capstoneenvirotrack.view.emb.smr
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.fragment.app.Fragment
@@ -48,6 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import retrofit2.Call
+import androidx.core.net.toUri
 
 @Suppress("UNCHECKED_CAST", "PrivatePropertyName")
 class SmrReviewDetailsFragment : Fragment() {
@@ -75,10 +81,13 @@ class SmrReviewDetailsFragment : Fragment() {
         binding.btnAnalyze.isEnabled = false
         binding.finalResultsView.visibility = View.GONE
 
-        fileAdapter = SmrFileListAdapter { url ->
-            binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
-            binding.recyclerAttachedFiles.adapter = fileAdapter
-        }
+        fileAdapter = SmrFileListAdapter(
+            "Download",
+            { url -> downloadFile(url) }
+        )
+
+        binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerAttachedFiles.adapter = fileAdapter
 
         smrViewModel.fileUrls.observe(viewLifecycleOwner) { urls ->
             fileAdapter.submitList(urls)
@@ -91,7 +100,22 @@ class SmrReviewDetailsFragment : Fragment() {
         }
     }
 
+    @SuppressLint("UseKtx")
+    private fun downloadFile(fileUrl: String) {
+        val request = DownloadManager.Request(fileUrl.toUri()).apply {
+            setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                fileUrl.toUri().lastPathSegment ?: "file"
+            )
+        }
+        val downloadManager =
+            requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
+        Toast.makeText(requireContext(), "Download started", Toast.LENGTH_SHORT).show()
+    }
+
     private fun fetchSmrDetails(submissionId: String) {
+        smrViewModel.setFileUrls(smr.fileUrls)
         db.collection("smr_submissions").document(submissionId)
             .get()
             .addOnSuccessListener { doc ->
@@ -199,7 +223,8 @@ class SmrReviewDetailsFragment : Fragment() {
                     others = others,
                     dateSubmitted = (doc.getTimestamp("dateSubmitted")),
                     uid = doc.getString("uid"),
-                    id = doc.id
+                    id = doc.id,
+                    fileUrls = doc.get("fileUrls") as? List<String> ?: emptyList()
                 )
 
                 this.smr = smr
@@ -304,7 +329,6 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun showRejectionDialog() {
-
         val input = android.widget.EditText(requireContext()).apply {
             hint = "Enter rejection reason"
             isSingleLine = false
@@ -324,6 +348,7 @@ class SmrReviewDetailsFragment : Fragment() {
                         "Rejection reason is required",
                         Snackbar.LENGTH_SHORT
                     ).show()
+                    findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -398,6 +423,7 @@ class SmrReviewDetailsFragment : Fragment() {
 //                            binding.tvAiAnalysis.visibility = View.VISIBLE
 //                            binding.btnApprove.visibility = View.GONE
 //                            binding.btnReject.visibility = View.GONE
+                //            binding.recyclerAttachedFiles.visibility = View.GONE
 //                            Snackbar.make(binding.root, "AI analysis loaded from cache", Snackbar.LENGTH_SHORT).show()
 //                            progressDialog.dismiss()
 //                        }
@@ -487,6 +513,7 @@ class SmrReviewDetailsFragment : Fragment() {
                         binding.tvAiAnalysis.text = compiledAnalysis
                         progressDialog.dismiss()
 
+                        binding.recyclerAttachedFiles.visibility = View.GONE
                         binding.recyclerModules.visibility = View.GONE
                         binding.btnAnalyze.visibility = View.GONE
                         binding.finalResultsView.visibility = View.VISIBLE
@@ -498,7 +525,7 @@ class SmrReviewDetailsFragment : Fragment() {
             } catch (_: TimeoutCancellationException) {
                 withContext(Dispatchers.Main) {
                     if (_binding != null) {
-                        Log.d("AIAnalysis", "AI analysis timed out.")
+                        Log.d("AIAnalysis", "Timeout occurred")
                         progressDialog.dismiss()
                     }
                 }
@@ -541,17 +568,6 @@ class SmrReviewDetailsFragment : Fragment() {
             prefs[KEY_LAST_AI_OUTPUT]
         )
     }
-
-    private suspend fun clearCache() {
-        val app = requireContext().applicationContext as? MyApplication
-            ?: throw IllegalStateException("Application context is not MyApplication. Check AndroidManifest.xml and rebuild.")
-        app.smrDataStore.edit { prefs ->
-            prefs.remove(KEY_LAST_PROMPT_HASH)
-            prefs.remove(KEY_LAST_AI_OUTPUT)
-        }
-        Log.d("CacheClear", "Cached prompts and analyses cleared.")
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

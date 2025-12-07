@@ -76,19 +76,20 @@ class SmrSummaryFragment : Fragment() {
             binding.tvStatus.visibility = View.GONE
             binding.btnEditSmr.visibility = View.GONE
 
-            smrViewModel.smr.observe(viewLifecycleOwner){ smr->
+            smrViewModel.smr.observe(viewLifecycleOwner) { smr ->
                 displaySmrData(smr)
             }
         }
         Log.d("SmrSummaryFragment", "smrId: $smrId")
 
-        fileAdapter = SmrFileListAdapter { url ->
-            if (smrId == null) smrViewModel.removeFileUrl(url)
-        }
+        fileAdapter = SmrFileListAdapter(
+            "Remove",
+            { url -> smrViewModel.removeFileUrl(url) }
+            )
         binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerAttachedFiles.adapter = fileAdapter
 
-        if(smrId == null){
+        if (smrId == null) {
             smrViewModel.fileUrls.observe(viewLifecycleOwner) { urls ->
                 fileAdapter.submitList(urls)
             }
@@ -100,6 +101,7 @@ class SmrSummaryFragment : Fragment() {
 
         binding.btnSubmitSmr.setOnClickListener {
             submitSmrToFirebase()
+            clearAllInputs()
         }
 
         binding.btnEditSmr.setOnClickListener {
@@ -129,7 +131,7 @@ class SmrSummaryFragment : Fragment() {
                     }
 
                     setupStatusListener(smrId)
-                }?:run {
+                } ?: run {
                     Snackbar.make(binding.root, "No SMR data found", Snackbar.LENGTH_SHORT).show()
                 }
             }
@@ -159,7 +161,7 @@ class SmrSummaryFragment : Fragment() {
         storageRef.putFile(uri)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    if(arguments?.getString("smrId") == null){
+                    if (arguments?.getString("smrId") == null) {
                         smrViewModel.addFileUrl(downloadUrl.toString())
                     }
                     Snackbar.make(
@@ -185,7 +187,10 @@ class SmrSummaryFragment : Fragment() {
     /** --- DISPLAY SUMMARY DATA --- **/
     @SuppressLint("SetTextI18n")
     private fun displaySmrData(smr: Smr) {
-        Log.d("SMRDisplay", "Displaying SMR: ${smr.id}, GeneralInfo: ${smr.generalInfo.establishmentName}")
+        Log.d(
+            "SMRDisplay",
+            "Displaying SMR: ${smr.id}, GeneralInfo: ${smr.generalInfo.establishmentName}"
+        )
 
         // Module 1: General Info
         val module1Text = smr.generalInfo.generalInfoText()
@@ -323,11 +328,11 @@ class SmrSummaryFragment : Fragment() {
 
     /** --- CLEAR ALL MODULE INPUT FIELDS --- **/
     private fun clearAllInputs() {
-        smrViewModel.updateGeneralInfo(GeneralInfo())
-        smrViewModel.updateHazardousWastes(emptyList())
-        smrViewModel.clearWaterPollutionRecords()
-        smrViewModel.updateAirPollution(AirPollution())
-        smrViewModel.updateOthers(Others())
+//        smrViewModel.updateGeneralInfo(GeneralInfo())
+//        smrViewModel.updateHazardousWastes(emptyList())
+//        smrViewModel.clearWaterPollutionRecords()
+//        smrViewModel.updateAirPollution(AirPollution())
+//        smrViewModel.updateOthers(Others())
         smrViewModel.clearSmr()
     }
 
