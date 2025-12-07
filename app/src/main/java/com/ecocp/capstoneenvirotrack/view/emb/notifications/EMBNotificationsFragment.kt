@@ -24,7 +24,6 @@ class EMBNotificationsFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
 
     private lateinit var adapter: NotificationAdapter
-    private val notifList = mutableListOf<NotificationModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,49 +51,53 @@ class EMBNotificationsFragment : Fragment() {
             .whereEqualTo("receiverId", userId)
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, e ->
-                if (e != null || snapshot == null) return@addSnapshotListener
-
-                // Prevent crash when fragment is destroyed
-                if (_binding == null) return@addSnapshotListener
+                if (e != null || snapshot == null || _binding == null) return@addSnapshotListener
 
                 val notifications = snapshot.documents.mapNotNull { doc ->
                     doc.toObject(NotificationModel::class.java)?.apply { documentId = doc.id }
-                }
+                }.distinctBy { it.documentId }
 
-                val uniqueNotifications = notifications.distinctBy { it.documentId }
-                val groupedNotifications = groupNotificationsByDate(uniqueNotifications)
-
-                adapter.addNotifications(groupedNotifications)
+                adapter.addNotifications(groupNotificationsByDate(notifications))
 
                 binding.emptyNotificationsText.visibility =
-                    if (groupedNotifications.isEmpty()) View.VISIBLE else View.GONE
+                    if (notifications.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 
-
     private fun groupNotificationsByDate(notifications: List<NotificationModel>): List<NotificationModel> {
-        val today = mutableListOf<NotificationModel>()
-        val yesterday = mutableListOf<NotificationModel>()
-        val earlier = mutableListOf<NotificationModel>()
+        if (notifications.isEmpty()) return emptyList()
 
+        val todayStr = getDayString(Date())
         val cal = Calendar.getInstance()
-        val todayStr = getDayString(cal.time)
         cal.add(Calendar.DATE, -1)
         val yesterdayStr = getDayString(cal.time)
 
-        for (notif in notifications) {
-            val notifDate = notif.timestamp?.toDate()?.let { getDayString(it) }
+        val todayList = mutableListOf<NotificationModel>()
+        val yesterdayList = mutableListOf<NotificationModel>()
+        val earlierList = mutableListOf<NotificationModel>()
+
+        notifications.forEach { notif ->
+            val notifDate = notif.timestamp?.toDate()?.let { getDayString(it) } ?: ""
             when (notifDate) {
-                todayStr -> today.add(notif)
-                yesterdayStr -> yesterday.add(notif)
-                else -> earlier.add(notif)
+                todayStr -> todayList.add(notif)
+                yesterdayStr -> yesterdayList.add(notif)
+                else -> earlierList.add(notif)
             }
         }
 
         val result = mutableListOf<NotificationModel>()
-        if (today.isNotEmpty()) result.add(NotificationModel(title = "Today", isHeader = true)); result.addAll(today)
-        if (yesterday.isNotEmpty()) result.add(NotificationModel(title = "Yesterday", isHeader = true)); result.addAll(yesterday)
-        if (earlier.isNotEmpty()) result.add(NotificationModel(title = "Earlier", isHeader = true)); result.addAll(earlier)
+        if (todayList.isNotEmpty()) {
+            result.add(NotificationModel(title = "Today", isHeader = true))
+            result.addAll(todayList)
+        }
+        if (yesterdayList.isNotEmpty()) {
+            result.add(NotificationModel(title = "Yesterday", isHeader = true))
+            result.addAll(yesterdayList)
+        }
+        if (earlierList.isNotEmpty()) {
+            result.add(NotificationModel(title = "Earlier", isHeader = true))
+            result.addAll(earlierList)
+        }
 
         return result
     }

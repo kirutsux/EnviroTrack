@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.NotificationModel
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class NotificationAdapter(
     notifications: List<NotificationModel>
@@ -63,7 +65,9 @@ class NotificationAdapter(
         if (holder is NotificationViewHolder) {
             holder.title.text = notif.title
             holder.message.text = notif.message
-            holder.time.text = notif.timestamp?.toDate()?.toLocaleString() ?: ""
+            val sdf = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.ENGLISH)
+            holder.time.text = notif.timestamp?.toDate()?.let { sdf.format(it) } ?: ""
+
 
             // Read/unread UI
             if (!notif.isRead) {
