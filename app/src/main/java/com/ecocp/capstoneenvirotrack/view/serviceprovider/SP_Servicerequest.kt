@@ -384,7 +384,7 @@ class SP_Servicerequest : Fragment() {
             return when {
                 f.contains("pending") -> "Pending"
                 f.contains("confirm") || f.contains("confirmed") -> "Confirmed"
-                f.contains("rejected") || f.contains("reject") -> "Rejected"
+                f.contains("reject") || f.contains("rejected") -> "Rejected"
                 f.contains("complete") || f.contains("completed") -> "Completed"
                 f.contains("delivered") -> "Delivered"
                 f.contains("paid") -> "Paid"
@@ -563,9 +563,10 @@ class SP_Servicerequest : Fragment() {
         val selected = b.spinnerSort.selectedItem?.toString() ?: "All"
 
         val filtered = when (selected) {
-            "Sort by Pending" -> masterList.filter { it.bookingStatus?.contains("pending", true) == true }
-            "Sort by Confirmed" -> masterList.filter { it.bookingStatus?.contains("confirm", true) == true }
-            "Sort by Rejected" -> masterList.filter { it.bookingStatus?.contains("reject", true) == true }
+            "Pending" -> masterList.filter { it.bookingStatus?.contains("pending", true) == true }
+            "Confirmed" -> masterList.filter { it.bookingStatus?.contains("confirm", true) == true }
+            "Rejected" -> masterList.filter { it.bookingStatus?.contains("reject", true) == true }
+            "All" -> masterList
             else -> masterList
         }
 
@@ -590,9 +591,10 @@ class SP_Servicerequest : Fragment() {
                     val selected = parent.getItemAtPosition(position).toString()
 
                     val filtered = when (selected) {
-                        "Sort by Pending" -> masterList.filter { it.bookingStatus?.contains("pending", true) == true }
-                        "Sort by Confirmed" -> masterList.filter { it.bookingStatus?.contains("confirm", true) == true }
-                        "Sort by Rejected" -> masterList.filter { it.bookingStatus?.contains("reject", true) == true }
+                        "Pending" -> masterList.filter { it.bookingStatus?.contains("pending", true) == true }
+                        "Confirmed" -> masterList.filter { it.bookingStatus?.contains("confirm", true) == true }
+                        "Rejected" -> masterList.filter { it.bookingStatus?.contains("reject", true) == true }
+                        "All" -> masterList
                         else -> masterList
                     }
 

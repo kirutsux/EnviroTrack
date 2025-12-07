@@ -1,6 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.TransporterBooking
 import com.ecocp.capstoneenvirotrack.view.serviceprovider.adapters.ActiveTasksAdapter
@@ -23,6 +25,7 @@ class SP_ActiveTasks : Fragment() {
     private lateinit var recyclerActiveTasks: RecyclerView
     private lateinit var txtEmptyState: TextView
     private lateinit var progressLoading: ProgressBar
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     private val bookings = mutableListOf<TransporterBooking>()
     private val db = FirebaseFirestore.getInstance()
@@ -37,6 +40,7 @@ class SP_ActiveTasks : Fragment() {
         recyclerActiveTasks = view.findViewById(R.id.recyclerActiveTasks)
         txtEmptyState = view.findViewById(R.id.txtEmptyState)
         progressLoading = view.findViewById(R.id.progressLoading)
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefresh)
 
         recyclerActiveTasks.layoutManager = LinearLayoutManager(requireContext())
 
@@ -50,12 +54,20 @@ class SP_ActiveTasks : Fragment() {
                 bundle
             )
         }
-
         recyclerActiveTasks.adapter = adapter
 
         // UI start state
         txtEmptyState.visibility = View.GONE
         progressLoading.visibility = View.VISIBLE
+        swipeRefreshLayout.isRefreshing = false
+
+        swipeRefreshLayout.setOnRefreshListener{
+            loadAllConfirmedBookings(adapter) {
+                swipeRefreshLayout.isRefreshing = false
+                progressLoading.visibility = View.GONE
+                txtEmptyState.visibility = if (bookings.isEmpty()) View.VISIBLE else View.GONE
+            }
+        }
 
         // initial load
         loadAllConfirmedBookings(adapter) {
@@ -94,14 +106,17 @@ class SP_ActiveTasks : Fragment() {
                         ?: sp.getString("providerType")
                         ?: sp.getString("type")
                         ?: "").lowercase()
+                    Log.d("SP_ActiveTasks", "Service provider doc exists: ${sp.exists()}, role: '$providerType'")
                     if (providerType.contains("tsd")) {
+                        Log.d("SP_ActiveTasks", "Detected TSD from service_providers")
                         callback(true)
                     } else {
                         // fallback to users/{uid}
                         db.collection("users").document(uid)
                             .get()
                             .addOnSuccessListener { u ->
-                                val uRole = (u.getString("role") ?: u.getString("accountType") ?: "").lowercase()
+                                val uRole = (u.getString("role") ?: u.getString("accountType")
+                                ?: "").lowercase()
                                 callback(uRole.contains("tsd"))
                             }
                             .addOnFailureListener {
@@ -114,7 +129,8 @@ class SP_ActiveTasks : Fragment() {
                     db.collection("users").document(uid)
                         .get()
                         .addOnSuccessListener { u ->
-                            val uRole = (u.getString("role") ?: u.getString("accountType") ?: "").lowercase()
+                            val uRole = (u.getString("role") ?: u.getString("accountType")
+                            ?: "").lowercase()
                             callback(uRole.contains("tsd"))
                         }
                         .addOnFailureListener {
@@ -124,7 +140,8 @@ class SP_ActiveTasks : Fragment() {
         }
 
         // statuses we treat as "active" — compare case-insensitively
-        val activeStatusSet = setOf("confirmed", "in transit", "delivered", "completed", "in_transit")
+        val activeStatusSet =
+            setOf("confirmed", "in transit", "delivered", "completed", "in_transit")
 
         checkIfCurrentUserIsTsd { isTsd ->
             if (isTsd) {
@@ -160,7 +177,7 @@ class SP_ActiveTasks : Fragment() {
                     .get()
                     .addOnSuccessListener { snap1 ->
                         val list1 = snap1.documents.mapNotNull { d ->
-                            val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                            val dataMap = (d.data ?: emptyMap<String, Any>())
                             d.id to dataMap
                         }
                         processSnapshot(list1)
@@ -170,7 +187,8 @@ class SP_ActiveTasks : Fragment() {
                             .get()
                             .addOnSuccessListener { snap2 ->
                                 val list2 = snap2.documents.mapNotNull { d ->
-                                    val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                                    val dataMap =
+                                        (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
                                     d.id to dataMap
                                 }
                                 processSnapshot(list2)
@@ -180,7 +198,8 @@ class SP_ActiveTasks : Fragment() {
                                     .get()
                                     .addOnSuccessListener { snap3 ->
                                         val list3 = snap3.documents.mapNotNull { d ->
-                                            val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                                            val dataMap = (d.data
+                                                ?: emptyMap<String, Any>()) as Map<String, Any>
                                             d.id to dataMap
                                         }
                                         processSnapshot(list3)
@@ -188,16 +207,19 @@ class SP_ActiveTasks : Fragment() {
                                         db.collection("service_providers").document(uid)
                                             .get()
                                             .addOnSuccessListener { spDoc ->
-                                                val tsdName = spDoc.getString("companyName")?.trim().orEmpty()
+                                                val tsdName =
+                                                    spDoc.getString("companyName")?.trim().orEmpty()
                                                 if (tsdName.isNotEmpty()) {
                                                     db.collection("tsd_bookings")
                                                         .whereEqualTo("tsdName", tsdName)
                                                         .get()
                                                         .addOnSuccessListener { snap4 ->
-                                                            val list4 = snap4.documents.mapNotNull { d ->
-                                                                val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
-                                                                d.id to dataMap
-                                                            }
+                                                            val list4 =
+                                                                snap4.documents.mapNotNull { d ->
+                                                                    val dataMap = (d.data
+                                                                        ?: emptyMap<String, Any>()) as Map<String, Any>
+                                                                    d.id to dataMap
+                                                                }
                                                             processSnapshot(list4)
                                                             adapter.notifyDataSetChanged(); done()
                                                         }
@@ -227,7 +249,8 @@ class SP_ActiveTasks : Fragment() {
                             .get()
                             .addOnSuccessListener { snap2 ->
                                 val list2 = snap2.documents.mapNotNull { d ->
-                                    val dataMap = (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
+                                    val dataMap =
+                                        (d.data ?: emptyMap<String, Any>()) as Map<String, Any>
                                     d.id to dataMap
                                 }
                                 processSnapshot(list2)
@@ -248,7 +271,8 @@ class SP_ActiveTasks : Fragment() {
                             val b = TransporterBooking(
                                 bookingId = doc.id,
                                 serviceProviderName = map["serviceProviderName"] as? String ?: "",
-                                serviceProviderCompany = map["serviceProviderCompany"] as? String ?: "",
+                                serviceProviderCompany = map["serviceProviderCompany"] as? String
+                                    ?: "",
                                 bookingStatus = map["bookingStatus"] as? String ?: "",
                                 bookingDate = map["bookingDate"] as? Timestamp
                             )

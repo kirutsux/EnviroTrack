@@ -1,7 +1,9 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,25 +15,29 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import androidx.core.net.toUri
 
 class SP_TaskUpdateDetails : Fragment() {
 
     private var bookingId: String? = null
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
-    private val auth = FirebaseAuth.getInstance()
 
     private val uploadedFiles = mutableListOf<Uri>()
 
     private lateinit var txtStatusPill: TextView
     private lateinit var txtNoAttachments: TextView
     private lateinit var attachmentContainer: LinearLayout
-    private lateinit var spinnerStatus: Spinner
+    private lateinit var transporterStatus: TextView
+    private lateinit var progressBarHorizontal: ProgressBar
     private lateinit var btnSaveStatus: Button
     private lateinit var btnCancel: Button
     private lateinit var btnUpload: Button
+    private lateinit var btnInTransit: Button
+    private lateinit var btnDelivered: Button
 
     private enum class BookingSource { TRANSPORT, TSD, UNKNOWN }
+
     private var bookingSource = BookingSource.UNKNOWN
 
     private val filePickerLauncher =
@@ -67,12 +73,13 @@ class SP_TaskUpdateDetails : Fragment() {
 
         attachmentContainer = view.findViewById(R.id.attachmentContainer)
         txtNoAttachments = view.findViewById(R.id.txtNoAttachments)
-        spinnerStatus = view.findViewById(R.id.spinnerStatus)
         btnSaveStatus = view.findViewById(R.id.btnSaveStatus)
+        transporterStatus = view.findViewById(R.id.transporterStatus)
+        progressBarHorizontal = view.findViewById(R.id.progressBarHorizontal)
         btnCancel = view.findViewById(R.id.btnCancel)
         btnUpload = view.findViewById(R.id.btnUploadFile)
-
-        setupSpinner()
+        btnInTransit = view.findViewById(R.id.btnInTransit)
+        btnDelivered = view.findViewById(R.id.btnDelivered)
 
         loadBookingDetails(
             txtCompanyName, txtCompanyAddress, txtTaskRef, txtStatusPill,
@@ -82,15 +89,11 @@ class SP_TaskUpdateDetails : Fragment() {
         btnUpload.setOnClickListener { filePickerLauncher.launch("*/*") }
         btnSaveStatus.setOnClickListener { saveStatus() }
         btnCancel.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
+        btnInTransit.setOnClickListener { updateStatusDirectly("In Transit") }
+        btnDelivered.setOnClickListener { updateStatusDirectly("Delivered") }
 
+        updateButtonVisibility()
         return view
-    }
-
-    private fun setupSpinner() {
-        val statusOptions = resources.getStringArray(R.array.transporter_status_options)
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statusOptions)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerStatus.adapter = adapter
     }
 
     private fun displayUploadedFiles() {
@@ -141,8 +144,13 @@ class SP_TaskUpdateDetails : Fragment() {
                             ?: doc.getString("bookingStatus")
                             ?: "Pending"
 
+                        val status = doc.getString("status") ?: "Confirmed"
                         updateStatusPill(savedStatus)
                         applyDeliveredLock(savedStatus)
+                        Log.d("Status Logging ", "Status: $status")
+                        transporterStatus.text = status.uppercase()
+                        updateProgressBar(status)
+
 
                         txtOriginDestination.text =
                             "${doc.getString("origin") ?: ""} → ${doc.getString("destination") ?: ""}"
@@ -157,10 +165,6 @@ class SP_TaskUpdateDetails : Fragment() {
                         uploadedFiles.addAll(existing.map { Uri.parse(it) })
                         displayUploadedFiles()
 
-                        // spinner: case-insensitive matching and safe fallback
-                        val options = resources.getStringArray(R.array.transporter_status_options)
-                        val idx = options.indexOfFirst { it.equals(savedStatus, ignoreCase = true) }.let { if (it >= 0) it else 0 }
-                        spinnerStatus.setSelection(idx)
 
                     } else {
                         // ---------------- TSD MODE ----------------
@@ -184,6 +188,7 @@ class SP_TaskUpdateDetails : Fragment() {
     // -------------------------------------------------------------
     // LOAD TSD BOOKING (WITH FIELD REMAPPING)
     // -------------------------------------------------------------
+    @SuppressLint("UseKtx")
     private fun loadTsdBookingForTaskUpdate(
         id: String,
         txtCompanyName: TextView,
@@ -231,7 +236,8 @@ class SP_TaskUpdateDetails : Fragment() {
                         }
                         walk(card)
                     }
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
 
                 // ---------------------------------
                 // FIELDS (CHANGES: prefer tsdName; fallback to wasteType instead of "Unknown";
@@ -255,8 +261,16 @@ class SP_TaskUpdateDetails : Fragment() {
                 // If tsdName is exactly the waste type (e.g. "Food Waste"), show the timestamp instead.
                 // If none of those, fallback to facilityName, then to waste type, then to "Unknown".
                 val companyToShow = when {
-                    tsdNameRaw.isNotBlank() && !tsdNameRaw.equals(wasteRaw, ignoreCase = true) -> tsdNameRaw
-                    tsdNameRaw.isNotBlank() && tsdNameRaw.equals(wasteRaw, ignoreCase = true) && tsDisplay.isNotBlank() -> tsDisplay
+                    tsdNameRaw.isNotBlank() && !tsdNameRaw.equals(
+                        wasteRaw,
+                        ignoreCase = true
+                    ) -> tsdNameRaw
+
+                    tsdNameRaw.isNotBlank() && tsdNameRaw.equals(
+                        wasteRaw,
+                        ignoreCase = true
+                    ) && tsDisplay.isNotBlank() -> tsDisplay
+
                     facilityNameRaw.isNotBlank() -> facilityNameRaw
                     wasteRaw.isNotBlank() -> wasteRaw
                     else -> "Unknown"
@@ -267,8 +281,12 @@ class SP_TaskUpdateDetails : Fragment() {
                 txtTaskRef.text = "Ref: $bookingRef"
 
                 val status = s("status", s("bookingStatus", "Pending"))
+                val transportStatus = s("status", "Confirmed")
                 updateStatusPill(status)
                 applyDeliveredLock(status)
+                Log.d("Status Logging ", "Status: $transportStatus")
+                transporterStatus.text = transportStatus.uppercase()
+                updateProgressBar(transportStatus)
 
                 val treatment = s("treatmentInfo", s("treatment", s("notes", "-")))
                 txtOriginDestination.text = treatment.ifEmpty { "-" }
@@ -297,22 +315,27 @@ class SP_TaskUpdateDetails : Fragment() {
 
                 // Attachments (keeps original behavior)
                 uploadedFiles.clear()
-                (m["previousRecordUrl"] as? String)?.let { if (it.isNotBlank()) uploadedFiles.add(Uri.parse(it)) }
-                (m["certificateUrl"] as? String)?.let { if (it.isNotBlank()) uploadedFiles.add(Uri.parse(it)) }
+                (m["previousRecordUrl"] as? String)?.let {
+                    if (it.isNotBlank()) uploadedFiles.add(
+                        Uri.parse(it)
+                    )
+                }
+                (m["certificateUrl"] as? String)?.let {
+                    if (it.isNotBlank()) uploadedFiles.add(
+                        it.toUri()
+                    )
+                }
                 val cp = m["collectionProof"]
-                if (cp is List<*>) cp.mapNotNull { it as? String }.forEach { uploadedFiles.add(Uri.parse(it)) }
+                if (cp is List<*>) cp.mapNotNull { it as? String }
+                    .forEach { uploadedFiles.add(Uri.parse(it)) }
                 displayUploadedFiles()
 
-                // spinner selection (keeps original behavior)
-                val options = resources.getStringArray(R.array.transporter_status_options)
-                spinnerStatus.setSelection(options.indexOf(status).coerceAtLeast(0))
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to load booking.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to load booking.", Toast.LENGTH_SHORT)
+                    .show()
             }
     }
-
-
 
 
     // -------------------------------------------------------------
@@ -322,36 +345,20 @@ class SP_TaskUpdateDetails : Fragment() {
 // SAVE STATUS + FILES (UPDATED: no optimistic UI lock; only lock after successful write)
 // -------------------------------------------------------------
     private fun saveStatus() {
-        val newStatus = spinnerStatus.selectedItem.toString().trim()
         val id = bookingId ?: return
 
         val collectionName =
             if (bookingSource == BookingSource.TSD) "tsd_bookings"
             else "transport_bookings"
-
-        // Prepare update map
         val updateMap = mutableMapOf<String, Any>()
-        if (collectionName == "transport_bookings") {
-            updateMap["wasteStatus"] = newStatus
-            // keep bookingStatus in sync so other screens that check bookingStatus behave correctly
-            updateMap["bookingStatus"] = newStatus
-        } else {
-            updateMap["status"] = newStatus
-            updateMap["bookingStatus"] = newStatus
-        }
 
         // Disable controls while saving to prevent double clicks
         btnSaveStatus.isEnabled = false
-        spinnerStatus.isEnabled = false
 
         val newFiles = uploadedFiles.filter { it.scheme == "content" || it.scheme == "file" }
         val oldUrls = uploadedFiles.filter { it.scheme == "https" }.map { it.toString() }
 
         fun finishWithSuccess() {
-            // Only now update the pill and possibly lock UI
-            updateStatusPill(newStatus)
-            applyDeliveredLock(newStatus)
-
             Toast.makeText(requireContext(), "Update saved!", Toast.LENGTH_SHORT).show()
             btnSaveStatus.isEnabled = true
         }
@@ -360,14 +367,14 @@ class SP_TaskUpdateDetails : Fragment() {
             Toast.makeText(requireContext(), "Failed to save update!", Toast.LENGTH_SHORT).show()
             // re-enable controls so user can retry
             btnSaveStatus.isEnabled = true
-            spinnerStatus.isEnabled = true
         }
 
         if (newFiles.isNotEmpty()) {
             // Upload new files first
             val uploadTasks = newFiles.map { uri ->
                 // use timestamp to avoid collisions
-                val dest = "$collectionName/$id/booking_proofs/${System.currentTimeMillis()}_${uri.lastPathSegment}"
+                val dest =
+                    "$collectionName/$id/booking_proofs/${System.currentTimeMillis()}_${uri.lastPathSegment}"
                 val ref = storage.reference.child(dest)
                 ref.putFile(uri).continueWithTask { t ->
                     if (!t.isSuccessful) throw t.exception ?: Exception("Upload failed")
@@ -375,7 +382,7 @@ class SP_TaskUpdateDetails : Fragment() {
                 }
             }
 
-            com.google.android.gms.tasks.Tasks.whenAllSuccess<android.net.Uri>(uploadTasks)
+            Tasks.whenAllSuccess<Uri>(uploadTasks)
                 .addOnSuccessListener { uris ->
                     val merged = oldUrls + uris.map { it.toString() }
 
@@ -425,51 +432,170 @@ class SP_TaskUpdateDetails : Fragment() {
     /** Map raw status strings to the pill text (case-insensitive, tolerant) */
     private fun updateStatusPill(status: String) {
         val s = status.trim().lowercase()
-        txtStatusPill.text = when {
-            s.contains("delivered") || s.contains("completed") -> "Delivered"
-            s.contains("in transit") || s.contains("transit") -> "In Transit"
-            s.contains("received") || s.contains("confirmed") -> "Confirmed"
-            s.contains("treated") -> "Treated"
-            s.contains("rejected") -> "Rejected"
-            else -> "Pending"
+        val statusPair: Pair<String, String> = when {
+            s.contains("delivered") || s.contains("completed") -> Pair("Delivered", "#4CAF50")
+            s.contains("in transit") || s.contains("transit") -> Pair("In Transit", "#FF9800")
+            s.contains("received") || s.contains("confirmed") -> Pair("Confirmed", "#2196F3")
+            s.contains("treated") -> Pair("Treated", "#9C27B0")
+            s.contains("rejected") -> Pair("Rejected", "#F44336")
+            else -> Pair("Pending", "#9E9E9E")
         }
+        txtStatusPill.text = statusPair.first
+        txtStatusPill.background.setTint(android.graphics.Color.parseColor(statusPair.second))
     }
 
 
     /** If status is a final/completed state -> lock UI (hide buttons + disable spinner)
      *  NOTE: transit/in transit is treated as final for transporter to match TSD behavior you requested.
      */
-    private fun applyDeliveredLock(status: String) {
+    private fun updateProgressBar(status: String) {
         val s = status.trim().lowercase()
-        val isFinal = s.contains("delivered") ||
-                s.contains("completed") ||
-                s.contains("treated") ||
-                s.contains("rejected")
-
-        if (isFinal) {
-            btnSaveStatus.visibility = View.GONE
-            btnCancel.visibility = View.GONE
-            btnUpload.visibility = View.GONE
-            spinnerStatus.isEnabled = false
+        if (bookingSource == BookingSource.TSD && (s.contains("in transit") || s.contains("transit"))) {
+            progressBarHorizontal.visibility = View.VISIBLE
         } else {
-            btnSaveStatus.visibility = View.VISIBLE
-            btnCancel.visibility = View.VISIBLE
-            btnUpload.visibility = View.VISIBLE
-            spinnerStatus.isEnabled = true
+            progressBarHorizontal.visibility = View.GONE
         }
     }
 
+    private fun updateButtonVisibility() {
+        if (bookingSource == BookingSource.TRANSPORT) {
+            btnInTransit.visibility = View.VISIBLE
+            btnDelivered.visibility = View.VISIBLE
+            btnCancel.visibility = View.VISIBLE
+            btnSaveStatus.visibility = View.GONE
+        } else {
+            btnInTransit.visibility = View.GONE
+            btnDelivered.visibility = View.GONE
+            btnSaveStatus.visibility = View.VISIBLE
+        }
+    }
 
+    private fun updateStatusDirectly(newStatus: String) {
+        val id = bookingId ?: return
+        val updateMap = mutableMapOf<String, Any>("status" to newStatus)
 
+        btnInTransit.isEnabled = false
+        btnDelivered.isEnabled = false
 
-    private fun updateBookingInFirestore(collection: String, id: String, map: Map<String, Any>) {
-        db.collection(collection).document(id)
-            .update(map)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Update saved!", Toast.LENGTH_SHORT).show()
+        db.collection("transport_bookings").document(id).get()
+            .addOnSuccessListener { transportDoc ->
+                if (!transportDoc.exists()) {
+                    Log.e("SP_TaskUpdateDetails", "Transport booking not found")
+                    Toast.makeText(
+                        requireContext(),
+                        "Transport booking not found",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    btnInTransit.isEnabled = true
+                    btnDelivered.isEnabled = true
+                    return@addOnSuccessListener
+                }
+
+                val pcoId = transportDoc.getString("pcoId") ?: ""
+                if (pcoId.isBlank()) {
+                    Log.e("SP_TaskUpdateDetails", "No pcoId found in transport booking")
+                    Toast.makeText(
+                        requireContext(),
+                        "Cannot link to TSD booking",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    btnInTransit.isEnabled = true
+                    btnDelivered.isEnabled = true
+                    return@addOnSuccessListener
+                }
+
+                Log.d("SP_TaskUpdateDetails", "pcoId: $pcoId")
+
+                db.collection("tsd_bookings")
+                    .whereEqualTo("generatorId", pcoId)
+                    .get()
+                    .addOnSuccessListener { tsdQuerySnap ->
+                        if (tsdQuerySnap.isEmpty) {
+                            Log.e(
+                                "SP_TaskUpdateDetails",
+                                "No TSD booking found with generatorId: $pcoId"
+                            )
+                            Toast.makeText(
+                                requireContext(),
+                                "Linked TSD booking not found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            btnInTransit.isEnabled = true
+                            btnDelivered.isEnabled = true
+                            return@addOnSuccessListener
+                        }
+
+                        val tsdDocId = tsdQuerySnap.documents[0].id
+                        Log.d("SP_TaskUpdateDetails", "Found TSD booking ID: $tsdDocId")
+
+                        val transportUpdate =
+                            db.collection("transport_bookings").document(id).update(updateMap)
+                        val tsdUpdate =
+                            db.collection("tsd_bookings").document(tsdDocId).update(updateMap)
+
+                        Tasks.whenAll(transportUpdate, tsdUpdate)
+                            .addOnSuccessListener {
+                                Log.d("SP_TaskUpdateDetails", "Both updates succeeded")
+                                transporterStatus.text = newStatus.uppercase()
+                                updateStatusPill(newStatus)
+                                updateProgressBar(newStatus)
+                                applyDeliveredLock(newStatus)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Status updated to $newStatus",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                btnInTransit.isEnabled = true
+                                btnDelivered.isEnabled = true
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("SP_TaskUpdateDetails", "Update failed", e)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to update status",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                btnInTransit.isEnabled = true
+                                btnDelivered.isEnabled = true
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("SP_TaskUpdateDetails", "TSD query failed", e)
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to find TSD booking",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        btnInTransit.isEnabled = true
+                        btnDelivered.isEnabled = true
+                    }
             }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to save update!", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Log.e("SP_TaskUpdateDetails", "Transport fetch failed", e)
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to load transport booking",
+                    Toast.LENGTH_SHORT
+                ).show()
+                btnInTransit.isEnabled = true
+                btnDelivered.isEnabled = true
             }
+    }
+
+    private fun applyDeliveredLock(status: String) {
+        if (bookingSource == BookingSource.TRANSPORT) {
+            btnSaveStatus.visibility = View.GONE
+            btnUpload.visibility = View.GONE
+            btnInTransit.visibility = View.VISIBLE
+            btnDelivered.visibility = View.VISIBLE
+            btnCancel.visibility = View.VISIBLE
+        } else {
+            btnInTransit.visibility = View.GONE
+            btnDelivered.visibility = View.GONE
+            btnSaveStatus.visibility = View.VISIBLE
+            btnUpload.visibility = View.VISIBLE
+            btnCancel.visibility = View.VISIBLE
+        }
+        updateProgressBar(status)
     }
 }
