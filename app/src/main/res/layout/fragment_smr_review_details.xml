@@ -20,6 +20,13 @@
         android:layout_marginTop="16dp"
         android:layout_weight="1" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerAttachedFiles"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"/>
+
     <Button
         android:id="@+id/btnAnalyze"
         android:layout_width="match_parent"
@@ -42,14 +49,6 @@
             android:layout_marginTop="20dp"
             android:gravity="top"
             android:orientation="vertical">
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerAttachedFiles"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"/>
 
             <TextView
                 android:id="@+id/tvAiAnalysis"

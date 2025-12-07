@@ -2,12 +2,17 @@ package com.ecocp.capstoneenvirotrack.view.emb.smr
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.fragment.app.Fragment
@@ -43,6 +48,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import androidx.core.net.toUri
 
 @Suppress("UNCHECKED_CAST", "PrivatePropertyName")
 class SmrReviewDetailsFragment : Fragment() {
@@ -70,12 +76,15 @@ class SmrReviewDetailsFragment : Fragment() {
         binding.btnAnalyze.isEnabled = false
         binding.finalResultsView.visibility = View.GONE
 
-        fileAdapter = SmrFileListAdapter{url->
-            binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
-            binding.recyclerAttachedFiles.adapter = fileAdapter
-        }
+        fileAdapter = SmrFileListAdapter(
+            "Download",
+            { url -> downloadFile(url) }
+        )
 
-        smrViewModel.fileUrls.observe(viewLifecycleOwner){urls->
+        binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerAttachedFiles.adapter = fileAdapter
+
+        smrViewModel.fileUrls.observe(viewLifecycleOwner) { urls ->
             fileAdapter.submitList(urls)
         }
 
@@ -84,6 +93,20 @@ class SmrReviewDetailsFragment : Fragment() {
         } else {
             Snackbar.make(binding.root, "No submissions selected", Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    @SuppressLint("UseKtx")
+    private fun downloadFile(fileUrl: String) {
+        val request = DownloadManager.Request(fileUrl.toUri()).apply {
+            setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                fileUrl.toUri().lastPathSegment ?: "file"
+            )
+        }
+        val downloadManager =
+            requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
+        Toast.makeText(requireContext(), "Download started", Toast.LENGTH_SHORT).show()
     }
 
     private fun fetchSmrDetails(submissionId: String) {
@@ -194,7 +217,8 @@ class SmrReviewDetailsFragment : Fragment() {
                     others = others,
                     dateSubmitted = (doc.getTimestamp("dateSubmitted")),
                     uid = doc.getString("uid"),
-                    id = doc.id
+                    id = doc.id,
+                    fileUrls = doc.get("fileUrls") as? List<String> ?: emptyList()
                 )
 
                 this.smr = smr
@@ -229,22 +253,28 @@ class SmrReviewDetailsFragment : Fragment() {
 
     private fun updateSmrStatus(newStatus: String, rejectionReason: String?) {
         val updates = mutableMapOf<String, Any>("status" to newStatus)
-        rejectionReason?.let{ updates["rejectionReason"] = it }
+        rejectionReason?.let { updates["rejectionReason"] = it }
 
         db.collection("smr_submissions").document(smr.id!!)
             .update(updates)
             .addOnSuccessListener {
-                Snackbar.make(binding.root, "SMR status updated to $newStatus", Snackbar.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
+                Snackbar.make(
+                    binding.root,
+                    "SMR status updated to $newStatus",
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
-            .addOnFailureListener{e->
-                Snackbar.make(binding.root, "Failed to update status: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Snackbar.make(
+                    binding.root,
+                    "Failed to update status: ${e.message}",
+                    Snackbar.LENGTH_SHORT
+                ).show()
                 Log.e("StatusUpdate", "Failed to update status: ${e.message}")
             }
     }
 
-    private fun showRejectionDialog(){
-
+    private fun showRejectionDialog() {
         val input = android.widget.EditText(requireContext()).apply {
             hint = "Enter rejection reason"
             isSingleLine = false
@@ -259,7 +289,12 @@ class SmrReviewDetailsFragment : Fragment() {
                 if (reason.isNotEmpty()) {
                     updateSmrStatus("Rejected", reason)
                 } else {
-                    Snackbar.make(binding.root, "Rejection reason is required", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(
+                        binding.root,
+                        "Rejection reason is required",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -334,6 +369,7 @@ class SmrReviewDetailsFragment : Fragment() {
 //                            binding.tvAiAnalysis.visibility = View.VISIBLE
 //                            binding.btnApprove.visibility = View.GONE
 //                            binding.btnReject.visibility = View.GONE
+                //            binding.recyclerAttachedFiles.visibility = View.GONE
 //                            Snackbar.make(binding.root, "AI analysis loaded from cache", Snackbar.LENGTH_SHORT).show()
 //                            progressDialog.dismiss()
 //                        }
@@ -350,6 +386,7 @@ class SmrReviewDetailsFragment : Fragment() {
 
                     val prompt = """
                         You are an Environmental Compliance Analyst for the EMB (Environmental Management Bureau).
+                        The parameters and rules you abide by are the rules and laws the Philippines abide by.
                         Here are a list of different modules from an accredited PCO for their quarterly requirements.
                         Provide a short and structured compliance assessment of each:
                         Module Name:${moduleName}
@@ -396,10 +433,13 @@ class SmrReviewDetailsFragment : Fragment() {
                             
                             
                     Replace the Module assessment placeholders with the actual results from previously done analyses. After the compiled analyses, put the final analysis generated for overall assessment.
+                    Afterwards, put an enumerated list of follow-up actions.
+                    At the very end, put a decision of whether the submission/application should be approved or not.
+                    i.e. Final approval decision: For approval/rejection.
                 """.trimIndent()
 
                 val finalRequest = OpenAiRequest(
-                    model = "gpt-3.5-turbo",
+                    model = "gpt-4o",
                     messages = listOf(OpenAiMessage(role = "user", content = finalPrompt)),
                     max_tokens = 1500
                 )
@@ -419,6 +459,7 @@ class SmrReviewDetailsFragment : Fragment() {
                         binding.tvAiAnalysis.text = compiledAnalysis
                         progressDialog.dismiss()
 
+                        binding.recyclerAttachedFiles.visibility = View.GONE
                         binding.recyclerModules.visibility = View.GONE
                         binding.btnAnalyze.visibility = View.GONE
                         binding.finalResultsView.visibility = View.VISIBLE
@@ -430,7 +471,7 @@ class SmrReviewDetailsFragment : Fragment() {
             } catch (_: TimeoutCancellationException) {
                 withContext(Dispatchers.Main) {
                     if (_binding != null) {
-                        binding.tvAiAnalysis.text = "AI analysis timed out."
+                        Log.d("AIAnalysis", "Timeout occurred")
                         progressDialog.dismiss()
                     }
                 }
@@ -473,6 +514,7 @@ class SmrReviewDetailsFragment : Fragment() {
             prefs[KEY_LAST_AI_OUTPUT]
         )
     }
+
     private suspend fun clearCache() {
         val app = requireContext().applicationContext as? MyApplication
             ?: throw IllegalStateException("Application context is not MyApplication. Check AndroidManifest.xml and rebuild.")
