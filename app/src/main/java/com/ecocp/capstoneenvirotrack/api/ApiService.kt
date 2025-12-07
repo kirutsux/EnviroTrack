@@ -86,6 +86,12 @@ data class UpdateStatusRequest(
     val feedback: String? = null
 )
 
+data class SendExpiryNotificationRequest(
+    val userId: String,    // PCO UID
+    val type: String,      // PTO / DISCHARGE / PCO etc.
+    val daysLeft: Long     // Number of days left until expiry
+)
+
 
 interface ApiService {
     // Send email
@@ -164,6 +170,13 @@ interface ApiService {
     @POST("/update-status")
     fun updateStatus(
         @Body request: UpdateStatusRequest
+    ): Call<Void>
+
+    // ----------------- Push Notification: Expiry Alert -----------------
+    @Headers("Content-Type: application/json")
+    @POST("/send-expiry-notification")
+    fun sendExpiryNotification(
+        @Body request: SendExpiryNotificationRequest
     ): Call<Void>
 
 }

@@ -328,6 +328,7 @@ class SmrSummaryFragment : Fragment() {
         smrViewModel.clearWaterPollutionRecords()
         smrViewModel.updateAirPollution(AirPollution())
         smrViewModel.updateOthers(Others())
+        smrViewModel.clearSmr()
     }
 
     override fun onDestroyView() {
