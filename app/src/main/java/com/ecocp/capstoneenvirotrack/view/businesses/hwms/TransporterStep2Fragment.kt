@@ -6,6 +6,7 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ServiceProviderAdapter
+import com.ecocp.capstoneenvirotrack.api.NotifyBookingCreatedRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentResponse
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.model.ServiceProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -30,6 +35,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -338,9 +346,10 @@ class TransporterStep2Fragment : Fragment() {
             bookingData = hashMapOf(
                 "pcoId" to currentUser.uid,
                 "pcoEmail" to (currentUser.email ?: ""),
-                "bookedBy" to currentUserFullName,                    // NEW: Full name here
-                "bookedByUid" to currentUser.uid,                     // NEW: UID for filtering
+                "bookedBy" to currentUserFullName,
+                "bookedByUid" to currentUser.uid,
                 "serviceProviderName" to provider.name,
+                "serviceProviderUid" to provider.uid,
                 "serviceProviderCompany" to provider.companyName,
                 "providerType" to provider.role,
                 "providerContact" to provider.contactNumber,
@@ -351,10 +360,10 @@ class TransporterStep2Fragment : Fragment() {
                 "specialInstructions" to special,
                 "bookingDate" to Date(selectedDateMillis!!),
                 "dateBooked" to FieldValue.serverTimestamp(),
-                "bookingStatus" to "pending",
+                "bookingStatus" to "Pending",
                 "amount" to paymentAmount,
-                "paymentStatus" to "pending",
-                "status" to "pending"
+                "paymentStatus" to "Pending",
+                "status" to "Pending"
             )
 
             // create provisional bookingId BEFORE uploading files
@@ -449,7 +458,7 @@ class TransporterStep2Fragment : Fragment() {
                 .addOnFailureListener {
                     callback(false, emptyMap())
                 }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             callback(false, emptyMap())
             return
         }
@@ -500,57 +509,33 @@ class TransporterStep2Fragment : Fragment() {
         btnConfirm?.isEnabled = (transportPlanUri != null && storagePermitUri != null)
     }
 
-    private fun createPaymentIntent(amount: Double) {
+    private fun createPaymentIntent(paymentAmount: Double) { // amount in PHP, flexible input
         progressDialog.setMessage("Initializing payment...")
         progressDialog.show()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val url = URL("http://10.0.2.2:8080/create-payment-intent")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-                conn.setRequestProperty("Accept", "application/json")
-                conn.doOutput = true
+        // Convert to cents for Stripe
+        val amountInCents = (paymentAmount).toInt()
 
-                val jsonBody = JSONObject()
-                jsonBody.put("amount", amount)
-                val out = conn.outputStream
-                out.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
-                out.flush()
-                out.close()
-
-                val responseCode = conn.responseCode
-                if (responseCode != HttpURLConnection.HTTP_OK) {
-                    throw Exception("Server responded with code $responseCode")
-                }
-
-                val response = conn.inputStream.bufferedReader().readText()
-                val json = JSONObject(response)
-                clientSecret = json.getString("clientSecret")
-
-                withContext(Dispatchers.Main) {
+        RetrofitClient.instance.createPaymentIntent(PaymentRequest(amountInCents))
+            .enqueue(object : Callback<PaymentResponse> {
+                override fun onResponse(call: Call<PaymentResponse>, response: Response<PaymentResponse>) {
                     progressDialog.dismiss()
-                    clientSecret?.let {
+                    if (response.isSuccessful && response.body() != null) {
+                        clientSecret = response.body()!!.clientSecret
                         paymentSheet.presentWithPaymentIntent(
-                            it,
+                            clientSecret!!,
                             PaymentSheet.Configuration("EnviroTrack")
                         )
-                    } ?: run {
-                        Toast.makeText(requireContext(), "Payment initialization error.", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to create payment intent", Toast.LENGTH_SHORT).show()
                     }
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+
+                override fun onFailure(call: Call<PaymentResponse>, t: Throwable) {
                     progressDialog.dismiss()
-                    Toast.makeText(
-                        requireContext(),
-                        "Payment initialization failed: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
-            }
-        }
+            })
     }
 
     private fun onPaymentResult(paymentResult: PaymentSheetResult) {
@@ -574,38 +559,99 @@ class TransporterStep2Fragment : Fragment() {
         val bookingId = bookingData["bookingId"] as? String
         if (bookingId.isNullOrEmpty()) {
             Toast.makeText(requireContext(), "Missing bookingId", Toast.LENGTH_SHORT).show()
+            Log.e("BOOKING", "Booking ID is null or empty")
             return
         }
 
-        db.collection("transport_bookings")
-            .document(bookingId)
-            .set(bookingData)
+        val serviceProviderUid = bookingData["serviceProviderUid"] as? String
+        Log.d("BOOKING", "Fetched serviceProviderUid: $serviceProviderUid")
+
+        val bookingRef = db.collection("transport_bookings").document(bookingId)
+
+        // 1️⃣ Save booking to Firestore
+        bookingRef.set(bookingData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Booking saved successfully!", Toast.LENGTH_LONG).show()
-                linkBookingToHazardousWasteGenerator(bookingId)
+                Log.d("BOOKING", "Booking saved successfully: $bookingId")
+
+                // 2️⃣ Link booking to hazardous waste generators
+                linkBookingToHazardousWasteGenerator(bookingId) { linkSuccess ->
+                    if (linkSuccess) {
+                        Log.d("BOOKING", "✅ Waste generators linked for booking $bookingId")
+
+                        // 3️⃣ Send notification AFTER linking
+                        if (!serviceProviderUid.isNullOrEmpty()) {
+                            Log.d("NOTIF", "Scheduling notification to serviceProviderUid: $serviceProviderUid")
+
+                            // Delay slightly to ensure Firestore propagation
+                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                val request = NotifyBookingCreatedRequest(bookingId = bookingId)
+                                RetrofitClient.instance.notifyBookingCreated(request)
+                                    .enqueue(object : retrofit2.Callback<Void> {
+                                        override fun onResponse(
+                                            call: Call<Void>,
+                                            response: retrofit2.Response<Void>
+                                        ) {
+                                            if (response.isSuccessful) {
+                                                Log.d("NOTIF", "Transporter notified for booking $bookingId.")
+                                            } else {
+                                                Log.e("NOTIF", "Failed to notify transporter: ${response.code()}")
+                                                Toast.makeText(requireContext(),
+                                                    "Notification error: ${response.code()}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+
+                                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                                            Log.e("NOTIF", "Error notifying transporter: ${t.message}", t)
+                                            Toast.makeText(requireContext(),
+                                                "Failed to notify transporter",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    })
+                            }, 2000) // 2 seconds delay
+                        } else {
+                            Log.e("NOTIF", "Cannot notify transporter — serviceProviderUid is null or empty")
+                        }
+                    } else {
+                        Log.e("BOOKING", "❌ Failed to link waste generators for booking $bookingId")
+                        Toast.makeText(requireContext(),
+                            "Booking saved but failed to link waste generators.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
             }
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(), "Failed to save booking: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("BOOKING", "Failed to save booking", e)
             }
     }
 
     /**
      * Link bookingId to selected waste generator(s) only.
      * Uses selectedWasteGenIds populated by the selection dialog.
+     * Calls the callback with `true` if linking succeeds, `false` otherwise.
      */
-    private fun linkBookingToHazardousWasteGenerator(bookingId: String) {
+    private fun linkBookingToHazardousWasteGenerator(
+        bookingId: String,
+        callback: (Boolean) -> Unit
+    ) {
         if (selectedWasteGenIds.isEmpty()) {
             Toast.makeText(requireContext(),
                 "No waste generators selected.",
                 Toast.LENGTH_SHORT).show()
+            callback(false)
             return
         }
 
         android.util.Log.d("TransporterStep2",
             "Linking booking $bookingId to ${selectedWasteGenIds.size} waste gen(s): $selectedWasteGenIds")
 
-        // 1. Update the booking document with wasteGeneratorIds
-        db.collection("transport_bookings")
+        // 1️⃣ Update the booking document with wasteGeneratorIds
+        val bookingUpdateTask = db.collection("transport_bookings")
             .document(bookingId)
             .update(
                 mapOf(
@@ -613,45 +659,44 @@ class TransporterStep2Fragment : Fragment() {
                     "primaryWasteGeneratorId" to selectedWasteGenIds.firstOrNull()
                 )
             )
-            .addOnSuccessListener {
-                android.util.Log.d("TransporterStep2",
-                    "✅ Added wasteGeneratorIds to booking $bookingId")
-            }
-            .addOnFailureListener { e ->
-                android.util.Log.e("TransporterStep2",
-                    "❌ Failed to update booking: ${e.message}")
-            }
 
-        // 2. Update ONLY the selected waste generator docs with bookingId
-        val updates = selectedWasteGenIds.map { wasteGenId ->
+        // 2️⃣ Update ONLY the selected waste generator docs with bookingId
+        val wasteGenUpdateTasks = selectedWasteGenIds.map { wasteGenId ->
             db.collection("HazardousWasteGenerator")
                 .document(wasteGenId)
                 .update("bookingId", bookingId)
         }
 
-        com.google.android.gms.tasks.Tasks.whenAllComplete(updates)
+        // Wait for ALL tasks to complete
+        val allTasks = mutableListOf(bookingUpdateTask)
+        allTasks.addAll(wasteGenUpdateTasks)
+
+        com.google.android.gms.tasks.Tasks.whenAllComplete(allTasks)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(),
                     "Linked ${selectedWasteGenIds.size} waste application(s) to transport booking!",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
 
                 // Clear selection for next booking
                 selectedWasteGenIds.clear()
 
-                // Return to Dashboard
+                // Navigate back to Dashboard
                 try {
                     findNavController().popBackStack(R.id.HWMSDashboardFragment, false)
                 } catch (e: Exception) {
-                    try {
-                        findNavController().navigate(R.id.HWMSDashboardFragment)
-                    } catch (_: Exception) {}
+                    try { findNavController().navigate(R.id.HWMSDashboardFragment) } catch (_: Exception) {}
                 }
+
+                callback(true)
             }
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(),
                     "Failed to link booking: ${e.message}",
                     Toast.LENGTH_SHORT).show()
                 try { findNavController().popBackStack() } catch (_: Exception) {}
+                callback(false)
             }
     }
+
 }

@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.NotifyBookingStatusRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSpServiceRequestDetailsBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -25,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import retrofit2.Call
 import java.util.UUID
 
 class SP_ServiceRequestDetails : Fragment() {
@@ -798,15 +801,30 @@ class SP_ServiceRequestDetails : Fragment() {
         btnReject: Button,
         prevAcceptText: String
     ) {
-        Log.d(TAG, "tsd_bookings doc exists for $bookingId → forcing TSD flow")
         receiveTsdBooking(bookingId) { success ->
             if (success) {
+                db.collection("tsd_bookings").document(bookingId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
+                        val request = NotifyBookingStatusRequest(
+                            receiverId = pcoId,
+                            bookingId = bookingId,
+                            status = "Accepted",     // or "Rejected"
+                            role = "tsd"
+                        )
+                        RetrofitClient.instance.notifyTsdBookingStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    Log.d("NOTIF", "TSD ACCEPT notification sent to PCO")
+                                }
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Failed to notify PCO about TSD ACCEPT: ${t.message}")
+                                }
+                            })
+                    }
+
                 Toast.makeText(requireContext(), "Marked as received", Toast.LENGTH_SHORT).show()
-                try {
-                    findNavController().popBackStack()
-                } catch (e: Exception) {
-                    Log.e(TAG, "popBackStack failed", e)
-                }
+                try { findNavController().popBackStack() } catch (e: Exception) { Log.e(TAG, "popBackStack failed", e) }
             } else {
                 btnAccept.text = prevAcceptText
                 btnAccept.isEnabled = true
@@ -867,14 +885,29 @@ class SP_ServiceRequestDetails : Fragment() {
     ) {
         acceptBooking(bookingId) { success ->
             if (success) {
-                // propagate to TSD if any linked tsd booking exists
-                propagateConfirmToTsdIfLinked(bookingId)
+                // Fetch PCO UID from Firestore
+                db.collection("transport_bookings").document(bookingId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
+                        val request = NotifyBookingStatusRequest(
+                            receiverId = pcoId,           // PCO ID
+                            bookingId = bookingId,
+                            status = "Accepted",           // or "Rejected" depending on handler
+                            role = "transporter"           // sender role
+                        )
+                        RetrofitClient.instance.notifyBookingStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    Log.d("NOTIF", "Transporter ACCEPT notification sent to PCO")
+                                }
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Failed to notify PCO about transporter ACCEPT: ${t.message}")
+                                }
+                            })
+                    }
 
-                try {
-                    findNavController().popBackStack()
-                } catch (e: Exception) {
-                    Log.e(TAG, "popBackStack failed", e)
-                }
+                propagateConfirmToTsdIfLinked(bookingId)
+                try { findNavController().popBackStack() } catch (e: Exception) { Log.e(TAG, "popBackStack failed", e) }
             } else {
                 btnAccept.text = prevAcceptText
                 btnAccept.isEnabled = true
@@ -891,12 +924,28 @@ class SP_ServiceRequestDetails : Fragment() {
     ) {
         treatTsdBooking(bookingId) { success ->
             if (success) {
+                db.collection("tsd_bookings").document(bookingId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
+                        val request = NotifyBookingStatusRequest(
+                            receiverId = pcoId,
+                            bookingId = bookingId,
+                            status = "Rejected",
+                            role = "tsd"
+                        )
+                        RetrofitClient.instance.notifyTsdBookingStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    Log.d("NOTIF", "TSD REJECT notification sent to PCO")
+                                }
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Failed to notify PCO about TSD REJECT: ${t.message}")
+                                }
+                            })
+                    }
+
                 Toast.makeText(requireContext(), "Marked as treated", Toast.LENGTH_SHORT).show()
-                try {
-                    findNavController().popBackStack()
-                } catch (e: Exception) {
-                    Log.e(TAG, "popBackStack failed", e)
-                }
+                try { findNavController().popBackStack() } catch (e: Exception) { Log.e(TAG, "popBackStack failed", e) }
             } else {
                 btnReject.text = prevRejectText
                 btnAccept.isEnabled = true
@@ -913,11 +962,27 @@ class SP_ServiceRequestDetails : Fragment() {
     ) {
         rejectBooking(bookingId) { success ->
             if (success) {
-                try {
-                    findNavController().popBackStack()
-                } catch (e: Exception) {
-                    Log.e(TAG, "popBackStack failed", e)
-                }
+                db.collection("transport_bookings").document(bookingId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
+                        val request = NotifyBookingStatusRequest(
+                            receiverId = pcoId,
+                            bookingId = bookingId,
+                            status = "Rejected",
+                            role = "transporter"
+                        )
+                        RetrofitClient.instance.notifyBookingStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    Log.d("NOTIF", "Transporter REJECT notification sent to PCO")
+                                }
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Failed to notify PCO about transporter REJECT: ${t.message}")
+                                }
+                            })
+                    }
+
+                try { findNavController().popBackStack() } catch (e: Exception) { Log.e(TAG, "popBackStack failed", e) }
             } else {
                 btnReject.text = prevRejectText
                 btnAccept.isEnabled = true

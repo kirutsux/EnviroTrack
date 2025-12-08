@@ -3,7 +3,7 @@ package com.ecocp.capstoneenvirotrack.model
 import com.google.firebase.Timestamp
 
 data class ServiceProvider(
-    val uid: String = "",
+    var uid: String = "",
     val name: String = "",
     val companyName: String = "",
     val contactNumber: String = "",

@@ -92,6 +92,35 @@ data class SendExpiryNotificationRequest(
     val daysLeft: Long     // Number of days left until expiry
 )
 
+// ----------------- SP Booking Notifications -----------------
+
+data class NotifyBookingCreatedRequest(
+    val bookingId: String
+)
+
+data class NotifyBookingStatusRequest(
+    val receiverId: String,      // PCO ID
+    val bookingId: String,
+    val status: String,          // accepted / rejected
+    val role: String             // transporter / tsd
+)
+
+data class NotifyPttUploadRequest(
+    val receiverId: String,      // transporter ID
+    val bookingId: String
+)
+
+data class NotifyDeliveredRequest(
+    val receiverId: String,      // pcoId
+    val bookingId: String
+)
+
+data class NotifyTreatmentDoneRequest(
+    val receiverId: String,      // pcoId
+    val bookingId: String
+)
+
+
 
 interface ApiService {
     // Send email
@@ -178,5 +207,63 @@ interface ApiService {
     fun sendExpiryNotification(
         @Body request: SendExpiryNotificationRequest
     ): Call<Void>
+
+    // ==========================================================
+//        SERVICE PROVIDER BOOKING NOTIFICATIONS
+// ==========================================================
+
+    // 1️⃣ PCO ➜ Transporter: New booking created
+    @Headers("Content-Type: application/json")
+    @POST("/notify-transporter-booking")
+    fun notifyBookingCreated(
+        @Body request: NotifyBookingCreatedRequest
+    ): Call<Void>
+
+    // 2️⃣ Transporter ➜ PCO: Accept/Reject booking
+    @Headers("Content-Type: application/json")
+    @POST("/notify/sp/booking-status")
+    fun notifyBookingStatus(
+        @Body request: NotifyBookingStatusRequest
+    ): Call<Void>
+
+    // 3️⃣ PCO ➜ TSD: New booking created
+    @Headers("Content-Type: application/json")
+    @POST("/notify-tsd-booking")
+    fun notifyTsdBookingCreated(
+        @Body request: NotifyBookingCreatedRequest
+    ): Call<Void>
+
+    // 4️⃣ TSD ➜ PCO: Accept/Reject booking
+    @Headers("Content-Type: application/json")
+    @POST("/notify/sp/tsd-booking-status")
+    fun notifyTsdBookingStatus(
+        @Body request: NotifyBookingStatusRequest
+    ): Call<Void>
+
+// ==========================================================
+//        TRANSPORTER / PCO SPECIFIC NOTIFICATIONS
+// ==========================================================
+
+    // 5️⃣ PCO ➜ Transporter: PTT certificate uploaded
+    @Headers("Content-Type: application/json")
+    @POST("/notify/sp/ptt-uploaded")
+    fun notifyPttUploaded(
+        @Body request: NotifyPttUploadRequest
+    ): Call<Void>
+
+    // 6️⃣ Transporter ➜ PCO: Waste delivered to TSD
+    @Headers("Content-Type: application/json")
+    @POST("/notify/sp/delivered")
+    fun notifyDelivered(
+        @Body request: NotifyDeliveredRequest
+    ): Call<Void>
+
+    // 7️⃣ TSD ➜ PCO: Treatment completed & certificate uploaded
+    @Headers("Content-Type: application/json")
+    @POST("/notify/sp/treatment-done")
+    fun notifyTreatmentDone(
+        @Body request: NotifyTreatmentDoneRequest
+    ): Call<Void>
+
 
 }

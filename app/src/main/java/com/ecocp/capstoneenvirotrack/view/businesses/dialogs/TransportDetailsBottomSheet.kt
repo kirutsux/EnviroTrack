@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.databinding.BottomsheetTransportDetailsBinding
+import com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragmentDirections
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -34,11 +35,12 @@ class TransportDetailsBottomSheet(
 
         // Proceed to Step 3
         binding.btnProceedStep3.setOnClickListener {
-            findNavController().navigate(
-                TransportDetailsBottomSheetDirections
-                    .actionTransportDetailsBottomSheetToTsdFacilitySelectionFragment(transportBookingId)
+            parentFragment?.findNavController()?.navigate(
+                HWMSDashboardFragmentDirections.actionHWMSDashboardFragmentToTsdFacilitySelectionFragment(transportBookingId)
             )
+            dismiss() // Close the BottomSheet after navigation
         }
+
 
         // SEND PTT CERTIFICATE ONLY (NO NAVIGATION)
         binding.btnViewPTTCert.setOnClickListener {

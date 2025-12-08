@@ -24,7 +24,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessaging
 
 class LoginFragment : Fragment() {
@@ -171,32 +173,65 @@ class LoginFragment : Fragment() {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val token = task.result
-                val userRef = FirebaseFirestore.getInstance().collection("users").document(currentUser.uid)
-
-                // Use arrayUnion to store multiple tokens without duplicates
-                userRef.update("fcmTokens", com.google.firebase.firestore.FieldValue.arrayUnion(token))
-                    .addOnSuccessListener {
-                        Log.d("LoginFragment", "FCM token added to fcmTokens array successfully")
-                    }
-                    .addOnFailureListener { e ->
-                        // If the document doesn't exist, create it with fcmTokens array
-                        userRef.set(mapOf("fcmTokens" to listOf(token)), com.google.firebase.firestore.SetOptions.merge())
-                            .addOnSuccessListener {
-                                Log.d("LoginFragment", "FCM token created successfully for new user document")
-                            }
-                            .addOnFailureListener { ex ->
-                                Log.e("LoginFragment", "Error creating FCM token array", ex)
-                            }
-
-                        Log.e("LoginFragment", "Error updating FCM token array", e)
-                    }
-            } else {
+            if (!task.isSuccessful) {
                 Log.e("LoginFragment", "Failed to get FCM token", task.exception)
+                return@addOnCompleteListener
             }
+
+            val token = task.result
+            val db = FirebaseFirestore.getInstance()
+
+            // First, check service_providers collection
+            db.collection("service_providers").document(currentUser.uid).get()
+                .addOnSuccessListener { spDoc ->
+                    val role = spDoc.getString("role")
+                    if (role == "Transporter" || role == "TSD Facility") {
+                        // Save token only in service_providers
+                        db.collection("service_providers").document(currentUser.uid)
+                            .update("fcmTokens", FieldValue.arrayUnion(token))
+                            .addOnSuccessListener {
+                                Log.d("LoginFragment", "FCM token added to service_providers successfully")
+                            }
+                            .addOnFailureListener { e ->
+                                // If document doesn't exist, create it
+                                db.collection("service_providers").document(currentUser.uid)
+                                    .set(mapOf("fcmTokens" to listOf(token)), SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        Log.d("LoginFragment", "FCM token created for new service_providers doc")
+                                    }
+                                    .addOnFailureListener { ex ->
+                                        Log.e("LoginFragment", "Error creating FCM token in service_providers", ex)
+                                    }
+                            }
+                        return@addOnSuccessListener
+                    }
+
+                    // If not a service provider, check users collection
+                    db.collection("users").document(currentUser.uid).get()
+                        .addOnSuccessListener { userDoc ->
+                            val userType = userDoc.getString("userType")
+                            if (userType == "pco" || userType == "emb") {
+                                db.collection("users").document(currentUser.uid)
+                                    .update("fcmTokens", FieldValue.arrayUnion(token))
+                                    .addOnSuccessListener {
+                                        Log.d("LoginFragment", "FCM token added to users successfully")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        db.collection("users").document(currentUser.uid)
+                                            .set(mapOf("fcmTokens" to listOf(token)), SetOptions.merge())
+                                            .addOnSuccessListener {
+                                                Log.d("LoginFragment", "FCM token created for new users doc")
+                                            }
+                                            .addOnFailureListener { ex ->
+                                                Log.e("LoginFragment", "Error creating FCM token in users", ex)
+                                            }
+                                    }
+                            }
+                        }
+                }
         }
     }
+
 
 
     private fun saveUserTypeToPrefs(userType: String) {

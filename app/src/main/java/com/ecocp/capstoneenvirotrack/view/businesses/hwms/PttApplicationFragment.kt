@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.hwms
 
+import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -13,6 +14,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.PaymentRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentResponse
 import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
 import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPttApplicationBinding
@@ -28,6 +31,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -39,6 +44,7 @@ class PttApplicationFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance().reference
     private val auth = FirebaseAuth.getInstance()
+    private lateinit var progressDialog: ProgressDialog
 
     private var selectedGeneratorId: String? = null
     private var selectedTransportBookingId: String? = null
@@ -52,7 +58,7 @@ class PttApplicationFragment : Fragment() {
     private lateinit var paymentSheet: PaymentSheet
     private var clientSecret: String? = null
 
-    private val PTT_FEE = 2500.0
+    private val PTT_FEE = 50.0
 
     private lateinit var pendingPttData: Map<String, Any>
 
@@ -73,6 +79,11 @@ class PttApplicationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPttApplicationBinding.inflate(inflater, container, false)
+
+        progressDialog = ProgressDialog(requireContext()).apply {
+            setMessage("Loading...")
+            setCancelable(false)
+        }
 
         PaymentConfiguration.init(
             requireContext(),
@@ -100,19 +111,45 @@ class PttApplicationFragment : Fragment() {
 
     // SELECT GENERATOR
     private fun loadGenerators() = scope.launch {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return@launch
         binding.progressBar.visibility = View.VISIBLE
-        try {
-            val docs = db.collection("HazardousWasteGenerator")
-                .whereEqualTo("status", "Submitted")
-                .get().await()
 
-            if (docs.isEmpty) {
-                Toast.makeText(requireContext(), "No approved generators found", Toast.LENGTH_SHORT).show()
+        try {
+            // 1️⃣ Fetch confirmed TSD bookings for this user
+            val confirmedBookings = db.collection("tsd_bookings")
+                .whereEqualTo("bookingStatus", "Confirmed")
+                .whereEqualTo("generatorId", currentUser.uid)
+                .get()
+                .await()
+
+            if (confirmedBookings.isEmpty) {
+                Toast.makeText(requireContext(), "No confirmed TSD bookings found", Toast.LENGTH_SHORT).show()
                 return@launch
             }
 
-            val names = docs.documents.map { it.getString("pcoName") ?: "Unnamed Generator" }
-            val ids = docs.documents.map { it.id }
+            val confirmedBookingIds = confirmedBookings.documents.map { it.id }
+
+            // Firestore allows a maximum of 10 elements in 'whereIn', so split if needed
+            val batches = confirmedBookingIds.chunked(10)
+            val generatorDocs = mutableListOf<com.google.firebase.firestore.DocumentSnapshot>()
+
+            for (batch in batches) {
+                val docs = db.collection("HazardousWasteGenerator")
+                    .whereEqualTo("status", "Submitted")
+                    .whereEqualTo("userId", currentUser.uid)
+                    .whereIn("tsdBookingId", batch)
+                    .get()
+                    .await()
+                generatorDocs.addAll(docs.documents)
+            }
+
+            if (generatorDocs.isEmpty()) {
+                Toast.makeText(requireContext(), "No submitted generators linked to confirmed TSD bookings", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            val names = generatorDocs.map { it.getString("pcoName") ?: "Unnamed Generator" }
+            val ids = generatorDocs.map { it.id }
 
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Select Generator")
@@ -124,8 +161,9 @@ class PttApplicationFragment : Fragment() {
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
+
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Error loading generators", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Error loading generators: ${e.message}", Toast.LENGTH_SHORT).show()
         } finally {
             binding.progressBar.visibility = View.GONE
         }
@@ -133,32 +171,56 @@ class PttApplicationFragment : Fragment() {
 
     // SELECT TRANSPORT BOOKING
     private fun loadTransportBookings() = scope.launch {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return@launch
         binding.progressBar.visibility = View.VISIBLE
-        try {
-            val snapshot = db.collection("transport_bookings")
-                .whereEqualTo("bookingStatus", "Confirmed")
-                .get().await()
 
-            if (snapshot.isEmpty) {
+        try {
+            // 1️⃣ Fetch confirmed transport bookings for this user
+            val confirmedBookings = db.collection("transport_bookings")
+                .whereEqualTo("bookingStatus", "Confirmed")
+                .get()
+                .await()
+
+            if (confirmedBookings.isEmpty) {
                 Toast.makeText(requireContext(), "No confirmed transport bookings", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            // Filter bookings where current user is linked via primaryWasteGeneratorId or wasteGeneratorIds
+            val userBookingDocs = confirmedBookings.documents.filter { doc ->
+                val primaryGenId = doc.getString("primaryWasteGeneratorId")
+                val otherGenIds = doc.get("wasteGeneratorIds") as? List<String> ?: emptyList()
+                val allGenIds = listOfNotNull(primaryGenId) + otherGenIds
+
+                // Check if any of the generator IDs belong to current user
+                allGenIds.any { genId ->
+                    val genDoc = runCatching {
+                        db.collection("HazardousWasteGenerator").document(genId).get().await()
+                    }.getOrNull()
+                    genDoc?.getString("userId") == currentUser.uid
+                }
+            }
+
+            if (userBookingDocs.isEmpty()) {
+                Toast.makeText(requireContext(), "No transport bookings linked to your applications", Toast.LENGTH_SHORT).show()
                 return@launch
             }
 
             val displayNames = mutableListOf<String>()
             val ids = mutableListOf<String>()
 
-            snapshot.documents.forEach { doc ->
-                ids.add(doc.id)
+            for (doc in userBookingDocs) {
                 val transporter = doc.getString("serviceProviderName") ?: "Unknown Transporter"
 
-                val genId = doc.getString("primaryWasteGeneratorId")
+                val primaryGenId = doc.getString("primaryWasteGeneratorId")
                     ?: (doc.get("wasteGeneratorIds") as? List<String>)?.firstOrNull()
 
-                val companyName = if (genId != null) {
-                    val genDoc = db.collection("HazardousWasteGenerator").document(genId).get().await()
+                val companyName = if (primaryGenId != null) {
+                    val genDoc = db.collection("HazardousWasteGenerator").document(primaryGenId).get().await()
                     genDoc.getString("companyName") ?: "Unknown Generator"
                 } else "Unknown Generator"
 
+                ids.add(doc.id)
                 displayNames.add("$transporter → $companyName")
             }
 
@@ -172,8 +234,9 @@ class PttApplicationFragment : Fragment() {
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
+
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Failed to load transport bookings", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Failed to load transport bookings: ${e.message}", Toast.LENGTH_SHORT).show()
         } finally {
             binding.progressBar.visibility = View.GONE
         }
@@ -181,20 +244,51 @@ class PttApplicationFragment : Fragment() {
 
     // SELECT TSD BOOKING
     private fun loadTsdBookings() = scope.launch {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return@launch
         binding.progressBar.visibility = View.VISIBLE
-        try {
-            val docs = db.collection("tsd_bookings")
-                .whereEqualTo("status", "Confirmed")
-                .get().await()
 
-            if (docs.isEmpty) {
+        try {
+            // 1️⃣ Fetch all confirmed TSD bookings for the current user
+            val confirmedBookings = db.collection("tsd_bookings")
+                .whereEqualTo("bookingStatus", "Confirmed")
+                .get()
+                .await()
+
+            if (confirmedBookings.isEmpty) {
                 Toast.makeText(requireContext(), "No confirmed TSD bookings", Toast.LENGTH_SHORT).show()
                 return@launch
             }
 
-            val names = docs.documents.map { it.getString("tsdName") ?: "Unnamed TSD Facility" }
-            val ids = docs.documents.map { it.id }
+            // 2️⃣ Filter bookings where current user is linked via primaryWasteGeneratorId or wasteGeneratorIds
+            val userBookingDocs = confirmedBookings.documents.filter { doc ->
+                val transportBookingId = doc.getString("transportBookingId")
+                val primaryGenId = doc.getString("primaryWasteGeneratorId")
+                val otherGenIds = doc.get("wasteGeneratorIds") as? List<String> ?: emptyList()
+                val allGenIds = listOfNotNull(primaryGenId) + otherGenIds
 
+                // Check if any linked generator belongs to current user
+                allGenIds.any { genId ->
+                    val genDoc = runCatching {
+                        db.collection("HazardousWasteGenerator").document(genId).get().await()
+                    }.getOrNull()
+                    genDoc?.getString("userId") == currentUser.uid
+                }
+            }
+
+            if (userBookingDocs.isEmpty()) {
+                Toast.makeText(requireContext(), "No TSD bookings linked to your applications", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            // 3️⃣ Prepare display names (bookedBy + TSD name)
+            val names = userBookingDocs.map { doc ->
+                val tsdName = doc.getString("tsdName") ?: "Unnamed TSD Facility"
+                val bookedBy = doc.getString("bookedBy") ?: "Unknown"
+                "$tsdName (Booked by: $bookedBy)"
+            }
+            val ids = userBookingDocs.map { it.id }
+
+            // 4️⃣ Show dialog
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Select TSD Booking")
                 .setItems(names.toTypedArray()) { _, i ->
@@ -205,12 +299,14 @@ class PttApplicationFragment : Fragment() {
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
+
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Error loading TSD bookings", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Error loading TSD bookings: ${e.message}", Toast.LENGTH_SHORT).show()
         } finally {
             binding.progressBar.visibility = View.GONE
         }
     }
+
 
     private fun initiatePttWithPayment() = scope.launch {
         if (!isFormValid()) return@launch
@@ -233,35 +329,33 @@ class PttApplicationFragment : Fragment() {
         createPaymentIntent(PTT_FEE)
     }
 
-    private fun createPaymentIntent(amount: Double) = scope.launch(Dispatchers.IO) {
-        try {
-            val url = URL("http://10.0.2.2:8080/create-payment-intent")
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
+    private fun createPaymentIntent(paymentAmount: Double) { // amount in PHP, flexible input
+        progressDialog.setMessage("Initializing payment...")
+        progressDialog.show()
 
-            val json = JSONObject().apply { put("amount", amount) }
-            conn.outputStream.write(json.toString().toByteArray())
+        // Convert to cents for Stripe
+        val amountInCents = (paymentAmount).toInt()
 
-            val response = conn.inputStream.bufferedReader().readText()
-            val jsonResponse = JSONObject(response)
-            clientSecret = jsonResponse.getString("clientSecret")
+        RetrofitClient.instance.createPaymentIntent(PaymentRequest(amountInCents))
+            .enqueue(object : Callback<PaymentResponse> {
+                override fun onResponse(call: Call<PaymentResponse>, response: Response<PaymentResponse>) {
+                    progressDialog.dismiss()
+                    if (response.isSuccessful && response.body() != null) {
+                        clientSecret = response.body()!!.clientSecret
+                        paymentSheet.presentWithPaymentIntent(
+                            clientSecret!!,
+                            PaymentSheet.Configuration("EnviroTrack")
+                        )
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to create payment intent", Toast.LENGTH_SHORT).show()
+                    }
+                }
 
-            withContext(Dispatchers.Main) {
-                binding.progressBar.visibility = View.GONE
-                paymentSheet.presentWithPaymentIntent(
-                    clientSecret!!,
-                    PaymentSheet.Configuration("EnviroTrack - PTT Application")
-                )
-            }
-        } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
-                binding.progressBar.visibility = View.GONE
-                binding.btnSubmitPTT.isEnabled = true
-                Toast.makeText(requireContext(), "Payment failed to start: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-        }
+                override fun onFailure(call: Call<PaymentResponse>, t: Throwable) {
+                    progressDialog.dismiss()
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     private fun onPaymentResult(result: PaymentSheetResult) {

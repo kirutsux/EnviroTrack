@@ -415,7 +415,17 @@
     <fragment
         android:id="@+id/HWMSDashboardFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.hwms.HWMSDashboardFragment"
-        tools:layout="@layout/fragment_hwms_dashboard" />
+        tools:layout="@layout/fragment_hwms_dashboard">
+
+        <!-- Add these actions -->
+        <action
+            android:id="@+id/action_HWMSDashboardFragment_to_tsdFacilitySelectionFragment"
+            app:destination="@id/tsdFacilitySelectionFragment" />
+
+        <action
+            android:id="@+id/action_HWMSDashboardFragment_to_transportDetailsBottomSheet"
+            app:destination="@id/transportDetailsBottomSheet" />
+    </fragment>
 
     <!-- ☣️ HWMS Add Application -->
     <fragment
@@ -555,7 +565,6 @@
         android:id="@+id/transportDetailsBottomSheet"
         android:name="com.ecocp.capstoneenvirotrack.view.businesses.dialogs.TransportDetailsBottomSheet"
         tools:layout="@layout/bottomsheet_transport_details">
-
         <action
             android:id="@+id/action_transportDetailsBottomSheet_to_tsdFacilitySelectionFragment"
             app:destination="@id/tsdFacilitySelectionFragment" />

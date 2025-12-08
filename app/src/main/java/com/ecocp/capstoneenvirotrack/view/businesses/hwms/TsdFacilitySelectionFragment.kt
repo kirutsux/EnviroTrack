@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.webkit.MimeTypeMap
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.TSDFacilityAdapter
+import com.ecocp.capstoneenvirotrack.api.NotifyBookingCreatedRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentResponse
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentTsdFacilitySelectionBinding
 import com.ecocp.capstoneenvirotrack.model.TSDFacility
 import com.google.android.gms.tasks.Tasks
@@ -31,6 +36,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
@@ -289,7 +297,7 @@ class TsdFacilitySelectionFragment : Fragment() {
                         companyName = doc.getString("companyName") ?: "Unknown Company",
                         contactNumber = doc.getString("contactNumber") ?: "N/A",
                         location = doc.getString("location") ?: "N/A",
-                        rate = doc.getDouble("rate") ?: 500.0,
+                        rate = doc.getDouble("rate") ?: 50.0,
                         wasteType = doc.getString("wasteType") ?: "General Waste",
                         capacity = (doc.getLong("capacity")?.toInt() ?: 0),
                         profileImageUrl = doc.getString("profileImageUrl") ?: ""
@@ -351,7 +359,7 @@ class TsdFacilitySelectionFragment : Fragment() {
             "preferredDate" to date,
             "rate" to rate,
             "amount" to paymentAmount,
-            "bookingStatus" to "pending",
+            "bookingStatus" to "Pending",
             "paymentStatus" to "Pending",
             "timestamp" to FieldValue.serverTimestamp()
         )
@@ -364,124 +372,149 @@ class TsdFacilitySelectionFragment : Fragment() {
         createPaymentIntent(paymentAmount)
     }
 
-    private fun createPaymentIntent(amount: Double) {
+    private fun createPaymentIntent(paymentAmount: Double) { // amount in PHP, flexible input
         progressDialog.setMessage("Initializing payment...")
         progressDialog.show()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val url = URL("http://10.0.2.2:8080/create-payment-intent")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-                conn.setRequestProperty("Accept", "application/json")
-                conn.doOutput = true
+        // Convert to cents for Stripe
+        val amountInCents = (paymentAmount).toInt()
 
-                val jsonBody = JSONObject().apply { put("amount", amount) }
-                conn.outputStream.use { it.write(jsonBody.toString().toByteArray(Charsets.UTF_8)) }
-
-                val responseCode = conn.responseCode
-                if (responseCode != HttpURLConnection.HTTP_OK) {
-                    throw Exception("Server responded with code $responseCode")
-                }
-
-                val response = conn.inputStream.bufferedReader().readText()
-                val json = JSONObject(response)
-                clientSecret = json.optString("clientSecret", null)
-
-                withContext(Dispatchers.Main) {
+        RetrofitClient.instance.createPaymentIntent(PaymentRequest(amountInCents))
+            .enqueue(object : Callback<PaymentResponse> {
+                override fun onResponse(call: Call<PaymentResponse>, response: Response<PaymentResponse>) {
                     progressDialog.dismiss()
-                    clientSecret?.let {
+                    if (response.isSuccessful && response.body() != null) {
+                        clientSecret = response.body()!!.clientSecret
                         paymentSheet.presentWithPaymentIntent(
-                            it,
+                            clientSecret!!,
                             PaymentSheet.Configuration("EnviroTrack")
                         )
-                    } ?: run {
-                        Toast.makeText(requireContext(), "Payment initialization failed", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to create payment intent", Toast.LENGTH_SHORT).show()
                     }
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+
+                override fun onFailure(call: Call<PaymentResponse>, t: Throwable) {
                     progressDialog.dismiss()
-                    Toast.makeText(requireContext(), "Payment initialization failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
-            }
-        }
+            })
     }
 
-    private fun onPaymentResult(result: PaymentSheetResult) {
-        when (result) {
+    private fun onPaymentResult(paymentResult: PaymentSheetResult) {
+        when (paymentResult) {
             is PaymentSheetResult.Completed -> {
                 Toast.makeText(requireContext(), "Payment successful!", Toast.LENGTH_SHORT).show()
-                finalizeBookingAfterPayment()
+                saveTsdBookingToFirestore(certificateUri, prevRecordUri)
             }
-            is PaymentSheetResult.Failed ->
-                Toast.makeText(requireContext(), "Payment failed: ${result.error.message}", Toast.LENGTH_SHORT).show()
-            PaymentSheetResult.Canceled ->
-                Toast.makeText(requireContext(), "Payment canceled", Toast.LENGTH_SHORT).show()
+            is PaymentSheetResult.Failed -> {
+                Toast.makeText(requireContext(), "Payment failed: ${paymentResult.error.message}", Toast.LENGTH_SHORT).show()
+            }
+            PaymentSheetResult.Canceled -> {
+                Toast.makeText(requireContext(), "Payment canceled.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun finalizeBookingAfterPayment() {
-        progressDialog.setMessage("Uploading documents...")
-        progressDialog.show()
-
+    private fun saveTsdBookingToFirestore(
+        certificate: Uri? = null,
+        previousRecord: Uri? = null
+    ) {
         val newDocRef = db.collection("tsd_bookings").document()
         val bookingId = newDocRef.id
         bookingData["tsdBookingId"] = bookingId
         bookingData["paymentStatus"] = "Paid"
 
-        uploadTsdFiles(bookingId, certificateUri, prevRecordUri) { success, fileUrls ->
-            progressDialog.dismiss()
-            if (!success) {
-                Toast.makeText(requireContext(), "File upload failed. Booking not saved.", Toast.LENGTH_LONG).show()
-                return@uploadTsdFiles
+        val tsdId = bookingData["tsdId"] as? String
+        Log.d("TSD", "Fetched tsdId: $tsdId")
+
+        // 1️⃣ Save booking to Firestore
+        newDocRef.set(bookingData)
+            .addOnSuccessListener {
+                Log.d("TSD", "TSD Booking saved successfully: $bookingId")
+
+                // 2️⃣ Link booking to waste generators
+                linkBookingToWasteGenerators(bookingId) { linkSuccess ->
+                    if (linkSuccess) {
+                        Log.d("TSD", "✅ Waste generators linked for TSD booking $bookingId")
+
+                        // 3️⃣ Upload files (certificate / previous record)
+                        uploadTsdFiles(bookingId, certificate, previousRecord) { success, urls ->
+                            if (success) {
+                                Log.d("TSD", "✅ Files uploaded successfully: $urls")
+                                // Update booking doc with uploaded URLs
+                                newDocRef.update(urls)
+                            } else {
+                                Log.e("TSD", "❌ Failed to upload files")
+                            }
+
+                            // 4️⃣ Notify TSD facility
+                            if (!tsdId.isNullOrEmpty()) {
+                                Log.d("NOTIF", "Scheduling notification to TSD facility: $tsdId")
+                                val request = NotifyBookingCreatedRequest(bookingId = bookingId)
+                                RetrofitClient.instance.notifyTsdBookingCreated(request)
+                                    .enqueue(object : retrofit2.Callback<Void> {
+                                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                            if (response.isSuccessful) {
+                                                Log.d("NOTIF", "TSD facility notified for booking $bookingId.")
+                                            } else {
+                                                Log.e("NOTIF", "Failed to notify TSD: ${response.code()}")
+                                            }
+                                            navigateToDashboard()
+                                        }
+
+                                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                                            Log.e("NOTIF", "Error notifying TSD: ${t.message}", t)
+                                            navigateToDashboard()
+                                        }
+                                    })
+                            } else {
+                                Log.e("NOTIF", "Cannot notify TSD — tsdId is null or empty")
+                                navigateToDashboard()
+                            }
+                        }
+
+                    } else {
+                        Log.e("TSD", "❌ Failed to link waste generators for TSD booking $bookingId")
+                        Toast.makeText(requireContext(),
+                            "Booking saved but failed to link waste generators.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navigateToDashboard()
+                    }
+                }
+
             }
-
-            bookingData.putAll(fileUrls)
-
-            newDocRef.set(bookingData)
-                .addOnSuccessListener {
-                    Toast.makeText(requireContext(), "TSD Booking successful!", Toast.LENGTH_SHORT).show()
-                    // Link to waste generators, then go back to dashboard
-                    linkBookingToWasteGenerators(bookingId)
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(requireContext(), "Failed to save booking: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-        }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to save booking: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("TSD", "Failed to save booking", e)
+            }
     }
 
     /**
      * Link TSD booking to selected waste generator(s) - same pattern as transport
      */
-    private fun linkBookingToWasteGenerators(tsdBookingId: String) {
+    private fun linkBookingToWasteGenerators(tsdBookingId: String, callback: (Boolean) -> Unit) {
         if (selectedWasteGenIds.isEmpty()) {
-            // If no selection (shouldn't happen), just navigate back
-            navigateToDashboard()
+            callback(true)
             return
         }
 
-        android.util.Log.d("TsdFacility",
-            "Linking TSD booking $tsdBookingId to ${selectedWasteGenIds.size} waste gen(s)")
+        Log.d("TSD", "Linking TSD booking $tsdBookingId to ${selectedWasteGenIds.size} waste generators")
 
-        // Update TSD booking with waste generator IDs
-        db.collection("tsd_bookings")
-            .document(tsdBookingId)
+        // Update TSD booking document
+        db.collection("tsd_bookings").document(tsdBookingId)
             .update(
                 mapOf(
                     "wasteGeneratorIds" to selectedWasteGenIds,
                     "primaryWasteGeneratorId" to selectedWasteGenIds.firstOrNull()
                 )
             )
-            .addOnSuccessListener {
-                android.util.Log.d("TsdFacility", "✅ Added wasteGeneratorIds to TSD booking")
-            }
 
-        // Update waste generators with TSD booking ID
-        val updates = selectedWasteGenIds.map { wasteGenId ->
+        // Update each waste generator document
+        val updates = selectedWasteGenIds.map { genId ->
             db.collection("HazardousWasteGenerator")
-                .document(wasteGenId)
+                .document(genId)
                 .update("tsdBookingId", tsdBookingId)
         }
 
@@ -489,15 +522,20 @@ class TsdFacilitySelectionFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(),
                     "Linked ${selectedWasteGenIds.size} waste application(s) to TSD booking!",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 selectedWasteGenIds.clear()
-                navigateToDashboard()
+                callback(true)
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to link waste generators", Toast.LENGTH_SHORT).show()
-                navigateToDashboard()
+                Toast.makeText(requireContext(),
+                    "Failed to link waste generators",
+                    Toast.LENGTH_SHORT
+                ).show()
+                callback(false)
             }
     }
+
 
     /**
      * Navigate back to HWMS Dashboard
