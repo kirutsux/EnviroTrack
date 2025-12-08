@@ -277,6 +277,10 @@
         <action
             android:id="@+id/action_COMP_Dashboard_to_notificationsFragment"
             app:destination="@id/notificationsFragment"/>
+        <action
+            android:id="@+id/action_pcoDashboard_to_regulationsFragment"
+            app:destination="@id/embRegulationsFragment" />
+
 
     </fragment>
 
@@ -559,6 +563,43 @@
         <action
             android:id="@+id/action_transportDetailsBottomSheet_to_tsdFacilitySelectionFragment"
             app:destination="@id/tsdFacilitySelectionFragment" />
+    </fragment>
+    <!-- 📋 Regulations -->
+    <fragment
+        android:id="@+id/embRegulationsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.RegulationsFragment"
+        android:label="Regulations"
+        tools:layout="@layout/fragment_regulations">
+
+        <action
+            android:id="@+id/action_embRegulationsFragment_to_regulationDetailsFragment"
+            app:destination="@id/regulationDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/regulationDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.RegulationDetailsFragment"
+        android:label="Regulation Details"
+        tools:layout="@layout/fragment_regulation_details">
+
+        <argument
+            android:name="regulationId"
+            app:argType="string" />
+        <argument
+            android:name="regulationName"
+            app:argType="string" />
+        <argument
+            android:name="republicAct"
+            app:argType="string" />
+        <argument
+            android:name="description"
+            app:argType="string" />
+        <argument
+            android:name="complianceRequirements"
+            app:argType="string" />
+        <argument
+            android:name="fileURL"
+            app:argType="string" />
     </fragment>
 
 
