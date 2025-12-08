@@ -35,6 +35,8 @@ class SP_TaskUpdateDetails : Fragment() {
     private lateinit var btnUpload: Button
     private lateinit var btnInTransit: Button
     private lateinit var btnDelivered: Button
+    private lateinit var btnReceiveWaste: Button
+    private lateinit var btnStartTreatment: Button
 
     private enum class BookingSource { TRANSPORT, TSD, UNKNOWN }
 
@@ -80,6 +82,8 @@ class SP_TaskUpdateDetails : Fragment() {
         btnUpload = view.findViewById(R.id.btnUploadFile)
         btnInTransit = view.findViewById(R.id.btnInTransit)
         btnDelivered = view.findViewById(R.id.btnDelivered)
+        btnReceiveWaste = view.findViewById(R.id.btnReceiveWaste)
+        btnStartTreatment = view.findViewById(R.id.btnStartTreatment)
 
         loadBookingDetails(
             txtCompanyName, txtCompanyAddress, txtTaskRef, txtStatusPill,
@@ -91,6 +95,8 @@ class SP_TaskUpdateDetails : Fragment() {
         btnCancel.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
         btnInTransit.setOnClickListener { updateStatusDirectly("In Transit") }
         btnDelivered.setOnClickListener { updateStatusDirectly("Delivered") }
+        btnReceiveWaste.setOnClickListener { updateTsdStatus("Received") }
+        btnStartTreatment.setOnClickListener { updateTsdStatus("Started") }
 
         updateButtonVisibility()
         return view
@@ -155,6 +161,7 @@ class SP_TaskUpdateDetails : Fragment() {
                         txtOriginDestination.text =
                             "${doc.getString("origin") ?: ""} → ${doc.getString("destination") ?: ""}"
 
+                        txtStatusPill.text = doc.getString("wasteStatus") ?: ""
                         txtWasteType.text = doc.getString("wasteType") ?: ""
                         txtQuantity.text = doc.getString("quantity") ?: ""
                         txtPackaging.text = doc.getString("packaging") ?: ""
@@ -279,6 +286,16 @@ class SP_TaskUpdateDetails : Fragment() {
                 txtCompanyName.text = companyToShow
                 txtCompanyAddress.text = s("location", "")
                 txtTaskRef.text = "Ref: $bookingRef"
+
+                val generatorId = doc.getString("generatorId")?:""
+                db.collection("transport_bookings")
+                    .whereEqualTo("pcoId",generatorId)
+                    .get()
+                    .addOnSuccessListener{wasteDoc->
+                        val wasteStatus = wasteDoc.documents[0].getString("wasteStatus")
+                        Log.d("WasteStatus", "Waste status: $wasteStatus")
+                        txtStatusPill.text = wasteStatus
+                    }
 
                 val status = s("status", s("bookingStatus", "Pending"))
                 val transportStatus = s("status", "Confirmed")
@@ -435,8 +452,9 @@ class SP_TaskUpdateDetails : Fragment() {
         val statusPair: Pair<String, String> = when {
             s.contains("delivered") || s.contains("completed") -> Pair("Delivered", "#4CAF50")
             s.contains("in transit") || s.contains("transit") -> Pair("In Transit", "#FF9800")
-            s.contains("received") || s.contains("confirmed") -> Pair("Confirmed", "#2196F3")
-            s.contains("treated") -> Pair("Treated", "#9C27B0")
+            s.contains("confirmed") -> Pair("Confirmed", "#2196F3")
+            s.contains("received") -> Pair("Received", "#ABCDEF")
+            s.contains("treated") || s.contains("started") -> Pair("Treated", "#9C27B0")
             s.contains("rejected") -> Pair("Rejected", "#F44336")
             else -> Pair("Pending", "#9E9E9E")
         }
@@ -466,8 +484,45 @@ class SP_TaskUpdateDetails : Fragment() {
         } else {
             btnInTransit.visibility = View.GONE
             btnDelivered.visibility = View.GONE
-            btnSaveStatus.visibility = View.VISIBLE
+            btnSaveStatus.visibility = View.GONE
         }
+    }
+
+    private fun updateTsdStatus(newStatus: String) {
+        val id = bookingId ?: return
+        val updateMap = mutableMapOf<String, Any>("wasteStatus" to newStatus)
+
+        btnReceiveWaste.isEnabled = false
+        btnStartTreatment.isEnabled = false
+
+
+        db.collection("tsd_bookings").document(id)
+            .get()
+            .addOnSuccessListener {tsdDoc->
+                val generatorId = tsdDoc.getString("generatorId") ?: ""
+
+                db.collection("transport_bookings")
+                    .whereEqualTo("pcoId",generatorId)
+                    .get()
+                    .addOnSuccessListener {wasteDoc->
+                        val wasteId = wasteDoc.documents[0].id
+                        db.collection("transport_bookings").document(wasteId).update(updateMap)
+                            .addOnSuccessListener {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Status updated to $newStatus",
+                                    Toast.LENGTH_SHORT)
+                                    .show()
+                            }.addOnFailureListener {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Status failure to update",
+                                    Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                    }
+
+            }
     }
 
     private fun updateStatusDirectly(newStatus: String) {
@@ -592,9 +647,11 @@ class SP_TaskUpdateDetails : Fragment() {
         } else {
             btnInTransit.visibility = View.GONE
             btnDelivered.visibility = View.GONE
-            btnSaveStatus.visibility = View.VISIBLE
+            btnSaveStatus.visibility = View.GONE
             btnUpload.visibility = View.VISIBLE
             btnCancel.visibility = View.VISIBLE
+            btnReceiveWaste.visibility = View.VISIBLE
+            btnStartTreatment.visibility = View.VISIBLE
         }
         updateProgressBar(status)
     }

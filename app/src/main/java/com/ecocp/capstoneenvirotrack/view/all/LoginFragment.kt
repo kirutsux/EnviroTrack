@@ -99,8 +99,8 @@ class LoginFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun forTesting(etEmail: EditText, etPassword: EditText){
-        etEmail.setText("loyswagas@gmail.com")
-        etPassword.setText("123123")
+        etEmail.setText("iandanegomez.93@gmail.com")
+        etPassword.setText("12345678")
     }
 
     // ✅ Google Sign-In Intent with forced popup

@@ -316,6 +316,35 @@
                         app:cornerRadius="8dp" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnReceiveWaste"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="Receive Waste"
+                        android:textColor="#FF9800"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="#FF9800"
+                        app:strokeWidth="1dp"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStartTreatment"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="Treatment Start"
+                        android:textColor="#4CAF50"
+                        android:textSize="10sp"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="#4CAF50"
+                        app:strokeWidth="1dp"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnInTransit"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="0dp"
@@ -336,8 +365,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:text="Deliver"
+                        android:text="Delivered"
                         android:textColor="#4CAF50"
+                        android:textSize="10sp"
                         app:cornerRadius="8dp"
                         app:strokeColor="#4CAF50"
                         app:strokeWidth="1dp"
