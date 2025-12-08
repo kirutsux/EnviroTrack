@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
     private lateinit var bottomNavigationView: BottomNavigationView
+    private var userType: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,32 +43,20 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
         bottomNavigationView = findViewById(R.id.bottom_navigation)
-        bottomNavigationView.setupWithNavController(navController)
-
-        // ✅ Bottom nav item handling
-        bottomNavigationView.setOnItemSelectedListener { item ->
-            val destinationId = when (item.itemId) {
-                R.id.pcoDashboard -> R.id.pcoDashboard
-                R.id.inboxFragment -> R.id.inboxFragment
-                R.id.aiFaqBotFragment -> R.id.aiFaqBotFragment
-                R.id.comp_Profile -> R.id.comp_Profile
-                else -> return@setOnItemSelectedListener false
-            }
-
-            safeNavigate(destinationId)
-            true
-        }
 
         // ✅ Show bottom nav only on certain fragments
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.pcoDashboard,
-                R.id.chatFragment,
-                R.id.aiFaqBotFragment,
-                R.id.comp_Profile -> bottomNavigationView.visibility = View.VISIBLE
-                else -> bottomNavigationView.visibility = View.GONE
-            }
+            bottomNavigationView.visibility = when (userType) {
+                "emb" -> when (destination.id) {
+                    R.id.embDashboard, R.id.checklistFragment, R.id.embProfile -> View.VISIBLE
+                    else -> View.GONE
+                }
 
+                else -> when (destination.id) {  // PCO logic
+                    R.id.pcoDashboard, R.id.chatFragment, R.id.aiFaqBotFragment, R.id.comp_Profile -> View.VISIBLE
+                    else -> View.GONE
+                }
+            }
             logCurrentDestination(destination)
         }
     }
@@ -83,7 +72,10 @@ class MainActivity : AppCompatActivity() {
                     val navOptions = NavOptions.Builder()
                         .setLaunchSingleTop(true)
                         .setPopUpTo(
-                            R.id.pcoDashboard, // Keeps dashboard as base
+                            when (userType) {
+                                "emb" -> R.id.embDashboard
+                                else -> R.id.pcoDashboard
+                            },
                             inclusive = false
                         )
                         .build()
@@ -126,12 +118,43 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d("MainActivity", "Now on destination: $destName (${destination.id})")
     }
+
     override fun onStart() {
         super.onStart()
 
         val prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
         val isLoggedIn = prefs.getBoolean("isLoggedIn", false)
-        val userType = prefs.getString("userType", null)
+        userType = prefs.getString("userType", null)
+
+        val menuResId = when(userType){
+            "emb" -> R.menu.bottom_nav_emb_menu
+            else -> R.menu.bottom_nav_menu
+        }
+        bottomNavigationView.menu.clear()
+        bottomNavigationView.inflateMenu(menuResId)
+
+        // ✅ Bottom nav item handling
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            val destinationId = when (userType) {
+                "emb" -> when (item.itemId) {
+                    R.id.nav_emb_dashboard -> R.id.embDashboard
+                    R.id.nav_checklist -> R.id.checklistFragment
+                    R.id.nav_emb_profile -> R.id.embProfile
+                    else -> return@setOnItemSelectedListener false
+                }
+
+                else -> when (item.itemId) {
+                    R.id.pcoDashboard -> R.id.pcoDashboard
+                    R.id.inboxFragment -> R.id.inboxFragment
+                    R.id.aiFaqBotFragment -> R.id.aiFaqBotFragment
+                    R.id.comp_Profile -> R.id.comp_Profile
+                    else -> return@setOnItemSelectedListener false
+                }
+            }
+
+            safeNavigate(destinationId)
+            true
+        }
 
         val user = FirebaseAuth.getInstance().currentUser
         if (isLoggedIn && user != null) {
@@ -139,6 +162,12 @@ class MainActivity : AppCompatActivity() {
                 "service_provider" -> {
                     startActivity(Intent(this, SPMainActivity::class.java))
                     finish()
+                }
+
+                "emb" -> {
+                    if (navController.currentDestination?.id != R.id.embDashboard) {
+                        safeNavigate(R.id.embDashboard)
+                    }
                 }
 
             }

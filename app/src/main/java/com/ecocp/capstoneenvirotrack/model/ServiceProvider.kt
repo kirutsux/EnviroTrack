@@ -9,8 +9,8 @@ data class ServiceProvider(
     val contactNumber: String = "",
     val email: String = "",
     val location: String = "",
-    val role: String = "", // e.g., "Transporter" or "TSD Facility"
-    val status: String = "", // e.g., "approved", "pending"
+    val role: String = "",
+    val status: String = "",
     val profileImageUrl: String = "",
     val mustChangePassword: Boolean = false,
     val createdAt: Timestamp? = null

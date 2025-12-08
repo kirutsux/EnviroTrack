@@ -341,6 +341,7 @@ class TransporterStep2Fragment : Fragment() {
                 "bookedBy" to currentUserFullName,                    // NEW: Full name here
                 "bookedByUid" to currentUser.uid,                     // NEW: UID for filtering
                 "serviceProviderName" to provider.name,
+                "serviceProviderUid" to provider.uid,
                 "serviceProviderCompany" to provider.companyName,
                 "providerType" to provider.role,
                 "providerContact" to provider.contactNumber,
@@ -449,7 +450,7 @@ class TransporterStep2Fragment : Fragment() {
                 .addOnFailureListener {
                     callback(false, emptyMap())
                 }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             callback(false, emptyMap())
             return
         }
