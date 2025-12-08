@@ -1,32 +1,42 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.smr
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.SmrFileListAdapter
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrSummaryBinding
-import com.ecocp.capstoneenvirotrack.model.*
+import com.ecocp.capstoneenvirotrack.model.AirPollution
+import com.ecocp.capstoneenvirotrack.model.GeneralInfo
+import com.ecocp.capstoneenvirotrack.model.Others
+import com.ecocp.capstoneenvirotrack.model.Smr
+import com.ecocp.capstoneenvirotrack.utils.airPollutionText
+import com.ecocp.capstoneenvirotrack.utils.generalInfoText
+import com.ecocp.capstoneenvirotrack.utils.hazardousWasteText
+import com.ecocp.capstoneenvirotrack.utils.othersText
+import com.ecocp.capstoneenvirotrack.utils.waterPollutionText
 import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.ecocp.capstoneenvirotrack.utils.*
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import retrofit2.Call
+
 
 class SmrSummaryFragment : Fragment() {
 
@@ -36,27 +46,14 @@ class SmrSummaryFragment : Fragment() {
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private lateinit var fileAdapter: SmrFileListAdapter
+    private var currentSmrDocumentId: String? = null
+    private var statusListener: ListenerRegistration? = null
 
     private val filePickerLauncher: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(
             ActivityResultContracts.OpenDocument()
         ) { uri: Uri? ->
             uri?.let { uploadFile(it) }
-        }
-
-    private val permissionLauncher: ActivityResultLauncher<String> =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            if (isGranted) {
-                pickFile()
-            } else {
-                Snackbar.make(
-                    binding.root,
-                    "Permission denied. Cannot access files.",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
         }
 
 
@@ -71,101 +68,79 @@ class SmrSummaryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileAdapter = SmrFileListAdapter { url -> smrViewModel.removeFileUrl(url) }
+        val smrId = arguments?.getString("smrId")
+        if (smrId != null) {
+            loadExistingSmr(smrId)
+            binding.btnSubmitSmr.visibility = View.GONE
+        } else {
+            binding.tvStatus.visibility = View.GONE
+            binding.btnEditSmr.visibility = View.GONE
+
+            smrViewModel.smr.observe(viewLifecycleOwner) { smr ->
+                displaySmrData(smr)
+            }
+        }
+        Log.d("SmrSummaryFragment", "smrId: $smrId")
+
+        fileAdapter = SmrFileListAdapter(
+            "Remove",
+            { url -> smrViewModel.removeFileUrl(url) }
+            )
         binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerAttachedFiles.adapter = fileAdapter
 
-        smrViewModel.fileUrls.observe(viewLifecycleOwner) { urls ->
-            fileAdapter.submitList(urls)
+        if (smrId == null) {
+            smrViewModel.fileUrls.observe(viewLifecycleOwner) { urls ->
+                fileAdapter.submitList(urls)
+            }
         }
 
         binding.btnAttachFile.setOnClickListener {
-            checkPermissionAndPickFile()
-        }
-
-        // Observe the smr LiveData so summary updates automatically when modules change
-        smrViewModel.smr.observe(viewLifecycleOwner) { smr ->
-            // update UI from the latest smr
-            displaySmrData(smr)
-
-            // rebuild summary and run AI analysis (optional: move analyzeSummary call to a button if you
-            // want to avoid running analysis on every small change)
-            val smrSummary = buildFullSmrSummary(smr)
-
-            val aiPrompt = """
-                ROLE:
-                You are an Environmental Compliance Analyst for the Environmental Management Bureau (EMB).
-                Your task is to evaluate Self-Monitoring Reports (SMR) for Modules 1–5.
-                Provide strictly evidence-based insights ONLY from the supplied SMR summary.
-                Do NOT fabricate missing information, values, or environmental limits.
-
-                INPUT:
-                Here is the complete SMR submitted by the facility:
-                --- BEGIN SMR DATA ---
-                $smrSummary
-                --- END SMR DATA ---
-
-                IMPORTANT RULES:
-                - Each module (1 to 5) MUST include an **Initial Findings** section.
-                - Each Initial Finding must be **1–2 sentences** summarizing ONLY the most important SMR data.
-                - Use ONLY the data available in the SMR summary.
-                - No assumptions or invented values.
-                - Output must remain consistent when the same data is provided (supports caching).
-
-                STEPS:
-                1. Read the entire SMR.
-                2. Extract only factual entries.
-                3. Identify important values per module and convert them into sentence-form initial findings.
-                4. Identify missing data, contradictions, unusual patterns, or suspicious values.
-                5. Only flag compliance concerns when the SMR itself provides supporting evidence.
-
-                EXPECTED OUTPUT FORMAT:
-
-                **MODULE 1 — Initial Findings**
-                - 1–2 sentences summarizing Module 1 data.
-
-                **MODULE 2 — Initial Findings**
-                - 1–2 sentences summarizing Module 2 data.
-
-                **MODULE 3 — Initial Findings**
-                - 1–2 sentences summarizing Module 3 data.
-
-                **MODULE 4 — Initial Findings**
-                - 1–2 sentences summarizing Module 4 data.
-
-                **MODULE 5 — Initial Findings**
-                - 1–2 sentences summarizing Module 5 data.
-
-                ---
-                **Overall Automated Analysis & Observations**
-                **Potential Compliance Concerns**
-                **Recommended Actions for EMB Review**
-                **Confidence Level**
-            """.trimIndent()
-
-//            smrViewModel.analyzeSummary(aiPrompt)
+            pickFile()
         }
 
         binding.btnSubmitSmr.setOnClickListener {
             submitSmrToFirebase()
+            clearAllInputs()
         }
 
-        observeAiAnalysis()
-    }
-
-    private fun checkPermissionAndPickFile() {
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            pickFile()
-        } else {
-            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        binding.btnEditSmr.setOnClickListener {
+            findNavController().navigate(R.id.action_smrSummaryFragment_to_module1GeneralInfoFragment)
         }
     }
 
-    private fun pickFile(){
+    private fun loadExistingSmr(smrId: String) {
+        firestore.collection("smr_submissions").document(smrId).get()
+            .addOnSuccessListener { document ->
+                val smr = document.toObject(Smr::class.java)?.copy(id = smrId)
+                smr?.let {
+                    displaySmrData(it)
+                    fileAdapter.submitList(it.fileUrls)
+
+                    binding.btnSubmitSmr.visibility = View.GONE
+                    val initialStatus = document.getString("status") ?: "Pending"
+                    val rejectionReason = document.getString("rejectionReason") ?: ""
+                    binding.tvStatus.text = "Status: $initialStatus"
+                    binding.tvRejectionReason.text = "Reason: $rejectionReason"
+                    binding.tvStatus.visibility = View.VISIBLE
+
+                    if (initialStatus == "Rejected") {
+                        binding.btnEditSmr.visibility = View.VISIBLE
+                        binding.btnAttachFile.visibility = View.VISIBLE
+                        binding.tvRejectionReason.visibility = View.VISIBLE
+                    } else {
+                        binding.btnEditSmr.visibility = View.GONE
+                        binding.btnAttachFile.visibility = View.GONE
+                    }
+
+                    setupStatusListener(smrId)
+                } ?: run {
+                    Snackbar.make(binding.root, "No SMR data found", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun pickFile() {
         filePickerLauncher.launch(
             arrayOf(
                 "application/pdf",
@@ -176,83 +151,82 @@ class SmrSummaryFragment : Fragment() {
         )
     }
 
-    private fun uploadFile(uri: Uri){
-        val userId = FirebaseAuth.getInstance().currentUser?.uid?: return
+    private fun uploadFile(uri: Uri) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+            Snackbar.make(binding.root, "User unauthorized.", Snackbar.LENGTH_SHORT).show()
+            binding.progressBar.visibility = View.VISIBLE
+            return
+        }
+
         val fileName = "smr_files/$userId/${System.currentTimeMillis()}_${uri.lastPathSegment}"
         val storageRef: StorageReference = storage.reference.child(fileName)
 
         storageRef.putFile(uri)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    smrViewModel.addFileUrl(downloadUrl.toString())
-                    Snackbar.make(binding.root, "File uploaded successfully!", Snackbar.LENGTH_SHORT).show()
+                    if (arguments?.getString("smrId") == null) {
+                        smrViewModel.addFileUrl(downloadUrl.toString())
+                    }
+                    Snackbar.make(
+                        binding.root,
+                        "File uploaded successfully!",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    binding.progressBar.visibility = View.GONE
                 }
             }
             .addOnFailureListener { e ->
-                Snackbar.make(binding.root, "Upload failed: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, "Upload failed: ${e.message}", Snackbar.LENGTH_SHORT)
+                    .show()
+                binding.progressBar.visibility = View.GONE
+            }
+            .addOnProgressListener { taskSnapshot ->
+                val progress =
+                    (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount).toInt()
+                binding.progressBar.progress = progress
             }
     }
 
     /** --- DISPLAY SUMMARY DATA --- **/
     @SuppressLint("SetTextI18n")
     private fun displaySmrData(smr: Smr) {
+        Log.d(
+            "SMRDisplay",
+            "Displaying SMR: ${smr.id}, GeneralInfo: ${smr.generalInfo.establishmentName}"
+        )
+
         // Module 1: General Info
         val module1Text = smr.generalInfo.generalInfoText()
         binding.module1Container.tvModuleTitle.text = "Module 1: General Information"
         binding.module1Container.tvModuleSummary.text = module1Text
-        android.util.Log.d("SMRDisplay", "Module 1: $module1Text")
+        Log.d("SMRDisplay", "Module 1: $module1Text")
 
         // Module 2: Hazardous Waste
         val module2Text = smr.hazardousWastes.hazardousWasteText()
         binding.module2Container.tvModuleTitle.text = "Module 2: Hazardous Waste"
         binding.module2Container.tvModuleSummary.text = module2Text
-        android.util.Log.d("SMRDisplay", "Module 2: $module2Text")
+        Log.d("SMRDisplay", "Module 2: $module2Text")
 
         // Module 3: Water Pollution
         val module3Text = smr.waterPollutionRecords.waterPollutionText()
         binding.module3Container.tvModuleTitle.text = "Module 3: Water Pollution"
         binding.module3Container.tvModuleSummary.text = module3Text
-        android.util.Log.d("SMRDisplay", "Module 3: $module3Text")
+        Log.d("SMRDisplay", "Module 3: $module3Text")
 
         // Module 4: Air Pollution
         val module4Text = smr.airPollution.airPollutionText()
         binding.module4Container.tvModuleTitle.text = "Module 4: Air Pollution"
         binding.module4Container.tvModuleSummary.text = module4Text
-        android.util.Log.d("SMRDisplay", "Module 4: $module4Text")
+        Log.d("SMRDisplay", "Module 4: $module4Text")
 
         // Module 5: Others
         val module5Text = smr.others.othersText()
         binding.module5Container.tvModuleTitle.text = "Module 5: Others"
         binding.module5Container.tvModuleSummary.text = module5Text
-        android.util.Log.d("SMRDisplay", "Module 5: $module5Text")
+        Log.d("SMRDisplay", "Module 5: $module5Text")
+
     }
 
-    private fun buildFullSmrSummary(smr: Smr): String {
-        return """
-            SELF-MONITORING REPORT SUMMARY
-            --- MODULE 1: GENERAL INFORMATION ---
-            ${smr.generalInfo.generalInfoText()}
-
-            --- MODULE 2: HAZARDOUS WASTE ---
-            ${smr.hazardousWastes.hazardousWasteText()}
-
-            --- MODULE 3: WATER POLLUTION ---
-            ${smr.waterPollutionRecords.waterPollutionText()}
-
-            --- MODULE 4: AIR POLLUTION ---
-            ${smr.airPollution.airPollutionText()}
-
-            --- MODULE 5: OTHERS ---
-            ${smr.others.othersText()}
-        """.trimIndent()
-    }
-
-    private fun observeAiAnalysis() {
-        smrViewModel.aiAnalysis.observe(viewLifecycleOwner) { analysis ->
-            binding.module6Container.tvAiAnalysis.text =
-                analysis ?: "No AI analysis provided."
-        }
-    }
 
     /** --- SAVE TO FIREBASE --- **/
     private fun submitSmrToFirebase() {
@@ -260,8 +234,7 @@ class SmrSummaryFragment : Fragment() {
         val userUid = FirebaseAuth.getInstance().currentUser?.uid
 
         if (smr == null || userUid == null) {
-            Snackbar.make(binding.root, "No SMR data or user UID found.", Snackbar.LENGTH_SHORT)
-                .show()
+            Snackbar.make(binding.root, "No SMR data or user UID found.", Snackbar.LENGTH_SHORT).show()
             return
         }
 
@@ -273,37 +246,97 @@ class SmrSummaryFragment : Fragment() {
             "waterPollutionRecords" to smr.waterPollutionRecords,
             "airPollution" to smr.airPollution,
             "others" to smr.others,
-            "fileUrls" to smr.fileUrls
+            "fileUrls" to smr.fileUrls,
+            "status" to "Pending"
         )
 
+        // Step 1: Save to Firestore
         firestore.collection("smr_submissions")
             .add(smrData)
-            .addOnSuccessListener {
-                Snackbar.make(binding.root, "SMR successfully submitted!", Snackbar.LENGTH_SHORT)
-                    .show()
-                smrViewModel.clearSmr()
-                smrViewModel.clearFiles()
-                clearAllInputs() // clear all input fields
+            .addOnSuccessListener { documentReference ->
+                val smrDocId = documentReference.id
+                currentSmrDocumentId = smrDocId
 
-                // Navigate to SmrDashboardFragment
-                findNavController().navigate(R.id.action_smrSummaryFragment_to_smrDashboardFragment)
+                Snackbar.make(binding.root, "SMR successfully submitted!", Snackbar.LENGTH_SHORT).show()
+                binding.btnSubmitSmr.visibility = View.GONE
+                binding.tvStatus.visibility = View.VISIBLE
+                binding.tvStatus.text = "Status: Pending"
+
+                // Optional: real-time status listener
+                setupStatusListener(smrDocId)
+
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = userUid,      // PCO UID
+                    module = "SMR", // Module name for SMR
+                    documentId = smrDocId      // Firestore document ID
+                )
+
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "SMR submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
+                                Snackbar.make(binding.root, "Notification error: ${response.code()}", Snackbar.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Error sending notifications: ${t.message}")
+                            Snackbar.make(binding.root, "Failed to send notifications", Snackbar.LENGTH_SHORT).show()
+                        }
+                    })
             }
             .addOnFailureListener { e ->
-                Snackbar.make(
-                    binding.root,
-                    "Failed to submit SMR: ${e.message}",
-                    Snackbar.LENGTH_SHORT
-                ).show()
+                Snackbar.make(binding.root, "Failed to submit SMR: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            }
+    }
+
+
+    private fun setupStatusListener(documentId: String) {
+        statusListener?.remove()
+        statusListener = firestore.collection("smr_submissions").document(documentId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Snackbar.make(binding.root, "Error fetching SMR status.", Snackbar.LENGTH_SHORT)
+                        .show()
+                    return@addSnapshotListener
+                }
+                val status = snapshot?.getString("status") ?: "Pending"
+                binding.tvStatus.text = "Status: $status"
+                binding.tvStatus.visibility = View.VISIBLE
+
+                when (status) {
+                    "Rejected" -> {
+                        binding.btnEditSmr.visibility = View.VISIBLE
+                    }
+
+                    "Approved" -> {
+                        binding.btnEditSmr.visibility = View.GONE
+                        if (arguments?.getString("smrId") == null) {
+                            clearAllInputs()
+                        }
+                    }
+
+                    else -> {
+                        binding.btnEditSmr.visibility = View.GONE
+                    }
+                }
             }
     }
 
     /** --- CLEAR ALL MODULE INPUT FIELDS --- **/
     private fun clearAllInputs() {
-        smrViewModel.updateGeneralInfo(GeneralInfo())
-        smrViewModel.updateHazardousWastes(emptyList())
-        smrViewModel.clearWaterPollutionRecords()
-        smrViewModel.updateAirPollution(AirPollution())
-        smrViewModel.updateOthers(Others())
+//        smrViewModel.updateGeneralInfo(GeneralInfo())
+//        smrViewModel.updateHazardousWastes(emptyList())
+//        smrViewModel.clearWaterPollutionRecords()
+//        smrViewModel.updateAirPollution(AirPollution())
+//        smrViewModel.updateOthers(Others())
+        smrViewModel.clearSmr()
     }
 
     override fun onDestroyView() {

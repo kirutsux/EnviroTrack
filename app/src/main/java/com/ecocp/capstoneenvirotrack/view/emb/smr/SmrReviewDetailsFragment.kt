@@ -2,21 +2,30 @@ package com.ecocp.capstoneenvirotrack.view.emb.smr
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.MyApplication
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ModuleAdapter
+import com.ecocp.capstoneenvirotrack.adapter.SmrFileListAdapter
 import com.ecocp.capstoneenvirotrack.api.OpenAiClient
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.model.AirPollution
 import com.ecocp.capstoneenvirotrack.model.GeneralInfo
@@ -31,7 +40,10 @@ import com.ecocp.capstoneenvirotrack.utils.generalInfoText
 import com.ecocp.capstoneenvirotrack.utils.hazardousWasteText
 import com.ecocp.capstoneenvirotrack.utils.othersText
 import com.ecocp.capstoneenvirotrack.utils.waterPollutionText
+import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +52,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import retrofit2.Call
+import androidx.core.net.toUri
+import kotlin.Double
 
 @Suppress("UNCHECKED_CAST", "PrivatePropertyName")
 class SmrReviewDetailsFragment : Fragment() {
@@ -47,7 +62,9 @@ class SmrReviewDetailsFragment : Fragment() {
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
     private var submissionId: String? = null
+    private val smrViewModel: SmrViewModel by activityViewModels()
     private lateinit var smr: Smr
+    private lateinit var fileAdapter: SmrFileListAdapter
 
 
     override fun onCreateView(
@@ -63,13 +80,39 @@ class SmrReviewDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnAnalyze.isEnabled = false
-        binding.tvAiAnalysis.visibility = View.GONE
+        binding.finalResultsView.visibility = View.GONE
+
+        fileAdapter = SmrFileListAdapter(
+            "Download",
+            { url -> downloadFile(url) }
+        )
+
+        binding.recyclerAttachedFiles.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerAttachedFiles.adapter = fileAdapter
+
+        smrViewModel.fileUrls.observe(viewLifecycleOwner) { urls ->
+            fileAdapter.submitList(urls)
+        }
 
         if (submissionId != null) {
             fetchSmrDetails(submissionId!!)
         } else {
             Snackbar.make(binding.root, "No submissions selected", Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    @SuppressLint("UseKtx")
+    private fun downloadFile(fileUrl: String) {
+        val request = DownloadManager.Request(fileUrl.toUri()).apply {
+            setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                fileUrl.toUri().lastPathSegment ?: "file"
+            )
+        }
+        val downloadManager =
+            requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
+        Toast.makeText(requireContext(), "Download started", Toast.LENGTH_SHORT).show()
     }
 
     private fun fetchSmrDetails(submissionId: String) {
@@ -123,7 +166,17 @@ class SmrReviewDetailsFragment : Fragment() {
                         WaterPollution(
                             domesticWastewater = (it["domesticWastewater"] as? Double) ?: 0.0,
                             processWastewater = (it["processWastewater"] as? Double) ?: 0.0,
-                            // Map other fields as needed
+                            coolingWater = it["coolingWater"] as? String ?: "",
+                            otherSource = it["otherSource"] as? String ?: "",
+                            washEquipment = it["washEquipment"] as? String ?: "",
+                            washFloor = it["washFloor"] as? String ?: "",
+                            employees = (it["employees"] as? Long)?.toInt() ?: 0,
+                            costEmployees = it["costEmployees"] as? String ?: "",
+                            utilityCost = it["utilityCost"] as? String ?: "",
+                            newInvestmentCost = it["newInvestmentCost"] as? String ?: "",
+                            outletNo = (it["outletNo"] as? Long)?.toInt() ?: 0,
+                            outletLocation = it["outletLocation"] as? String ?: "",
+                            waterBody = it["waterBody"] as? String ?: "",
                             date1 = it["date1"] as? String ?: "",
                             flow1 = it["flow1"] as? String ?: "",
                             bod1 = it["bod1"] as? String ?: "",
@@ -178,12 +231,14 @@ class SmrReviewDetailsFragment : Fragment() {
                     waterPollutionRecords = waterPollutionRecords,
                     airPollution = airPollution,
                     others = others,
-                    submittedAt = (doc.getTimestamp("dateSubmitted")?.toDate()?.time) ?: 0L,
+                    dateSubmitted = (doc.getTimestamp("dateSubmitted")),
                     uid = doc.getString("uid"),
-                    id = doc.id
+                    id = doc.id,
+                    fileUrls = doc.get("fileUrls") as? List<String> ?: emptyList()
                 )
 
                 this.smr = smr
+                smrViewModel.setFileUrls(smr.fileUrls)
                 displaySummary(smr)
 
                 binding.btnAnalyze.isEnabled = true
@@ -207,31 +262,79 @@ class SmrReviewDetailsFragment : Fragment() {
         }
 
         binding.btnReject.setOnClickListener {
+            updateSmrStatus("Rejected", null)
             showRejectionDialog()
         }
     }
 
     private fun updateSmrStatus(newStatus: String, rejectionReason: String?) {
-        val updates = mutableMapOf<String, Any>("status" to newStatus)
-        rejectionReason?.let{ updates["rejectionReason"] = it }
+        val smrId = smr.id ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        db.collection("smr_submissions").document(smr.id!!)
-            .update(updates)
+        // Always check fragment state
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        // Step 1: Update Firestore first (optional, keeps data in sync)
+        val updateData = mutableMapOf<String, Any>(
+            "status" to newStatus,
+            "reviewedTimestamp" to Timestamp.now()
+        )
+        rejectionReason?.let { updateData["rejectionReason"] = it }
+
+        db.collection("smr_submissions").document(smrId)
+            .update(updateData)
             .addOnSuccessListener {
-                Snackbar.make(binding.root, "SMR status updated to $newStatus", Snackbar.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
+
+                // Step 2: Fetch PCO UID from the SMR document
+                db.collection("smr_submissions").document(smrId).get()
+                    .addOnSuccessListener { doc ->
+                        val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
+
+                        // --------------------------------------------------------
+                        // 🔔 CALL BACKEND API — NOTIFY PCO OF STATUS UPDATE
+                        // --------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = smrId,
+                            newStatus = newStatus,
+                            pcoId = pcoUid,
+                            embId = embUid,
+                            module = "SMR",
+                            feedback = rejectionReason ?: ""
+                        )
+
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "SMR status update notification sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Failed to send notification: ${response.code()}")
+                                        Snackbar.make(binding.root, "Notification error: ${response.code()}", Snackbar.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Snackbar.make(binding.root, "Failed to send notification", Snackbar.LENGTH_SHORT).show()
+                                }
+                            })
+                    }
+                    .addOnFailureListener { e ->
+                        Snackbar.make(binding.root, "Failed to fetch SMR data: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                        Log.e("SMR_REVIEW", "Failed to fetch SMR application: ${e.message}", e)
+                    }
             }
-            .addOnFailureListener{e->
+            .addOnFailureListener { e ->
                 Snackbar.make(binding.root, "Failed to update status: ${e.message}", Snackbar.LENGTH_SHORT).show()
-                Log.e("StatusUpdate", "Failed to update status: ${e.message}")
+                Log.e("SMR_REVIEW", "Failed to update SMR status: ${e.message}", e)
             }
     }
 
-    private fun showRejectionDialog(){
-
+    private fun showRejectionDialog() {
         val input = android.widget.EditText(requireContext()).apply {
             hint = "Enter rejection reason"
-            setSingleLine(false)
+            isSingleLine = false
             maxLines = 5
         }
         AlertDialog.Builder(requireContext())
@@ -243,7 +346,12 @@ class SmrReviewDetailsFragment : Fragment() {
                 if (reason.isNotEmpty()) {
                     updateSmrStatus("Rejected", reason)
                 } else {
-                    Snackbar.make(binding.root, "Rejection reason is required", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(
+                        binding.root,
+                        "Rejection reason is required",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    findNavController().navigate(R.id.action_embSmrReviewDetailsFragment_to_embSmrDashboardFragment)
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -251,14 +359,6 @@ class SmrReviewDetailsFragment : Fragment() {
     }
 
     private fun displaySummary(smr: Smr) {
-        val totalModules = 5
-        var completedModules = 0
-        if (smr.generalInfo.establishmentName.isNotEmpty()) completedModules++
-        if (smr.hazardousWastes.isNotEmpty()) completedModules++
-        if (smr.waterPollutionRecords.isNotEmpty()) completedModules++
-        if (smr.airPollution.processEquipment.isNotEmpty()) completedModules++
-        if (smr.others.accidentDate.isNotEmpty()) completedModules++
-        val percentage = (completedModules.toFloat() / totalModules * 100).toInt()
 
         val modules = listOf(
             "General Information" to smr.generalInfo.generalInfoText(),
@@ -313,6 +413,27 @@ class SmrReviewDetailsFragment : Fragment() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                val (cachedHash, cachedAnalysis) = loadCached()
+                val expectedHash = "full_analysis_${smr.id}"
+
+//                if(cachedHash==expectedHash && !cachedAnalysis.isNullOrEmpty()){
+//                    withContext(Dispatchers.Main) {
+//                        if(_binding!=null){
+//                            binding.tvAiAnalysis.text = cachedAnalysis
+//                            binding.recyclerModules.visibility = View.GONE
+//                            binding.btnAnalyze.visibility = View.GONE
+//                            binding.finalResultsView.visibility = View.VISIBLE
+//                            binding.tvAiAnalysis.visibility = View.VISIBLE
+//                            binding.btnApprove.visibility = View.GONE
+//                            binding.btnReject.visibility = View.GONE
+                //            binding.recyclerAttachedFiles.visibility = View.GONE
+//                            Snackbar.make(binding.root, "AI analysis loaded from cache", Snackbar.LENGTH_SHORT).show()
+//                            progressDialog.dismiss()
+//                        }
+//                    }
+//                    return@launch
+//                }
+
                 for ((moduleName, moduleData) in modules) {
                     withContext(Dispatchers.Main) {
                         if (_binding != null) {
@@ -322,6 +443,7 @@ class SmrReviewDetailsFragment : Fragment() {
 
                     val prompt = """
                         You are an Environmental Compliance Analyst for the EMB (Environmental Management Bureau).
+                        The parameters and rules you abide by are the rules and laws the Philippines abide by.
                         Here are a list of different modules from an accredited PCO for their quarterly requirements.
                         Provide a short and structured compliance assessment of each:
                         Module Name:${moduleName}
@@ -329,7 +451,7 @@ class SmrReviewDetailsFragment : Fragment() {
                     """.trimIndent()
 
                     val request = OpenAiRequest(
-                        model = "gpt-3.5-turbo",
+                        model = "gpt-4.1-nano",
                         messages = listOf(OpenAiMessage(role = "user", content = prompt)),
                         max_tokens = 500
                     )
@@ -354,10 +476,27 @@ class SmrReviewDetailsFragment : Fragment() {
                     Compile the following module analyses into a comprehensive SMR compliance report:
                     $fullAnalysis
                     Provide an overall assessment with structured criticism. Provide an assessment on their issues, recommendations, and follow-up steps.
+                    Before the final analysis, enumerate the assessments from the previous analyses.
+                    i.e. Module 1: Module 1 assessment
+                         Module 2: Module 2 assessment
+                    For readability, use horizontal/vertical lines (______ or ||) as line breaks and separators to separate the summaries.
+                    i.e.
+                        ____________________________________
+                        Module 1:
+                            (Module 1 assessment)
+                        ____________________________________
+                        Module 2:
+                            (Module 2 assessment)
+                            
+                            
+                    Replace the Module assessment placeholders with the actual results from previously done analyses. After the compiled analyses, put the final analysis generated for overall assessment.            
+                    At the very end, put a decision of whether the submission/application should be approved or not.
+                    i.e. Final approval decision: For approval/rejection. If for approval, list nothing other than approve. If for rejection, list the reasons for rejection and put an enumerated list of follow-up actions.
+                    Note: If there are conditions or follow up actions, do not approve even if the conditions are minor.
                 """.trimIndent()
 
                 val finalRequest = OpenAiRequest(
-                    model = "gpt-3.5-turbo",
+                    model = "gpt-4.1-nano",
                     messages = listOf(OpenAiMessage(role = "user", content = finalPrompt)),
                     max_tokens = 1500
                 )
@@ -377,25 +516,11 @@ class SmrReviewDetailsFragment : Fragment() {
                         binding.tvAiAnalysis.text = compiledAnalysis
                         progressDialog.dismiss()
 
-                        binding.tvCompletionPercentage.visibility = View.GONE
+                        binding.recyclerAttachedFiles.visibility = View.GONE
                         binding.recyclerModules.visibility = View.GONE
                         binding.btnAnalyze.visibility = View.GONE
+                        binding.finalResultsView.visibility = View.VISIBLE
                         binding.tvAiAnalysis.visibility = View.VISIBLE
-
-                        db.collection("smr_submissions").document(smr.id!!)
-                            .update("status", "Reviewed")
-                            .addOnSuccessListener {
-                                Log.d(
-                                    "Status Update",
-                                    "Status updated to Reviewed for ${smr.id}"
-                                )
-                            }
-                            .addOnFailureListener { e ->
-                                Log.d(
-                                    "Status Update",
-                                    "Status update failed. ${e.message}}"
-                                )
-                            }
                     }
                 }
 
@@ -403,7 +528,7 @@ class SmrReviewDetailsFragment : Fragment() {
             } catch (_: TimeoutCancellationException) {
                 withContext(Dispatchers.Main) {
                     if (_binding != null) {
-                        binding.tvAiAnalysis.text = "AI analysis timed out."
+                        Log.d("AIAnalysis", "Timeout occurred")
                         progressDialog.dismiss()
                     }
                 }
@@ -445,23 +570,6 @@ class SmrReviewDetailsFragment : Fragment() {
             prefs[KEY_LAST_PROMPT_HASH],
             prefs[KEY_LAST_AI_OUTPUT]
         )
-    }
-
-
-    private fun buildFullSummary(smr: Smr): String {
-        return """
-            SELF-MONITORING REPORT SUMMARY
-            --- MODULE 1: GENERAL INFORMATION ---
-            ${smr.generalInfo.generalInfoText()}
-            --- MODULE 2: HAZARDOUS WASTE ---
-            ${smr.hazardousWastes.hazardousWasteText()}
-            --- MODULE 3: WATER POLLUTION ---
-            ${smr.waterPollutionRecords.waterPollutionText()}
-            --- MODULE 4: AIR POLLUTION ---
-            ${smr.airPollution.airPollutionText()}
-            --- MODULE 5: OTHERS ---
-            ${smr.others.othersText()}
-        """.trimIndent()
     }
 
     override fun onDestroyView() {

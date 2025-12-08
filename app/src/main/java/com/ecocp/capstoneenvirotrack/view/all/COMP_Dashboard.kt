@@ -31,6 +31,7 @@ import android.animation.ValueAnimator
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavOptions
 import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.SendExpiryNotificationRequest
 import com.ecocp.capstoneenvirotrack.api.SendNotificationRequest
 import com.ecocp.capstoneenvirotrack.view.businesses.smr.SmrActivity
 import com.google.firebase.Timestamp
@@ -202,8 +203,7 @@ class COMP_Dashboard : Fragment() {
                 .setPopEnterAnim(R.anim.slide_in_right)
                 .setPopExitAnim(R.anim.slide_out_left)
                 .build()
-            navController.navigate(R.id.action_global_notificationsFragment, bundle, options)
-
+            findNavController().navigate(R.id.action_COMP_Dashboard_to_notificationsFragment)
         }
     }
 
@@ -310,48 +310,36 @@ class COMP_Dashboard : Fragment() {
 
     private fun sendExpiryNotification(type: String, daysLeft: Long) {
         val userId = auth.currentUser?.uid ?: return
-        val message = when(type) {
-            "Permit" -> "Your permit to operate will expire in $daysLeft day(s)."
-            "PCO Accreditation" -> "Your PCO accreditation will expire in $daysLeft day(s)."
-            else -> "$type will expire in $daysLeft day(s)."
+
+        // Map friendly module names
+        val friendlyType = when(type) {
+            "Permit" -> "Permit to Operate"
+            "PCO Accreditation" -> "PCO Accreditation"
+            else -> type
         }
 
-        val notification = hashMapOf(
-            "receiverId" to userId,
-            "receiverType" to "pco",
-            "senderId" to "system",
-            "title" to "$type Expiry Alert",
-            "message" to message,
-            "timestamp" to Timestamp.now(),
-            "isRead" to false
-        )
-
-        // Save to Firestore
-        db.collection("notifications").add(notification)
-            .addOnSuccessListener { Log.d("COMP_Dashboard", "✅ Expiry notification sent: $type") }
-            .addOnFailureListener { e -> Log.e("COMP_Dashboard", "❌ Failed sending expiry notification: ${e.message}") }
-
-        // Send push notification via backend
         val api = RetrofitClient.instance
-        val request = SendNotificationRequest(
-            receiverId = userId,
-            title = "$type Expiry Alert",
-            message = message
+        val request = SendExpiryNotificationRequest(
+            userId = userId,
+            type = friendlyType,
+            daysLeft = daysLeft
         )
-        api.sendNotification(request).enqueue(object : retrofit2.Callback<Void> {
+
+        api.sendExpiryNotification(request).enqueue(object : retrofit2.Callback<Void> {
             override fun onResponse(call: retrofit2.Call<Void>, response: retrofit2.Response<Void>) {
                 if (response.isSuccessful) {
-                    Log.d("COMP_Dashboard", "✅ Push notification sent for $type expiry")
+                    Log.d("COMP_Dashboard", "✅ Expiry notification sent for $friendlyType")
                 } else {
-                    Log.e("COMP_Dashboard", "❌ Push failed for $type expiry")
+                    Log.e("COMP_Dashboard", "❌ Push failed for $friendlyType: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: retrofit2.Call<Void>, t: Throwable) {
-                Log.e("COMP_Dashboard", "❌ Push error for $type expiry", t)
+                Log.e("COMP_Dashboard", "❌ Push error for $friendlyType", t)
             }
         })
     }
+
 
     // Smooth pulsating red effect
     private fun flashDashboardRed() {

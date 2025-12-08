@@ -7,8 +7,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    tools:context=".view.all.COMP_Dashboard">
+    android:fitsSystemWindows="true"
+    tools:context=".view.emb.all.EMB_Dashboard">
 
+    <!-- MAIN CONTENT + BOTTOM NAVIGATION -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
     <!-- Main Content -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -118,42 +124,41 @@
                     android:contentDescription="@string/welcome_message_description"
                     tools:text="Welcome! Monitor document reviews efficiently and process compliance submissions on time" />
 
-                <!-- Spacer for Scrolling -->
-                <GridLayout
-                    android:id="@+id/recent_grid"
+                <!-- Responsive Card Layout -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cards_layout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:horizontalSpacing="16dp"
-                    android:padding="16dp"
-                    android:verticalSpacing="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/welcome_message"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/welcome_message">
+                    app:layout_constraintEnd_toEndOf="parent">
 
-                    <!-- CNC Card -->
+                    <!-- Row 1 -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cnc_card"
-                        android:layout_width="160dp"
-                        android:layout_height="150dp"
-                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintWidth_percent="0.45"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         app:cardCornerRadius="25dp"
                         app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/recent_item_background"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="12dp"
+                            android:background="@drawable/recent_item_background">
 
                             <ImageView
                                 android:layout_width="64dp"
                                 android:layout_height="64dp"
-                                android:contentDescription="@string/cnc_icon_description"
-                                android:src="@drawable/ic_recent" />
+                                android:src="@drawable/ic_recent"
+                                android:contentDescription="@string/cnc_icon_description"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -163,33 +168,35 @@
                                 android:textAlignment="center"
                                 android:textColor="@color/text_primary"
                                 android:textSize="12sp"
-                                android:textStyle="bold"
-                                tools:text="Certificate of Non-Coverage \n(CNC) Management" />
+                                android:textStyle="bold"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- SMR Card -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/smr_card"
-                        android:layout_width="160dp"
-                        android:layout_height="150dp"
-                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintWidth_percent="0.45"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintStart_toEndOf="@id/cnc_card"
+                        app:layout_constraintTop_toTopOf="@id/cnc_card"
+                        android:layout_marginStart="16dp"
                         app:cardCornerRadius="25dp"
                         app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/recent_item_background"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="12dp"
+                            android:background="@drawable/recent_item_background">
 
                             <ImageView
                                 android:layout_width="64dp"
                                 android:layout_height="64dp"
-                                android:contentDescription="@string/smr_icon_description"
-                                android:src="@drawable/smr" />
+                                android:src="@drawable/smr"
+                                android:contentDescription="@string/smr_icon_description"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -199,33 +206,36 @@
                                 android:textAlignment="center"
                                 android:textColor="@color/text_primary"
                                 android:textSize="12sp"
-                                android:textStyle="bold"
-                                tools:text="Self-Monitoring \nReport (SMR) Management" />
+                                android:textStyle="bold"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- OPMS Card -->
+                    <!-- Row 2 -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/opms_card"
-                        android:layout_width="160dp"
-                        android:layout_height="150dp"
-                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintWidth_percent="0.45"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/cnc_card"
+                        android:layout_marginTop="16dp"
                         app:cardCornerRadius="25dp"
                         app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/recent_item_background"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="12dp"
+                            android:background="@drawable/recent_item_background">
 
                             <ImageView
                                 android:layout_width="64dp"
                                 android:layout_height="64dp"
-                                android:contentDescription="@string/opms_icon_description"
-                                android:src="@drawable/opms" />
+                                android:src="@drawable/opms"
+                                android:contentDescription="@string/opms_icon_description"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -235,32 +245,36 @@
                                 android:textAlignment="center"
                                 android:textColor="@color/text_primary"
                                 android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:textStyle="bold"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- Hazardous Waste Card -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/hazewaste_card"
-                        android:layout_width="160dp"
-                        android:layout_height="150dp"
-                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintWidth_percent="0.45"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintStart_toEndOf="@id/opms_card"
+                        app:layout_constraintTop_toTopOf="@id/opms_card"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="2dp"
                         app:cardCornerRadius="25dp"
                         app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/recent_item_background"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="12dp"
+                            android:background="@drawable/recent_item_background">
 
                             <ImageView
                                 android:layout_width="64dp"
                                 android:layout_height="64dp"
-                                android:contentDescription="@string/hazewaste_icon_description"
-                                android:src="@drawable/hms" />
+                                android:src="@drawable/hms"
+                                android:contentDescription="@string/hazewaste_icon_description"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -270,33 +284,36 @@
                                 android:textAlignment="center"
                                 android:textColor="@color/text_primary"
                                 android:textSize="12sp"
-                                android:textStyle="bold"
-                                tools:text="Hazardous Waste \nManifest" />
+                                android:textStyle="bold"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- PCO Card -->
+                    <!-- Row 3 -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/pco_card"
-                        android:layout_width="160dp"
-                        android:layout_height="150dp"
-                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintWidth_percent="0.45"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/opms_card"
+                        android:layout_marginTop="16dp"
                         app:cardCornerRadius="25dp"
                         app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/recent_item_background"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="12dp"
+                            android:background="@drawable/recent_item_background">
 
                             <ImageView
                                 android:layout_width="64dp"
                                 android:layout_height="64dp"
-                                android:contentDescription="@string/pco_icon_description"
-                                android:src="@drawable/pco" />
+                                android:src="@drawable/pco"
+                                android:contentDescription="@string/pco_icon_description"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -306,32 +323,36 @@
                                 android:textAlignment="center"
                                 android:textColor="@color/text_primary"
                                 android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:textStyle="bold"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- CRS Card -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/crs_card"
-                        android:layout_width="160dp"
-                        android:layout_height="150dp"
-                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintWidth_percent="0.45"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintStart_toEndOf="@id/pco_card"
+                        app:layout_constraintTop_toTopOf="@id/pco_card"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="2dp"
                         app:cardCornerRadius="25dp"
                         app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/recent_item_background"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="12dp"
+                            android:background="@drawable/recent_item_background">
 
                             <ImageView
                                 android:layout_width="64dp"
                                 android:layout_height="64dp"
-                                android:contentDescription="@string/crs_icon_description"
-                                android:src="@drawable/crs" />
+                                android:src="@drawable/crs"
+                                android:contentDescription="@string/crs_icon_description"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -341,15 +362,17 @@
                                 android:textAlignment="center"
                                 android:textColor="@color/text_primary"
                                 android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:textStyle="bold"/>
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
-                </GridLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
 
                 <View
                     android:layout_width="0dp"
                     android:layout_height="100dp"
-                    app:layout_constraintTop_toBottomOf="@id/recent_grid"
+                    app:layout_constraintTop_toBottomOf="@id/cards_layout"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -367,5 +390,5 @@
         android:background="@color/white"
         app:itemIconTint="@color/nav_item_tint"
         app:itemTextColor="@color/nav_item_text" />
-
+    </LinearLayout>
 </androidx.drawerlayout.widget.DrawerLayout>

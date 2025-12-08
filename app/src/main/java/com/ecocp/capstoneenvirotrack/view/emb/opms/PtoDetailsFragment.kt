@@ -12,13 +12,20 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoDetails2Binding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -310,72 +317,79 @@ class PtoDetailsFragment : Fragment() {
     }
 
     // ------------------------------------------------------------
-    // APPROVE / REJECT STATUS UPDATE
-    // ------------------------------------------------------------
+// APPROVE / REJECT STATUS UPDATE
+// ------------------------------------------------------------
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
 
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        val collectionName = "opms_pto_applications"
+
+        // Step 1: Update Firestore
         val updateData = mapOf(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_pto_applications").document(id)
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // Navigate back to EMB dashboard
-                if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
-                    navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
-                }
-
-                // ✅ Send notifications using NotificationManager
-                db.collection("opms_pto_applications").document(id).get()
+                // Step 2: Fetch PCO UID
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("establishmentName") ?: "Unknown Establishment"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        // PCO notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = pcoUid,
-                            title = if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
-                            message = if (isApproved)
-                                "Your Permit to Operate application has been approved."
-                            else
-                                "Your Permit to Operate application has been rejected. Please review the feedback.",
-                            category = "approval",
-                            priority = "high",
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoUid,
+                            embId = embUid,
                             module = "PTO",
-                            documentId = id
+                            feedback = feedback
                         )
 
-                        // EMB notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = embUid,
-                            title = "PTO Application ${status.uppercase()}",
-                            message = "You have $status a PTO application for $companyName.",
-                            category = "system",
-                            priority = "high",
-                            module = "PTO",
-                            documentId = id
-                        )
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "PTO status update notifications sent.")
+                                        Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Log.e("NOTIF", "Notification error: ${response.code()}")
+                                        Toast.makeText(safeContext, "Notification failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext, "Notification failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Navigate back to dashboard safely
+                        if (isAdded) {
+                            val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
+                            navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(safeContext, "Failed to fetch application data: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("PTO_REVIEW", "❌ Failed to fetch PTO application", e)
                     }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("PTO_REVIEW", "❌ Failed to update PTO status", e)
+                Toast.makeText(safeContext, "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

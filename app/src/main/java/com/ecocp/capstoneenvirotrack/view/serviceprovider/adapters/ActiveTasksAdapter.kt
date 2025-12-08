@@ -15,7 +15,7 @@ import java.util.*
 
 class ActiveTasksAdapter(
     private val bookings: MutableList<TransporterBooking>,
-    private val onViewClick: (TransporterBooking) -> Unit
+    private val onViewClick: (TransporterBooking) -> Unit,
 ) : RecyclerView.Adapter<ActiveTasksAdapter.ActiveTaskViewHolder>() {
 
     inner class ActiveTaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,7 +32,7 @@ class ActiveTasksAdapter(
 
     private val confirmedList: List<TransporterBooking>
         get() = bookings.filter {
-            val s = (it.bookingStatus ?: "").lowercase().trim()
+            val s = it.bookingStatus.lowercase().trim()
             activeStatuses.contains(s)
         }
 
@@ -61,9 +61,8 @@ class ActiveTasksAdapter(
                 val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
                 sdf.format(timestamp.toDate())
             }
-            is String -> timestamp
+
             null -> ""
-            else -> timestamp.toString()
         }
 
         // Optional: Load client image if URL available (uncomment + add Glide dependency)

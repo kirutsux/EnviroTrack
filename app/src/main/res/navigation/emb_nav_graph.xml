@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/emb_nav_graph"
+    app:destination="@id/EmbDashboard">
+
+    <fragment
+        android:id="@+id/EmbDashboard"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
+        android:label="EmbDashboard"
+        tools:layout="@layout/emb_dashboard">
+        <action
+            android:id="@+id/action_EmbDashboard_to_EmbChecklist"
+            app:destination="@id/ChecklistFragment" />
+        <action
+            android:id="@+id/action_EmbDashboard_to_EmbProfile"
+            app:destination="@id/EmbProfile"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/ChecklistFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.all.ChecklistFragment"
+        android:label="EmbChecklistFragment"
+        tools:layout="@layout/fragment_checklist">
+        <action
+            android:id="@+id/action_EmbChecklist_to_EmbDashboard"
+            app:destination="@id/EmbDashboard"/>
+        <action
+            android:id="@+id/action_EmbChecklist_to_EmbProfile"
+            app:destination="@id/EmbProfile"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/EmbProfile"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Profile"
+        android:label="EmbProfileFragment"
+        tools:layout="@layout/fragment_emb_profile">
+        <action
+            android:id="@+id/action_EmbProfile_to_EmbDashboard"
+            app:destination="@id/EmbDashboard"/>
+        <action
+            android:id="@+id/action_EmbProfile_to_EmbChecklist"
+            app:destination="@id/ChecklistFragment"/>
+    </fragment>
+
+</navigation>

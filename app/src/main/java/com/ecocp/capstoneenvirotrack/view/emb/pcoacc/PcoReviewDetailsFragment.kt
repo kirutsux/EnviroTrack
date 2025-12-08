@@ -10,10 +10,17 @@ import android.view.ViewGroup
 import com.google.firebase.Timestamp
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPcoReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
+import retrofit2.Call
 import java.util.*
 
 class PcoEmbReviewDetailsFragment : Fragment() {
@@ -133,66 +140,74 @@ class PcoEmbReviewDetailsFragment : Fragment() {
 
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
 
-        val updateData = mapOf(
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        val collectionName = "accreditations"
+
+        // Step 1: Update Firestore
+        val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
-            "reviewedBy" to embUid,
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        db.collection("accreditations").document(id)
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                if (isAdded) {
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
-                }
+                Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // ✅ Send notifications using NotificationManager
-                db.collection("accreditations").document(id).get()
+                // Step 2: Fetch PCO UID
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
-                        val pcoName = doc.getString("fullName") ?: "Unknown PCO"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        // PCO notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = pcoUid,
-                            title = if (isApproved) "Accreditation Approved" else "Accreditation Rejected",
-                            message = if (isApproved)
-                                "Your PCO Accreditation has been approved."
-                            else
-                                "Your PCO Accreditation has been rejected. Please review the feedback.",
-                            category = "approval",
-                            priority = "high",
-                            module = "Accreditation",
-                            documentId = id
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoUid,
+                            embId = embUid,
+                            module = "PCO",
+                            feedback = feedback
                         )
 
-                        // EMB notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = embUid,
-                            title = "Accreditation ${status.uppercase()}",
-                            message = "You have $status a PCO accreditation application for $pcoName.",
-                            category = "system",
-                            priority = "high",
-                            module = "Accreditation",
-                            documentId = id
-                        )
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "Accreditation status update notifications sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Notification failed: ${response.code()}")
+                                        Toast.makeText(safeContext, "Notification failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext, "Notification failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Navigate back safely
+                        if (isAdded) requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(safeContext, "Failed to fetch application data: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("PCO_REVIEW", "❌ Failed to fetch accreditation application", e)
                     }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("PCO_REVIEW", "❌ Failed to update accreditation status", e)
+                Toast.makeText(safeContext, "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -1,12 +1,15 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.cnc
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewBinding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
@@ -14,6 +17,11 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import org.json.JSONObject
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.android.volley.Request
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -155,34 +163,35 @@ class CncReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "CNC Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ----------------------------------------------------------------------
-                // ✅ Notify PCO (self)
-                // ----------------------------------------------------------------------
-                NotificationManager.sendNotificationToUser(
-                    receiverId = uid!!,
-                    title = "CNC Submitted",
-                    message = "You have successfully submitted a Certificate of Non-Coverage application.",
-                    category = "submission",
-                    priority = "medium",
-                    module = "CNC",
-                    documentId = currentDocId!!
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = uid!!,          // PCO UID
+                    module = "CNC",              // Module name
+                    documentId = currentDocId!!  // Firestore document ID
                 )
 
-                // ----------------------------------------------------------------------
-                // ✅ Notify all EMB admins
-                // ----------------------------------------------------------------------
-                NotificationManager.sendToAllEmb(
-                    title = "New CNC Application",
-                    message = "A new Certificate of Non-Coverage has been submitted by a PCO.",
-                    category = "alert",
-                    priority = "high",
-                    module = "CNC",
-                    documentId = currentDocId!!
-                )
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "CNC submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
+                                Toast.makeText(requireContext(), "Notification error: ${response.code()}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
 
-                // ----------------------------------------------------------------------
-                // ✅ Navigate back to CNC Dashboard and clear back stack
-                // ----------------------------------------------------------------------
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Error sending notifications: ${t.message}")
+                            Toast.makeText(requireContext(), "Failed to send notifications", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+
+                // --------------------------------------------------------
+                // ✅ Navigate back to CNC Dashboard
+                // --------------------------------------------------------
                 findNavController().navigate(
                     R.id.cncDashboardFragment,
                     null,
@@ -195,6 +204,7 @@ class CncReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to submit CNC application.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
 
     override fun onDestroyView() {

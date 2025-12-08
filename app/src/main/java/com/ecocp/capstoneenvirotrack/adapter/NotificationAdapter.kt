@@ -10,14 +10,34 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.model.NotificationModel
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class NotificationAdapter(
-    private val notificationList: MutableList<NotificationModel>
+    notifications: List<NotificationModel>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ITEM = 1
+    }
+
+    // Maintain a unique list based on documentId
+    private val notificationList: MutableList<NotificationModel> = mutableListOf()
+    private val uniqueIds: MutableSet<String> = mutableSetOf()
+
+    init {
+        addNotifications(notifications)
+    }
+
+    fun addNotifications(notifications: List<NotificationModel>) {
+        notifications.forEach { notif ->
+            if (notif.documentId != null && !uniqueIds.contains(notif.documentId)) {
+                notificationList.add(notif)
+                uniqueIds.add(notif.documentId!!)
+            }
+        }
+        notifyDataSetChanged()
     }
 
     override fun getItemViewType(position: Int) =
@@ -45,7 +65,9 @@ class NotificationAdapter(
         if (holder is NotificationViewHolder) {
             holder.title.text = notif.title
             holder.message.text = notif.message
-            holder.time.text = notif.timestamp?.toDate()?.toLocaleString() ?: ""
+            val sdf = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.ENGLISH)
+            holder.time.text = notif.timestamp?.toDate()?.let { sdf.format(it) } ?: ""
+
 
             // Read/unread UI
             if (!notif.isRead) {
@@ -58,7 +80,7 @@ class NotificationAdapter(
                 holder.unreadDot.visibility = View.GONE
             }
 
-            // Click to mark as read (Firestore update)
+            // Click to mark as read
             holder.itemView.setOnClickListener {
                 if (!notif.isRead && notif.documentId != null) {
                     NotificationManager.markAsRead(notif.documentId!!)
@@ -76,6 +98,7 @@ class NotificationAdapter(
                         notif.documentId?.let {
                             NotificationManager.deleteNotification(it)
                             notificationList.removeAt(position)
+                            uniqueIds.remove(it)
                             notifyItemRemoved(position)
                         }
                     }

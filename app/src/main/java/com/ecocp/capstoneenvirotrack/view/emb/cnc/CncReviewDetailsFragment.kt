@@ -12,6 +12,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.navOptions
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewDetailsBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -19,8 +23,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
+import retrofit2.Call
 
 class CncReviewDetailsFragment : Fragment() {
 
@@ -284,6 +292,9 @@ class CncReviewDetailsFragment : Fragment() {
         val id = applicationId ?: return
         val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
         val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
@@ -291,50 +302,73 @@ class CncReviewDetailsFragment : Fragment() {
         )
         certificateUrl?.let { updateData["certificateUrl"] = it }
 
-        db.collection("cnc_applications").document(id)
+        val collectionName = "cnc_applications"
+
+        // Step 1: Firestore update
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // 🔔 Notifications
-                db.collection("cnc_applications").document(id).get()
+                Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
+
+                // Step 2: Fetch PCO UID
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoId = doc.getString("uid") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("companyName") ?: "Unknown Company"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        // PCO Notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = pcoId,
-                            title = if (isApproved) "Application Approved" else "Application Rejected",
-                            message = if (isApproved)
-                                "Your CNC application has been approved. Certificate is now available."
-                            else
-                                "Your CNC application has been rejected. Please review the feedback.",
-                            category = "approval",
-                            priority = "high",
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoId,
+                            embId = embUid,
                             module = "CNC",
-                            documentId = id
+                            feedback = feedback
                         )
 
-                        // EMB Notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = embUid,
-                            title = "CNC Application ${status.uppercase()}",
-                            message = "You have $status a CNC application by $companyName.",
-                            category = "approval",
-                            priority = "high",
-                            module = "CNC",
-                            documentId = id
-                        )
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "Status update notifications sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Notification error: ${response.code()}")
+                                        Toast.makeText(safeContext,
+                                            "Notification failed: ${response.code()}",
+                                            Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext,
+                                        "Notification failed: ${t.message}",
+                                        Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Return to dashboard
+                        if (isAdded) navigateToDashboard()
                     }
-
-                // ✅ Return to dashboard
+            }
+            .addOnFailureListener {
                 if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embcnc_nav_host_fragment)
-                    navController.popBackStack(R.id.cncEmbDashboardFragment, false)
+                    Toast.makeText(safeContext, "Failed to update status: ${it.message}", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    private fun navigateToDashboard() {
+        val navController = requireActivity().findNavController(R.id.embhwms_nav_host_fragment)
+        navController.navigate(
+            R.id.hwmsEmbDashboardFragment,
+            null,
+            navOptions {
+                popUpTo(R.id.hwmsEmbDashboardFragment) { inclusive = true } // Clear everything above dashboard
+            }
+        )
     }
 
 

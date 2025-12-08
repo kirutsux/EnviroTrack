@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/embhwms_nav_graph"
+    app:startDestination="@id/hwmsEmbDashboardFragment">
+
+    <!-- EMB CRS Dashboard -->
+    <fragment
+        android:id="@+id/hwmsEmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.hwms.HwmsEmbDashboardFragment"
+        android:label="EMB HWMS Dashboard"
+        tools:layout="@layout/fragment_hwms_emb_dashboard">
+
+        <action
+            android:id="@+id/action_hwmsEmbDashboardFragment_to_hwmsEmbReviewDetailsFragment"
+            app:destination="@id/PttReviewDetailsFragment" />
+
+        <action
+            android:id="@+id/action_hwmsEmbDashboardFragment_to_EmbDashboardFragment"
+            app:destination="@id/EmbDashboardFragment" />
+    </fragment>
+
+    <!-- Review Details Fragment -->
+    <fragment
+        android:id="@+id/PttReviewDetailsFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.hwms.PttReviewDetailsFragment"
+        android:label="Review PTT"
+        tools:layout="@layout/fragment_ptt_review_details" >
+    <action
+        android:id="@+id/action_hwmsEmbReviewDetailsFragment_to_hwmsEmbDashboardFragment"
+        app:destination="@id/hwmsEmbDashboardFragment" />
+</fragment>
+
+    <fragment
+        android:id="@+id/EmbDashboardFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.emb.all.EMB_Dashboard"
+        android:label="EMB Dashboard"
+        tools:layout="@layout/emb_dashboard">
+
+        <action
+            android:id="@+id/action_hwmsEmbDashboardFragment_to_hwmsEmbReviewDetailsFragment"
+            app:destination="@id/PttReviewDetailsFragment" />
+    </fragment>
+</navigation>

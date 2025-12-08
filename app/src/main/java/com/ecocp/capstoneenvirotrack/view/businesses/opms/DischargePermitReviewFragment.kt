@@ -1,19 +1,27 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.opms
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentDischargePermitReviewBinding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import org.json.JSONObject
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -129,13 +137,13 @@ class DischargePermitReviewFragment : Fragment() {
     }
 
     private fun submitApplication() {
-        if (uid == null) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (currentDocId == null) {
-            Toast.makeText(requireContext(), "No application found to update.", Toast.LENGTH_SHORT).show()
+        val docId = currentDocId ?: run {
+            Toast.makeText(requireContext(), "No application found to submit.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -144,41 +152,46 @@ class DischargePermitReviewFragment : Fragment() {
             "submittedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_discharge_permits")
-            .document(currentDocId!!)
+        db.collection("opms_discharge_permits").document(docId)
             .update(updateData)
             .addOnSuccessListener {
-
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ----------------------------------------------------------------------
-                // ✅ SEND NOTIFICATION — PCO (SELF)
-                // ----------------------------------------------------------------------
-                NotificationManager.sendNotificationToUser(
-                    receiverId = uid!!,
-                    title = "Discharge Permit Submitted",
-                    message = "You have successfully submitted a Discharge Permit application.",
-                    category = "submission",
-                    priority = "medium",
-                    module = "OPMS",
-                    documentId = currentDocId!!
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = uid,      // PCO UID
+                    module = "DISCHARGE",  // Module name
+                    documentId = docId
                 )
 
-                // ----------------------------------------------------------------------
-                // ✅ SEND NOTIFICATION TO ALL EMB ADMINS
-                // ----------------------------------------------------------------------
-                NotificationManager.sendToAllEmb(
-                    title = "New Discharge Permit Application",
-                    message = "A new Discharge Permit application has been submitted by a PCO.",
-                    category = "alert",
-                    priority = "high",
-                    module = "OPMS",
-                    documentId = currentDocId!!
-                )
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "Discharge submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Notification error: ${response.code()}")
+                                Toast.makeText(requireContext(),
+                                    "Notification failed: ${response.code()}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
 
-                // ----------------------------------------------------------------------
-                // ✅ NAVIGATE BACK TO DASHBOARD (CLEAR BACK STACK)
-                // ----------------------------------------------------------------------
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Notification error: ${t.message}")
+                            Toast.makeText(requireContext(),
+                                "Failed to send notifications",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
+
+                // --------------------------------------------------------
+                // ✅ Navigate back to dashboard
+                // --------------------------------------------------------
                 findNavController().navigate(
                     R.id.opmsDashboardFragment,
                     null,
@@ -191,6 +204,9 @@ class DischargePermitReviewFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
             }
     }
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

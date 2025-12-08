@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
@@ -17,6 +18,7 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.cnc.embcncactivity
 import com.ecocp.capstoneenvirotrack.view.emb.crs.EmbcrsActivity
+import com.ecocp.capstoneenvirotrack.view.emb.hwms.EmbhwmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.notifications.EMBNotificationsFragment
 import com.ecocp.capstoneenvirotrack.view.emb.opms.EmbopmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.pcoacc.EmbpcoActivity
@@ -30,6 +32,7 @@ class EMB_Dashboard : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+
 
     private lateinit var cncCard: CardView
     private lateinit var smrCard: CardView
@@ -69,6 +72,7 @@ class EMB_Dashboard : Fragment() {
         notificationIcon = view.findViewById(R.id.emb_notification_icon)
 
         fetchGreetingMessage()
+        setupDrawer()
         setupNotificationIcon()
 
         val navController = findNavController()
@@ -89,9 +93,9 @@ class EMB_Dashboard : Fragment() {
             startActivity(Intent(requireContext(), EmbopmsActivity::class.java))
         }
 
-//        hazewasteCard.setOnClickListener {
-//            navController.navigate(R.id.action_embDashboard_to_embHMSFragment)
-//        }
+        hazewasteCard.setOnClickListener {
+            startActivity(Intent(requireContext(), EmbhwmsActivity::class.java))
+        }
 
         crsCard.setOnClickListener {
             startActivity(Intent(requireContext(), EmbcrsActivity::class.java))
@@ -123,6 +127,12 @@ class EMB_Dashboard : Fragment() {
         }
     }
 
+    private fun setupDrawer() {
+        drawerMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+    }
+
     // ---------------- NOTIFICATIONS -----------------
     private fun setupNotificationIcon() {
         notificationIcon.setOnClickListener {
@@ -140,7 +150,7 @@ class EMB_Dashboard : Fragment() {
                 .setPopEnterAnim(R.anim.slide_in_right)
                 .setPopExitAnim(R.anim.slide_out_left)
                 .build()
-            navController.navigate(R.id.action_global_embnotificationsFragment, bundle, options)
+            navController.navigate(R.id.action_embDashboard_to_embnotificationsFragment, bundle, options)
 
         }
     }

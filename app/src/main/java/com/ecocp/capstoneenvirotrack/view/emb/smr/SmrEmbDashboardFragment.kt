@@ -90,7 +90,7 @@ class SmrEmbDashboardFragment : Fragment() {
 
 
     private fun setupSpinner() {
-        val statusOptions = listOf("All", "Pending", "Reviewed")
+        val statusOptions = listOf("All", "Pending", "Approved", "Rejected")
         val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, statusOptions)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerStatus.adapter = spinnerAdapter
@@ -176,7 +176,7 @@ class SmrEmbDashboardFragment : Fragment() {
                         val smr = Smr(
                             generalInfo = generalInfo,
                             hazardousWastes = hazardousWastes,
-                            submittedAt = submittedTimestamp.toDate().time,
+                            dateSubmitted = submittedTimestamp,
                             uid = data["uid"] as? String,
                             id = doc.id,
                             status = status
@@ -185,7 +185,7 @@ class SmrEmbDashboardFragment : Fragment() {
                     }
                 }
 
-                smrList.sortByDescending { it.submittedAt }
+                smrList.sortByDescending { it.dateSubmitted }
                 applyFilters()
             }
     }

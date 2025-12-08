@@ -10,11 +10,18 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCrsReviewDetailsBinding
 import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -151,66 +158,79 @@ class CrsReviewDetailsFragment : Fragment() {
 
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
 
-        val updateData = mapOf(
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
-            "reviewedBy" to embUid,
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        db.collection("crs_applications").document(id)
+        val collectionName = "crs_applications"
+
+        // Step 1: Firestore update
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                if (isAdded) {
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
-                }
+                Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // ✅ Send notifications using NotificationManager
-                db.collection("crs_applications").document(id).get()
+                // Step 2: Fetch PCO UID (CRS stores pco as "userId")
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
-                        val pcoUid = doc.getString("userId") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("companyName") ?: "Unknown Company"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
+                        val pcoId = doc.getString("userId") ?: return@addOnSuccessListener
 
-                        // PCO notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = pcoUid,
-                            title = if (isApproved) "Company Registration Approved" else "Company Registration Rejected",
-                            message = if (isApproved)
-                                "Your Company Registration has been approved."
-                            else
-                                "Your Company Registration has been rejected. Please review the feedback.",
-                            category = "approval",
-                            priority = "high",
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoId,
+                            embId = embUid,
                             module = "CRS",
-                            documentId = id
+                            feedback = feedback
                         )
 
-                        // EMB notification
-                        NotificationManager.sendNotificationToUser(
-                            receiverId = embUid,
-                            title = "Company Registration ${status.uppercase()}",
-                            message = "You have $status a company registration application for $companyName.",
-                            category = "system",
-                            priority = "high",
-                            module = "CRS",
-                            documentId = id
-                        )
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "Status update notifications sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Notification error: ${response.code()}")
+                                        Toast.makeText(safeContext,
+                                            "Notification failed: ${response.code()}",
+                                            Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext,
+                                        "Notification failed: ${t.message}",
+                                        Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Navigate back (keep previous CRS behavior)
+                        if (isAdded) {
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
                     }
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("CRS_REVIEW", "❌ Failed to update CRS application status", e)
+            .addOnFailureListener {
+                if (isAdded) {
+                    Toast.makeText(safeContext, "Failed to update status: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

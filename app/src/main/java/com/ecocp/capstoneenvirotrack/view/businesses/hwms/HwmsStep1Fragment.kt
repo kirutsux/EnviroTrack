@@ -177,7 +177,7 @@ class HwmsStep1Fragment : Fragment() {
             "pcoContact" to pcoContact,
             "embRegNo" to embRegNo,
             "wasteDetails" to wasteList,
-            "status" to "Draft",
+            "status" to "Submitted",
             "timestamp" to FieldValue.serverTimestamp()
         )
 

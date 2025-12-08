@@ -7,7 +7,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ecocp.capstoneenvirotrack.databinding.ItemSmrFileBinding
 
 class SmrFileListAdapter(
-    private val onRemove: (String) -> Unit
+    private val buttonText: String,
+    private val onAction: (String) -> Unit
 ): RecyclerView.Adapter<SmrFileListAdapter.FileViewHolder>() {
 
     private val files = mutableListOf<String>()
@@ -33,7 +34,8 @@ class SmrFileListAdapter(
     inner class FileViewHolder(private val binding: ItemSmrFileBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(url: String){
             binding.tvFileName.text = url.substringAfterLast("/")
-            binding.btnRemove.setOnClickListener{ onRemove(url) }
+            binding.btnRemove.text = buttonText
+            binding.btnRemove.setOnClickListener{ onAction(url) }
         }
     }
 }
