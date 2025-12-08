@@ -18,6 +18,11 @@
         android:title="Feedback" />
 
     <item
+        android:id="@+id/nav_regulations"
+        android:icon="@drawable/regulation"
+        android:title="Regulations" />
+
+    <item
         android:id="@+id/nav_service_providers"
         android:icon="@drawable/serviceprovider"
         android:title="Service Providers" />

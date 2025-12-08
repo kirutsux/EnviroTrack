@@ -140,6 +140,11 @@ class COMP_Dashboard : Fragment() {
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
+                R.id.nav_regulations -> {
+                    findNavController().navigate(R.id.action_pcoDashboard_to_regulationsFragment)
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
                 R.id.nav_service_providers -> {
                     findNavController().navigate(R.id.action_pcoDashboard_to_serviceProvidersFragment)
                     drawerLayout.closeDrawer(GravityCompat.START)
@@ -150,6 +155,7 @@ class COMP_Dashboard : Fragment() {
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
+
                 else -> false
             }
         }
