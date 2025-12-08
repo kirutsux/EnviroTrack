@@ -92,6 +92,23 @@ data class SendExpiryNotificationRequest(
     val daysLeft: Long     // Number of days left until expiry
 )
 
+// ----------------- Notification: Service Provider Status Update -----------
+
+data class UpdateWasteStatusDelivered(
+    val pcoId: String,
+    val bookingId: String
+)
+
+data class UpdateWasteInTransit(
+    val pcoId: String,
+    val bookingId: String,
+    val tsdId: String
+)
+
+data class UpdateWasteTreated(
+    val pcoId: String,
+    val bookingId: String
+)
 
 interface ApiService {
     // Send email
@@ -177,6 +194,29 @@ interface ApiService {
     @POST("/send-expiry-notification")
     fun sendExpiryNotification(
         @Body request: SendExpiryNotificationRequest
+    ): Call<Void>
+
+    // ================= Push Notification: Service Providers ====================
+
+    // ----------------- UPDATE STATUS Transporter -> PCO (Marked Delivered) -----------------------
+
+    @Headers("Content-Type: application/json")
+    @POST("/notify-pco-delivered")
+    fun updateWasteStatusDelivered(
+        @Body request: UpdateWasteStatusDelivered
+    ): Call<Void>
+
+
+    @Headers("Content-Type:application/json")
+    @POST("/notify-pco-in-transit")
+    fun updateWasteInTransit(
+        @Body request: UpdateWasteInTransit
+    ): Call<Void>
+
+    @Headers("Content-Type:application/json")
+    @POST("/notify-pco-treatment-finished")
+    fun updateWasteTreated(
+        @Body request: UpdateWasteTreated
     ): Call<Void>
 
 }

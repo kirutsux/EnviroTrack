@@ -16,6 +16,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import androidx.core.net.toUri
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateWasteInTransit
+import com.ecocp.capstoneenvirotrack.api.UpdateWasteStatusDelivered
+import com.ecocp.capstoneenvirotrack.api.UpdateWasteTreated
+import retrofit2.Call
 
 class SP_TaskUpdateDetails : Fragment() {
 
@@ -513,6 +518,30 @@ class SP_TaskUpdateDetails : Fragment() {
                                     "Status updated to $newStatus",
                                     Toast.LENGTH_SHORT)
                                     .show()
+
+                                // CALL API SERVICE FOR NOTIFICATION
+                                val treatedReq = UpdateWasteTreated(
+                                    generatorId,
+                                    id
+                                )
+
+                                RetrofitClient.instance.updateWasteTreated(treatedReq)
+                                    .enqueue(object : retrofit2.Callback<Void> {
+                                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                            if (response.isSuccessful) {
+                                                Log.d("NOTIF", "Waste treatment status sent.")
+                                            } else {
+                                                Log.e("NOTIF", "Notification failed: ${response.code()}")
+                                                Toast.makeText(requireContext(), "Notification failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+
+                                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                                            Log.e("NOTIF", "Notification error: ${t.message}")
+                                            Toast.makeText(requireContext(), "Notification failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                                        }
+
+                                    })
                             }.addOnFailureListener {
                                 Toast.makeText(
                                     requireContext(),
@@ -600,8 +629,58 @@ class SP_TaskUpdateDetails : Fragment() {
                                     "Status updated to $newStatus",
                                     Toast.LENGTH_SHORT
                                 ).show()
+
+                                // CALL API BACKEND FOR DELIVERED/IN TRANSIT STATUS UPDATE
+
                                 btnInTransit.isEnabled = true
                                 btnDelivered.isEnabled = true
+
+                                val deliveredReq = UpdateWasteStatusDelivered(
+                                    pcoId,
+                                    id
+                                )
+
+                                val transitReq = UpdateWasteInTransit(
+                                    pcoId,
+                                    id,
+                                    tsdDocId
+                                )
+
+                                RetrofitClient.instance.updateWasteStatusDelivered(deliveredReq)
+                                    .enqueue(object : retrofit2.Callback<Void> {
+                                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                            if (response.isSuccessful) {
+                                                Log.d("NOTIF", "Waste delivery status sent.")
+                                            } else {
+                                                Log.e("NOTIF", "Notification failed: ${response.code()}")
+                                                Toast.makeText(requireContext(), "Notification failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+
+                                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                                            Log.e("NOTIF", "Notification error: ${t.message}")
+                                            Toast.makeText(requireContext(), "Notification failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                                        }
+
+                                    })
+
+                                RetrofitClient.instance.updateWasteInTransit(transitReq)
+                                    .enqueue(object : retrofit2.Callback<Void> {
+                                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                            if (response.isSuccessful) {
+                                                Log.d("NOTIF", "Waste delivery status sent.")
+                                            } else {
+                                                Log.e("NOTIF", "Notification failed: ${response.code()}")
+                                                Toast.makeText(requireContext(), "Notification failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+
+                                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                                            Log.e("NOTIF", "Notification error: ${t.message}")
+                                            Toast.makeText(requireContext(), "Notification failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                                        }
+
+                                    })
                             }
                             .addOnFailureListener { e ->
                                 Log.e("SP_TaskUpdateDetails", "Update failed", e)

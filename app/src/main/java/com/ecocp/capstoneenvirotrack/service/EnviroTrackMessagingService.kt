@@ -37,7 +37,7 @@ class EnviroTrackMessagingService : FirebaseMessagingService() {
     }
 
     private fun showNotification(title: String?, body: String?) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "envirotrack_channel"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
