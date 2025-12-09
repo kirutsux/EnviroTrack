@@ -77,11 +77,11 @@ data class NotifyBookingCreatedRequest(
     val bookingId: String
 )
 data class NotifyBookingStatusRequest(
-    val receiverId: String,      // PCO ID
+    val pcoId: String,
     val bookingId: String,
-    val status: String,          // accepted / rejected
-    val role: String             // transporter / tsd
+    val status: String
 )
+
 data class NotifyPttUploadRequest(
     val receiverId: String,      // transporter ID
     val bookingId: String

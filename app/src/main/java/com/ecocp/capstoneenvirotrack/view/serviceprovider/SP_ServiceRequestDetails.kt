@@ -853,10 +853,9 @@ class SP_ServiceRequestDetails : Fragment() {
 
                     // Notify PCO
                     val request = NotifyBookingStatusRequest(
-                        receiverId = pcoId,
+                        pcoId = pcoId,
                         bookingId = bookingId,
-                        status = "Accepted",
-                        role = "tsd"
+                        status = "Accepted"
                     )
 
                     RetrofitClient.instance.notifyTsdBookingStatus(request)
@@ -951,11 +950,11 @@ class SP_ServiceRequestDetails : Fragment() {
 
                     // Notify the PCO about acceptance
                     val request = NotifyBookingStatusRequest(
-                        receiverId = pcoId,
+                        pcoId = pcoId,
                         bookingId = bookingId,
-                        status = "Accepted",
-                        role = "transporter"
+                        status = "Accepted"
                     )
+
 
                     RetrofitClient.instance.notifyBookingStatus(request)
                         .enqueue(object : retrofit2.Callback<Void> {
@@ -1020,11 +1019,11 @@ class SP_ServiceRequestDetails : Fragment() {
                     .addOnSuccessListener { doc ->
                         val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
                         val request = NotifyBookingStatusRequest(
-                            receiverId = pcoId,
+                            pcoId = pcoId,
                             bookingId = bookingId,
-                            status = "Rejected",
-                            role = "tsd"
+                            status = "Accepted"
                         )
+
                         RetrofitClient.instance.notifyTsdBookingStatus(request)
                             .enqueue(object : retrofit2.Callback<Void> {
                                 override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
@@ -1058,11 +1057,11 @@ class SP_ServiceRequestDetails : Fragment() {
                     .addOnSuccessListener { doc ->
                         val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
                         val request = NotifyBookingStatusRequest(
-                            receiverId = pcoId,
+                            pcoId = pcoId,
                             bookingId = bookingId,
-                            status = "Rejected",
-                            role = "transporter"
+                            status = "Accepted"
                         )
+
                         RetrofitClient.instance.notifyBookingStatus(request)
                             .enqueue(object : retrofit2.Callback<Void> {
                                 override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {

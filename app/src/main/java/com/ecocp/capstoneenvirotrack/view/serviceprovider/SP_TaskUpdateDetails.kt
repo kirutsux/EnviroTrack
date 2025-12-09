@@ -713,7 +713,7 @@ class SP_TaskUpdateDetails : Fragment() {
     private fun applyDeliveredLock(status: String) {
         if (bookingSource == BookingSource.TRANSPORT) {
             btnSaveStatus.visibility = View.GONE
-            btnUpload.visibility = View.GONE
+            btnUpload.visibility = View.VISIBLE
             btnInTransit.visibility = View.VISIBLE
             btnDelivered.visibility = View.VISIBLE
             btnCancel.visibility = View.VISIBLE
