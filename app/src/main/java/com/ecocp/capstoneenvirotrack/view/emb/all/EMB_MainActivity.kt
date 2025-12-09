@@ -1,6 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.emb.all
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -11,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+@Suppress("KotlinConstantConditions")
 class EMB_MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
@@ -33,10 +35,10 @@ class EMB_MainActivity : AppCompatActivity() {
         // Keep correct item highlighted when navigating
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.embDashboard -> bottomNav.selectedItemId = R.id.nav_emb_dashboard
-                R.id.checklistFragment -> bottomNav.selectedItemId = R.id.nav_checklist
-                R.id.embProfile -> bottomNav.selectedItemId = R.id.nav_emb_profile
-                else -> bottomNav.selectedItemId = R.id.nav_emb_dashboard
+                R.id.ChecklistFragment,
+                R.id.EmbProfile,
+                R.id.EmbDashboard -> bottomNav.visibility = View.VISIBLE
+                else -> bottomNav.visibility = View.GONE
             }
         }
 

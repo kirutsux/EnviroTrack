@@ -32,7 +32,7 @@ class ActiveTasksAdapter(
 
     private val confirmedList: List<TransporterBooking>
         get() = bookings.filter {
-            val s = (it.bookingStatus ?: "").lowercase().trim()
+            val s = it.bookingStatus.lowercase().trim()
             activeStatuses.contains(s)
         }
 
@@ -62,9 +62,7 @@ class ActiveTasksAdapter(
                 sdf.format(timestamp.toDate())
             }
 
-            is String -> timestamp
             null -> ""
-            else -> timestamp.toString()
         }
 
         // Optional: Load client image if URL available (uncomment + add Glide dependency)

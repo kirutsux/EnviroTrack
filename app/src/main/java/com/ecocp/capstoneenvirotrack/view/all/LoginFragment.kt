@@ -233,7 +233,6 @@ class LoginFragment : Fragment() {
     }
 
 
-
     private fun saveUserTypeToPrefs(userType: String) {
         val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         prefs.edit().putString("userType", userType.lowercase()).apply()
