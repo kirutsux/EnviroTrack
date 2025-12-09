@@ -330,13 +330,13 @@
                         android:visibility="gone" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnStartTreatment"
+                        android:id="@+id/btnFinishTreatment"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:text="Treatment Start"
+                        android:text="Treatment Finish"
                         android:textColor="#4CAF50"
                         android:textSize="10sp"
                         app:cornerRadius="8dp"

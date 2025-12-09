@@ -538,13 +538,23 @@ class SP_ServiceRequestDetails : Fragment() {
         }
 
         val updates = mutableMapOf<String, Any>(
-            "status" to statusValue,
-            "bookingStatus" to statusValue,
             "statusUpdatedAt" to FieldValue.serverTimestamp(),
             "statusUpdatedBy" to actorUid
         )
+
+// Only apply generic status/bookingStatus if caller did NOT override them
+        if (!extraFields.containsKey("status")) {
+            updates["status"] = statusValue
+        }
+        if (!extraFields.containsKey("bookingStatus")) {
+            updates["bookingStatus"] = statusValue
+        }
+
         lifecycleField?.let { updates[it] = FieldValue.serverTimestamp() }
+
+// Merge extras last
         updates.putAll(extraFields)
+
 
         Log.d(TAG, "updateBookingStatusGeneric: collection=$collectionName id=$bookingId updates=$updates")
 
@@ -601,21 +611,27 @@ class SP_ServiceRequestDetails : Fragment() {
     // Transporter helpers
     private fun acceptBooking(bookingId: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "acceptBooking() CALLED for bookingId=$bookingId")
+
         val uid = auth.currentUser?.uid ?: ""
-        val extra = mapOf<String, Any>(
+
+        val extra = mapOf(
             "providerId" to uid,
+            "status" to "Accepted",               // 🔥 Transporter status
+            "bookingStatus" to "Confirmed",       // 🔥 Main booking status
             "assignedAt" to FieldValue.serverTimestamp()
         )
+
         updateBookingStatusGeneric(
             collectionName = "transport_bookings",
             bookingId = bookingId,
-            statusValue = "Confirmed",
+            statusValue = "Confirmed",            // 🔥 Still required for your generic handler
             actorUid = uid,
             lifecycleField = "confirmedAt",
             extraFields = extra,
             callback = callback
         )
     }
+
 
     private fun rejectBooking(bookingId: String, callback: (Boolean) -> Unit) {
         Log.d(TAG, "rejectBooking() CALLED for bookingId=$bookingId")
@@ -802,36 +818,65 @@ class SP_ServiceRequestDetails : Fragment() {
         prevAcceptText: String
     ) {
         receiveTsdBooking(bookingId) { success ->
-            if (success) {
-                db.collection("tsd_bookings").document(bookingId).get()
-                    .addOnSuccessListener { doc ->
-                        val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
-                        val request = NotifyBookingStatusRequest(
-                            receiverId = pcoId,
-                            bookingId = bookingId,
-                            status = "Accepted",     // or "Rejected"
-                            role = "tsd"
-                        )
-                        RetrofitClient.instance.notifyTsdBookingStatus(request)
-                            .enqueue(object : retrofit2.Callback<Void> {
-                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
-                                    Log.d("NOTIF", "TSD ACCEPT notification sent to PCO")
-                                }
-                                override fun onFailure(call: Call<Void>, t: Throwable) {
-                                    Log.e("NOTIF", "Failed to notify PCO about TSD ACCEPT: ${t.message}")
-                                }
-                            })
-                    }
-
-                Toast.makeText(requireContext(), "Marked as received", Toast.LENGTH_SHORT).show()
-                try { findNavController().popBackStack() } catch (e: Exception) { Log.e(TAG, "popBackStack failed", e) }
-            } else {
+            if (!success) {
                 btnAccept.text = prevAcceptText
                 btnAccept.isEnabled = true
                 btnReject.isEnabled = true
+                return@receiveTsdBooking
             }
+
+            db.collection("tsd_bookings").document(bookingId).get()
+                .addOnSuccessListener { doc ->
+                    val pcoId = doc.getString("bookedByUid") ?: run {
+                        Log.e(TAG, "PCO ID not found in booking")
+                        return@addOnSuccessListener
+                    }
+
+                    // Use the correct TSD service provider ID
+                    val tsdProviderId = doc.getString("tsdId") ?: run {
+                        Log.e(TAG, "TSD provider ID not found in booking")
+                        return@addOnSuccessListener
+                    }
+
+                    Log.d("TSD", "Updating availability for TSD: $tsdProviderId")
+
+                    // Update TSD availability
+                    db.collection("service_providers")
+                        .document(tsdProviderId)
+                        .update("availabilityStatus", "unavailable")
+                        .addOnSuccessListener {
+                            Log.d("TSD", "TSD availability updated to unavailable")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("TSD", "Failed to update TSD availability: ${e.message}")
+                        }
+
+                    // Notify PCO
+                    val request = NotifyBookingStatusRequest(
+                        receiverId = pcoId,
+                        bookingId = bookingId,
+                        status = "Accepted",
+                        role = "tsd"
+                    )
+
+                    RetrofitClient.instance.notifyTsdBookingStatus(request)
+                        .enqueue(object : retrofit2.Callback<Void> {
+                            override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                Log.d("NOTIF", "TSD ACCEPT notification sent to PCO")
+                            }
+
+                            override fun onFailure(call: Call<Void>, t: Throwable) {
+                                Log.e("NOTIF", "Failed to notify PCO about TSD ACCEPT: ${t.message}")
+                            }
+                        })
+                }
+
+            Toast.makeText(requireContext(), "Marked as received", Toast.LENGTH_SHORT).show()
+            try { findNavController().popBackStack() } catch (e: Exception) { Log.e(TAG, "popBackStack failed", e) }
         }
     }
+
+
     /**
      * If the transport booking references a TSD booking, set that TSD booking to Confirmed as well.
      * Tries common link fields: "tsdBookingId", "tsdId", "bookingId", "requestId".
@@ -884,37 +929,84 @@ class SP_ServiceRequestDetails : Fragment() {
         prevAcceptText: String
     ) {
         acceptBooking(bookingId) { success ->
-            if (success) {
-                // Fetch PCO UID from Firestore
-                db.collection("transport_bookings").document(bookingId).get()
-                    .addOnSuccessListener { doc ->
-                        val pcoId = doc.getString("pcoId") ?: return@addOnSuccessListener
-                        val request = NotifyBookingStatusRequest(
-                            receiverId = pcoId,           // PCO ID
-                            bookingId = bookingId,
-                            status = "Accepted",           // or "Rejected" depending on handler
-                            role = "transporter"           // sender role
-                        )
-                        RetrofitClient.instance.notifyBookingStatus(request)
-                            .enqueue(object : retrofit2.Callback<Void> {
-                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
-                                    Log.d("NOTIF", "Transporter ACCEPT notification sent to PCO")
-                                }
-                                override fun onFailure(call: Call<Void>, t: Throwable) {
-                                    Log.e("NOTIF", "Failed to notify PCO about transporter ACCEPT: ${t.message}")
-                                }
-                            })
-                    }
-
-                propagateConfirmToTsdIfLinked(bookingId)
-                try { findNavController().popBackStack() } catch (e: Exception) { Log.e(TAG, "popBackStack failed", e) }
-            } else {
+            if (!success) {
                 btnAccept.text = prevAcceptText
                 btnAccept.isEnabled = true
                 btnReject.isEnabled = true
+                return@acceptBooking
             }
+
+            // Fetch the booking to get PCO and transporter UID
+            db.collection("transport_bookings").document(bookingId).get()
+                .addOnSuccessListener { doc ->
+                    val pcoId = doc.getString("pcoId") ?: run {
+                        Log.e(TAG, "PCO ID not found in transport booking")
+                        return@addOnSuccessListener
+                    }
+
+                    val transporterId = doc.getString("serviceProviderUid") ?: run {
+                        Log.e(TAG, "Transporter UID not found (providerId missing)")
+                        return@addOnSuccessListener
+                    }
+
+                    // Notify the PCO about acceptance
+                    val request = NotifyBookingStatusRequest(
+                        receiverId = pcoId,
+                        bookingId = bookingId,
+                        status = "Accepted",
+                        role = "transporter"
+                    )
+
+                    RetrofitClient.instance.notifyBookingStatus(request)
+                        .enqueue(object : retrofit2.Callback<Void> {
+                            override fun onResponse(
+                                call: Call<Void>,
+                                response: retrofit2.Response<Void>
+                            ) {
+                                Log.d("NOTIF", "Transporter ACCEPT notification sent to PCO")
+                            }
+
+                            override fun onFailure(call: Call<Void>, t: Throwable) {
+                                Log.e(
+                                    "NOTIF",
+                                    "Failed to notify PCO about transporter ACCEPT: ${t.message}"
+                                )
+                            }
+                        })
+
+                    // Update transporter's availabilityStatus → "unavailable"
+                    db.collection("service_providers")
+                        .document(transporterId)
+                        .update("availabilityStatus", "unavailable")
+                        .addOnSuccessListener {
+                            Log.d("Transporter", "Transporter availability updated → unavailable")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Transporter", "Failed to update transporter availability: ${e.message}")
+                        }
+
+                    // Optional: propagate confirmation to TSD if linked
+                    propagateConfirmToTsdIfLinked(bookingId)
+
+                    // Navigate back safely
+                    try {
+                        findNavController().popBackStack()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "popBackStack failed", e)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Failed to fetch transport booking: ${e.message}")
+                    Toast.makeText(
+                        requireContext(),
+                        "Failed to fetch booking details",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
         }
     }
+
+
 
     private fun handleTsdReject(
         bookingId: String,

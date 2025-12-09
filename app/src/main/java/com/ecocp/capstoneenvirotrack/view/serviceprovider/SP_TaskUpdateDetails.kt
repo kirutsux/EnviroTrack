@@ -40,7 +40,7 @@ class SP_TaskUpdateDetails : Fragment() {
     private lateinit var btnInTransit: Button
     private lateinit var btnDelivered: Button
     private lateinit var btnReceiveWaste: Button
-    private lateinit var btnStartTreatment: Button
+    private lateinit var btnFinishTreatment: Button
 
     private enum class BookingSource { TRANSPORT, TSD, UNKNOWN }
 
@@ -87,7 +87,7 @@ class SP_TaskUpdateDetails : Fragment() {
         btnInTransit = view.findViewById(R.id.btnInTransit)
         btnDelivered = view.findViewById(R.id.btnDelivered)
         btnReceiveWaste = view.findViewById(R.id.btnReceiveWaste)
-        btnStartTreatment = view.findViewById(R.id.btnStartTreatment)
+        btnFinishTreatment = view.findViewById(R.id.btnFinishTreatment)
 
         loadBookingDetails(
             txtCompanyName, txtCompanyAddress, txtTaskRef, txtStatusPill,
@@ -100,7 +100,7 @@ class SP_TaskUpdateDetails : Fragment() {
         btnInTransit.setOnClickListener { updateStatusDirectly("In Transit") }
         btnDelivered.setOnClickListener { updateStatusDirectly("Delivered") }
         btnReceiveWaste.setOnClickListener { updateTsdStatus("Received") }
-        btnStartTreatment.setOnClickListener { updateTsdStatus("Started") }
+        btnFinishTreatment.setOnClickListener { updateTsdStatus("Finish Treatment") }
 
         updateButtonVisibility()
         return view
@@ -497,12 +497,14 @@ class SP_TaskUpdateDetails : Fragment() {
         val updateMap = mutableMapOf<String, Any>("wasteStatus" to newStatus)
 
         btnReceiveWaste.isEnabled = false
-        btnStartTreatment.isEnabled = false
+        btnFinishTreatment.isEnabled = false
 
         db.collection("tsd_bookings").document(id)
             .get()
             .addOnSuccessListener { tsdDoc ->
+
                 val generatorId = tsdDoc.getString("generatorId") ?: ""
+                val tsdId = tsdDoc.getString("tsdId") ?: ""   // 👈 IMPORTANT
 
                 db.collection("transport_bookings")
                     .whereEqualTo("pcoId", generatorId)
@@ -511,7 +513,7 @@ class SP_TaskUpdateDetails : Fragment() {
                         if (wasteQuery.isEmpty) {
                             Toast.makeText(requireContext(), "No linked transport booking found", Toast.LENGTH_SHORT).show()
                             btnReceiveWaste.isEnabled = true
-                            btnStartTreatment.isEnabled = true
+                            btnFinishTreatment.isEnabled = true
                             return@addOnSuccessListener
                         }
 
@@ -519,13 +521,30 @@ class SP_TaskUpdateDetails : Fragment() {
                         db.collection("transport_bookings").document(wasteDocId)
                             .update(updateMap)
                             .addOnSuccessListener {
+
                                 Toast.makeText(requireContext(), "Status updated to $newStatus", Toast.LENGTH_SHORT).show()
+
+                                // -------------------------------------------------
+                                //  ✅ If TSD finishes treatment → set available again
+                                // -------------------------------------------------
+                                if (newStatus == "Finish Treatment") {
+                                    db.collection("service_providers")
+                                        .document(tsdId)
+                                        .update("availabilityStatus", "available")
+                                        .addOnSuccessListener {
+                                            Log.d("TSD", "TSD is now AVAILABLE again")
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Log.e("TSD", "Failed to update availability: ${e.message}")
+                                        }
+                                }
 
                                 // ------------------- 🔔 Notify PCO -------------------
                                 val request = NotifyTreatmentDoneRequest(
-                                    receiverId = generatorId,  // PCO UID
+                                    receiverId = generatorId,
                                     bookingId = id
                                 )
+
                                 RetrofitClient.instance.notifyTreatmentDone(request)
                                     .enqueue(object : retrofit2.Callback<Void> {
                                         override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
@@ -542,26 +561,27 @@ class SP_TaskUpdateDetails : Fragment() {
                                     })
 
                                 btnReceiveWaste.isEnabled = true
-                                btnStartTreatment.isEnabled = true
+                                btnFinishTreatment.isEnabled = true
                             }
-                            .addOnFailureListener { e ->
+                            .addOnFailureListener {
                                 Toast.makeText(requireContext(), "Failed to update status", Toast.LENGTH_SHORT).show()
                                 btnReceiveWaste.isEnabled = true
-                                btnStartTreatment.isEnabled = true
+                                btnFinishTreatment.isEnabled = true
                             }
                     }
-                    .addOnFailureListener { e ->
+                    .addOnFailureListener {
                         Toast.makeText(requireContext(), "Failed to fetch transport booking", Toast.LENGTH_SHORT).show()
                         btnReceiveWaste.isEnabled = true
-                        btnStartTreatment.isEnabled = true
+                        btnFinishTreatment.isEnabled = true
                     }
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to fetch TSD booking", Toast.LENGTH_SHORT).show()
                 btnReceiveWaste.isEnabled = true
-                btnStartTreatment.isEnabled = true
+                btnFinishTreatment.isEnabled = true
             }
     }
+
 
 
     private fun updateStatusDirectly(newStatus: String) {
@@ -575,70 +595,51 @@ class SP_TaskUpdateDetails : Fragment() {
             .addOnSuccessListener { transportDoc ->
                 if (!transportDoc.exists()) {
                     Log.e("SP_TaskUpdateDetails", "Transport booking not found")
-                    Toast.makeText(
-                        requireContext(),
-                        "Transport booking not found",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Transport booking not found", Toast.LENGTH_SHORT).show()
                     btnInTransit.isEnabled = true
                     btnDelivered.isEnabled = true
                     return@addOnSuccessListener
                 }
 
                 val pcoId = transportDoc.getString("pcoId") ?: ""
+                val transporterId = transportDoc.getString("transporterId") ?: ""
+
                 if (pcoId.isBlank()) {
                     Log.e("SP_TaskUpdateDetails", "No pcoId found in transport booking")
-                    Toast.makeText(
-                        requireContext(),
-                        "Cannot link to TSD booking",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Cannot link to TSD booking", Toast.LENGTH_SHORT).show()
                     btnInTransit.isEnabled = true
                     btnDelivered.isEnabled = true
                     return@addOnSuccessListener
                 }
-
-                Log.d("SP_TaskUpdateDetails", "pcoId: $pcoId")
 
                 db.collection("tsd_bookings")
                     .whereEqualTo("generatorId", pcoId)
                     .get()
                     .addOnSuccessListener { tsdQuerySnap ->
                         if (tsdQuerySnap.isEmpty) {
-                            Log.e(
-                                "SP_TaskUpdateDetails",
-                                "No TSD booking found with generatorId: $pcoId"
-                            )
-                            Toast.makeText(
-                                requireContext(),
-                                "Linked TSD booking not found",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Log.e("SP_TaskUpdateDetails","No TSD booking found with generatorId: $pcoId")
+                            Toast.makeText(requireContext(),"Linked TSD booking not found",Toast.LENGTH_SHORT).show()
                             btnInTransit.isEnabled = true
                             btnDelivered.isEnabled = true
                             return@addOnSuccessListener
                         }
 
                         val tsdDocId = tsdQuerySnap.documents[0].id
-                        Log.d("SP_TaskUpdateDetails", "Found TSD booking ID: $tsdDocId")
 
-                        val transportUpdate =
-                            db.collection("transport_bookings").document(id).update(updateMap)
-                        val tsdUpdate =
-                            db.collection("tsd_bookings").document(tsdDocId).update(updateMap)
+                        val transportUpdate = db.collection("transport_bookings").document(id)
+                            .update(updateMap)
+
+                        val tsdUpdate = db.collection("tsd_bookings").document(tsdDocId)
+                            .update(updateMap)
 
                         Tasks.whenAll(transportUpdate, tsdUpdate)
                             .addOnSuccessListener {
-                                Log.d("SP_TaskUpdateDetails", "Both updates succeeded")
                                 transporterStatus.text = newStatus.uppercase()
                                 updateStatusPill(newStatus)
                                 updateProgressBar(newStatus)
                                 applyDeliveredLock(newStatus)
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Status updated to $newStatus",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+
+                                Toast.makeText(requireContext(),"Status updated to $newStatus",Toast.LENGTH_SHORT).show()
 
                                 // ------------------- 🔔 Notify PCO -------------------
                                 val request = NotifyDeliveredRequest(
@@ -648,11 +649,7 @@ class SP_TaskUpdateDetails : Fragment() {
                                 RetrofitClient.instance.notifyDelivered(request)
                                     .enqueue(object : retrofit2.Callback<Void> {
                                         override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
-                                            if (response.isSuccessful) {
-                                                Log.d("NOTIF", "PCO notified: waste delivered")
-                                            } else {
-                                                Log.e("NOTIF", "Failed to notify PCO: ${response.code()}")
-                                            }
+                                            Log.d("NOTIF", "PCO notified: waste delivered")
                                         }
 
                                         override fun onFailure(call: Call<Void>, t: Throwable) {
@@ -660,33 +657,40 @@ class SP_TaskUpdateDetails : Fragment() {
                                         }
                                     })
 
+                                // --------------------------------------------------------
+                                // ✅ Make transporter AVAILABLE again if delivery is finished
+                                // --------------------------------------------------------
+                                if (newStatus.equals("Delivered", ignoreCase = true)) {
+                                    db.collection("service_providers")
+                                        .document(transporterId)
+                                        .update("availabilityStatus", "available")
+                                        .addOnSuccessListener {
+                                            Log.d("SP_TaskUpdateDetails", "Transporter availability restored → available")
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Log.e("SP_TaskUpdateDetails", "Failed to restore availability: ${e.message}")
+                                        }
+                                }
+
                                 btnInTransit.isEnabled = true
                                 btnDelivered.isEnabled = true
                             }
-
                     }
                     .addOnFailureListener { e ->
                         Log.e("SP_TaskUpdateDetails", "TSD query failed", e)
-                        Toast.makeText(
-                            requireContext(),
-                            "Failed to find TSD booking",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(requireContext(),"Failed to find TSD booking",Toast.LENGTH_SHORT).show()
                         btnInTransit.isEnabled = true
                         btnDelivered.isEnabled = true
                     }
             }
             .addOnFailureListener { e ->
                 Log.e("SP_TaskUpdateDetails", "Transport fetch failed", e)
-                Toast.makeText(
-                    requireContext(),
-                    "Failed to load transport booking",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(requireContext(),"Failed to load transport booking",Toast.LENGTH_SHORT).show()
                 btnInTransit.isEnabled = true
                 btnDelivered.isEnabled = true
             }
     }
+
 
     private fun applyDeliveredLock(status: String) {
         if (bookingSource == BookingSource.TRANSPORT) {
@@ -702,7 +706,7 @@ class SP_TaskUpdateDetails : Fragment() {
             btnUpload.visibility = View.VISIBLE
             btnCancel.visibility = View.VISIBLE
             btnReceiveWaste.visibility = View.VISIBLE
-            btnStartTreatment.visibility = View.VISIBLE
+            btnFinishTreatment.visibility = View.VISIBLE
         }
         updateProgressBar(status)
     }

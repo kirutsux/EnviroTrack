@@ -287,6 +287,7 @@ class TsdFacilitySelectionFragment : Fragment() {
         db.collection("service_providers")
             .whereEqualTo("role", "TSD Facility")
             .whereEqualTo("status", "approved")
+            .whereEqualTo("availabilityStatus", "available")   // ✅ NEW FILTER
             .get()
             .addOnSuccessListener { result ->
                 tsdList.clear()
@@ -310,6 +311,7 @@ class TsdFacilitySelectionFragment : Fragment() {
                 Toast.makeText(requireContext(), "Error loading facilities: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun validateAndProceed() {
         val userId = auth.currentUser?.uid ?: run {

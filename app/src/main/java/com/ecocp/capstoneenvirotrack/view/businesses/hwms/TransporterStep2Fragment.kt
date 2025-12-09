@@ -134,9 +134,11 @@ class TransporterStep2Fragment : Fragment() {
 
     private fun fetchTransporters() {
         progressDialog.show()
+
         db.collection("service_providers")
             .whereEqualTo("role", "Transporter")
             .whereEqualTo("status", "approved")
+            .whereEqualTo("availabilityStatus", "available")   // ✅ NEW FILTER
             .get()
             .addOnSuccessListener { snap ->
                 progressDialog.dismiss()
@@ -149,6 +151,7 @@ class TransporterStep2Fragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to load transporters: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
+
 
     /**
      * Show dialog to let user select which waste generator(s) to book transport for.
