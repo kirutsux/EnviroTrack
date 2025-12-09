@@ -6,6 +6,9 @@ data class ServiceRequest(
     val id: String = "",               // SR document id
     val bookingId: String? = null,     // original booking id (optional)
 
+    val pcoId: String? = null,
+
+
     // Client / Generator
     val clientName: String = "",       // shown on UI as client/generator name
 

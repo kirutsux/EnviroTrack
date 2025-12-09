@@ -172,7 +172,9 @@ class SP_ChangepasswordFragment : Fragment() {
                                             "password" to newPassword,
                                             "mustChangePassword" to false,
                                             "profileImageUrl" to existingProfileUrl,
-                                            "createdAt" to existingCreatedAt
+                                            "createdAt" to existingCreatedAt,
+                                            "availabilityStatus" to "available"
+
                                         )
 
                                         firestore.collection("service_providers").document(uid)
