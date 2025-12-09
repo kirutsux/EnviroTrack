@@ -32,15 +32,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <ImageView
-                android:id="@+id/drawerMenu"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_menu"
-                android:contentDescription="@string/menu_icon_description"
-                android:layout_gravity="center_vertical"
-                app:tint="@color/white" />
-
             <TextView
                 android:id="@+id/app_title"
                 android:layout_width="0dp"
@@ -378,17 +369,5 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Navigation Drawer -->
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:menu="@menu/drawer_menu"
-        app:headerLayout="@layout/nav_header"
-        android:background="@color/white"
-        app:itemIconTint="@color/nav_item_tint"
-        app:itemTextColor="@color/nav_item_text" />
     </LinearLayout>
 </androidx.drawerlayout.widget.DrawerLayout>

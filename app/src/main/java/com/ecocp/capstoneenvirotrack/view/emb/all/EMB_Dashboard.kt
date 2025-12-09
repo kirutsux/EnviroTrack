@@ -67,12 +67,10 @@ class EMB_Dashboard : Fragment() {
         notificationIcon = view.findViewById(R.id.emb_notification_icon)
         drawerLayout = view.findViewById(R.id.drawer_layout)
         navView = view.findViewById(R.id.nav_view)
-        drawerMenu = view.findViewById(R.id.drawerMenu)
 
         notificationIcon = view.findViewById(R.id.emb_notification_icon)
 
         fetchGreetingMessage()
-        setupDrawer()
         setupNotificationIcon()
 
         val navController = findNavController()
@@ -124,12 +122,6 @@ class EMB_Dashboard : Fragment() {
             in 0..11 -> "Good Morning"
             in 12..17 -> "Good Afternoon"
             else -> "Good Evening"
-        }
-    }
-
-    private fun setupDrawer() {
-        drawerMenu.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
         }
     }
 
