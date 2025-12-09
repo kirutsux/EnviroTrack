@@ -28,7 +28,7 @@ class SP_Dashboard : Fragment() {
         val paymentsCard = view.findViewById<CardView?>(R.id.opms_card)
 
         // find notification icon
-        notificationIcon = view.findViewById(R.id.sp_notification_icon)
+//        notificationIcon = view.findViewById(R.id.sp_notification_icon)
 
         // click listeners
         activeTasksCard?.setOnClickListener {
