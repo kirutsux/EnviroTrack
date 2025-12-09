@@ -2,6 +2,7 @@ package com.ecocp.capstoneenvirotrack.view.messaging
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -120,15 +121,27 @@ class ChatFragment : Fragment() {
                 if (_binding == null) return
                 messageList.clear()
                 for (msgSnapshot in snapshot.children) {
-                    msgSnapshot.getValue(Message::class.java)?.let {
-                        messageList.add(it)
+                    val message = msgSnapshot.getValue(Message::class.java)
+                    if (message != null) {
+                        val isUserInvolved = message.senderId == currentUserId || message.receiverId == currentUserId
+                        val isReceiverMatching = message.receiverId == providerId
+
+                        if (isUserInvolved && isReceiverMatching) {
+                            messageList.add(message)
+                        } else {
+                            Log.w("ChatFragment", "Skipping invalid message: sender=${message.senderId}, receiver=${message.receiverId}, expectedReceiver=$providerId")
+                        }
                     }
                 }
                 chatAdapter.notifyDataSetChanged()
-                binding.chatRecyclerView.scrollToPosition(messageList.size - 1)
+                if (messageList.isNotEmpty()) {
+                    binding.chatRecyclerView.scrollToPosition(messageList.size - 1)
+                }
             }
 
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ChatFragment", "Listen cancelled: ${error.message}")
+            }
         }
 
         chatRef.addValueEventListener(messageListener!!)
