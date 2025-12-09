@@ -57,7 +57,7 @@ class SP_Inbox : Fragment() {
                 putString("providerName", pco.name)
                 putString("providerImage", pco.imageUrl)
             }
-            findNavController().navigate(R.id.chatFragment, bundle)
+            findNavController().navigate(R.id.action_spInbox_to_chatFragment, bundle)
         }
 
         binding.inboxRecyclerView.layoutManager = LinearLayoutManager(requireContext())
