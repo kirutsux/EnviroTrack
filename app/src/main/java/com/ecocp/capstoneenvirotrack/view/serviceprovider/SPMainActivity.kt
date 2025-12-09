@@ -44,7 +44,8 @@ class SPMainActivity : AppCompatActivity() {
             R.id.SP_ActiveTasks,
             R.id.SP_TaskUpdateDetails,
             R.id.SP_ServiceReport,
-            R.id.SP_Inbox
+            R.id.SP_Inbox,
+            R.id.chatFragment
             // Completed Services lis
         )
 
