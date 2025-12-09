@@ -2,22 +2,19 @@ package com.ecocp.capstoneenvirotrack.view.all
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.ecocp.capstoneenvirotrack.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.*
-import org.json.JSONObject
-import java.io.IOException
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.AskRequest
+import com.ecocp.capstoneenvirotrack.api.AskResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 class AiFaqBotFragment : Fragment() {
 
@@ -66,10 +63,10 @@ class AiFaqBotFragment : Fragment() {
             val question = questionEditText.text.toString().trim()
             var module = moduleSpinner.selectedItem.toString().lowercase()
 
-            // 🩵 Fix the naming mismatch for Service Provider and HWMS
+            // Fix naming mismatch for Service Provider and HWMS
             module = when (module) {
                 "service provider" -> "service_provider"
-                "hwms" -> "hwm" // optional, in case your backend uses "hwm" not "hwms"
+                "hwms" -> "hwm" // optional: match backend naming
                 else -> module
             }
 
@@ -82,7 +79,6 @@ class AiFaqBotFragment : Fragment() {
             }
         }
     }
-
 
     private fun addChatBubble(text: String, isUser: Boolean) {
         val bubble = TextView(requireContext())
@@ -98,16 +94,15 @@ class AiFaqBotFragment : Fragment() {
         params.setMargins(16, 8, 16, 8)
 
         if (isUser) {
-            params.gravity = android.view.Gravity.END
+            params.gravity = Gravity.END
             bubble.setBackgroundResource(R.drawable.bg_user_bubble)
         } else {
-            params.gravity = android.view.Gravity.START
+            params.gravity = Gravity.START
             bubble.setBackgroundResource(R.drawable.bg_ai_bubble)
         }
 
         bubble.layoutParams = params
         chatLayout.addView(bubble)
-
         scrollToBottom()
     }
 
@@ -117,67 +112,39 @@ class AiFaqBotFragment : Fragment() {
         }
     }
 
+    // ----------------- Retrofit AI Call -----------------
     private fun callAiAssistant(question: String, module: String) {
         typingText.visibility = View.VISIBLE
         startTypingAnimation()
         scrollToBottom()
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val client = OkHttpClient()
-                val json = JSONObject()
-                json.put("question", question)
-                json.put("module", module)
+        val request = AskRequest(question, module)
 
-                val body = RequestBody.create(
-                    "application/json; charset=utf-8".toMediaTypeOrNull(),
-                    json.toString()
-                )
-
-                val request = Request.Builder()
-                    .url("http://10.0.2.2:3000/ask")
-                    .post(body)
-                    .build()
-
-                client.newCall(request).enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        e.printStackTrace()
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            stopTypingAnimation()
-                            typingText.visibility = View.GONE
-                            addChatBubble("Failed to get response", isUser = false)
-                        }
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        val respText = response.body?.string()
-                        val answer = try {
-                            JSONObject(respText).getString("answer")
-                        } catch (e: Exception) {
-                            "No answer found"
-                        }
-
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            stopTypingAnimation()
-                            typingText.visibility = View.GONE
-                            addChatBubble(answer, isUser = false)
-                        }
-                    }
-                })
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
+        RetrofitClient.instance.askAI(request)
+            .enqueue(object : Callback<AskResponse> {
+                override fun onResponse(call: Call<AskResponse>, response: Response<AskResponse>) {
                     stopTypingAnimation()
                     typingText.visibility = View.GONE
-                    addChatBubble("Error occurred", isUser = false)
+
+                    if (response.isSuccessful && response.body() != null) {
+                        val answer = response.body()!!.answer
+                        addChatBubble(answer, isUser = false)
+                    } else {
+                        addChatBubble("Failed to get response", isUser = false)
+                    }
                 }
-            }
-        }
+
+                override fun onFailure(call: Call<AskResponse>, t: Throwable) {
+                    stopTypingAnimation()
+                    typingText.visibility = View.GONE
+                    addChatBubble("Error: ${t.message}", isUser = false)
+                }
+            })
     }
 
     private fun startTypingAnimation() {
         val alpha = AlphaAnimation(0.3f, 1.0f)
-        alpha.duration = 600 // milliseconds
+        alpha.duration = 600
         alpha.repeatMode = Animation.REVERSE
         alpha.repeatCount = Animation.INFINITE
         typingText.startAnimation(alpha)
