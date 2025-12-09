@@ -38,6 +38,8 @@ class ChatFragment : Fragment() {
     private var providerImageUrl: String = ""
     private var providerDisplayName: String = ""
 
+    private var messageListener: ValueEventListener? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,7 +60,7 @@ class ChatFragment : Fragment() {
                 .into(binding.providerImage)
         }
 
-        binding.btnBack.setOnClickListener{ findNavController().navigateUp() }
+        binding.btnBack.setOnClickListener { findNavController().navigateUp() }
 
         setupRecyclerView()
         setupSendButton()
@@ -81,7 +83,7 @@ class ChatFragment : Fragment() {
             val senderId = auth.currentUser?.uid ?: return@setOnClickListener
             if (messageText.isEmpty()) return@setOnClickListener
 
-            val timestamp = SimpleDateFormat("MM-dd-yy", Locale.getDefault()).format(Date())
+            val timestamp = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
             val message = Message(
                 senderId = senderId,
                 receiverId = providerId,
@@ -94,7 +96,7 @@ class ChatFragment : Fragment() {
             val senderChatRef = dbRef.child(senderId).child(chatId).child("messages")
             val receiverChatRef = dbRef.child(providerId).child(chatId).child("messages")
 
-            val newMsgKey = senderChatRef.push().key?:return@setOnClickListener
+            val newMsgKey = senderChatRef.push().key ?: return@setOnClickListener
             senderChatRef.child(newMsgKey).setValue(message)
             receiverChatRef.child(newMsgKey).setValue(message)
 
@@ -110,9 +112,12 @@ class ChatFragment : Fragment() {
         val chatId = generateChatId(currentUserId, providerId)
         val chatRef = dbRef.child(currentUserId).child(chatId).child("messages")
 
-        chatRef.addValueEventListener(object : ValueEventListener {
+        messageListener?.let { chatRef.removeEventListener(it) }
+
+        messageListener = object : ValueEventListener {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (_binding == null) return
                 messageList.clear()
                 for (msgSnapshot in snapshot.children) {
                     msgSnapshot.getValue(Message::class.java)?.let {
@@ -124,7 +129,9 @@ class ChatFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {}
-        })
+        }
+
+        chatRef.addValueEventListener(messageListener!!)
     }
 
     private fun generateChatId(userId1: String, userId2: String): String {
@@ -134,6 +141,11 @@ class ChatFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        messageListener?.let {
+            val currentUserId = auth.currentUser?.uid ?: return
+            val chatId = generateChatId(currentUserId, providerId)
+            dbRef.child(currentUserId).child(chatId).child("messages").removeEventListener(it)
+        }
         _binding = null
         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.VISIBLE
     }

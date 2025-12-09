@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.InboxAdapter
 import com.ecocp.capstoneenvirotrack.databinding.FragmentInboxBinding
+import com.ecocp.capstoneenvirotrack.model.InboxItem
 import com.ecocp.capstoneenvirotrack.model.Message
 import com.ecocp.capstoneenvirotrack.model.Provider
 import com.google.firebase.auth.FirebaseAuth
@@ -21,7 +22,7 @@ class Inbox : Fragment() {
 
     private lateinit var binding: FragmentInboxBinding
     private lateinit var adapter: InboxAdapter
-    private val providerList = mutableListOf<Provider>()
+    private val providerList = mutableListOf<InboxItem>()
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val realtimeDb = FirebaseDatabase.getInstance().getReference("chats")
@@ -127,7 +128,8 @@ class Inbox : Fragment() {
     private fun updateProviderLastMessage(providerId: String, message: String) {
         val index = providerList.indexOfFirst { it.id == providerId }
         if (index != -1) {
-            providerList[index] = providerList[index].copy(description = message)
+            val current = providerList[index] as Provider
+            providerList[index] = current.copy(description = message)
             adapter.notifyItemChanged(index)
         }
     }
