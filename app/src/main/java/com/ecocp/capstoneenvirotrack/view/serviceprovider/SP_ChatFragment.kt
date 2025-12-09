@@ -45,7 +45,6 @@ class SP_ChatFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChatBinding.inflate(inflater, container, false)
-        // Hide bottom nav while chatting
         requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.GONE
 
         providerId = arguments?.getString("providerId") ?: ""

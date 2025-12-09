@@ -36,8 +36,7 @@ class SP_Dashboard : Fragment() {
 
         // click listeners
         activeTasksCard?.setOnClickListener {
-            // Navigate to SP_Inbox (assuming this card is for inbox/chat)
-            findNavController().navigate(R.id.action_SP_Dashboard_to_SP_Inbox)  // Add this action to nav graph
+            findNavController().navigate(R.id.action_SP_Dashboard_to_SP_Inbox)
         }
 
         serviceRequestCard?.setOnClickListener {

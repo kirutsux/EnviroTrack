@@ -43,7 +43,14 @@
         tools:layout="@layout/fragment_sp_inbox" >
         <action
             android:id="@+id/action_SP_Inbox_to_chatFragment"
-            app:destination="@id/chatFragment"/>
+            app:destination="@id/spChatFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/spChatFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_ChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_sp_chat">
     </fragment>
 
     <!-- Bookings -->
