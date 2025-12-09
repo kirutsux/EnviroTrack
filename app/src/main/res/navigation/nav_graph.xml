@@ -56,11 +56,11 @@
     </fragment>
 
     <fragment
-        android:id="@+id/spInbox"
+        android:id="@+id/SP_Inbox"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Inbox"
         tools:layout="@layout/fragment_sp_inbox">
         <action
-            android:id="@+id/action_spInbox_to_chatFragment"
+            android:id="@+id/action_SP_Inbox_to_chatFragment"
             app:destination="@id/chatFragment"/>
     </fragment>
 

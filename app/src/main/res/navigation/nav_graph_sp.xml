@@ -12,6 +12,9 @@
         android:label="Dashboard"
         tools:layout="@layout/sp_dashboard">
         <action
+            android:id="@+id/action_SP_Dashboard_to_SP_Inbox"
+            app:destination="@id/SP_Inbox" />
+        <action
             android:id="@+id/action_SP_Dashboard_to_SP_Servicerequest"
             app:destination="@id/SP_Servicerequest"/>
         <action
@@ -37,7 +40,11 @@
         android:id="@+id/SP_Inbox"
         android:name="com.ecocp.capstoneenvirotrack.view.serviceprovider.SP_Inbox"
         android:label="Inbox"
-        tools:layout="@layout/fragment_sp_inbox" />
+        tools:layout="@layout/fragment_sp_inbox" >
+        <action
+            android:id="@+id/action_SP_Inbox_to_chatFragment"
+            app:destination="@id/chatFragment"/>
+    </fragment>
 
     <!-- Bookings -->
     <fragment
@@ -99,6 +106,12 @@
             app:popUpTo="@id/SP_ChangepasswordFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.ecocp.capstoneenvirotrack.view.messaging.ChatFragment"
+        tools:layout="@layout/fragment_chat" />
 
     <!-- Service Requests -->
     <fragment

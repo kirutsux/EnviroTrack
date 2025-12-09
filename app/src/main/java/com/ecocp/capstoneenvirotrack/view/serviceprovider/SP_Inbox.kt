@@ -2,6 +2,7 @@ package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ import com.ecocp.capstoneenvirotrack.databinding.FragmentSpInboxBinding
 import com.ecocp.capstoneenvirotrack.model.InboxItem
 import com.ecocp.capstoneenvirotrack.model.Message
 import com.ecocp.capstoneenvirotrack.model.PCOMessages
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
@@ -47,6 +49,10 @@ class SP_Inbox : Fragment() {
     ): View {
         binding = FragmentSpInboxBinding.inflate(inflater, container, false)
 
+        val bottomNav = requireActivity().findViewById<View>(R.id.bottom_navigation)
+        bottomNav?.visibility = View.GONE
+        Log.d("SP_Inbox", "Bottom nav hidden: ${bottomNav != null}")
+
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
         }
@@ -57,7 +63,7 @@ class SP_Inbox : Fragment() {
                 putString("providerName", pco.name)
                 putString("providerImage", pco.imageUrl)
             }
-            findNavController().navigate(R.id.action_spInbox_to_chatFragment, bundle)
+            findNavController().navigate(R.id.action_SP_Inbox_to_chatFragment, bundle)
         }
 
         binding.inboxRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -135,5 +141,12 @@ class SP_Inbox : Fragment() {
             pcoList[index] = current.copy(description = message)
             adapter.notifyItemChanged(index)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        val bottomNav = requireActivity().findViewById<View>(R.id.bottom_navigation)
+        bottomNav?.visibility = View.VISIBLE
+        Log.d("SP_Inbox", "Bottom nav shown: ${bottomNav != null}")
     }
 }

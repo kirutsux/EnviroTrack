@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
+import com.google.android.material.bottomnavigation.BottomNavigationView  // Add if needed
 
 class SP_Dashboard : Fragment() {
 
@@ -30,9 +31,13 @@ class SP_Dashboard : Fragment() {
         // find notification icon
 //        notificationIcon = view.findViewById(R.id.sp_notification_icon)
 
+        // Ensure bottom nav is visible on dashboard
+        requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.VISIBLE
+
         // click listeners
         activeTasksCard?.setOnClickListener {
-            findNavController().navigate(R.id.SP_ActiveTasks)
+            // Navigate to SP_Inbox (assuming this card is for inbox/chat)
+            findNavController().navigate(R.id.action_SP_Dashboard_to_SP_Inbox)  // Add this action to nav graph
         }
 
         serviceRequestCard?.setOnClickListener {
@@ -50,7 +55,7 @@ class SP_Dashboard : Fragment() {
         }
 
         // ---------------- NOTIFICATIONS -----------------
-        setupNotificationIcon()
+//        setupNotificationIcon()
 
         return view
     }
