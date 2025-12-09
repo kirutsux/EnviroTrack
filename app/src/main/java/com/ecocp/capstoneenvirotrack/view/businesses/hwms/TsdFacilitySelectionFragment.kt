@@ -455,8 +455,8 @@ class TsdFacilitySelectionFragment : Fragment() {
                                 Log.d("NOTIF", "Scheduling notification to TSD facility: $tsdId")
                                 val request = NotifyBookingCreatedRequest(bookingId = bookingId)
                                 RetrofitClient.instance.notifyTsdBookingCreated(request)
-                                    .enqueue(object : retrofit2.Callback<Void> {
-                                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    .enqueue(object : Callback<Void> {
+                                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
                                             if (response.isSuccessful) {
                                                 Log.d("NOTIF", "TSD facility notified for booking $bookingId.")
                                             } else {
