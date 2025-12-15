@@ -16,50 +16,41 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <!-- Header Row -->
+        <!-- Header Row: Establishment Name + Status Badge -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
 
+            <!-- 🏢 Establishment Name (takes available space) -->
             <TextView
-                android:id="@+id/tvCompanyId"
-                android:text="Ref: CRS-12345"
+                android:id="@+id/tvEstablishment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ABC Manufacturing Corp."
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:textColor="@color/black"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end" />
 
-            <!-- STATUS BADGE -->
+            <!-- STATUS BADGE (fixed on the right) -->
             <TextView
                 android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Pending"
                 android:textStyle="bold"
                 android:textSize="12sp"
                 android:paddingVertical="4dp"
                 android:paddingHorizontal="10dp"
-                android:layout_marginStart="8dp"
                 android:background="@drawable/bg_status_badge"
                 android:textColor="@android:color/white"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content" />
+                android:layout_marginStart="12dp" />
         </LinearLayout>
-
-        <!-- 🏢 Establishment Name -->
-        <TextView
-            android:id="@+id/tvEstablishment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="ABC Manufacturing Corp."
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:layout_marginBottom="2dp" />
 
         <!-- 🏭 Company Type -->
         <TextView
@@ -69,7 +60,7 @@
             android:text="Type: Corporation"
             android:textSize="13sp"
             android:textColor="@color/darker_gray"
-            android:layout_marginBottom="2dp" />
+            android:layout_marginBottom="4dp" />
 
         <!-- 👤 CEO Name -->
         <TextView
@@ -79,7 +70,7 @@
             android:text="CEO: John Doe"
             android:textSize="13sp"
             android:textColor="@color/darker_gray"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginBottom="4dp" />
 
         <!-- 📍 Address -->
         <TextView
@@ -89,50 +80,51 @@
             android:text="123 Purok 4, Brgy. San Juan, Quezon City"
             android:textSize="13sp"
             android:textColor="@color/darker_gray"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginBottom="8dp" />
 
-        <!-- 📅 Status & Date -->
+        <!-- 📅 Date Submitted & Action Buttons Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
+            <!-- Date Submitted (left) -->
             <TextView
                 android:id="@+id/tvDateSubmitted"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="2025-10-10"
                 android:textColor="@color/darker_gray"
                 android:textSize="12sp" />
+
+            <!-- Action Buttons (right) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/btnEdit"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_edit"
+                    android:contentDescription="Edit Establishment"
+                    app:tint="@color/orange_submitted" />
+
+                <ImageButton
+                    android:id="@+id/btnDelete"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="12dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="Delete Establishment"
+                    app:tint="@color/red_rejected" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- ✏️ Action Buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="8dp">
-
-            <ImageButton
-                android:id="@+id/btnEdit"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_edit"
-                android:contentDescription="Edit Establishment"
-                app:tint="@color/orange_submitted" />
-
-            <ImageButton
-                android:id="@+id/btnDelete"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_delete"
-                android:contentDescription="Delete Establishment"
-                app:tint="@color/red_rejected"
-                android:layout_marginStart="8dp" />
-        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

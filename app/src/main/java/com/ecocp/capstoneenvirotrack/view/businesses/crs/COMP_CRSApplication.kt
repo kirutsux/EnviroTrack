@@ -127,7 +127,6 @@ class COMP_CRSApplication : Fragment() {
 
         btnUploadFiles = view.findViewById(R.id.btnUploadFiles)
         btnSaveChanges = view.findViewById(R.id.btnSaveChanges)
-        btnClear = view.findViewById(R.id.btnClear)
         btnBack = view.findViewById(R.id.btnBack)
 
         // Dropdown setup
@@ -139,7 +138,6 @@ class COMP_CRSApplication : Fragment() {
         // Listeners
         btnUploadFiles.setOnClickListener { openFilePicker() }
         btnSaveChanges.setOnClickListener { validateAndSubmit() }
-        btnClear.setOnClickListener { clearFields() }
         btnBack.setOnClickListener { findNavController().navigateUp() }
 
         return view
