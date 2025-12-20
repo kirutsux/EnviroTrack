@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_purple_blue"
+    android:background="@android:color/white"
     tools:context=".view.businesses.crs.COMP_CRS">
 
     <LinearLayout
@@ -46,7 +46,7 @@
                     android:orientation="horizontal"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="8dp"
-                    android:background="@drawable/bg_title_gradient"
+                    android:background="@drawable/bg_enviro_header_teal"
                     android:gravity="center_vertical">
 
                     <TextView
@@ -77,10 +77,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Approved Establishments"
-                    android:textColor="@color/white"
+                    android:textColor="#34656D"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:paddingVertical="8dp" />
+                    android:paddingVertical="8dp"
+                    android:background="@drawable/bg_enviro_section_light"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginBottom="8dp"
+                    android:elevation="1dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerApproved"
@@ -94,10 +98,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Pending Establishments"
-                    android:textColor="@color/white"
+                    android:textColor="#34656D"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:paddingVertical="8dp" />
+                    android:paddingVertical="8dp"
+                    android:background="@drawable/bg_enviro_section_light"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8dp"
+                    android:elevation="1dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerPending"
@@ -119,6 +128,6 @@
         android:layout_margin="16dp"
         android:src="@drawable/ic_add"
         android:contentDescription="Add Establishment"
-        app:backgroundTint="@color/teal_700"
+        app:backgroundTint="#34656D"
         app:tint="@android:color/white" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

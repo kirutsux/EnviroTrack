@@ -1,82 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/bg_gradient_purple_blue"
+    android:background="@android:color/white"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-<LinearLayout
-    android:padding="16dp"
-    android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:layout_height="wrap_content">
-    <!-- Header with Back Button and Title -->
+
     <LinearLayout
+        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/bg_title_gradient"
-        android:padding="8dp"
-        android:gravity="center_vertical">
-
-        <ImageView
-            android:id="@+id/backButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:src="@drawable/backbtn"
-            android:contentDescription="Back Button"
-            android:padding="4dp"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/tvTitle"
-            android:text="Self Monitoring Report"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:textColor="@android:color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <LinearLayout
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="12dp">
+        android:layout_height="wrap_content">
 
-        <!-- Submitted Applications Header -->
-        <TextView
-            android:text="Your Submitted Applications"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:background="@drawable/bg_title_gradient"
-            android:padding="10dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="8dp"
+        <!-- Header with Back Button and Title -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- No Applications Text -->
-        <TextView
-            android:id="@+id/txtNoApplications"
-            android:text="You have no submitted applications yet."
-            android:textColor="#666"
-            android:textSize="14sp"
-            android:background="@drawable/text_border"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_enviro_header_teal"
             android:padding="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginBottom="8dp" />
+            android:gravity="center_vertical">
 
-        <!-- RecyclerView for submitted SMRs -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerSmrList"
+            <ImageView
+                android:id="@+id/backButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/backbtn"
+                android:contentDescription="Back Button"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:text="Self Monitoring Report"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            android:overScrollMode="never"
-            android:layout_marginBottom="12dp" />
-    </LinearLayout>
+            android:paddingBottom="12dp">
+
+            <!-- Submitted Applications Header -->
+            <TextView
+                android:text="Your Submitted Applications"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#263238"
+                android:background="@drawable/bg_enviro_section_light"
+                android:padding="10dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <!-- No Applications Text -->
+            <TextView
+                android:id="@+id/txtNoApplications"
+                android:text="You have no submitted applications yet."
+                android:textColor="#757575"
+                android:textSize="14sp"
+                android:background="@drawable/bg_enviro_section_light"
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
+            <!-- RecyclerView for submitted SMRs -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerSmrList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:layout_marginBottom="12dp" />
+        </LinearLayout>
 
     <!-- Module Progress Section -->
     <TextView

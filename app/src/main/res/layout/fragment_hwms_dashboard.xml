@@ -6,38 +6,48 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="12dp"
-    android:background="@color/white">
+    android:background="@android:color/white">
 
+    <!-- Header -->
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="My HWMS Applications"
-        android:textSize="22sp"
         android:textStyle="bold"
-        android:layout_marginBottom="12dp"
-        android:textColor="#1E1E1E" />
+        android:textSize="21sp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_enviro_header_teal"
+        android:padding="16dp"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        android:elevation="3dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
+    <!-- Add Button -->
     <Button
         android:id="@+id/btnAddApplication"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:text="+ Add New Application"
-        android:backgroundTint="@color/teal_700"
-        android:textColor="@color/white"
-        android:layout_marginBottom="12dp" />
+        android:backgroundTint="#34656D"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="12dp"
+        android:elevation="2dp"
+        android:cornerRadius="8dp" />
 
+    <!-- Tabs -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabIndicatorColor="@color/teal_700"
-        app:tabSelectedTextColor="@color/teal_700"
+        app:tabIndicatorColor="#34656D"
+        app:tabSelectedTextColor="#34656D"
         app:tabTextColor="#808080"
         app:tabIndicatorFullWidth="false"
         app:tabMode="fixed"
         android:layout_marginBottom="8dp" />
 
+    <!-- Empty State -->
     <TextView
         android:id="@+id/tvEmptyState"
         android:layout_width="match_parent"
@@ -48,6 +58,7 @@
         android:visibility="gone"
         android:layout_marginTop="8dp" />
 
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewHWMS"
         android:layout_width="match_parent"

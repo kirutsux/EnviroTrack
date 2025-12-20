@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient_purple_blue"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/white"
     android:padding="16dp">
 
     <LinearLayout
@@ -10,13 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Header -->
         <androidx.constraintlayout.widget.ConstraintLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_title_gradient"
-            android:padding="8dp"
+            android:background="@drawable/bg_enviro_header_teal"
+            android:padding="12dp"
             android:elevation="2dp">
 
             <ImageButton
@@ -28,7 +28,8 @@
                 android:contentDescription="Back"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="#FFFFFF" />
 
             <TextView
                 android:id="@+id/tvHeader"
@@ -37,7 +38,7 @@
                 android:text="Online Permitting and Monitoring"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="@android:color/white"
+                android:textColor="#FFFFFF"
                 android:gravity="center_vertical"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
@@ -45,15 +46,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+        <!-- Instruction -->
         <TextView
             android:text="Select which permit you want to apply for:"
             android:textSize="14sp"
-            android:textColor="#555"
-            android:background="@drawable/text_border"
+            android:textColor="#263238"
+            android:background="@drawable/bg_enviro_section_light"
             android:padding="10dp"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
@@ -64,7 +64,7 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/card_border"
+            android:background="@drawable/bg_enviro_card"
             android:padding="16dp"
             android:elevation="3dp"
             android:layout_marginBottom="20dp">
@@ -75,6 +75,7 @@
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:textColor="#FFFFFF"
+                android:backgroundTint="#34656D"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp" />
@@ -85,18 +86,19 @@
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:textColor="#FFFFFF"
+                android:backgroundTint="#34656D"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp" />
         </LinearLayout>
 
-        <!-- Submitted Applications -->
+        <!-- Submitted Applications Section -->
         <TextView
             android:text="Your Submitted Applications"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:background="@drawable/bg_title_gradient"
+            android:textColor="#263238"
+            android:background="@drawable/bg_enviro_section_light"
             android:padding="10dp"
             android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
@@ -105,9 +107,9 @@
         <TextView
             android:id="@+id/txtNoApplications"
             android:text="You have no submitted applications yet."
-            android:textColor="#666"
+            android:textColor="#757575"
             android:textSize="14sp"
-            android:background="@drawable/text_border"
+            android:background="@drawable/bg_enviro_card"
             android:padding="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

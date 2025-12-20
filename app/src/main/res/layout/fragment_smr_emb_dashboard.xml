@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@drawable/bg_gradient_purple_blue"
+    android:background="@android:color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -14,8 +14,8 @@
         android:text="EMB SMR Submissions Dashboard"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:textColor="@android:color/white"
-        android:background="@drawable/bg_title_gradient"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_enviro_header_teal"
         android:padding="12dp"
         android:gravity="center"
         android:layout_marginBottom="16dp"
@@ -28,8 +28,8 @@
         android:text="Submitted SMRs"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:textColor="@android:color/white"
-        android:background="@drawable/bg_title_gradient"
+        android:textColor="#263238"
+        android:background="@drawable/bg_enviro_section_light"
         android:padding="10dp"
         android:layout_marginBottom="8dp"
         android:layout_width="match_parent"
@@ -61,7 +61,7 @@
                 android:layout_height="20dp"
                 android:src="@drawable/ic_search"
                 android:contentDescription="Search"
-                app:tint="@color/black" />
+                app:tint="#34656D" />
 
             <EditText
                 android:id="@+id/etSearch"
@@ -73,8 +73,8 @@
                 android:inputType="text"
                 android:padding="6dp"
                 android:singleLine="true"
-                android:textColor="@color/black"
-                android:textColorHint="@color/darker_gray"
+                android:textColor="#263238"
+                android:textColorHint="#757575"
                 tools:ignore="TouchTargetSizeCheck" />
         </LinearLayout>
 
@@ -95,9 +95,9 @@
     <TextView
         android:id="@+id/txtNoSubmissions"
         android:text="No SMR submissions found."
-        android:textColor="#FFFFFF"
+        android:textColor="#757575"
         android:textSize="14sp"
-        android:background="@drawable/text_border"
+        android:background="@drawable/bg_enviro_section_light"
         android:padding="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
