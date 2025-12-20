@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollCNC"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="@color/surface"
     android:padding="16dp">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <ImageButton
             android:id="@+id/btnBack"
@@ -20,388 +22,423 @@
             android:contentDescription="Back"
             app:tint="#445B6C" />
 
-        <!-- Header -->
-        <LinearLayout
+        <!-- Main Card -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Card.Elevated"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/bg_title_gradient"
-            android:layout_marginBottom="12dp">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Certificate of Non-Coverage (CNC) Application"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"
-                android:gravity="center"
-
-                android:padding="10dp" />
-        </LinearLayout>
-
-        <!-- Subheader -->
-        <TextView
-            android:id="@+id/subHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Please fill out all required fields accurately before submitting your CNC application."
-            android:textSize="14sp"
-            android:textColor="#555"
-            android:background="@drawable/text_border"
-            android:padding="10dp"
-            android:layout_marginBottom="20dp" />
-
-        <TextView
-            android:text="A. Basic Information"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#445B6C"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/text_border_green"
-            android:padding="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- A. Basic Information -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp">
-
-            <EditText
-                android:id="@+id/inputCompanyName"
-                android:hint="Company Name"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
+                <!-- Module Header -->
+                <TextView
+                    android:id="@+id/tvTitleCNC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Certificate of Non-Coverage (CNC) Application"
+                    android:textSize="20sp"
+                    android:textColor="@color/textPrimary"
+                    android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/inputBusinessName"
-                android:hint="Business/Establishment Name"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                <TextView
+                    android:id="@+id/tvSubtitleCNC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Please fill out all required fields accurately before submitting your CNC application."
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginTop="4dp" />
 
-            <EditText
-                android:id="@+id/inputProjectTitle"
-                android:hint="Project Title"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                <!-- Section A: Basic Information -->
+                <TextView
+                    android:id="@+id/tvSectionA"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="A. Basic Information"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginTop="12dp" />
 
-            <EditText
-                android:id="@+id/inputNatureOfBusiness"
-                android:hint="Nature of Business"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputCompanyName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Company Name"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputProjectLocation"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:hint="Project Location (Address, Barangay, Municipality/City, Province)"
-                android:gravity="top"
-                android:inputType="textMultiLine"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputBusinessName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Business/Establishment Name"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/email"
-                android:minHeight="48dp"
-                android:hint="Email Address"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputProjectTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Project Title"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputManagingHead"
-                android:layout_height="48dp"
-                android:hint="Managing Head Name"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputNatureOfBusiness"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Nature of Business"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputPcoName"
-                android:hint="Pollution Control Officer Name"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputProjectLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Project Location (Address, Barangay, Municipality/City, Province)"
+                        android:inputType="textMultiLine" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputPcoAccreditation"
-                android:layout_height="48dp"
-                android:hint="PCO Accreditation No."
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Email Address"
+                        android:inputType="textEmailAddress" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputDateEstablished"
-                android:layout_height="48dp"
-                android:hint="Date of Establishment"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputManagingHead"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Managing Head Name"
+                        android:inputType="textCapWords" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputEmployees"
-                android:layout_height="48dp"
-                android:hint="Number of Employees"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputPcoName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Pollution Control Officer Name"
+                        android:inputType="textCapWords" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputPsicCode"
-                android:layout_height="48dp"
-                android:hint="PSIC Code / Industry Classification"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
-        </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputPcoAccreditation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="PCO Accreditation No."
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="B. Project Description"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#445B6C"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/text_border_green"
-            android:padding="8dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputDateEstablished"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Date of Establishment"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- B. Project Description -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputEmployees"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Number of Employees"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputProjectType"
-                android:layout_height="48dp"
-                android:hint="Project Type (e.g., Manufacturing, Retail, Service)"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputPsicCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="PSIC Code / Industry Classification"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputProjectScale"
-                android:layout_height="48dp"
-                android:hint="Project Size/Scale (Small, Medium, Large)"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <!-- Section B: Project Description -->
+                <TextView
+                    android:id="@+id/tvSectionB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="B. Project Description"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginTop="20dp" />
 
-            <EditText
-                android:id="@+id/inputProjectCost"
-                android:layout_height="48dp"
-                android:hint="Project Cost / Capital Investment (₱)"
-                android:inputType="numberDecimal"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputProjectType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Project Type (e.g., Manufacturing, Retail, Service)"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputLandArea"
-                android:layout_height="48dp"
-                android:hint="Land Area (sq. meters or hectares)"
-                android:inputType="numberDecimal"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputProjectScale"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Project Size/Scale (Small, Medium, Large)"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputRawMaterials"
-                android:layout_height="48dp"
-                android:hint="Raw Materials Used"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputProjectCost"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Project Cost / Capital Investment (₱)"
+                        android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputProductionCapacity"
-                android:layout_height="48dp"
-                android:hint="Production Capacity"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_width="match_parent"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputLandArea"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Land Area (sq. meters or hectares)"
+                        android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputUtilitiesUsed"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:hint="Utilities Used (Water, Power, Fuel, etc.)"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputRawMaterials"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Raw Materials Used"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputWasteGenerated"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:hint="Waste Generated (solid, liquid, hazardous)"
-                android:inputType="textMultiLine"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
-        </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputProductionCapacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Production Capacity"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="C. Location and Environmental Setting"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#445B6C"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/text_border_green"
-            android:padding="8dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputUtilitiesUsed"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Utilities Used (Water, Power, Fuel, etc.)"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- C. Location and Environmental Setting -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputWasteGenerated"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Waste Generated (solid, liquid, hazardous)"
+                        android:inputType="textMultiLine" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputCoordinates"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:hint="Coordinates (Latitude, Longitude)"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
+                <!-- Section C: Location and Environmental Setting -->
+                <TextView
+                    android:id="@+id/tvSectionC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="C. Location and Environmental Setting"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginTop="20dp" />
 
-            <EditText
-                android:id="@+id/inputNearbyWaters"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:hint="Nearby Bodies of Water"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputCoordinates"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Coordinates (Latitude, Longitude)"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputResidentialProximity"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:hint="Proximity to Residential Areas"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputNearbyWaters"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Nearby Bodies of Water"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputEnvFeatures"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:hint="Environmental Features Nearby (forest, agricultural land, protected areas)"
-                android:inputType="textMultiLine"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputResidentialProximity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Proximity to Residential Areas"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/inputZoning"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:hint="Zoning Classification"
-                android:background="@drawable/text_border"
-                android:padding="10dp"
-                android:layout_marginBottom="10dp" />
-        </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputEnvFeatures"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Environmental Features Nearby (forest, agricultural land, protected areas)"
+                        android:inputType="textMultiLine" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="D. Attachments / Uploads"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="#445B6C"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/text_border_green"
-            android:padding="8dp" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputZoning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Zoning Classification"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- D. Attachments / Uploads -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp">
+                <!-- Section D: Attachments / Uploads -->
+                <TextView
+                    android:id="@+id/tvSectionD"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="D. Attachments / Uploads"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginTop="20dp" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Upload the following documents (PDF/IMAGE formats):\n• Location Map\n• Vicinity Map\n• Project Layout / Site Development Plan\n• Business Permit / DTI/SEC Registration\n• Land Title / Lease Agreement\n• Authorization Letter (if applicable)\n• Proof of Non-Coverage Justification (Project Description Document)"
-                android:layout_marginTop="8dp"
-                android:padding="4dp"
-                android:textColorHint="@android:color/white"
-                android:textColor="@android:color/white"/>
+                <TextView
+                    android:id="@+id/tvUploadDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Upload the following documents (PDF/IMAGE formats):\n• Location Map\n• Vicinity Map\n• Project Layout / Site Development Plan\n• Business Permit / DTI/SEC Registration\n• Land Title / Lease Agreement\n• Authorization Letter (if applicable)\n• Proof of Non-Coverage Justification (Project Description Document)"
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginTop="8dp" />
 
-            <Button
-                android:id="@+id/btnUploadFiles"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Upload Files"
-                android:layout_marginTop="10dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnUploadFiles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Upload Files"
+                    android:layout_marginTop="12dp"
+                    app:backgroundTint="@color/primary"
+                    android:textColor="@color/bg_white" />
 
-            <TextView
-                android:id="@+id/txtFileNames"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="No files selected"
-                android:textStyle="italic"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="8dp" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/txtFileNames"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No files selected"
+                    android:textStyle="italic"
+                    android:textColor="@color/textSecondary"
+                    android:layout_marginTop="8dp" />
 
-        <Button
-            android:id="@+id/btnSubmitCnc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save and Continue to Payment"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#445B6C" />
+                <!-- Buttons -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSaveCNC"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Save CNC Application"
+                    android:layout_marginTop="16dp"
+                    app:backgroundTint="@color/primary"
+                    android:textColor="@color/bg_white" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSubmitCnc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Save and Continue to Payment"
+                    android:layout_marginTop="12dp"
+                    app:backgroundTint="@color/primary"
+                    android:textColor="@color/bg_white" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

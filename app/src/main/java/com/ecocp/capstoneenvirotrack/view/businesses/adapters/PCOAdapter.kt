@@ -21,7 +21,6 @@ class PCOAdapter(
     private var filteredList = list.toMutableList()
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvAppId: TextView = itemView.findViewById(R.id.tvAppId)
         val tvAppName: TextView = itemView.findViewById(R.id.tvAppName)
         val tvApplicant: TextView = itemView.findViewById(R.id.tvApplicant)
         val tvForwardedTo: TextView = itemView.findViewById(R.id.tvForwardedTo)
@@ -42,7 +41,7 @@ class PCOAdapter(
         val app = filteredList[position]
         val context = holder.itemView.context
 
-        holder.tvAppId.text = app.appId
+
         holder.tvAppName.text = app.appName
         holder.tvApplicant.text = app.applicant
         holder.tvForwardedTo.text = app.forwardedTo
