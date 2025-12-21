@@ -149,8 +149,8 @@
                             android:background="@drawable/recent_item_background">
 
                             <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
                                 android:src="@drawable/ic_recent"
                                 android:contentDescription="@string/cnc_icon_description"/>
 
@@ -187,8 +187,8 @@
                             android:background="@drawable/recent_item_background">
 
                             <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
                                 android:src="@drawable/smr"
                                 android:contentDescription="@string/smr_icon_description"/>
 
@@ -226,8 +226,8 @@
                             android:background="@drawable/recent_item_background">
 
                             <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
                                 android:src="@drawable/opms"
                                 android:contentDescription="@string/opms_icon_description"/>
 
@@ -265,8 +265,8 @@
                             android:background="@drawable/recent_item_background">
 
                             <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
                                 android:src="@drawable/hms"
                                 android:contentDescription="@string/hazewaste_icon_description"/>
 
@@ -304,8 +304,8 @@
                             android:background="@drawable/recent_item_background">
 
                             <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
                                 android:src="@drawable/pco"
                                 android:contentDescription="@string/pco_icon_description"/>
 
@@ -343,8 +343,8 @@
                             android:background="@drawable/recent_item_background">
 
                             <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
                                 android:src="@drawable/crs"
                                 android:contentDescription="@string/crs_icon_description"/>
 

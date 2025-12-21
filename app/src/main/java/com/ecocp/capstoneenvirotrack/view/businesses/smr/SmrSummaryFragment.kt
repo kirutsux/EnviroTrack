@@ -7,11 +7,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.SmrFileListAdapter
@@ -250,28 +252,26 @@ class SmrSummaryFragment : Fragment() {
             "status" to "Pending"
         )
 
-        // Step 1: Save to Firestore
         firestore.collection("smr_submissions")
             .add(smrData)
             .addOnSuccessListener { documentReference ->
                 val smrDocId = documentReference.id
                 currentSmrDocumentId = smrDocId
 
-                Snackbar.make(binding.root, "SMR successfully submitted!", Snackbar.LENGTH_SHORT).show()
-                binding.btnSubmitSmr.visibility = View.GONE
-                binding.tvStatus.visibility = View.VISIBLE
-                binding.tvStatus.text = "Status: Pending"
+                // ✅ Navigate immediately to SmrDashboardFragment
+                findNavController().navigate(
+                    R.id.smrDashboardFragment,
+                    null,
+                    navOptions {
+                        popUpTo(R.id.smrDashboardFragment) { inclusive = true }
+                    }
+                )
 
-                // Optional: real-time status listener
-                setupStatusListener(smrDocId)
-
-                // --------------------------------------------------------
-                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
-                // --------------------------------------------------------
+                // 🔔 Send notifications safely without UI reference
                 val request = PcoSendNotificationRequest(
-                    receiverId = userUid,      // PCO UID
-                    module = "SMR", // Module name for SMR
-                    documentId = smrDocId      // Firestore document ID
+                    receiverId = userUid,
+                    module = "SMR",
+                    documentId = smrDocId
                 )
 
                 RetrofitClient.instance.sendPcoSubmissionNotification(request)
@@ -281,13 +281,11 @@ class SmrSummaryFragment : Fragment() {
                                 Log.d("NOTIF", "SMR submission notifications sent.")
                             } else {
                                 Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
-                                Snackbar.make(binding.root, "Notification error: ${response.code()}", Snackbar.LENGTH_SHORT).show()
                             }
                         }
 
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             Log.e("NOTIF", "Error sending notifications: ${t.message}")
-                            Snackbar.make(binding.root, "Failed to send notifications", Snackbar.LENGTH_SHORT).show()
                         }
                     })
             }

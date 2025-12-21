@@ -125,6 +125,7 @@ dependencies {
     implementation(libs.androidx.animation.core)
     implementation ("com.google.firebase:firebase-messaging-ktx")
     implementation(libs.volley)
+    implementation(libs.androidx.navigation.common.ktx)
 
 
     kapt("com.github.bumptech.glide:compiler:4.16.0")

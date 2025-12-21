@@ -43,6 +43,16 @@ class LoginFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
+        // ✅ Auto-login if user is already signed in and has saved session
+        val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("isLoggedIn", false)
+        val userType = prefs.getString("userType", "")
+
+        if (auth.currentUser != null && isLoggedIn && !userType.isNullOrEmpty()) {
+            redirectToDashboard(userType)
+            return view
+        }
+
         val btnGoogle: Button = view.findViewById(R.id.btnGoogle)
         val btnLogin: Button = view.findViewById(R.id.btnLogin)
         val etEmail: EditText = view.findViewById(R.id.etEmail)
@@ -101,7 +111,7 @@ class LoginFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun forTesting(etEmail: EditText, etPassword: EditText){
-        etEmail.setText("loyswagas@gmail.com")
+        etEmail.setText("elizabethmalang6@gmail.com")
         etPassword.setText("123123")
     }
 
@@ -425,4 +435,18 @@ class LoginFragment : Fragment() {
         }
         editText.setSelection(editText.text.length)
     }
+
+    private fun redirectToDashboard(userType: String) {
+        when (userType.lowercase()) {
+            "emb" -> findNavController().navigate(R.id.action_loginFragment_to_embDashboard)
+            "pco" -> findNavController().navigate(R.id.action_loginFragment_to_pcoDashboard)
+            "service_provider" -> {
+                val intent = Intent(requireContext(), SPMainActivity::class.java)
+                startActivity(intent)
+                requireActivity().finish()
+            }
+            else -> Log.w("LoginFragment", "Unknown user type: $userType")
+        }
+    }
+
 }

@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -60,6 +62,96 @@ class CncFormFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnBack.setOnClickListener { findNavController().navigateUp() }
+
+        // 🌐 Nature of Business dropdown
+        val natureOfBusinessOptions = listOf(
+            "Retail / Store",
+            "Restaurant / Food Services",
+            "Office / Professional Services",
+            "Light Industrial Facility",
+            "Auto Repair / Workshop",
+            "Water Station",
+            "Laundry / Cleaning Services",
+            "Hospitality / Hotel / Resort",
+            "Agriculture / Farm",
+            "Market / Talipapa",
+            "Others"
+        )
+
+        val natureAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, natureOfBusinessOptions)
+        (binding.inputNatureOfBusiness as? AutoCompleteTextView)?.apply {
+            setAdapter(natureAdapter)
+            setOnClickListener { showDropDown() }
+            setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showDropDown() }
+        }
+
+// 🌐 Project Type dropdown
+        val projectTypeOptions = listOf("Manufacturing", "Retail", "Service")
+        val projectTypeAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, projectTypeOptions)
+        (binding.inputProjectType as? AutoCompleteTextView)?.apply {
+            setAdapter(projectTypeAdapter)
+            setOnClickListener { showDropDown() }
+            setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showDropDown() }
+        }
+
+// 🌐 Project Scale dropdown
+        val projectScaleOptions = listOf("Small", "Medium", "Large")
+        val projectScaleAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, projectScaleOptions)
+        (binding.inputProjectScale as? AutoCompleteTextView)?.apply {
+            setAdapter(projectScaleAdapter)
+            setOnClickListener { showDropDown() }
+            setOnFocusChangeListener { _, hasFocus -> showDropDown() }
+        }
+
+        val inputEnvFeatures = listOf("Forest", "Agricultural Land", "Protected Areas")
+        val inputEnvFeaturesAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, inputEnvFeatures)
+        (binding.inputEnvFeatures as? AutoCompleteTextView)?.apply {
+            setAdapter(inputEnvFeaturesAdapter)
+            setOnClickListener { showDropDown() }
+            setOnFocusChangeListener { _, hasFocus -> showDropDown() }
+        }
+
+        val inputWasteGenerated = listOf("Solid", "Liquid", "Hazardous")
+        val inputWasteGeneratedAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, inputWasteGenerated)
+        (binding.inputWasteGenerated as? AutoCompleteTextView)?.apply {
+            setAdapter(inputWasteGeneratedAdapter)
+            setOnClickListener { showDropDown() }
+            setOnFocusChangeListener { _, hasFocus -> showDropDown() }
+        }
+
+        // 🌐 PSIC Code / Industry Classification dropdown
+        val psicOptions = listOf(
+            "A – Agriculture, Forestry and Fishing",
+            "B – Mining and Quarrying",
+            "C – Manufacturing",
+            "D – Electricity, Gas, Steam and Air Conditioning Supply",
+            "E – Water Supply; Sewerage, Waste Management",
+            "F – Construction",
+            "G – Wholesale and Retail Trade",
+            "H – Transportation and Storage",
+            "I – Accommodation and Food Service Activities",
+            "J – Information and Communication",
+            "K – Financial and Insurance Activities",
+            "L – Real Estate Activities",
+            "M – Professional, Scientific and Technical Activities",
+            "N – Administrative and Support Service Activities",
+            "O – Public Administration and Defense",
+            "P – Education",
+            "Q – Human Health and Social Work Activities",
+            "R – Arts, Entertainment and Recreation",
+            "S – Other Service Activities"
+        )
+
+        val psicAdapter =
+            ArrayAdapter(requireContext(), R.layout.dropdown_item, psicOptions)
+
+        (binding.inputPsicCode as? AutoCompleteTextView)?.apply {
+            setAdapter(psicAdapter)
+            setOnClickListener { showDropDown() }
+            setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) showDropDown()
+            }
+        }
 
         // Initial button state
         updateSubmitButtonState()

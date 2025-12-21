@@ -131,8 +131,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:elevation="2dp"
-                android:cornerRadius="12dp" />
+                android:elevation="2dp" />
         </LinearLayout>
 
     </LinearLayout>
