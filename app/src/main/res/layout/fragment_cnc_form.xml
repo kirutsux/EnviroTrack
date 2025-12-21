@@ -99,16 +99,23 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutNatureOfBusiness"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    android:hint="Nature of Business"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
                         android:id="@+id/inputNatureOfBusiness"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Nature of Business"
-                        android:inputType="text" />
+                        android:inputType="none"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:paddingVertical="16dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
+
+
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -197,13 +204,17 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    android:hint="PSIC Code / Industry Classification"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
                         android:id="@+id/inputPsicCode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="PSIC Code / Industry Classification"
-                        android:inputType="text" />
+                        android:inputType="none"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:paddingVertical="16dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Section B: Project Description -->
@@ -217,28 +228,40 @@
                     android:layout_marginTop="20dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutProjectType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    android:hint="Project Type"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
                         android:id="@+id/inputProjectType"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Project Type (e.g., Manufacturing, Retail, Service)"
-                        android:inputType="text" />
+                        android:inputType="none"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:paddingVertical="16dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
+
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutProjectScale"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    android:hint="Project Size / Scale"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
                         android:id="@+id/inputProjectScale"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Project Size/Scale (Small, Medium, Large)"
-                        android:inputType="text" />
+                        android:inputType="none"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:paddingVertical="16dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
+
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -303,13 +326,17 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    android:hint="Waste Generated"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
                         android:id="@+id/inputWasteGenerated"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Waste Generated (solid, liquid, hazardous)"
-                        android:inputType="textMultiLine" />
+                        android:inputType="none"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:paddingVertical="16dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Section C: Location and Environmental Setting -->
@@ -361,13 +388,17 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    android:hint="Environmental Features Nearby"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                    <AutoCompleteTextView
                         android:id="@+id/inputEnvFeatures"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Environmental Features Nearby (forest, agricultural land, protected areas)"
-                        android:inputType="textMultiLine" />
+                        android:inputType="none"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:paddingVertical="16dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -428,7 +459,7 @@
                     app:backgroundTint="@color/primary"
                     android:textColor="@color/bg_white" />
 
-                <com.google.android.material.button.MaterialButton
+                <Button
                     android:id="@+id/btnSubmitCnc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="@android:color/white"
     android:padding="16dp">
 
     <LinearLayout
@@ -26,15 +26,15 @@
                 android:layout_marginEnd="8dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_arrow_back"
-                android:contentDescription="Back"
-                app:tint="#2E7D32" />
+                app:tint="#34656D"
+                android:contentDescription="Back" />
 
             <TextView
                 android:id="@+id/titleHeader"
                 android:text="Payment of Fees"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="#445B6C"
+                android:textColor="#34656D"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -42,16 +42,17 @@
         <!-- Info Section -->
         <LinearLayout
             android:orientation="vertical"
-            android:background="@drawable/bordered_box"
-            android:padding="12dp"
+            android:background="@drawable/bg_enviro_card"
+            android:padding="16dp"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:elevation="2dp">
 
             <TextView
                 android:text="Please review the fee details and proceed with payment."
                 android:textSize="14sp"
-                android:textColor="#666666"
+                android:textColor="#607D8B"
                 android:layout_marginBottom="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -66,7 +67,7 @@
             <TextView
                 android:text="Processing Fee"
                 android:textStyle="bold"
-                android:textColor="#555555"
+                android:textColor="#263238"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -74,13 +75,14 @@
                 android:text="₱1,000.00"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
+                android:textColor="#34656D"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <TextView
                 android:text="Environmental Fee"
                 android:textStyle="bold"
-                android:textColor="#555555"
+                android:textColor="#263238"
                 android:textSize="14sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -88,13 +90,14 @@
                 android:text="₱500.00"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
+                android:textColor="#34656D"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <TextView
                 android:text="Total"
                 android:textStyle="bold"
-                android:textColor="#445B6C"
+                android:textColor="#34656D"
                 android:textSize="15sp"
                 android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
@@ -103,7 +106,7 @@
                 android:text="₱1,500.00"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:textColor="#000000"
+                android:textColor="#263238"
                 android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -112,21 +115,23 @@
         <!-- Payment Button Section -->
         <LinearLayout
             android:orientation="vertical"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/bg_enviro_card"
             android:padding="12dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:elevation="2dp">
 
             <Button
                 android:id="@+id/btnPayWithStripe"
                 android:text="Pay with Card (Stripe)"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
+                android:backgroundTint="#34656D"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:radius="12dp" />
+                android:elevation="2dp" />
         </LinearLayout>
 
     </LinearLayout>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="@android:color/white"
     android:padding="20dp"
     tools:context=".view.businesses.cnc.CncPaymentFragment">
 
@@ -28,7 +28,7 @@
                 android:layout_height="40dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_arrow_back"
-                app:tint="#445B6C" />
+                app:tint="#34656D" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
                 android:text="CNC - Payment"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="#445B6C"
+                android:textColor="#34656D"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
@@ -45,16 +45,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bordered_box"
+            android:background="@drawable/bg_enviro_card"
             android:padding="16dp"
-            android:layout_marginBottom="30dp">
+            android:layout_marginBottom="30dp"
+            android:elevation="2dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Application Fee:"
                 android:textStyle="bold"
-                android:textColor="#000000" />
+                android:textColor="#263238" />
 
             <TextView
                 android:id="@+id/txtFeeAmount"
@@ -62,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:text="₱1,200.00"
                 android:textSize="20sp"
-                android:textColor="#445B6C"
+                android:textColor="#34656D"
                 android:layout_marginTop="5dp" />
 
             <TextView
@@ -70,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pay securely using Stripe."
-                android:textColor="#666666"
+                android:textColor="#607D8B"
                 android:layout_marginTop="10dp" />
         </LinearLayout>
 
@@ -81,8 +82,9 @@
             android:layout_height="wrap_content"
             android:text="Pay with Card (Stripe)"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#445B6C"
+            android:backgroundTint="#34656D"
             android:textSize="16sp"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:elevation="2dp" />
     </LinearLayout>
 </ScrollView>

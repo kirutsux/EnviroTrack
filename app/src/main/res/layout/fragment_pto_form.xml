@@ -359,7 +359,7 @@
                     android:textColor="@color/textSecondary"
                     android:layout_marginBottom="12dp" />
 
-                <com.google.android.material.button.MaterialButton
+                <Button
                     android:id="@+id/btnUploadFile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -378,7 +378,7 @@
                     android:layout_marginBottom="24dp" />
 
                 <!-- Submit Button -->
-                <com.google.android.material.button.MaterialButton
+                <Button
                     android:id="@+id/btnSubmitPto"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -1,82 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/surface"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <!-- Header -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:text="Certificate of Non-Coverage (CNC)"
+        android:textStyle="bold"
+        android:textSize="21sp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_enviro_header_teal"
+        android:padding="16dp"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        android:elevation="3dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content" />
 
-        <!-- Header -->
-        <TextView
-            android:id="@+id/tvTitle"
-            android:text="Certificate of Non-Coverage (CNC)"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:textColor="@color/textPrimary"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <!-- Submitted Applications -->
+    <TextView
+        android:text="Your Submitted Applications"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#34656D"
+        android:background="@drawable/bg_enviro_section_light"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:elevation="1dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-        <!-- Main Card -->
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Card.Elevated"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    <!-- Empty State -->
+    <TextView
+        android:id="@+id/txtNoApplications"
+        android:text="You have no submitted applications yet."
+        android:textColor="#607D8B"
+        android:textSize="14sp"
+        android:background="@drawable/bg_enviro_card"
+        android:padding="14dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="12dp"
+        android:elevation="1dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerCncList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp"
+        android:overScrollMode="never" />
 
-                <!-- Submitted Applications Section -->
-                <TextView
-                    android:text="Your Submitted Applications"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="@color/textPrimary"
-                    android:layout_marginBottom="12dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+    <!-- Floating Add Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnAddCnc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="4dp"
+        android:contentDescription="Add CNC"
+        android:src="@drawable/ic_add"
+        android:backgroundTint="#34656D"
+        android:elevation="6dp" />
 
-                <!-- No Applications Message -->
-                <TextView
-                    android:id="@+id/txtNoApplications"
-                    android:text="You have no submitted applications yet."
-                    android:textColor="@color/textSecondary"
-                    android:textSize="14sp"
-                    android:padding="12dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginBottom="12dp" />
-
-                <!-- RecyclerView -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerCncList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:overScrollMode="never" />
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Floating Add Button -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnAddCnc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="0dp"
-            android:contentDescription="Add CNC"
-            android:src="@drawable/ic_add"
-            app:backgroundTint="@color/primary" />
-
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</LinearLayout>
