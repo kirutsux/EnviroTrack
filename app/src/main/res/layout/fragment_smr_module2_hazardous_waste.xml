@@ -109,39 +109,35 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginTop="20dp" />
 
-                <!-- HW No and HW Class row -->
-                <LinearLayout
+                <!-- HW No (DROPDOWN) -->
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:weightSum="2"
-                    android:layout_marginTop="8dp">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etHwNo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="HW No."
-                            android:inputType="text" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
+                        android:id="@+id/etHwNo"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etHwClass"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="HW Class"
-                            android:inputType="text" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
+                        android:hint=" HW No."
+                        android:inputType="text"
+                        android:minHeight="48dp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- HW Class (DROPDOWN) -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
+                        android:id="@+id/etHwClass"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint=" HW Class"
+                        android:inputType="text"
+                        android:minHeight="48dp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- HW Generated / Stored -->
                 <com.google.android.material.textfield.TextInputLayout
@@ -166,16 +162,19 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginTop="20dp" />
 
+                <!-- Storage Method (DROPDOWN) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etStorageMethod"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Storage Method (On-site / Off-site)"
-                        android:inputType="text" />
+                        android:hint=" Storage Method"
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -202,16 +201,19 @@
                         android:inputType="textCapWords" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Disposal Method (DROPDOWN) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etDisposalMethod"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Disposal Method"
-                        android:inputType="text" />
+                        android:hint=" Disposal Method"
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Add Waste Button -->

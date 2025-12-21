@@ -112,28 +112,34 @@
                         android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Wash Equipment (DROPDOWN: Yes/No/N/A) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/inputWashEquipment"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Wash Equipment"
-                        android:inputType="text" />
+                        android:hint=" Wash Equipment"
+                        android:inputType="none"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Wash Floor (DROPDOWN: Yes/No/N/A) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/inputWashFloor"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Wash Floor"
-                        android:inputType="text" />
+                        android:hint=" Wash Floor"
+                        android:inputType="none"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Section B: Cost of Treatment -->
@@ -239,16 +245,19 @@
                         android:inputType="textCapWords" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Water Body (DROPDOWN) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/inputWaterBody"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Receiving Water Body"
-                        android:inputType="textCapWords" />
+                        android:hint=" Receiving Water Body"
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Section D: Detailed Report of Wastewater Characteristics -->
@@ -261,16 +270,20 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginTop="20dp" />
 
+                <!-- Date (DATEPICKER) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="custom">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputDate1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Date (e.g. 1/15/16)"
-                        android:inputType="text" />
+                        android:hint="Date of Sampling"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -309,16 +322,19 @@
                         android:inputType="numberDecimal" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Color (DROPDOWN) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/inputColor1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Color"
-                        android:inputType="text" />
+                        android:hint=" Color"
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout

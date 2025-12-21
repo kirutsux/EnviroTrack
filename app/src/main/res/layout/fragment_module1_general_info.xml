@@ -136,19 +136,21 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <!-- Type of Business (simple) -->
+                <!-- Type of Business / Industry (DROPDOWN) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilTypeOfBusiness"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/etTypeOfBusiness"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Type of Business / Industry"
-                        android:inputType="text" />
+                        android:hint=" Type of Business / Industry"
+                        android:inputType="none"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Responsible Officers title -->
@@ -276,7 +278,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <!-- PCO Accreditation # and Legal Classification -->
+                <!-- PCO Accreditation Number -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilPcoAccNo"
                     android:layout_width="match_parent"
@@ -291,18 +293,21 @@
                         android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Legal Classification (DROPDOWN) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilLegalClass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/etLegalClassification"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Legal Classification (e.g., private domestic corp.)"
-                        android:inputType="text" />
+                        android:hint=" Legal Classification"
+                        android:inputType="none"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Save Button -->

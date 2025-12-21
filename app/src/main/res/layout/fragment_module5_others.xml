@@ -63,59 +63,68 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginTop="12dp" />
 
-                <!-- Date -->
+                <!-- Date (DATEPICKER) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="custom">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etAccidentDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Date"
-                        android:inputType="text" />
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Area / Location -->
+                <!-- Area / Location (DROPDOWN with custom input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etAccidentArea"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Area / Location"
-                        android:inputType="textCapWords" />
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Findings and Observation -->
+                <!-- Findings and Observation (DROPDOWN with custom input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etFindings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Findings and Observation"
-                        android:inputType="textMultiLine" />
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Actions Taken -->
+                <!-- Actions Taken (DROPDOWN with custom input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etActions"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Actions Taken"
-                        android:inputType="textMultiLine" />
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Remarks -->
+                <!-- Remarks (Text Input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -138,30 +147,35 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginTop="20dp" />
 
-                <!-- Date Conducted -->
+                <!-- Date Conducted (DATEPICKER) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="custom">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etTrainingDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Date Conducted"
-                        android:inputType="text" />
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Course/Training Description -->
+                <!-- Course/Training Description (DROPDOWN with custom input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etTrainingDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Course / Training Description"
-                        android:inputType="textCapSentences" />
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- # of Personnel Trained -->

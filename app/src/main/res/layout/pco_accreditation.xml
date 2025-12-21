@@ -66,7 +66,7 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginBottom="12dp" />
 
-                <!-- Full Name -->
+                <!-- Full Name (Text Input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -82,24 +82,26 @@
                         android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Position / Designation -->
+                <!-- Position / Designation (Dropdown) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Position / Designation"
+                    android:hint=" Position / Designation"
                     app:boxStrokeColor="@color/input_field_border"
                     app:hintTextColor="@color/text_secondary"
-                    app:boxBackgroundColor="@color/input_field_background">
+                    app:boxBackgroundColor="@color/input_field_background"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/positionDesignation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp" />
+                        android:minHeight="48dp"
+                        android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Accreditation Number -->
+                <!-- Accreditation Number (Text Input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -116,7 +118,7 @@
                         android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Company Affiliation -->
+                <!-- Company Affiliation (Text Input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -133,38 +135,42 @@
                         android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Educational Background -->
+                <!-- Educational Background (Dropdown) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Educational Background"
+                    android:hint=" Educational Background"
                     app:boxStrokeColor="@color/input_field_border"
                     app:hintTextColor="@color/text_secondary"
-                    app:boxBackgroundColor="@color/input_field_background">
+                    app:boxBackgroundColor="@color/input_field_background"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/educationalBackground"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp" />
+                        android:minHeight="48dp"
+                        android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Experience -->
+                <!-- Experience in Env. Management (Dropdown) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Experience in Environmental Management"
+                    android:hint=" Experience in Environmental Management"
                     app:boxStrokeColor="@color/input_field_border"
                     app:hintTextColor="@color/text_secondary"
-                    app:boxBackgroundColor="@color/input_field_background">
+                    app:boxBackgroundColor="@color/input_field_background"
+                    app:endIconMode="dropdown_menu">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/experienceInEnvManagement"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp" />
+                        android:minHeight="48dp"
+                        android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Section: Upload Documents -->

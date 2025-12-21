@@ -121,16 +121,19 @@
                         android:inputType="textCapWords" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Fuel Used (DROPDOWN with custom input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etFuelUsed"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Fuel Used (e.g. Diesel, LPG)"
-                        android:inputType="textCapWords" />
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
@@ -176,16 +179,19 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginTop="20dp" />
 
+                <!-- PCF Name (DROPDOWN with custom input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etPcfName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Facility Name / Description"
-                        android:inputType="textCapWords" />
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -256,16 +262,19 @@
                     android:textColor="@color/textPrimary"
                     android:layout_marginTop="20dp" />
 
+                <!-- Emission Description (DROPDOWN with custom input) -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-                    <com.google.android.material.textfield.TextInputEditText
+                    android:layout_marginTop="8dp"
+                    app:endIconMode="dropdown_menu">
+                    <AutoCompleteTextView
                         android:id="@+id/etEmissionDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Description / Location of PCF"
-                        android:inputType="textCapWords" />
+                        android:inputType="text"
+                        android:minHeight="48dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout

@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -40,7 +42,81 @@ class Module2HazardousWasteFragment : Fragment() {
             hazardousWasteList.addAll(it)
         }
 
+        // Setup dropdowns
+        setupDropdowns()
+
         setupListeners()
+    }
+
+    /** --- Setup AutoCompleteTextView Dropdowns with Custom Input Support --- */
+    private fun setupDropdowns() {
+        // HW No. Dropdown (with custom input)
+        val hwNoArray = resources.getStringArray(R.array.hw_no_list)
+        val hwNoAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            hwNoArray
+        )
+        val etHwNo = binding.etHwNo as AutoCompleteTextView
+        etHwNo.setAdapter(hwNoAdapter)
+        etHwNo.threshold = 1
+        etHwNo.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etHwNo.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etHwNo.showDropDown()
+            }
+        }
+
+        // HW Class Dropdown (with custom input)
+        val hwClassArray = resources.getStringArray(R.array.hw_class_list)
+        val hwClassAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            hwClassArray
+        )
+        val etHwClass = binding.etHwClass as AutoCompleteTextView
+        etHwClass.setAdapter(hwClassAdapter)
+        etHwClass.threshold = 1
+        etHwClass.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etHwClass.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etHwClass.showDropDown()
+            }
+        }
+
+        // Storage Method Dropdown (with custom input)
+        val storageArray = resources.getStringArray(R.array.storage_method_list)
+        val storageAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            storageArray
+        )
+        val etStorageMethod = binding.etStorageMethod as AutoCompleteTextView
+        etStorageMethod.setAdapter(storageAdapter)
+        etStorageMethod.threshold = 1
+        etStorageMethod.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etStorageMethod.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etStorageMethod.showDropDown()
+            }
+        }
+
+        // Disposal Method Dropdown (with custom input)
+        val disposalArray = resources.getStringArray(R.array.disposal_method_list)
+        val disposalAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            disposalArray
+        )
+        val etDisposalMethod = binding.etDisposalMethod as AutoCompleteTextView
+        etDisposalMethod.setAdapter(disposalAdapter)
+        etDisposalMethod.threshold = 1
+        etDisposalMethod.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etDisposalMethod.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etDisposalMethod.showDropDown()
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -93,7 +169,7 @@ class Module2HazardousWasteFragment : Fragment() {
         val disposalMethod = binding.etDisposalMethod.text?.toString()?.trim().orEmpty()
 
         if (commonName.isEmpty() || hwNo.isEmpty() || hwGenerated.isEmpty()) {
-            Toast.makeText(requireContext(), "Please fill out required fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Please fill out required fields (Common Name, HW No., Quantity)", Toast.LENGTH_SHORT).show()
             return null
         }
 

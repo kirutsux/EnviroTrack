@@ -1,9 +1,12 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.smr
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -13,6 +16,8 @@ import com.ecocp.capstoneenvirotrack.databinding.FragmentModule3WaterPollutionBi
 import com.ecocp.capstoneenvirotrack.model.WaterPollution
 import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
 import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.*
 
 class Module3WaterPollutionFragment : Fragment() {
 
@@ -38,7 +43,96 @@ class Module3WaterPollutionFragment : Fragment() {
         // Load existing records from ViewModel if any
         smrViewModel.smr.value?.waterPollutionRecords?.let { waterPollutionList.addAll(it) }
 
+        // Setup dropdowns
+        setupDropdowns()
+
+        // Setup DatePicker
+        setupDatePicker()
+
         setupListeners()
+    }
+
+    /** --- Setup AutoCompleteTextView Dropdowns --- */
+    private fun setupDropdowns() {
+        // Wash Equipment (Yes/No/N/A)
+        val yesNoNaArray = resources.getStringArray(R.array.yes_no_na_options)
+        val yesNoNaAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            yesNoNaArray
+        )
+        val etWashEquipment = binding.inputWashEquipment as AutoCompleteTextView
+        etWashEquipment.setAdapter(yesNoNaAdapter)
+        etWashEquipment.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etWashEquipment.showDropDown()
+            }
+        }
+
+        // Wash Floor (Yes/No/N/A)
+        val etWashFloor = binding.inputWashFloor as AutoCompleteTextView
+        etWashFloor.setAdapter(yesNoNaAdapter)
+        etWashFloor.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etWashFloor.showDropDown()
+            }
+        }
+
+        // Water Body Type (with custom input support)
+        val waterBodyArray = resources.getStringArray(R.array.water_body_types)
+        val waterBodyAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            waterBodyArray
+        )
+        val etWaterBody = binding.inputWaterBody as AutoCompleteTextView
+        etWaterBody.setAdapter(waterBodyAdapter)
+        etWaterBody.threshold = 1
+        etWaterBody.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etWaterBody.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etWaterBody.showDropDown()
+            }
+        }
+
+        // Color (with custom input support)
+        val colorArray = resources.getStringArray(R.array.effluent_color_list)
+        val colorAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            colorArray
+        )
+        val etColor = binding.inputColor1 as AutoCompleteTextView
+        etColor.setAdapter(colorAdapter)
+        etColor.threshold = 1
+        etColor.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etColor.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etColor.showDropDown()
+            }
+        }
+    }
+
+    /** --- Setup DatePicker for Date Field --- */
+    private fun setupDatePicker() {
+        val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+        binding.inputDate1.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePickerDialog = DatePickerDialog(
+                requireContext(),
+                { _, selectedYear, selectedMonth, selectedDay ->
+                    calendar.set(selectedYear, selectedMonth, selectedDay)
+                    val selectedDate = dateFormat.format(calendar.time)
+                    binding.inputDate1.setText(selectedDate)
+                },
+                year, month, day
+            )
+            datePickerDialog.show()
+        }
     }
 
     private fun setupListeners() {

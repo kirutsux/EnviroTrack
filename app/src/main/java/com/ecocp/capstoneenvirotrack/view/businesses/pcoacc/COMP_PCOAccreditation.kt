@@ -31,11 +31,11 @@ import java.util.*
 class COMP_PCOAccreditation : Fragment() {
 
     private lateinit var fullName: EditText
-    private lateinit var positionDesignation: EditText
+    private lateinit var positionDesignation: AutoCompleteTextView
     private lateinit var accreditationNumber: EditText
     private lateinit var companyAffiliation: EditText
-    private lateinit var educationalBackground: EditText
-    private lateinit var experienceInEnvManagement: EditText
+    private lateinit var educationalBackground: AutoCompleteTextView
+    private lateinit var experienceInEnvManagement: AutoCompleteTextView
     private lateinit var uploadCertificateButton: Button
     private lateinit var uploadGovernmentIDButton: Button
     private lateinit var uploadTrainingCertificateButton: Button
@@ -82,8 +82,38 @@ class COMP_PCOAccreditation : Fragment() {
             setCancelable(false)
         }
 
+        setupDropdowns()
         setupButtonListeners()
         return view
+    }
+
+    private fun setupDropdowns() {
+        // Position / Designation Dropdown
+        val positionArray = resources.getStringArray(R.array.pco_position_designation)
+        val positionAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            positionArray
+        )
+        positionDesignation.setAdapter(positionAdapter)
+
+        // Educational Background Dropdown
+        val educationArray = resources.getStringArray(R.array.pco_educational_background)
+        val educationAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            educationArray
+        )
+        educationalBackground.setAdapter(educationAdapter)
+
+        // Experience in Environmental Management Dropdown
+        val experienceArray = resources.getStringArray(R.array.pco_experience_env_management)
+        val experienceAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            experienceArray
+        )
+        experienceInEnvManagement.setAdapter(experienceAdapter)
     }
 
     private fun setupButtonListeners() {
@@ -265,7 +295,4 @@ class COMP_PCOAccreditation : Fragment() {
                 Toast.makeText(requireContext(), "Failed to save application: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
-
-
 }

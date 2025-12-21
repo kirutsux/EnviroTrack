@@ -175,4 +175,367 @@
     <string name="feedback_hint">Share your thoughts…</string>
     <string name="feedback_char_count">%1$d/500</string>
     <string name="ai_analysis_recommendations"><![CDATA[AI Analysis & Recommendations]]></string>
+
+    <string-array name="pco_position_designation">
+        <item>Managing Head / Owner</item>
+        <item>Environmental Officer</item>
+        <item>Environmental Manager</item>
+        <item>Plant Manager</item>
+        <item>Operations Manager</item>
+        <item>Facility Manager</item>
+        <item>Compliance Officer</item>
+        <item>Quality Assurance Manager</item>
+        <item>Maintenance Manager</item>
+        <item>Store Manager (Category A)</item>
+        <item>Retail Station Manager (Category A)</item>
+        <item>Building Administrator (Category A)</item>
+        <item>Supervisor</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="pco_educational_background">
+        <item>Licensed Engineer (Appropriate Discipline)</item>
+        <item>BS Environmental Science</item>
+        <item>BS Environmental Engineering</item>
+        <item>BS Chemical Engineering</item>
+        <item>BS Civil Engineering</item>
+        <item>BS Industrial Engineering</item>
+        <item>BS Sanitary Engineering</item>
+        <item>BS Biology</item>
+        <item>BS Chemistry</item>
+        <item>BS Physics</item>
+        <item>Bachelors Degree (Any 4-Year Course)</item>
+        <item>Associate Degree</item>
+        <item>High School Diploma / Vocational</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="pco_experience_env_management">
+        <item>Less than 1 year</item>
+        <item>1-2 years</item>
+        <item>2-3 years</item>
+        <item>3-5 years</item>
+        <item>5+ years</item>
+        <item>No formal environmental management experience</item>
+    </string-array>
+
+    <!-- SMR MODULE 1 LEGAL CLASSIFICATION DROPDOWN -->
+    <string-array name="legal_classification_types">
+        <item>Sole Proprietorship</item>
+        <item>Partnership</item>
+        <item>Private Domestic Corporation</item>
+        <item>Private Foreign Corporation</item>
+        <item>Public Corporation</item>
+        <item>Government-Owned and Controlled Corporation (GOCC)</item>
+        <item>Cooperative</item>
+        <item>Non-Governmental Organization (NGO)</item>
+        <item>Government Agency / Bureau</item>
+        <item>Joint Venture</item>
+        <item>Association</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 1 TYPE OF BUSINESS / INDUSTRY CATEGORIES (EMB DENR) -->
+    <string-array name="emb_industry_categories">
+        <item>Manufacturing - Chemicals and Chemical Products</item>
+        <item>Manufacturing - Petroleum and Coal Products</item>
+        <item>Manufacturing - Non-metallic Mineral Products</item>
+        <item>Manufacturing - Basic Metals and Metal Products</item>
+        <item>Manufacturing - Machinery and Equipment</item>
+        <item>Manufacturing - Electrical and Electronic Equipment</item>
+        <item>Manufacturing - Transport Equipment</item>
+        <item>Manufacturing - Furniture and Other Manufacturing</item>
+        <item>Manufacturing - Food, Beverage and Tobacco</item>
+        <item>Manufacturing - Textiles, Apparel and Leather</item>
+        <item>Manufacturing - Wood and Wood Products</item>
+        <item>Manufacturing - Paper and Paper Products</item>
+        <item>Manufacturing - Printing and Reproduction of Media</item>
+        <item>Mining and Quarrying</item>
+        <item>Energy - Fossil Fuel Generation</item>
+        <item>Energy - Renewable Energy</item>
+        <item>Water Supply and Sewerage</item>
+        <item>Waste Management and Remediation Services</item>
+        <item>Construction</item>
+        <item>Wholesale and Retail Trade</item>
+        <item>Transportation and Storage</item>
+        <item>Accommodation and Food Service Activities</item>
+        <item>Information and Communication</item>
+        <item>Financial and Insurance Activities</item>
+        <item>Real Estate Activities</item>
+        <item>Professional, Scientific and Technical Services</item>
+        <item>Administrative and Support Services</item>
+        <item>Public Administration and Defense</item>
+        <item>Education</item>
+        <item>Human Health and Social Work Activities</item>
+        <item>Arts, Entertainment and Recreation</item>
+        <item>Other Service Activities</item>
+    </string-array>
+
+    <string-array name="hw_no_list">
+        <item>HW-01: Spent Solvents</item>
+        <item>HW-02: Used Oils and Fuels</item>
+        <item>HW-03: Acidic/Alkaline Wastes</item>
+        <item>HW-04: Heavy Metal Wastes</item>
+        <item>HW-05: Halogenated Organic Compounds</item>
+        <item>HW-06: Non-halogenated Organic Compounds</item>
+        <item>HW-07: Pesticide and Herbicide Wastes</item>
+        <item>HW-08: Pharmaceutical Wastes</item>
+        <item>HW-09: Asbestos-containing Wastes</item>
+        <item>HW-10: PCB/Transformer Oil</item>
+        <item>HW-11: Radioactive Wastes</item>
+        <item>HW-12: Corrosive Wastes</item>
+        <item>HW-13: Toxic Wastes</item>
+        <item>HW-14: Reactive Wastes</item>
+        <item>HW-15: Industrial Sludges</item>
+    </string-array>
+
+    <!-- SMR MODULE 2: HAZARDOUS WASTE CLASSIFICATION (HW Class) -->
+    <string-array name="hw_class_list">
+        <item>Class 1: Acutely Hazardous</item>
+        <item>Class 2: Hazardous</item>
+        <item>Class 3: Persistent</item>
+        <item>Class 4: Bio-accumulative</item>
+        <item>Class 5: Eco-toxic</item>
+        <item>Class 6: Mixed/Multiple Properties</item>
+    </string-array>
+
+    <!-- SMR MODULE 2: STORAGE METHOD -->
+    <string-array name="storage_method_list">
+        <item>On-site: Drum Storage</item>
+        <item>On-site: Tank Storage</item>
+        <item>On-site: Enclosed Container</item>
+        <item>On-site: Impoundment Facility</item>
+        <item>On-site: Secured Landfill</item>
+        <item>Off-site: Licensed Facility</item>
+        <item>Off-site: Third-party Storage</item>
+        <item>Temporary Storage (max. 90 days)</item>
+        <item>Central Facility Storage</item>
+    </string-array>
+
+    <!-- SMR MODULE 2: DISPOSAL METHOD -->
+    <string-array name="disposal_method_list">
+        <item>Incineration</item>
+        <item>Thermal Treatment</item>
+        <item>Chemical Treatment</item>
+        <item>Solidification/Stabilization</item>
+        <item>Biological Treatment</item>
+        <item>Recycling/Recovery</item>
+        <item>Landfilling</item>
+        <item>Secured Landfill</item>
+        <item>Deep Well Injection</item>
+        <item>Land Application</item>
+        <item>Decontamination</item>
+        <item>Energy Recovery</item>
+        <item>Sent to DENR-Authorized Facility</item>
+        <item>Pending Treatment</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 3: YES/NO/N/A OPTIONS -->
+    <string-array name="yes_no_na_options">
+        <item>Yes</item>
+        <item>No</item>
+        <item>N/A</item>
+    </string-array>
+
+    <!-- SMR MODULE 3: RECEIVING WATER BODY TYPES (P.D. 984) -->
+    <string-array name="water_body_types">
+        <item>River</item>
+        <item>Creek</item>
+        <item>Stream</item>
+        <item>Lake</item>
+        <item>Lagoon</item>
+        <item>Sea / Ocean</item>
+        <item>Estuary</item>
+        <item>Bay</item>
+        <item>Fish Pond</item>
+        <item>Irrigation Channel</item>
+        <item>Drainage Canal</item>
+        <item>Groundwater / Aquifer</item>
+        <item>Wetland</item>
+        <item>Urban Waterway</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 3: EFFLUENT COLOR (WASTEWATER CHARACTERISTICS) -->
+    <string-array name="effluent_color_list">
+        <item>Colorless</item>
+        <item>Slightly Turbid</item>
+        <item>Turbid</item>
+        <item>Brown</item>
+        <item>Dark Brown</item>
+        <item>Yellow</item>
+        <item>Dark Yellow</item>
+        <item>Green</item>
+        <item>Dark Green</item>
+        <item>Blue</item>
+        <item>Red</item>
+        <item>Orange</item>
+        <item>Black</item>
+        <item>Gray</item>
+        <item>White (Milky)</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 4: FUEL TYPES (R.A. 8749) -->
+    <string-array name="fuel_types_list">
+        <item>Diesel</item>
+        <item>Petrol / Gasoline</item>
+        <item>LPG (Liquefied Petroleum Gas)</item>
+        <item>Natural Gas</item>
+        <item>Bunker Fuel Oil (HFO)</item>
+        <item>Marine Diesel Oil (MDO)</item>
+        <item>Coal</item>
+        <item>Wood / Biomass</item>
+        <item>Biogas</item>
+        <item>Electricity</item>
+        <item>Multiple Fuels</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 4: POLLUTION CONTROL FACILITIES (PCF) TYPES -->
+    <string-array name="pcf_types_list">
+        <item>Bag Filter / Baghouse</item>
+        <item>Electrostatic Precipitator (ESP)</item>
+        <item>Cyclone Separator</item>
+        <item>Wet Scrubber</item>
+        <item>Dry Scrubber</item>
+        <item>Venturi Scrubber</item>
+        <item>Settling Chamber</item>
+        <item>Fabric Filter</item>
+        <item>HEPA Filter</item>
+        <item>Activated Carbon Absorber</item>
+        <item>Catalytic Converter</item>
+        <item>Thermal Oxidizer / Incinerator</item>
+        <item>Bio-scrubber</item>
+        <item>Mist Collector</item>
+        <item>Multi-stage Filtration</item>
+        <item>Stack / Chimney (No APC)</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 4: EMISSION SOURCE DESCRIPTIONS -->
+    <string-array name="emission_source_descriptions">
+        <item>Process Exhaust - Production Line</item>
+        <item>Process Exhaust - Furnace</item>
+        <item>Process Exhaust - Dryer</item>
+        <item>Process Exhaust - Boiler</item>
+        <item>Process Exhaust - Kiln</item>
+        <item>Process Exhaust - Crusher</item>
+        <item>Process Exhaust - Grinding Mill</item>
+        <item>Process Exhaust - Welding Station</item>
+        <item>Process Exhaust - Painting Booth</item>
+        <item>Fuel Combustion - Boiler Stack</item>
+        <item>Fuel Combustion - Generator Exhaust</item>
+        <item>Fuel Combustion - Engine Exhaust</item>
+        <item>Material Handling - Conveyor Dust</item>
+        <item>Material Handling - Loading/Unloading</item>
+        <item>Material Handling - Storage Area</item>
+        <item>Emission - Cooling Tower</item>
+        <item>Emission - Waste Gas Treatment</item>
+        <item>Fugitive Emissions - Vents</item>
+        <item>Fugitive Emissions - Leaks</item>
+        <item>Fugitive Emissions - Dust from Operations</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 5: ACCIDENT AREA / LOCATION TYPES -->
+    <string-array name="accident_area_types">
+        <item>Production Area</item>
+        <item>Processing Plant</item>
+        <item>Warehouse</item>
+        <item>Storage Facility</item>
+        <item>Chemical Storage</item>
+        <item>Hazardous Waste Storage</item>
+        <item>Office Area</item>
+        <item>Administrative Building</item>
+        <item>Laboratory</item>
+        <item>Maintenance Area</item>
+        <item>Loading/Unloading Area</item>
+        <item>Transportation / Vehicle Area</item>
+        <item>Waste Treatment Facility</item>
+        <item>Pollution Control Equipment Area</item>
+        <item>Environmental Monitoring Station</item>
+        <item>Emergency Response Area</item>
+        <item>Employee Facilities</item>
+        <item>Grounds / Perimeter</item>
+        <item>Water Discharge Point</item>
+        <item>Air Emission Stack</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 5: ACCIDENT/INCIDENT FINDINGS CATEGORIES -->
+    <string-array name="incident_findings_categories">
+        <item>Chemical Spill - Minor</item>
+        <item>Chemical Spill - Major</item>
+        <item>Hazardous Waste Leak</item>
+        <item>Equipment Malfunction</item>
+        <item>Process Failure</item>
+        <item>Improper Handling of Materials</item>
+        <item>Non-compliance with Procedures</item>
+        <item>Safety Equipment Failure</item>
+        <item>Personnel Injury - Minor</item>
+        <item>Personnel Injury - Serious</item>
+        <item>Environmental Contamination</item>
+        <item>Water Pollution Incident</item>
+        <item>Air Pollution Incident</item>
+        <item>Soil Contamination</item>
+        <item>Fire / Explosion</item>
+        <item>Inadequate Ventilation</item>
+        <item>Non-functional Pollution Control Equipment</item>
+        <item>Improper Waste Disposal</item>
+        <item>Regulatory Non-compliance</item>
+        <item>False Alarm / Near Miss</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 5: CORRECTIVE ACTIONS TAKEN -->
+    <string-array name="corrective_actions_list">
+        <item>Immediate Containment and Cleanup</item>
+        <item>Equipment Repair / Replacement</item>
+        <item>System Shutdown and Inspection</item>
+        <item>Emergency Response Activation</item>
+        <item>Notification to DENR / EMB</item>
+        <item>Personnel Training / Re-training</item>
+        <item>Standard Operating Procedure (SOP) Review</item>
+        <item>Pollution Control Equipment Maintenance</item>
+        <item>Installation of Additional Safety Measures</item>
+        <item>Facility Decontamination</item>
+        <item>Medical Attention / First Aid</item>
+        <item>Environmental Impact Assessment</item>
+        <item>Remediation Work Started</item>
+        <item>Root Cause Analysis Conducted</item>
+        <item>Preventive Measures Implemented</item>
+        <item>Increased Monitoring and Surveillance</item>
+        <item>Third-party Cleanup / Remediation Services</item>
+        <item>Investigation by Regulatory Agency</item>
+        <item>Incident Documentation and Reporting</item>
+        <item>Follow-up Corrective Actions Ongoing</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- SMR MODULE 5: PERSONNEL TRAINING TYPES -->
+    <string-array name="training_types_list">
+        <item>Environmental Management System (EMS)</item>
+        <item>Occupational Health and Safety</item>
+        <item>Hazardous Materials Handling</item>
+        <item>Hazardous Waste Management</item>
+        <item>Wastewater Treatment Operation</item>
+        <item>Air Pollution Control Equipment</item>
+        <item>Emergency Response and Evacuation</item>
+        <item>First Aid and CPR</item>
+        <item>Chemical Safety</item>
+        <item>Spill Prevention and Control</item>
+        <item>Personal Protective Equipment (PPE) Usage</item>
+        <item>Pollution Prevention</item>
+        <item>Environmental Monitoring and Testing</item>
+        <item>Regulatory Compliance</item>
+        <item>SMR Documentation and Reporting</item>
+        <item>Equipment Operation and Maintenance</item>
+        <item>Waste Segregation and Management</item>
+        <item>ISO 14001 Certification Training</item>
+        <item>Green Management Practices</item>
+        <item>Sustainability and Environmental Responsibility</item>
+        <item>Other</item>
+    </string-array>
 </resources>

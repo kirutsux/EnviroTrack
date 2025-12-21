@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -35,6 +37,9 @@ class Module4AirPollutionFragment : Fragment() {
             findNavController().navigateUp()
         }
 
+        // Setup dropdowns
+        setupDropdowns()
+
         // Preload existing Air Pollution data if any
         smrViewModel.smr.value?.airPollution?.let {
             currentAirPollution = it
@@ -59,6 +64,60 @@ class Module4AirPollutionFragment : Fragment() {
         binding.btnNextModule5.setOnClickListener {
             saveAirPollutionData(partial = true)
             findNavController().navigate(R.id.action_module4AirPollutionFragment_to_module5OthersFragment)
+        }
+    }
+
+    /** --- Setup AutoCompleteTextView Dropdowns with Custom Input Support --- */
+    private fun setupDropdowns() {
+        // Fuel Used (with custom input support)
+        val fuelArray = resources.getStringArray(R.array.fuel_types_list)
+        val fuelAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            fuelArray
+        )
+        val etFuelUsed = binding.etFuelUsed as AutoCompleteTextView
+        etFuelUsed.setAdapter(fuelAdapter)
+        etFuelUsed.threshold = 1
+        etFuelUsed.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etFuelUsed.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etFuelUsed.showDropDown()
+            }
+        }
+
+        // PCF Name (with custom input support)
+        val pcfArray = resources.getStringArray(R.array.pcf_types_list)
+        val pcfAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            pcfArray
+        )
+        val etPcfName = binding.etPcfName as AutoCompleteTextView
+        etPcfName.setAdapter(pcfAdapter)
+        etPcfName.threshold = 1
+        etPcfName.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etPcfName.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etPcfName.showDropDown()
+            }
+        }
+
+        // Emission Description (with custom input support)
+        val emissionArray = resources.getStringArray(R.array.emission_source_descriptions)
+        val emissionAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            emissionArray
+        )
+        val etEmissionDescription = binding.etEmissionDescription as AutoCompleteTextView
+        etEmissionDescription.setAdapter(emissionAdapter)
+        etEmissionDescription.threshold = 1
+        etEmissionDescription.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etEmissionDescription.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etEmissionDescription.showDropDown()
+            }
         }
     }
 
