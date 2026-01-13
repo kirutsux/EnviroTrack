@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -138,13 +139,18 @@ class PtoReviewFragment : Fragment() {
     }
 
     private fun submitApplication() {
+
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "User not logged in", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
         val docId = currentDocId ?: run {
-            Toast.makeText(requireContext(), "No application found to submit.", Toast.LENGTH_SHORT).show()
+            context?.let {
+                Toast.makeText(it, "No application found to submit.", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
@@ -157,37 +163,50 @@ class PtoReviewFragment : Fragment() {
             .document(docId)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
+
+                context?.let {
+                    Toast.makeText(it, "Application submitted successfully!", Toast.LENGTH_SHORT).show()
+                }
 
                 // --------------------------------------------------------
                 // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
                 // --------------------------------------------------------
                 val request = PcoSendNotificationRequest(
-                    receiverId = uid,       // PCO UID
-                    module = "PTO",         // Module name
+                    receiverId = uid,
+                    module = "PTO",
                     documentId = docId
                 )
 
                 RetrofitClient.instance.sendPcoSubmissionNotification(request)
                     .enqueue(object : retrofit2.Callback<Void> {
-                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+
+                        override fun onResponse(
+                            call: Call<Void>,
+                            response: retrofit2.Response<Void>
+                        ) {
                             if (response.isSuccessful) {
                                 Log.d("NOTIF", "PTO submission notifications sent.")
                             } else {
                                 Log.e("NOTIF", "Notification error: ${response.code()}")
-                                Toast.makeText(requireContext(),
-                                    "Notification failed: ${response.code()}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                context?.let {
+                                    Toast.makeText(
+                                        it,
+                                        "Notification failed: ${response.code()}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
                         }
 
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             Log.e("NOTIF", "Notification error: ${t.message}")
-                            Toast.makeText(requireContext(),
-                                "Failed to send notifications",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            context?.let {
+                                Toast.makeText(
+                                    it,
+                                    "Failed to send notifications",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     })
 
@@ -197,15 +216,18 @@ class PtoReviewFragment : Fragment() {
                 findNavController().navigate(
                     R.id.opmsDashboardFragment,
                     null,
-                    androidx.navigation.NavOptions.Builder()
+                    NavOptions.Builder()
                         .setPopUpTo(R.id.opmsDashboardFragment, true)
                         .build()
                 )
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
+                context?.let {
+                    Toast.makeText(it, "Failed to submit application.", Toast.LENGTH_SHORT).show()
+                }
             }
     }
+
 
 
     override fun onDestroyView() {
