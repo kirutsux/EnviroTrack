@@ -130,6 +130,7 @@
                         android:id="@+id/cnc_card"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:layout_marginLeft="11dp"
                         app:layout_constraintWidth_percent="0.45"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintStart_toStartOf="parent"
@@ -206,6 +207,7 @@
                         android:id="@+id/opms_card"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:layout_marginLeft="11dp"
                         app:layout_constraintWidth_percent="0.45"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintStart_toStartOf="parent"
@@ -284,6 +286,7 @@
                         android:id="@+id/pco_card"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
+                        android:layout_marginLeft="11dp"
                         app:layout_constraintWidth_percent="0.45"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintStart_toStartOf="parent"
@@ -358,11 +361,9 @@
                     </androidx.cardview.widget.CardView>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
                 <View
                     android:layout_width="0dp"
-                    android:layout_height="100dp"
+                    android:layout_height="30dp"
                     app:layout_constraintTop_toBottomOf="@id/cards_layout"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />

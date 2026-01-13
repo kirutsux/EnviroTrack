@@ -54,11 +54,6 @@ class SmrDashboardFragment : Fragment(R.layout.fragment_smr_dashboard) {
             findNavController().navigate(R.id.action_smrDashboardFragment_to_module5OthersFragment)
         }
 
-        // --- Floating button to start new SMR ---
-        binding.btnAddSmr.setOnClickListener {
-            findNavController().navigate(R.id.action_smrDashboardFragment_to_module1GeneralInfoFragment)
-        }
-
         // --- Back button ---
         binding.backButton.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()

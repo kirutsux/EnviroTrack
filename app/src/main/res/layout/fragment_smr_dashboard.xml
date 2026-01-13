@@ -76,8 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
-                android:overScrollMode="never"
-                android:layout_marginBottom="12dp" />
+                android:overScrollMode="never" />
         </LinearLayout>
 
     <!-- Module Progress Section -->
@@ -85,7 +84,7 @@
         android:text="Current SMR Module Progress"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
@@ -314,14 +313,5 @@
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
-    <!-- Floating Add Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnAddSmr"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_margin="12dp"
-        android:contentDescription="Add SMR"
-        android:src="@drawable/ic_add" />
 </LinearLayout>
 </ScrollView>
