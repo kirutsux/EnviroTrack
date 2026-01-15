@@ -201,6 +201,7 @@ class CncFormFragment : Fragment() {
                     val doc = querySnapshot.documents.first()
                     val status = doc.getString("status") ?: "Pending"
                     val paymentStatus = doc.getString("paymentStatus") ?: "Unpaid"
+                    val submittedTimestamp = doc.getTimestamp("submittedTimestamp") // null if not submitted
                     val formData = doc.data ?: emptyMap<String, Any>()
 
                     when {
@@ -222,7 +223,7 @@ class CncFormFragment : Fragment() {
                         }
 
                         // Pending & paid → continue to review (ignore submittedTimestamp)
-                        status.equals("Pending", true) && paymentStatus.equals("Paid", true) -> {
+                        status.equals("Pending", true) && paymentStatus.equals("Paid", true) && submittedTimestamp == null -> {
                             AlertDialog.Builder(requireContext())
                                 .setTitle("Paid Application Found")
                                 .setMessage("You have already paid for this CNC application. Do you want to continue to review your application?")

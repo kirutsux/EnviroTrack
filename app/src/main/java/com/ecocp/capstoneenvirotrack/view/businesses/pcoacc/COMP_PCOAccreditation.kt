@@ -12,6 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -281,14 +283,15 @@ class COMP_PCOAccreditation : Fragment() {
                         }
                     })
 
-                // --------------------------------------------------------
-                // ✅ Navigate back to PCO dashboard
-                // --------------------------------------------------------
-                val compPCOFragment = COMP_PCO()
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.nav_host_fragment, compPCOFragment)
-                    .addToBackStack(null)
-                    .commit()
+                // ✅ SAFE to navigate AFTER submission
+                findNavController().navigate(
+                    R.id.COMP_PCO,   // target fragment
+                    null,                        // optional bundle
+                    NavOptions.Builder()
+                        .setPopUpTo(R.id.COMP_PCO, true)  // clear back stack
+                        .build()
+                )
+
             }
             .addOnFailureListener {
                 progressDialog.dismiss()
