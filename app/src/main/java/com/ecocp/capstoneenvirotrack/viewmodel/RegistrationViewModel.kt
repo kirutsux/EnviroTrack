@@ -73,7 +73,8 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
         enteredCode: String? = null
     ) {
         viewModelScope.launch {
-            Log.d("RegistrationViewModel", "registerWithEmail called. enteredCode=$enteredCode, tempUserDetails=$tempUserDetails, verificationCode=$verificationCode")
+            Log.d("RegistrationViewModel", "registerWithEmail called. enteredCode=$enteredCode")
+
             // Set loading state and clear previous messages
             _uiState.value = _uiState.value?.copy(
                 isLoading = true,
@@ -102,7 +103,17 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
 
             // Step 1: Handle initial call (no enteredCode) - send OTP
             if (enteredCode == null) {
-                storeUserDetails(email, firstName, lastName, password, phoneNumber)
+                // Store user details only if we're sending OTP (not verifying)
+                if (email.isNotBlank() && firstName.isNotBlank()) {
+                    storeUserDetails(email, firstName, lastName, password, phoneNumber)
+                } else {
+                    _uiState.value = _uiState.value?.copy(
+                        isLoading = false,
+                        errorMessage = "Email and first name are required"
+                    )
+                    return@launch
+                }
+
                 val sentCode = withContext(Dispatchers.IO) {
                     repository.sendVerificationCode(email)
                 }
@@ -125,7 +136,7 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
             }
 
             // Step 2: Verify OTP and complete PCO registration
-            if (enteredCode.isNullOrBlank()) {
+            if (enteredCode.isBlank()) {
                 _uiState.value = _uiState.value?.copy(
                     isLoading = false,
                     errorMessage = "Please enter the 6-digit verification code"
@@ -142,6 +153,8 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
                 return@launch
             }
 
+            Log.d("RegistrationViewModel", "Comparing codes - Entered: '$enteredCode', Stored: '$verificationCode'")
+
             if (enteredCode != verificationCode) {
                 _uiState.value = _uiState.value?.copy(
                     isLoading = false,
@@ -151,7 +164,7 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
                 return@launch
             }
 
-            // Code is valid: complete PCO registration
+            // Code is valid: complete PCO registration using stored tempUserDetails
             val userDetails = tempUserDetails ?: run {
                 _uiState.value = _uiState.value?.copy(
                     isLoading = false,
@@ -162,6 +175,8 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
             }
 
             try {
+                Log.d("RegistrationViewModel", "Attempting registration for: ${userDetails.email}")
+
                 val registrationSuccessful = withContext(Dispatchers.IO) {
                     repository.registerUserWithEmail(
                         email = userDetails.email,
@@ -186,7 +201,7 @@ class RegistrationViewModel(private val repository: UserRepository) : ViewModel(
                 } else {
                     _uiState.value = _uiState.value?.copy(
                         isLoading = false,
-                        errorMessage = "Registration failed"
+                        errorMessage = "Registration failed. Email may already exist."
                     )
                     Log.e("RegistrationViewModel", "Registration failed for email: ${userDetails.email}")
                 }

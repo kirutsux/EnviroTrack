@@ -65,27 +65,33 @@ class VerificationFragment : Fragment() {
         val otpFields = listOf(otp1, otp2, otp3, otp4, otp5, otp6)
 
         for (i in otpFields.indices) {
+            // Handle forward movement when typing
             otpFields[i].addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     if (s?.length == 1 && i < otpFields.size - 1) {
+                        // Move to next field when current field has a digit
                         otpFields[i + 1].requestFocus()
                     }
                 }
+
                 override fun afterTextChanged(s: Editable?) {}
             })
 
+            // Handle backspace behavior
             otpFields[i].setOnKeyListener { v, keyCode, event ->
                 if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL) {
                     if (otpFields[i].text.isEmpty() && i > 0) {
-                        // ✅ delete the previous field’s digit before moving back
+                        // Current field is empty, move back and clear previous field
                         otpFields[i - 1].setText("")
                         otpFields[i - 1].requestFocus()
+                        return@setOnKeyListener true // Consume the event
                     }
-                    true
-                } else {
-                    false
+                    // Current field has text, let the default behavior handle it (clear current field)
+                    return@setOnKeyListener false
                 }
+                false
             }
         }
     }
@@ -113,10 +119,7 @@ class VerificationFragment : Fragment() {
             return
         }
 
-        // Retrieve arguments for context, though the ViewModel uses tempUserDetails
-        val args = arguments
-        val emailFromArgs = args?.getString("email") ?: ""
-        Log.d("VerificationFragment", "Verify button clicked. OTP: $enteredCode. Email from args: $emailFromArgs")
+        Log.d("VerificationFragment", "Verify button clicked. OTP: $enteredCode")
 
         // Add logging to debug the stored verification code
         viewModel.getVerificationCodeForDebug()?.let { storedCode ->
@@ -125,14 +128,15 @@ class VerificationFragment : Fragment() {
             Log.w("VerificationFragment", "No verification code stored in ViewModel!")
         }
 
-        // Call the ViewModel's registerWithEmail method with only the enteredCode
+        // IMPORTANT: Pass empty strings for user details and only provide the enteredCode
+        // The ViewModel will use tempUserDetails that were stored when OTP was sent
         viewModel.registerWithEmail(
-            email = emailFromArgs, // Context only, ViewModel uses tempUserDetails.email
-            firstName = args?.getString("firstName") ?: "", // Context only
-            lastName = args?.getString("lastName") ?: "",   // Context only
-            password = args?.getString("password") ?: "",   // Context only
-            phoneNumber = args?.getString("phoneNumber") ?: "", // Context only
-            enteredCode = enteredCode    // Triggers the OTP verification logic
+            email = "",           // Empty - ViewModel uses tempUserDetails
+            firstName = "",       // Empty - ViewModel uses tempUserDetails
+            lastName = "",        // Empty - ViewModel uses tempUserDetails
+            password = "",        // Empty - ViewModel uses tempUserDetails
+            phoneNumber = "",     // Empty - ViewModel uses tempUserDetails
+            enteredCode = enteredCode  // This triggers OTP verification
         )
     }
 
