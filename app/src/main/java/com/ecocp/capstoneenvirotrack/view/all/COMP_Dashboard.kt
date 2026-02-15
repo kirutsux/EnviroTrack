@@ -29,6 +29,10 @@ import java.util.*
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavOptions
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.SendExpiryNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.SendNotificationRequest
 import com.ecocp.capstoneenvirotrack.view.businesses.smr.SmrActivity
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -121,8 +125,8 @@ class COMP_Dashboard : Fragment() {
     private fun setupNavigationView() {
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_modules -> {
-                    findNavController().navigate(R.id.action_pcoDashboard_to_modulesFragment)
+                R.id.nav_checklist -> {
+                    findNavController().navigate(R.id.action_pcoDashboard_to_checklistFragment)
                     drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
@@ -185,19 +189,24 @@ class COMP_Dashboard : Fragment() {
     // ---------------- NOTIFICATIONS -----------------
     private fun setupNotificationIcon() {
         notificationIcon.setOnClickListener {
-            val fragment = com.ecocp.capstoneenvirotrack.view.businesses.notifications.NotificationsFragment()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .setCustomAnimations(
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right,
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left
-                )
-                .replace(R.id.nav_host_fragment, fragment)
-                .addToBackStack(null)
-                .commit()
+            // Use NavController to navigate to NotificationsFragment
+            val navController = findNavController() // if inside a fragment
+            // OR: requireActivity().findNavController(R.id.nav_host_fragment) if inside activity
+
+            // Optional: create a Bundle if you want to pass data
+            val bundle = Bundle() // add args if needed
+
+            // Navigate using global action or direct fragment ID
+            val options = NavOptions.Builder()
+                .setEnterAnim(R.anim.slide_in_left)
+                .setExitAnim(R.anim.slide_out_right)
+                .setPopEnterAnim(R.anim.slide_in_right)
+                .setPopExitAnim(R.anim.slide_out_left)
+                .build()
+            findNavController().navigate(R.id.action_COMP_Dashboard_to_notificationsFragment)
         }
     }
+
 
     // ---------------- CARD LISTENERS -----------------
     private fun setupCardListeners() {
@@ -299,26 +308,36 @@ class COMP_Dashboard : Fragment() {
         return (diffMillis / (1000.0 * 60 * 60 * 24)).toLong() + 1 // +1 to include today
     }
 
-
     private fun sendExpiryNotification(type: String, daysLeft: Long) {
         val userId = auth.currentUser?.uid ?: return
-        val message = when(type) {
-            "Permit" -> "Your permit to operate will expire in $daysLeft day(s)."
-            "PCO Accreditation" -> "Your PCO accreditation will expire in $daysLeft day(s)."
-            else -> "$type will expire in $daysLeft day(s)."
+
+        // Map friendly module names
+        val friendlyType = when(type) {
+            "Permit" -> "Permit to Operate"
+            "PCO Accreditation" -> "PCO Accreditation"
+            else -> type
         }
-        val notification = hashMapOf(
-            "receiverId" to userId,
-            "receiverType" to "pco",
-            "senderId" to "system",
-            "title" to "$type Expiry Alert",
-            "message" to message,
-            "timestamp" to Timestamp.now(),
-            "isRead" to false
+
+        val api = RetrofitClient.instance
+        val request = SendExpiryNotificationRequest(
+            userId = userId,
+            type = friendlyType,
+            daysLeft = daysLeft
         )
-        db.collection("notifications").add(notification)
-            .addOnSuccessListener { Log.d("COMP_Dashboard", "✅ Expiry notification sent: $type") }
-            .addOnFailureListener { e -> Log.e("COMP_Dashboard", "❌ Failed sending expiry notification: ${e.message}") }
+
+        api.sendExpiryNotification(request).enqueue(object : retrofit2.Callback<Void> {
+            override fun onResponse(call: retrofit2.Call<Void>, response: retrofit2.Response<Void>) {
+                if (response.isSuccessful) {
+                    Log.d("COMP_Dashboard", "✅ Expiry notification sent for $friendlyType")
+                } else {
+                    Log.e("COMP_Dashboard", "❌ Push failed for $friendlyType: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<Void>, t: Throwable) {
+                Log.e("COMP_Dashboard", "❌ Push error for $friendlyType", t)
+            }
+        })
     }
 
 

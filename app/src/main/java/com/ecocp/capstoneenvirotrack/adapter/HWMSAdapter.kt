@@ -4,45 +4,44 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.ItemHwmsBinding
-import com.ecocp.capstoneenvirotrack.model.HWMSApplication
+import com.ecocp.capstoneenvirotrack.model.DisplayItem
 
 class HWMSAdapter(
-    private var applications: MutableList<HWMSApplication>,
-    private val onItemClick: (HWMSApplication) -> Unit
+    private var items: MutableList<DisplayItem>,
+    private val onItemClick: (DisplayItem) -> Unit
 ) : RecyclerView.Adapter<HWMSAdapter.ViewHolder>() {
 
     inner class ViewHolder(private val binding: ItemHwmsBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(application: HWMSApplication) {
+        fun bind(item: DisplayItem) {
             binding.apply {
-                tvWasteType.text = application.wasteType
-                tvQuantity.text = "Quantity: ${application.quantity} ${application.unit}"
-                tvTransporter.text = "Transporter: ${application.transporterName}"
-                tvTsdFacility.text = "TSD Facility: ${application.tsdFacilityName}"
-                tvPermitNo.text = "Permit No: ${application.permitNumber ?: "Pending"}"
 
-                // ✅ PAYMENT STATUS TEXT + COLOR
-                val paymentStatus = application.status?.trim() ?: "Unpaid"
-                tvPaymentStatuss.text = "Payment: $paymentStatus"
+                tvTitle.text = item.title
+                tvSubtitle.text = item.subtitle
 
-                when (paymentStatus.lowercase()) {
-                    "paid" -> tvPaymentStatuss.setTextColor(
+                tvTransporter.text = item.transporter.ifEmpty { "—" }
+                tvTsdFacility.text = item.tsdFacility.ifEmpty { "—" }
+                tvPermitNo.text = item.permitNo.ifEmpty { "—" }
+
+                tvPaymentStatus.text = "Payment: ${item.paymentStatus}"
+                tvStatus.text = item.status
+
+                // Colors
+                when (item.paymentStatus.lowercase()) {
+                    "paid" -> tvPaymentStatus.setTextColor(
                         ContextCompat.getColor(root.context, android.R.color.holo_green_dark)
                     )
-                    "unpaid" -> tvPaymentStatuss.setTextColor(
+                    "unpaid" -> tvPaymentStatus.setTextColor(
                         ContextCompat.getColor(root.context, android.R.color.holo_red_dark)
                     )
-                    else -> tvPaymentStatuss.setTextColor(
+                    else -> tvPaymentStatus.setTextColor(
                         ContextCompat.getColor(root.context, android.R.color.darker_gray)
                     )
                 }
 
-                // ✅ EMB STATUS COLOR (already good, just kept clean)
-                tvStatus.text = application.embStatus ?: "Pending"
-                when (application.embStatus?.lowercase()) {
+                when (item.status.lowercase()) {
                     "pending" -> tvStatus.setTextColor(
                         ContextCompat.getColor(root.context, android.R.color.holo_orange_dark)
                     )
@@ -57,7 +56,7 @@ class HWMSAdapter(
                     )
                 }
 
-                root.setOnClickListener { onItemClick(application) }
+                root.setOnClickListener { onItemClick(item) }
             }
         }
     }
@@ -68,19 +67,14 @@ class HWMSAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(applications[position])
+        holder.bind(items[position])
     }
 
-    override fun getItemCount(): Int = applications.size
+    override fun getItemCount(): Int = items.size
 
-    fun updateData(newList: List<HWMSApplication>) {
-        applications.clear()
-        applications.addAll(newList)
+    fun update(newList: List<DisplayItem>) {
+        items.clear()
+        items.addAll(newList)
         notifyDataSetChanged()
-    }
-
-    fun addApplication(newApp: HWMSApplication) {
-        applications.add(0, newApp)
-        notifyItemInserted(0)
     }
 }

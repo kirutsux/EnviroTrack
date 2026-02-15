@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F6FA"
+    android:padding="16dp"
+    tools:context=".view.serviceprovider.SP_Payments">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Top Title Card w/ Back Button (kept IDs) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/topBarCard"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:cardCornerRadius="6dp"
+            app:cardElevation="6dp"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#14232B">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_arrow_back"
+                    android:backgroundTint="@android:color/transparent"
+                    android:contentDescription="Back"
+                    app:tint="@android:color/white"/>
+
+                <TextView
+                    android:id="@+id/txtHeaderTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Payments"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- subtle subtitle on right (no new ID; uses existing layout only) -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="Wallet"
+                    android:textColor="#BFE6FF"
+                    android:textSize="12sp"
+                    android:paddingEnd="8dp"/>
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Balance card (e-wallet style) - visually enhanced but same IDs -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/balance_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:padding="12dp"
+            android:backgroundTint="#FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvBalanceLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Your Balance"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#263238"/>
+
+                    >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvCollectedBalance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="₱0.00"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:textColor="#0B5E84"
+                    android:layout_marginTop="10dp"/>
+
+                <!-- small helper row -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Total collected from all bookings"
+                    android:textSize="12sp"
+                    android:textColor="#7B8F94"
+                    android:layout_marginTop="6dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+
+
+        <!-- Payment history -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Payment History"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:textColor="#263238"/>
+
+        <LinearLayout
+            android:id="@+id/payments_list_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="6dp"
+            android:paddingBottom="24dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

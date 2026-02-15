@@ -93,21 +93,24 @@ class OpmsEmbDashboardFragment : Fragment() {
                 }
                 snapshot?.documents?.forEach { doc ->
                     val data = doc.data ?: return@forEach
-                    val app = EmbOpmsApplication(
-                        applicationId = doc.id,
-                        applicationType = "Discharge Permit",
-                        companyName = data["companyName"] as? String,
-                        companyAddress = data["companyAddress"] as? String,
-                        pcoName = data["pcoName"] as? String,
-                        pcoAccreditationNumber = data["pcoAccreditation"] as? String,
-                        receivingBody = data["bodyOfWater"] as? String,
-                        dischargeVolume = data["volume"] as? String,
-                        dischargeMethod = data["treatmentMethod"] as? String,
-                        uploadedFiles = data["fileLinks"] as? String,
-                        status = data["status"] as? String ?: "Pending",
-                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp
-                    )
-                    addOrUpdateApplication(app)
+                    val submittedTs = data["submittedTimestamp"] as? Timestamp
+                    if (submittedTs != null) { // Only include submitted applications
+                        val app = EmbOpmsApplication(
+                            applicationId = doc.id,
+                            applicationType = "Discharge Permit",
+                            companyName = data["companyName"] as? String,
+                            companyAddress = data["companyAddress"] as? String,
+                            pcoName = data["pcoName"] as? String,
+                            pcoAccreditationNumber = data["pcoAccreditation"] as? String,
+                            receivingBody = data["bodyOfWater"] as? String,
+                            dischargeVolume = data["volume"] as? String,
+                            dischargeMethod = data["treatmentMethod"] as? String,
+                            uploadedFiles = data["fileLinks"] as? String,
+                            status = data["status"] as? String ?: "Pending",
+                            submittedTimestamp = submittedTs
+                        )
+                        addOrUpdateApplication(app)
+                    }
                 }
                 applyFilters()
             }
@@ -122,33 +125,37 @@ class OpmsEmbDashboardFragment : Fragment() {
                 }
                 snapshot?.documents?.forEach { doc ->
                     val data = doc.data ?: return@forEach
-                    val app = EmbOpmsApplication(
-                        applicationId = doc.id,
-                        applicationType = "Permit to Operate",
-                        ownerName = data["ownerName"] as? String,
-                        establishmentName = data["establishmentName"] as? String,
-                        mailingAddress = data["mailingAddress"] as? String,
-                        plantAddress = data["plantAddress"] as? String,
-                        tin = data["tin"] as? String,
-                        ownershipType = data["ownershipType"] as? String,
-                        natureOfBusiness = data["natureOfBusiness"] as? String,
-                        pcoName = data["pcoName"] as? String,
-                        pcoAccreditation = data["pcoAccreditation"] as? String,
-                        operatingHours = data["operatingHours"] as? String,
-                        totalEmployees = data["totalEmployees"] as? String,
-                        landArea = data["landArea"] as? String,
-                        equipmentName = data["equipmentName"] as? String,
-                        fuelType = data["fuelType"] as? String,
-                        emissions = data["emissions"] as? String,
-                        status = data["status"] as? String ?: "Pending",
-                        submittedTimestamp = data["submittedTimestamp"] as? Timestamp
-                    )
-                    addOrUpdateApplication(app)
+                    val submittedTs = data["submittedTimestamp"] as? Timestamp
+                    if (submittedTs != null) { // Only include submitted applications
+                        val app = EmbOpmsApplication(
+                            applicationId = doc.id,
+                            applicationType = "Permit to Operate",
+                            ownerName = data["ownerName"] as? String,
+                            establishmentName = data["establishmentName"] as? String,
+                            mailingAddress = data["mailingAddress"] as? String,
+                            plantAddress = data["plantAddress"] as? String,
+                            tin = data["tin"] as? String,
+                            ownershipType = data["ownershipType"] as? String,
+                            natureOfBusiness = data["natureOfBusiness"] as? String,
+                            pcoName = data["pcoName"] as? String,
+                            pcoAccreditation = data["pcoAccreditation"] as? String,
+                            operatingHours = data["operatingHours"] as? String,
+                            totalEmployees = data["totalEmployees"] as? String,
+                            landArea = data["landArea"] as? String,
+                            equipmentName = data["equipmentName"] as? String,
+                            fuelType = data["fuelType"] as? String,
+                            emissions = data["emissions"] as? String,
+                            status = data["status"] as? String ?: "Pending",
+                            submittedTimestamp = submittedTs
+                        )
+                        addOrUpdateApplication(app)
+                    }
                 }
                 applyFilters()
             }
         snapshotListeners.add(ptoListener)
     }
+
 
     private fun addOrUpdateApplication(app: EmbOpmsApplication) {
         val index = opmsList.indexOfFirst { it.applicationId == app.applicationId }

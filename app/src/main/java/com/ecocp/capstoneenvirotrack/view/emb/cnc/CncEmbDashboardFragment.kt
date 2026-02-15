@@ -101,24 +101,25 @@ class CncEmbDashboardFragment : Fragment() {
                 snapshots?.documents?.forEach { doc ->
                     val data = doc.data ?: return@forEach
 
-                    val submittedTimestamp =
-                        (data["submittedTimestamp"] as? Timestamp) ?: Timestamp.now()
-                    val cnc = CncApplication(
-                        applicationId = doc.id,
-                        companyName = data["companyName"] as? String,
-                        projectTitle = data["projectTitle"] as? String,
-                        projectLocation = data["projectLocation"] as? String,
-                        status = data["status"] as? String,
-                        submittedTimestamp = submittedTimestamp
-                    )
-                    cncList.add(cnc)
+                    val submittedTimestamp = data["submittedTimestamp"] as? Timestamp
+                    if (submittedTimestamp != null) { // Only include CNCs that have been submitted
+                        val cnc = CncApplication(
+                            applicationId = doc.id,
+                            companyName = data["companyName"] as? String,
+                            projectTitle = data["projectTitle"] as? String,
+                            projectLocation = data["projectLocation"] as? String,
+                            status = data["status"] as? String,
+                            submittedTimestamp = submittedTimestamp
+                        )
+                        cncList.add(cnc)
+                    }
                 }
 
                 cncList.sortByDescending { it.submittedTimestamp }
                 applyFilters()
             }
     }
-
+    
     private fun applyFilters() {
         // 🛡️ Prevent crash if fragment view is already destroyed
         val safeBinding = _binding ?: return

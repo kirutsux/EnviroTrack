@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.all
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -23,7 +24,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.messaging.FirebaseMessaging
 
 class LoginFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
@@ -64,6 +68,8 @@ class LoginFragment : Fragment() {
             togglePasswordVisibility(etPassword, showPassword, isPasswordVisible)
         }
 
+        forTesting(etEmail, etPassword)
+
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -77,6 +83,7 @@ class LoginFragment : Fragment() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Log.d("LoginFragment", "Login successful for email: $email")
+                        saveFcmTokenForCurrentUser()
                         checkUserType(email)
                     } else {
                         Toast.makeText(requireContext(), "Login failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
@@ -90,6 +97,12 @@ class LoginFragment : Fragment() {
         }
 
         return view
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun forTesting(etEmail: EditText, etPassword: EditText){
+        etEmail.setText("loyswagas@gmail.com")
+        etPassword.setText("123123")
     }
 
     // ✅ Google Sign-In Intent with forced popup
@@ -138,6 +151,7 @@ class LoginFragment : Fragment() {
                         .addOnCompleteListener { authTask ->
                             if (authTask.isSuccessful) {
                                 Log.d("LoginFragment", "Google auth successful for email: $email")
+                                saveFcmTokenForCurrentUser()
                                 checkUserType(email)
                             } else {
                                 Toast.makeText(requireContext(), "Authentication failed!", Toast.LENGTH_SHORT).show()
@@ -153,6 +167,75 @@ class LoginFragment : Fragment() {
                 Log.e("LoginFragment", "Error checking user existence", e)
                 Toast.makeText(requireContext(), "Error checking user: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun saveFcmTokenForCurrentUser() {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.e("LoginFragment", "Failed to get FCM token", task.exception)
+                return@addOnCompleteListener
+            }
+
+            val token = task.result
+            val db = FirebaseFirestore.getInstance()
+
+            // First, check service_providers collection
+            db.collection("service_providers").document(currentUser.uid).get()
+                .addOnSuccessListener { spDoc ->
+                    val role = spDoc.getString("role")
+                    if (role == "Transporter" || role == "TSD Facility") {
+                        // Save token only in service_providers
+                        db.collection("service_providers").document(currentUser.uid)
+                            .update("fcmTokens", FieldValue.arrayUnion(token))
+                            .addOnSuccessListener {
+                                Log.d("LoginFragment", "FCM token added to service_providers successfully")
+                            }
+                            .addOnFailureListener { e ->
+                                // If document doesn't exist, create it
+                                db.collection("service_providers").document(currentUser.uid)
+                                    .set(mapOf("fcmTokens" to listOf(token)), SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        Log.d("LoginFragment", "FCM token created for new service_providers doc")
+                                    }
+                                    .addOnFailureListener { ex ->
+                                        Log.e("LoginFragment", "Error creating FCM token in service_providers", ex)
+                                    }
+                            }
+                        return@addOnSuccessListener
+                    }
+
+                    // If not a service provider, check users collection
+                    db.collection("users").document(currentUser.uid).get()
+                        .addOnSuccessListener { userDoc ->
+                            val userType = userDoc.getString("userType")
+                            if (userType == "pco" || userType == "emb") {
+                                db.collection("users").document(currentUser.uid)
+                                    .update("fcmTokens", FieldValue.arrayUnion(token))
+                                    .addOnSuccessListener {
+                                        Log.d("LoginFragment", "FCM token added to users successfully")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        db.collection("users").document(currentUser.uid)
+                                            .set(mapOf("fcmTokens" to listOf(token)), SetOptions.merge())
+                                            .addOnSuccessListener {
+                                                Log.d("LoginFragment", "FCM token created for new users doc")
+                                            }
+                                            .addOnFailureListener { ex ->
+                                                Log.e("LoginFragment", "Error creating FCM token in users", ex)
+                                            }
+                                    }
+                            }
+                        }
+                }
+        }
+    }
+
+
+    private fun saveUserTypeToPrefs(userType: String) {
+        val prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("userType", userType.lowercase()).apply()
     }
 
     // ✅ Check user type from Firestore and navigate to the correct dashboard
@@ -179,14 +262,20 @@ class LoginFragment : Fragment() {
                     Log.d("LoginFragment", "User found in users: $email ($userType)")
 
                     when (userType) {
-                        "emb" -> findNavController().navigate(R.id.action_loginFragment_to_embDashboard)
-                        "pco" -> findNavController().navigate(R.id.action_loginFragment_to_pcoDashboard)
-                        else -> Toast.makeText(
-                            requireContext(),
-                            "Unknown user type: $userType",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        "emb" -> {
+                            saveUserTypeToPrefs("emb")
+                            findNavController().navigate(R.id.action_loginFragment_to_embDashboard)
+                        }
+                        "pco" -> {
+                            saveUserTypeToPrefs("pco")
+                            findNavController().navigate(R.id.action_loginFragment_to_pcoDashboard)
+                        }
+                        "service_provider" -> {
+                            saveUserTypeToPrefs("service_provider")
+                            findNavController().navigate(R.id.action_loginFragment_to_serviceProviderDashboard)
+                        }
                     }
+
                 } else {
                     // 2️⃣ Not found in users → check service_providers
                     firestore.collection("service_providers")

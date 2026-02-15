@@ -1,18 +1,27 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.cnc
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import org.json.JSONObject
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.android.volley.Request
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -36,8 +45,19 @@ class CncReviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         fetchCncDetails()
 
+        // ✅ Edit CNC Info
         binding.btnCncEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.cncFormFragment, false)
+            if (currentDocId != null) {
+                val bundle = Bundle().apply {
+                    putString("applicationId", currentDocId)
+                }
+                findNavController().navigate(
+                    R.id.action_cncReviewFragment_to_cncEditInfoFragment,
+                    bundle
+                )
+            } else {
+                Toast.makeText(requireContext(), "No CNC data available to edit.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.btnCncSubmitApplication.setOnClickListener {
@@ -143,66 +163,47 @@ class CncReviewFragment : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "CNC Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "CNC Submission",
-                    message = "You have successfully submitted a Certificate of Non-Coverage application.",
-                    type = "submission"
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = uid!!,          // PCO UID
+                    module = "CNC",              // Module name
+                    documentId = currentDocId!!  // Firestore document ID
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New CNC Application",
-                                message = "A new Certificate of Non-Coverage has been submitted by a PCO.",
-                                type = "alert"
-                            )
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "CNC submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
+                                Toast.makeText(requireContext(), "Notification error: ${response.code()}", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
 
-                findNavController().navigate(R.id.cncDashboardFragment)
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Error sending notifications: ${t.message}")
+                            Toast.makeText(requireContext(), "Failed to send notifications", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+
+                // --------------------------------------------------------
+                // ✅ Navigate back to CNC Dashboard
+                // --------------------------------------------------------
+                findNavController().navigate(
+                    R.id.cncDashboardFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.cncDashboardFragment, true)
+                        .build()
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit CNC application.", Toast.LENGTH_SHORT).show()
             }
     }
-
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
-
 
 
 

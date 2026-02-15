@@ -6,7 +6,7 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,10 +17,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.adapter.ServiceProviderAdapter
+import com.ecocp.capstoneenvirotrack.api.NotifyBookingCreatedRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentRequest
+import com.ecocp.capstoneenvirotrack.api.PaymentResponse
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.model.ServiceProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -30,6 +35,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -39,6 +47,7 @@ class TransporterStep2Fragment : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     private val providers = mutableListOf<ServiceProvider>()
     private lateinit var adapter: ServiceProviderAdapter
     private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
@@ -62,9 +71,15 @@ class TransporterStep2Fragment : Fragment() {
     // Temp: the provisional doc id used while uploading files before payment
     private var provisionalBookingId: String? = null
 
-    // Dialog references (fixed)
+    // Dialog references
     private var currentDialogView: View? = null
     private var bookingDialog: androidx.appcompat.app.AlertDialog? = null
+
+    // Selected waste generator IDs for linking
+    private var selectedWasteGenIds = mutableListOf<String>()
+
+    // NEW: Store the user's full name for bookedBy field
+    private var currentUserFullName: String = "PCO User"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,7 +90,7 @@ class TransporterStep2Fragment : Fragment() {
         recycler.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = ServiceProviderAdapter(providers) { provider ->
-            showBookingDialog(provider)
+            showWasteGenSelectionDialog(provider)
         }
         recycler.adapter = adapter
 
@@ -84,22 +99,46 @@ class TransporterStep2Fragment : Fragment() {
             setCancelable(false)
         }
 
-        // Stripe setup (keep your publishable key)
+        // Stripe setup
         PaymentConfiguration.init(
             requireContext(),
             "pk_test_51PF3r9J2KRREDP2eehrcDI42PVjLhtLQuEy55mabmKa63Etlh5DxHGupzcklVCnrEE0RF6SxYUQVEbJMNph0Zalf00Va9vwLxS"
         )
         paymentSheet = PaymentSheet(this, ::onPaymentResult)
 
+        // NEW: Fetch user's name early
+        fetchCurrentUserFullName()
+
         fetchTransporters()
         return v
     }
 
+    // NEW: Fetch current user's full name from users collection
+    private fun fetchCurrentUserFullName() {
+        val user = auth.currentUser ?: return
+        db.collection("users").document(user.uid).get()
+            .addOnSuccessListener { document ->
+                val firstName = document.getString("firstName")?.trim() ?: ""
+                val lastName = document.getString("lastName")?.trim() ?: ""
+                currentUserFullName = when {
+                    firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
+                    firstName.isNotEmpty() -> firstName
+                    lastName.isNotEmpty() -> lastName
+                    else -> "PCO User"
+                }
+            }
+            .addOnFailureListener {
+                currentUserFullName = "PCO User"
+            }
+    }
+
     private fun fetchTransporters() {
         progressDialog.show()
+
         db.collection("service_providers")
             .whereEqualTo("role", "Transporter")
             .whereEqualTo("status", "approved")
+            .whereEqualTo("availabilityStatus", "available")   // ✅ NEW FILTER
             .get()
             .addOnSuccessListener { snap ->
                 progressDialog.dismiss()
@@ -110,6 +149,84 @@ class TransporterStep2Fragment : Fragment() {
             .addOnFailureListener { e ->
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Failed to load transporters: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+
+    /**
+     * Show dialog to let user select which waste generator(s) to book transport for.
+     * Call this BEFORE showing the booking dialog.
+     */
+    private fun showWasteGenSelectionDialog(provider: ServiceProvider) {
+        val currentUser = auth.currentUser ?: return
+
+        progressDialog.setMessage("Loading your waste applications...")
+        progressDialog.show()
+
+        db.collection("HazardousWasteGenerator")
+            .whereEqualTo("userId", currentUser.uid)
+            .whereEqualTo("status", "Submitted")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                progressDialog.dismiss()
+
+                if (querySnapshot.isEmpty) {
+                    Toast.makeText(requireContext(),
+                        "No submitted waste applications found. Please submit a waste generator application first.",
+                        Toast.LENGTH_LONG).show()
+                    return@addOnSuccessListener
+                }
+
+                val wasteGens = querySnapshot.documents.map { doc ->
+                    Triple(
+                        doc.id,
+                        doc.getString("companyName") ?: "Unknown",
+                        doc.getString("embRegNo") ?: "N/A"
+                    )
+                }
+
+                // If only one waste gen, auto-select it
+                if (wasteGens.size == 1) {
+                    selectedWasteGenIds.clear()
+                    selectedWasteGenIds.add(wasteGens[0].first)
+                    showBookingDialog(provider)
+                    return@addOnSuccessListener
+                }
+
+                // Multiple waste gens - show selection dialog
+                val items = wasteGens.map { "${it.second} (EMB: ${it.third})" }.toTypedArray()
+                val checkedItems = BooleanArray(items.size) { false }
+
+                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Select Waste Application(s)")
+                    .setMultiChoiceItems(items, checkedItems) { _, which, isChecked ->
+                        checkedItems[which] = isChecked
+                    }
+                    .setPositiveButton("Continue") { _, _ ->
+                        selectedWasteGenIds.clear()
+                        checkedItems.forEachIndexed { index, isChecked ->
+                            if (isChecked) {
+                                selectedWasteGenIds.add(wasteGens[index].first)
+                            }
+                        }
+
+                        if (selectedWasteGenIds.isEmpty()) {
+                            Toast.makeText(requireContext(),
+                                "Please select at least one waste application.",
+                                Toast.LENGTH_SHORT).show()
+                        } else {
+                            showBookingDialog(provider)
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            .addOnFailureListener { e ->
+                progressDialog.dismiss()
+                Toast.makeText(requireContext(),
+                    "Error loading applications: ${e.message}",
+                    Toast.LENGTH_LONG).show()
             }
     }
 
@@ -134,7 +251,6 @@ class TransporterStep2Fragment : Fragment() {
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
         val etPackaging = dialogView.findViewById<EditText>(R.id.etPackaging)
         val etOrigin = dialogView.findViewById<EditText>(R.id.etOrigin)
-        val etDestination = dialogView.findViewById<EditText>(R.id.etDestination)
         val etSpecial = dialogView.findViewById<EditText>(R.id.etSpecialInstructions)
         val etAmount = dialogView.findViewById<EditText>(R.id.etAmount)
         val btnPickDate = dialogView.findViewById<Button>(R.id.btnPickDate)
@@ -168,7 +284,7 @@ class TransporterStep2Fragment : Fragment() {
             dp.show()
         }
 
-        // disable confirm until uploads are done (we require both plan & permit uploaded)
+        // disable confirm until uploads are done
         btnConfirm.isEnabled = false
 
         btnUploadPlan.setOnClickListener {
@@ -176,13 +292,6 @@ class TransporterStep2Fragment : Fragment() {
         }
         btnUploadPermit.setOnClickListener {
             pickFile(REQ_PICK_PERMIT)
-        }
-
-        // Helper to update status UI and confirm button enable check (local initial update)
-        fun updateStatusUI_Local() {
-            tvPlanStatus.text = if (transportPlanUri != null) "✅ Uploaded" else "Not uploaded"
-            tvPermitStatus.text = if (storagePermitUri != null) "✅ Uploaded" else "Not uploaded"
-            btnConfirm.isEnabled = (transportPlanUri != null && storagePermitUri != null)
         }
 
         // initial statuses
@@ -194,17 +303,14 @@ class TransporterStep2Fragment : Fragment() {
             .setView(dialogView)
             .create()
 
-        // ensure currentDialogView cleared on dismiss
         bookingDialog?.setOnDismissListener {
             currentDialogView = null
         }
 
         btnCancel.setOnClickListener {
-            // clear temp
             provisionalBookingId = null
             transportPlanUri = null
             storagePermitUri = null
-            // dismiss dialog
             bookingDialog?.dismiss()
         }
 
@@ -213,7 +319,6 @@ class TransporterStep2Fragment : Fragment() {
             val quantity = etQuantity.text.toString().trim()
             val packaging = etPackaging.text.toString().trim()
             val origin = etOrigin.text.toString().trim()
-            val destination = etDestination.text.toString().trim()
             val special = etSpecial.text.toString().trim()
             val amountText = etAmount.text.toString().trim()
 
@@ -234,16 +339,20 @@ class TransporterStep2Fragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val currentUser = FirebaseAuth.getInstance().currentUser ?: run {
+            val currentUser = auth.currentUser ?: run {
                 Toast.makeText(requireContext(), "User not logged in.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             selectedProvider = provider
 
-            // create bookingData skeleton
+            // create bookingData skeleton (UPDATED WITH bookedBy)
             bookingData = hashMapOf(
                 "pcoId" to currentUser.uid,
+                "pcoEmail" to (currentUser.email ?: ""),
+                "bookedBy" to currentUserFullName,
+                "bookedByUid" to currentUser.uid,
                 "serviceProviderName" to provider.name,
+                "serviceProviderUid" to provider.uid,
                 "serviceProviderCompany" to provider.companyName,
                 "providerType" to provider.role,
                 "providerContact" to provider.contactNumber,
@@ -251,19 +360,21 @@ class TransporterStep2Fragment : Fragment() {
                 "quantity" to quantity,
                 "packaging" to packaging,
                 "origin" to origin,
-                "destination" to destination,
                 "specialInstructions" to special,
                 "bookingDate" to Date(selectedDateMillis!!),
                 "dateBooked" to FieldValue.serverTimestamp(),
-                "status" to "Pending" // will change to "Paid" after payment
+                "bookingStatus" to "Pending",
+                "amount" to paymentAmount,
+                "paymentStatus" to "Pending",
+                "status" to "Pending"
             )
 
-            // 1) create provisional bookingId BEFORE uploading files so path is known
+            // create provisional bookingId BEFORE uploading files
             val newDocRef = db.collection("transport_bookings").document()
             provisionalBookingId = newDocRef.id
             bookingData["bookingId"] = provisionalBookingId!!
 
-            // 2) Upload required files to storage under transport_bookings/{bookingId}/
+            // Upload required files
             progressDialog.setMessage("Uploading required documents...")
             progressDialog.show()
             uploadBookingFilesAndProceed(newDocRef, transportPlanUri!!, storagePermitUri!!) { success, fileUrls ->
@@ -273,26 +384,15 @@ class TransporterStep2Fragment : Fragment() {
                     return@uploadBookingFilesAndProceed
                 }
 
-                // merge file urls into bookingData
                 bookingData.putAll(fileUrls)
-
-                // 3) Start payment flow (Stripe) — only after uploads finished
                 createPaymentIntent(paymentAmount)
                 bookingDialog?.dismiss()
             }
         }
 
-        // show dialog
         bookingDialog?.show()
-
-        // initial local update in case URIs were already set (unlikely but safe)
-        updateStatusUI_Local()
     }
 
-    /**
-     * Upload the two required files and return a map of file field names -> downloadURL
-     * callback(success, mapOf("transportPlanUrl"->..., "storagePermitUrl"->...))
-     */
     private fun uploadBookingFilesAndProceed(
         newDocRef: com.google.firebase.firestore.DocumentReference,
         planUri: Uri,
@@ -310,7 +410,6 @@ class TransporterStep2Fragment : Fragment() {
             }
         }
 
-        // helper to get extension from mime
         fun extFromMime(uri: Uri): String {
             val type = requireContext().contentResolver.getType(uri)
             return when (type) {
@@ -325,7 +424,6 @@ class TransporterStep2Fragment : Fragment() {
             }
         }
 
-        // upload plan
         try {
             val planExt = extFromMime(planUri)
             val planRef = storage.reference.child("transport_bookings/$bookingId/transport_plan$planExt")
@@ -347,7 +445,6 @@ class TransporterStep2Fragment : Fragment() {
             return
         }
 
-        // upload permit
         try {
             val permitExt = extFromMime(permitUri)
             val permitRef = storage.reference.child("transport_bookings/$bookingId/storage_permit$permitExt")
@@ -364,33 +461,25 @@ class TransporterStep2Fragment : Fragment() {
                 .addOnFailureListener {
                     callback(false, emptyMap())
                 }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             callback(false, emptyMap())
             return
         }
     }
 
-    /**
-     * Launch file chooser. We'll accept PDF, JPEG, PNG.
-     */
     private fun pickFile(requestCode: Int) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
-        // allow only pdf and images via chooser MIME filters:
         val mimeTypes = arrayOf("application/pdf", "image/jpeg", "image/png")
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
         startActivityForResult(Intent.createChooser(intent, "Select file"), requestCode)
     }
 
-    /**
-     * Receive selected file URIs for plan and permit.
-     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != Activity.RESULT_OK) return
         val uri = data?.data ?: return
 
-        // Validate mime type
         val mime = requireContext().contentResolver.getType(uri) ?: ""
         val allowed = listOf("application/pdf", "image/jpeg", "image/png")
         if (!allowed.contains(mime)) {
@@ -409,87 +498,53 @@ class TransporterStep2Fragment : Fragment() {
             }
         }
 
-        // update status textviews and confirm button inside the open dialog (if any)
         updateDialogStatuses()
     }
 
-    /**
-     * Update the TextViews and Confirm button inside the currently open booking dialog.
-     * Uses the stored currentDialogView reference (no searching the activity view tree).
-     */
     private fun updateDialogStatuses() {
         val root = currentDialogView ?: return
         val tvPlanStatus = root.findViewById<TextView?>(R.id.tvPlanStatus)
         val tvPermitStatus = root.findViewById<TextView?>(R.id.tvPermitStatus)
         val btnConfirm = root.findViewById<Button?>(R.id.btnConfirmBooking)
 
-        tvPlanStatus?.text = if (transportPlanUri != null) "✅ Selected" else "Not uploaded"
-        tvPermitStatus?.text = if (storagePermitUri != null) "✅ Selected" else "Not uploaded"
+        tvPlanStatus?.text = if (transportPlanUri != null) "Selected" else "Not uploaded"
+        tvPermitStatus?.text = if (storagePermitUri != null) "Selected" else "Not uploaded"
         btnConfirm?.isEnabled = (transportPlanUri != null && storagePermitUri != null)
     }
 
-    /**
-     * Initiates payment intent using your local endpoint and Stripe.
-     * After payment completes (onPaymentResult Completed) we save booking to Firestore.
-     */
-    private fun createPaymentIntent(amount: Double) {
+    private fun createPaymentIntent(paymentAmount: Double) { // amount in PHP, flexible input
         progressDialog.setMessage("Initializing payment...")
         progressDialog.show()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val url = URL("http://10.0.2.2:8080/create-payment-intent")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-                conn.setRequestProperty("Accept", "application/json")
-                conn.doOutput = true
+        // Convert to cents for Stripe
+        val amountInCents = (paymentAmount).toInt()
 
-                val jsonBody = JSONObject()
-                jsonBody.put("amount", amount)
-                val out = conn.outputStream
-                out.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
-                out.flush()
-                out.close()
-
-                val responseCode = conn.responseCode
-                if (responseCode != HttpURLConnection.HTTP_OK) {
-                    throw Exception("Server responded with code $responseCode")
-                }
-
-                val response = conn.inputStream.bufferedReader().readText()
-                val json = JSONObject(response)
-                clientSecret = json.getString("clientSecret")
-
-                withContext(Dispatchers.Main) {
+        RetrofitClient.instance.createPaymentIntent(PaymentRequest(amountInCents))
+            .enqueue(object : Callback<PaymentResponse> {
+                override fun onResponse(call: Call<PaymentResponse>, response: Response<PaymentResponse>) {
                     progressDialog.dismiss()
-                    clientSecret?.let {
+                    if (response.isSuccessful && response.body() != null) {
+                        clientSecret = response.body()!!.clientSecret
                         paymentSheet.presentWithPaymentIntent(
-                            it,
+                            clientSecret!!,
                             PaymentSheet.Configuration("EnviroTrack")
                         )
-                    } ?: run {
-                        Toast.makeText(requireContext(), "Payment initialization error.", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to create payment intent", Toast.LENGTH_SHORT).show()
                     }
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+
+                override fun onFailure(call: Call<PaymentResponse>, t: Throwable) {
                     progressDialog.dismiss()
-                    Toast.makeText(
-                        requireContext(),
-                        "Payment initialization failed: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
-            }
-        }
+            })
     }
 
     private fun onPaymentResult(paymentResult: PaymentSheetResult) {
         when (paymentResult) {
             is PaymentSheetResult.Completed -> {
                 Toast.makeText(requireContext(), "Payment successful!", Toast.LENGTH_SHORT).show()
-                // Save booking with status Paid (bookingData already contains bookingId and file urls)
                 saveBookingToFirestore("Paid")
             }
             is PaymentSheetResult.Failed -> {
@@ -501,67 +556,150 @@ class TransporterStep2Fragment : Fragment() {
         }
     }
 
-    /**
-     * Save booking to Firestore using the provisional bookingId (created before file upload).
-     * Booking doc will include uploaded file URLs and bookingId already set.
-     */
     private fun saveBookingToFirestore(status: String) {
-        bookingData["status"] = status
+        bookingData["paymentStatus"] = status
 
         val bookingId = bookingData["bookingId"] as? String
         if (bookingId.isNullOrEmpty()) {
             Toast.makeText(requireContext(), "Missing bookingId", Toast.LENGTH_SHORT).show()
+            Log.e("BOOKING", "Booking ID is null or empty")
             return
         }
 
-        // Save at document(bookingId) so path matches uploaded files
-        db.collection("transport_bookings")
-            .document(bookingId)
-            .set(bookingData)
+        val serviceProviderUid = bookingData["serviceProviderUid"] as? String
+        Log.d("BOOKING", "Fetched serviceProviderUid: $serviceProviderUid")
+
+        val bookingRef = db.collection("transport_bookings").document(bookingId)
+
+        // 1️⃣ Save booking to Firestore
+        bookingRef.set(bookingData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Booking saved successfully!", Toast.LENGTH_LONG).show()
-                linkBookingToHazardousWasteGenerator(bookingId)
+                Log.d("BOOKING", "Booking saved successfully: $bookingId")
+
+                // 2️⃣ Link booking to hazardous waste generators
+                linkBookingToHazardousWasteGenerator(bookingId) { linkSuccess ->
+                    if (linkSuccess) {
+                        Log.d("BOOKING", "✅ Waste generators linked for booking $bookingId")
+
+                        // 3️⃣ Send notification AFTER linking
+                        if (!serviceProviderUid.isNullOrEmpty()) {
+                            Log.d("NOTIF", "Scheduling notification to serviceProviderUid: $serviceProviderUid")
+
+                            // Delay slightly to ensure Firestore propagation
+                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                val request = NotifyBookingCreatedRequest(bookingId = bookingId)
+                                RetrofitClient.instance.notifyBookingCreated(request)
+                                    .enqueue(object : retrofit2.Callback<Void> {
+                                        override fun onResponse(
+                                            call: Call<Void>,
+                                            response: retrofit2.Response<Void>
+                                        ) {
+                                            if (response.isSuccessful) {
+                                                Log.d("NOTIF", "Transporter notified for booking $bookingId.")
+                                            } else {
+                                                Log.e("NOTIF", "Failed to notify transporter: ${response.code()}")
+                                                Toast.makeText(requireContext(),
+                                                    "Notification error: ${response.code()}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+
+                                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                                            Log.e("NOTIF", "Error notifying transporter: ${t.message}", t)
+                                            Toast.makeText(requireContext(),
+                                                "Failed to notify transporter",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    })
+                            }, 2000) // 2 seconds delay
+                        } else {
+                            Log.e("NOTIF", "Cannot notify transporter — serviceProviderUid is null or empty")
+                        }
+                    } else {
+                        Log.e("BOOKING", "❌ Failed to link waste generators for booking $bookingId")
+                        Toast.makeText(requireContext(),
+                            "Booking saved but failed to link waste generators.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
             }
             .addOnFailureListener { e ->
                 Toast.makeText(requireContext(), "Failed to save booking: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("BOOKING", "Failed to save booking", e)
             }
     }
 
-    // Link bookingId to HazardousWasteGenerator (unchanged)
-    private fun linkBookingToHazardousWasteGenerator(bookingId: String) {
-        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
-        val userId = currentUser.uid
+    /**
+     * Link bookingId to selected waste generator(s) only.
+     * Uses selectedWasteGenIds populated by the selection dialog.
+     * Calls the callback with `true` if linking succeeds, `false` otherwise.
+     */
+    private fun linkBookingToHazardousWasteGenerator(
+        bookingId: String,
+        callback: (Boolean) -> Unit
+    ) {
+        if (selectedWasteGenIds.isEmpty()) {
+            Toast.makeText(requireContext(),
+                "No waste generators selected.",
+                Toast.LENGTH_SHORT).show()
+            callback(false)
+            return
+        }
 
-        db.collection("HazardousWasteGenerator")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (querySnapshot.isEmpty) {
-                    Toast.makeText(requireContext(), "No HazardousWasteGenerator record found for this user.", Toast.LENGTH_SHORT).show()
-                    return@addOnSuccessListener
+        android.util.Log.d("TransporterStep2",
+            "Linking booking $bookingId to ${selectedWasteGenIds.size} waste gen(s): $selectedWasteGenIds")
+
+        // 1️⃣ Update the booking document with wasteGeneratorIds
+        val bookingUpdateTask = db.collection("transport_bookings")
+            .document(bookingId)
+            .update(
+                mapOf(
+                    "wasteGeneratorIds" to selectedWasteGenIds,
+                    "primaryWasteGeneratorId" to selectedWasteGenIds.firstOrNull()
+                )
+            )
+
+        // 2️⃣ Update ONLY the selected waste generator docs with bookingId
+        val wasteGenUpdateTasks = selectedWasteGenIds.map { wasteGenId ->
+            db.collection("HazardousWasteGenerator")
+                .document(wasteGenId)
+                .update("bookingId", bookingId)
+        }
+
+        // Wait for ALL tasks to complete
+        val allTasks = mutableListOf(bookingUpdateTask)
+        allTasks.addAll(wasteGenUpdateTasks)
+
+        com.google.android.gms.tasks.Tasks.whenAllComplete(allTasks)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(),
+                    "Linked ${selectedWasteGenIds.size} waste application(s) to transport booking!",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Clear selection for next booking
+                selectedWasteGenIds.clear()
+
+                // Navigate back to Dashboard
+                try {
+                    findNavController().popBackStack(R.id.HWMSDashboardFragment, false)
+                } catch (e: Exception) {
+                    try { findNavController().navigate(R.id.HWMSDashboardFragment) } catch (_: Exception) {}
                 }
 
-                for (doc in querySnapshot.documents) {
-                    db.collection("HazardousWasteGenerator")
-                        .document(doc.id)
-                        .update("bookingId", bookingId)
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Linked booking to HWMS application!", Toast.LENGTH_SHORT).show()
-
-                            // Navigate to Step 3 (TSD Facility Selection)
-                            try {
-                                findNavController().navigate(R.id.action_transporterStep2Fragment_to_tsdFacilitySelectionFragment)
-                            } catch (e: Exception) {
-                                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Failed to link booking: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                }
+                callback(true)
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Error fetching HWMS application: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(),
+                    "Failed to link booking: ${e.message}",
+                    Toast.LENGTH_SHORT).show()
+                try { findNavController().popBackStack() } catch (_: Exception) {}
+                callback(false)
             }
     }
+
 }

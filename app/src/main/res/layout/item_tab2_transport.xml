@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Transport Booking"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#1E1E1E"/>
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subtitle here"
+            android:layout_marginTop="4dp"
+            android:textColor="#555555"/>
+
+        <!-- Transporter -->
+        <TextView
+            android:id="@+id/tvTransporter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Transporter"
+            android:layout_marginTop="6dp"
+            android:textColor="#333333"/>
+
+        <!-- TSD -->
+        <TextView
+            android:id="@+id/tvTsd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TSD Facility"
+            android:layout_marginTop="2dp"
+            android:textColor="#333333"/>
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: Pending"
+            android:layout_marginTop="10dp"
+            android:textStyle="bold"
+            android:textColor="#0066CC"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

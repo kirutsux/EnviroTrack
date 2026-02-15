@@ -4,7 +4,7 @@
     android:id="@+id/embopms_nav_host_fragment"
     app:startDestination="@id/opmsEmbDashboardFragment">
 
-    <!-- EMB Dashboard -->
+    <!-- OPMS EMB Dashboard -->
     <fragment
         android:id="@+id/opmsEmbDashboardFragment"
         android:name="com.ecocp.capstoneenvirotrack.view.emb.opms.OpmsEmbDashboardFragment"

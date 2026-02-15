@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,70 +10,66 @@
     tools:context=".view.serviceprovider.SP_TaskUpdateDetails">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <!-- Header Card: Company & Booking Info -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="4dp"
             android:layout_marginBottom="12dp"
-            android:foreground="?attr/selectableItemBackground">
+            android:foreground="?attr/selectableItemBackground"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
 
                 <!-- KEEP Company Logo -->
                 <ImageView
                     android:id="@+id/imgCompanyLogo"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/dunkin"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="Company logo"
-                    android:background="@drawable/circle_bg"
-                    android:layout_marginEnd="12dp"/>
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
 
                 <LinearLayout
-                    android:orientation="vertical"
                     android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_height="wrap_content">
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/txtCompanyName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Dunkin Donuts"
-                        android:textStyle="bold"
+                        android:textColor="#212121"
                         android:textSize="18sp"
-                        android:textColor="#212121"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/txtCompanyAddress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
                         android:text="A. S. Fortuna St, Mandaue City, Cebu"
                         android:textColor="#616161"
-                        android:textSize="14sp"
-                        android:layout_marginTop="4dp"/>
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/txtTaskRef"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
                         android:text="Ref: #SR-2025-0012"
-                        android:textSize="12sp"
                         android:textColor="#9E9E9E"
-                        android:layout_marginTop="6dp"/>
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <!-- Status Pill -->
@@ -82,16 +77,16 @@
                     android:id="@+id/txtStatusPill"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pending"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/rounded_status_bg"
                     android:contentDescription="Current status"
-                    android:layout_marginStart="8dp"/>
+                    android:paddingLeft="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="12dp"
+                    android:paddingBottom="6dp"
+                    android:text="Pending"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -101,144 +96,149 @@
             android:id="@+id/cardTaskInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp"
             android:layout_marginBottom="16dp"
-            android:foreground="?attr/selectableItemBackground">
+            android:foreground="?attr/selectableItemBackground"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp">
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:padding="16dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Waste and Transport Info"
+                    android:textColor="#212121"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#212121"/>
+                    android:textStyle="bold" />
 
                 <!-- Waste Type -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="Waste Type"
-                    android:textSize="12sp"
                     android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
+                    android:textSize="12sp" />
+
                 <TextView
                     android:id="@+id/txtWasteType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="test37"
-                    android:textColor="#212121"
+                    android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:background="@drawable/bg_field"/>
+                    android:text="test37"
+                    android:textColor="#212121" />
 
                 <!-- Quantity -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="Quantity"
-                    android:textSize="12sp"
                     android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
+                    android:textSize="12sp" />
+
                 <TextView
                     android:id="@+id/txtQuantity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="test37"
-                    android:textColor="#212121"
+                    android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:background="@drawable/bg_field"/>
+                    android:text="test37"
+                    android:textColor="#212121" />
 
                 <!-- Origin / Destination -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="Origin / Destination"
-                    android:textSize="12sp"
                     android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
+                    android:textSize="12sp" />
+
                 <TextView
                     android:id="@+id/txtOriginDestination"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="test37 → test37"
-                    android:textColor="#212121"
+                    android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:background="@drawable/bg_field"/>
+                    android:text="test37 → test37"
+                    android:textColor="#212121" />
 
                 <!-- Packaging -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="Packaging"
-                    android:textSize="12sp"
                     android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
+                    android:textSize="12sp" />
+
                 <TextView
                     android:id="@+id/txtPackaging"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="test37"
-                    android:textColor="#212121"
+                    android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:background="@drawable/bg_field"/>
+                    android:text="test37"
+                    android:textColor="#212121" />
 
                 <!-- Special Instructions -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="Special Instructions"
-                    android:textSize="12sp"
                     android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
+                    android:textSize="12sp" />
+
                 <TextView
                     android:id="@+id/txtSpecialInstructions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="test37"
-                    android:textColor="#212121"
+                    android:background="@drawable/bg_field"
                     android:padding="10dp"
-                    android:background="@drawable/bg_field"/>
+                    android:text="test37"
+                    android:textColor="#212121" />
 
                 <!-- Upload Collection Proof -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="Upload Collection Proof"
-                    android:textSize="12sp"
                     android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
+                    android:textSize="12sp" />
                 <!-- Attachment row: preview + add button (NO RecyclerView) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="8dp">
+                    android:orientation="horizontal">
 
                     <!-- Preview thumbnail (first attachment) -->
                     <ImageView
                         android:id="@+id/imgAttachmentPreview"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_attachment"
+                        android:background="@drawable/bg_field"
                         android:contentDescription="Attachment preview"
                         android:scaleType="centerCrop"
-                        android:background="@drawable/bg_field"/>
+                        android:src="@drawable/ic_attachment" />
 
                     <!-- Simple container for attachments (NO RecyclerView) -->
                     <LinearLayout
                         android:id="@+id/attachmentContainer"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/txtNoAttachments"
@@ -246,7 +246,7 @@
                             android:layout_height="wrap_content"
                             android:text="No attachments added"
                             android:textColor="#888888"
-                            android:textSize="12sp"/>
+                            android:textSize="12sp" />
                     </LinearLayout>
 
                     <!-- Upload button -->
@@ -254,60 +254,136 @@
                         android:id="@+id/btnUploadFile"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:text="Upload"
-                        app:cornerRadius="8dp"
-                        app:backgroundTint="#2ECC71"
                         android:textColor="#FFFFFF"
-                        android:layout_marginStart="8dp"/>
+                        app:backgroundTint="#2ECC71"
+                        app:cornerRadius="8dp" />
                 </LinearLayout>
 
                 <!-- Status Update -->
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Update Status"
-                    android:textSize="12sp"
-                    android:textColor="#757575"
-                    android:layout_marginTop="12dp"/>
-                <Spinner
-                    android:id="@+id/spinnerStatus"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="12dp"
+                        android:text="Status:"
+                        android:textColor="#757575"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/transporterStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="IN TRANSIT"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progressBarHorizontal"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/transporter_status_options"
-                    android:background="@drawable/spinner_background"
-                    android:padding="8dp"/>
+                    android:layout_marginHorizontal="12dp"
+                    android:indeterminate="true"
+                    android:progressTint="@color/card_green_background"
+                    android:visibility="gone" />
 
                 <!-- Action Buttons -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp"
                     android:gravity="center"
-                    android:layout_marginTop="16dp">
+                    android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSaveStatus"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
                         android:text="Save Status"
-                        app:cornerRadius="8dp"
-                        app:backgroundTint="#1F3A4A"
                         android:textColor="#FFFFFF"
-                        android:layout_marginEnd="8dp"/>
+                        app:backgroundTint="#1F3A4A"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnReceiveWaste"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="Receive Waste"
+                        android:textColor="#FF9800"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="#FF9800"
+                        app:strokeWidth="1dp"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFinishTreatment"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="Treatment Finish"
+                        android:textColor="#4CAF50"
+                        android:textSize="10sp"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="#4CAF50"
+                        app:strokeWidth="1dp"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnInTransit"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="In Transit"
+                        android:textColor="#FF9800"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="#FF9800"
+                        app:strokeWidth="1dp"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDelivered"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="Delivered"
+                        android:textColor="#4CAF50"
+                        android:textSize="10sp"
+                        app:cornerRadius="8dp"
+                        app:strokeColor="#4CAF50"
+                        app:strokeWidth="1dp"
+                        android:visibility="gone"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCancel"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:text="Cancel"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cancel"
+                        android:textColor="#C0392B"
                         app:cornerRadius="8dp"
                         app:strokeColor="#C0392B"
-                        app:strokeWidth="1dp"
-                        android:textColor="#C0392B"
-                        android:layout_marginStart="8dp"/>
+                        app:strokeWidth="1dp" />
                 </LinearLayout>
 
             </LinearLayout>

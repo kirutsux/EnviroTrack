@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_booking_details"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#F5F6FA">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvBookingId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Booking ID"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvActor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Actor / Facility"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvUpdatedAt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Updated at"
+            android:paddingBottom="16dp" />
+
+        <Button
+            android:id="@+id/btnViewCertificate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View Certificate" />
+
+    </LinearLayout>
+</ScrollView>

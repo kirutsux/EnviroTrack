@@ -1,18 +1,27 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.opms
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoReviewBinding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import org.json.JSONObject
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,12 +46,23 @@ class PtoReviewFragment : Fragment() {
         fetchPtoDetails()
 
         binding.btnEditInfo.setOnClickListener {
-            findNavController().popBackStack(R.id.ptoFormFragment, false)
+            if (currentDocId != null) {
+                val bundle = Bundle().apply {
+                    putString("applicationId", currentDocId) // Pass the document ID only
+                }
+                findNavController().navigate(
+                    R.id.action_ptoReviewFragment_to_ptoEditInfoFragment,
+                    bundle
+                )
+            } else {
+                Toast.makeText(requireContext(), "No application found to edit.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.btnSubmitApplication.setOnClickListener {
             submitApplication()
         }
+
     }
 
     private fun fetchPtoDetails() {
@@ -84,7 +104,7 @@ class PtoReviewFragment : Fragment() {
                 // --- Equipment Info ---
                 val equipmentName = doc.getString("equipmentName") ?: "-"
                 val fuelType = doc.getString("fuelType") ?: "-"
-                val emissions = doc.getString("emissions") ?: "-"
+                val emissions = doc.getString("emissionsSummary") ?: "-"
 
                 // --- Payment Info ---
                 val amount = doc.getDouble("amount") ?: 0.0
@@ -118,78 +138,72 @@ class PtoReviewFragment : Fragment() {
     }
 
     private fun submitApplication() {
-        if (uid == null || currentDocId == null) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val docId = currentDocId ?: run {
             Toast.makeText(requireContext(), "No application found to submit.", Toast.LENGTH_SHORT).show()
             return
         }
 
         val updateData = mapOf(
-            "status" to "Pending", // EMB will review later
+            "status" to "Pending",
             "submittedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_pto_applications").document(currentDocId!!)
+        db.collection("opms_pto_applications")
+            .document(docId)
             .update(updateData)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
 
-                // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "PTO Submission",
-                    message = "You have successfully submitted a Permit to Operate application.",
-                    type = "submission"
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = uid,       // PCO UID
+                    module = "PTO",         // Module name
+                    documentId = docId
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New PTO Application",
-                                message = "A new Permit to Operate has been submitted by a PCO.",
-                                type = "alert"
-                            )
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "PTO submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Notification error: ${response.code()}")
+                                Toast.makeText(requireContext(),
+                                    "Notification failed: ${response.code()}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
-                    }
 
-                findNavController().navigate(R.id.opmsDashboardFragment)
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Notification error: ${t.message}")
+                            Toast.makeText(requireContext(),
+                                "Failed to send notifications",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
+
+                // --------------------------------------------------------
+                // ✅ Navigate back to dashboard
+                // --------------------------------------------------------
+                findNavController().navigate(
+                    R.id.opmsDashboardFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.opmsDashboardFragment, true)
+                        .build()
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to submit application.", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

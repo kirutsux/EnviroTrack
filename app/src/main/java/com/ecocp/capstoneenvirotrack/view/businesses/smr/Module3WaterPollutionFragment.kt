@@ -12,12 +12,16 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentModule3WaterPollutionBinding
 import com.ecocp.capstoneenvirotrack.model.WaterPollution
 import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
+import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModelFactory
 
 class Module3WaterPollutionFragment : Fragment() {
 
     private var _binding: FragmentModule3WaterPollutionBinding? = null
     private val binding get() = _binding!!
-    private val smrViewModel: SmrViewModel by activityViewModels()
+
+    private val smrViewModel: SmrViewModel by activityViewModels {
+        SmrViewModelFactory(requireActivity().application)
+    }
     private val waterPollutionList = mutableListOf<WaterPollution>()
 
     override fun onCreateView(
@@ -31,38 +35,44 @@ class Module3WaterPollutionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnBack.setOnClickListener {
-            findNavController().navigateUp()
-        }
-
-        // Preload existing water pollution records if any
+        // Load existing records from ViewModel if any
         smrViewModel.smr.value?.waterPollutionRecords?.let { waterPollutionList.addAll(it) }
 
-        /** --- Add Water Pollution Entry --- */
+        setupListeners()
+    }
+
+    private fun setupListeners() {
+        binding.btnBack.setOnClickListener { findNavController().navigateUp() }
+
+        // Add a new water pollution record
         binding.AddWaterPollution.setOnClickListener {
             val record = collectWaterPollutionInput()
-            if (record != null) {
-                waterPollutionList.add(record)
-                smrViewModel.updateWaterPollutionRecords(waterPollutionList)
-                Toast.makeText(requireContext(), "Water Pollution record added!", Toast.LENGTH_SHORT).show()
-                clearFields()
+            record?.let {
+                if (!waterPollutionList.contains(it)) {
+                    waterPollutionList.add(it)
+                    smrViewModel.updateWaterPollutionRecords(waterPollutionList)
+                    Toast.makeText(requireContext(), "Water pollution record added!", Toast.LENGTH_SHORT).show()
+                    clearFields()
+                } else {
+                    Toast.makeText(requireContext(), "This record already exists.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
-        /** --- Save Module (partial save) --- */
+        // Save module partially
         binding.SaveModule.setOnClickListener {
             smrViewModel.updateWaterPollutionRecords(waterPollutionList)
             Toast.makeText(requireContext(), "Module saved successfully!", Toast.LENGTH_SHORT).show()
         }
 
-        /** --- Navigate to Module 4 (Air Pollution) --- */
+        // Navigate to Module 4
         binding.btnNextModule4.setOnClickListener {
             smrViewModel.updateWaterPollutionRecords(waterPollutionList)
             findNavController().navigate(R.id.action_module3WaterPollutionFragment_to_module4AirPollutionFragment)
         }
     }
 
-    /** --- Collect input fields into WaterPollution object --- */
+    /** Collect input fields safely into WaterPollution object */
     private fun collectWaterPollutionInput(): WaterPollution? {
         val domesticWastewater = binding.inputDomesticWastewater.text.toString().toDoubleOrNull() ?: 0.0
         val processWastewater = binding.inputProcessWastewater.text.toString().toDoubleOrNull() ?: 0.0
@@ -98,7 +108,7 @@ class Module3WaterPollutionFragment : Fragment() {
         )
     }
 
-    /** --- Clear input fields (after adding a record) --- */
+    /** Clear input fields after adding a record */
     private fun clearFields() = with(binding) {
         inputDomesticWastewater.text?.clear()
         inputProcessWastewater.text?.clear()

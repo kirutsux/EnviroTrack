@@ -51,6 +51,7 @@
         <include
             layout="@layout/item_summary_module"
             android:id="@+id/module1Container"
+            android:layout_marginVertical="3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -58,6 +59,7 @@
         <include
             layout="@layout/item_summary_module"
             android:id="@+id/module2Container"
+            android:layout_marginVertical="3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -65,6 +67,7 @@
         <include
             layout="@layout/item_summary_module"
             android:id="@+id/module3Container"
+            android:layout_marginVertical="3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -72,6 +75,7 @@
         <include
             layout="@layout/item_summary_module"
             android:id="@+id/module4Container"
+            android:layout_marginVertical="3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -79,14 +83,40 @@
         <include
             layout="@layout/item_summary_module"
             android:id="@+id/module5Container"
+            android:layout_marginVertical="3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <include
-            layout="@layout/item_aisummary_module"
-            android:id="@+id/module6Container"
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Attach Files (Required)"
+            android:textStyle="bold" />
+        <Button
+            android:id="@+id/btnAttachFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Select File for Submission" />
+
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:progress="0"
+            android:visibility="gone" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerAttachedFiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <!-- SUBMIT BUTTON -->
         <com.google.android.material.button.MaterialButton
@@ -98,5 +128,32 @@
             app:backgroundTint="@color/primary"
             android:textColor="@color/bg_white"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Pending"
+            android:layout_marginTop="24dp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/tvRejectionReason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Just cause"
+            android:layout_marginTop="8dp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnEditSmr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Edit SMR"
+            android:visibility="gone"/>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

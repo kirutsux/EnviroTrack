@@ -1,6 +1,7 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider.adapters
 
 import android.content.res.ColorStateList
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -13,7 +14,8 @@ import com.ecocp.capstoneenvirotrack.model.ServiceRequest
 class ServiceRequestAdapter(
     private val requests: MutableList<ServiceRequest>,
     private val isActiveTasks: Boolean,
-    private val onActionClick: (ServiceRequest) -> Unit
+    private val onActionClick: (ServiceRequest) -> Unit,
+    private var role: String = "transporter" // NEW: role support, default transporter
 ) : RecyclerView.Adapter<ServiceRequestAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemServiceRequestBinding) :
@@ -30,8 +32,18 @@ class ServiceRequestAdapter(
 
     // ⭐ Called by Sorting / Filtering
     fun updateList(newList: List<ServiceRequest>) {
+        Log.d("TSD_DEBUG", "Adapter.updateList called -> newList.size=${newList.size}. Sample statuses: ${
+            newList.take(5).map { it.bookingStatus }.joinToString()
+        }")
         requests.clear()
         requests.addAll(newList)
+        notifyDataSetChanged()
+    }
+
+
+    // NEW: allow fragment to change role at runtime (call after role detection)
+    fun setRole(role: String) {
+        this.role = role.lowercase()
         notifyDataSetChanged()
     }
 
@@ -61,8 +73,14 @@ class ServiceRequestAdapter(
             val badgeColor = ContextCompat.getColor(root.context, colorRes)
             bookingStatus.backgroundTintList = ColorStateList.valueOf(badgeColor)
 
-            // ⭐ Button behavior
-            btnView.text = if (isActiveTasks) "Update Status" else "View"
+            // ⭐ Button behavior adapts by role + activeTasks flag
+            if (role == "tsd" || role == "tsdfacility" || request.serviceTitle.startsWith("TSD", true)) {
+                // TSD view: prefer "Manage" for active tasks, otherwise "View"
+                btnView.text = if (isActiveTasks) "Manage" else "View"
+            } else {
+                // Transporter / default behavior
+                btnView.text = if (isActiveTasks) "Update Status" else "View"
+            }
 
             // ⭐ Image (fallback avatar)
             Glide.with(imgClient.context)

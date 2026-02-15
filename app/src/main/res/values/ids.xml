@@ -51,4 +51,5 @@
     <item name="subHeader" type="id" />
     <item name="fileHintText" type="id" />
     <item name="btnUploadFile" type="id" />
+    <item name="txtNoSubmissions" type="id"/>
 </resources>

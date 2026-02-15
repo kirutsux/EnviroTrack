@@ -1,5 +1,6 @@
 package com.ecocp.capstoneenvirotrack.view.businesses.cnc
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.net.Uri
 import android.os.Bundle
@@ -73,6 +74,7 @@ class CncFormFragment : Fragment() {
         }
 
         binding.btnSubmitCnc.setOnClickListener { validateAndSubmitForm() }
+        checkPendingCNCApplication()
     }
 
     private fun updateSubmitButtonState() {
@@ -93,6 +95,68 @@ class CncFormFragment : Fragment() {
         ).show()
     }
 
+    // ✅ New function to check pending CNC application
+    private fun checkPendingCNCApplication() {
+        val userUid = auth.currentUser?.uid ?: return
+
+        firestore.collection("cnc_applications")
+            .whereEqualTo("uid", userUid)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val doc = querySnapshot.documents.first()
+                    val status = doc.getString("status") ?: "Pending"
+                    val paymentStatus = doc.getString("paymentStatus") ?: "Unpaid"
+                    val formData = doc.data ?: emptyMap<String, Any>()
+
+                    when {
+                        // Pending & payment not done → continue to payment
+                        status.equals("Pending", true) && paymentStatus.equals("Unpaid", true) -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Pending Application Found")
+                                .setMessage("You have a pending CNC application. Do you want to continue to payment?")
+                                .setPositiveButton("Yes") { _, _ ->
+                                    val bundle = Bundle().apply {
+                                        putString("documentId", doc.id)
+                                        formData.forEach { (k, v) -> putString(k, v.toString()) }
+                                        putString("paymentInfo", "₱50 - Unpaid")
+                                    }
+                                    findNavController().navigate(R.id.action_cncFormFragment_to_cncPaymentFragment, bundle)
+                                }
+                                .setNegativeButton("No", null)
+                                .show()
+                        }
+
+                        // Pending & paid → continue to review (ignore submittedTimestamp)
+                        status.equals("Pending", true) && paymentStatus.equals("Paid", true) -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Paid Application Found")
+                                .setMessage("You have already paid for this CNC application. Do you want to continue to review your application?")
+                                .setPositiveButton("Yes") { _, _ ->
+                                    val bundle = Bundle().apply {
+                                        putString("documentId", doc.id)
+                                        formData.forEach { (k, v) -> putString(k, v.toString()) }
+                                        putString("paymentInfo", "₱50 - Paid")
+                                    }
+                                    findNavController().navigate(R.id.action_cncFormFragment_to_cncReviewFragment, bundle)
+                                }
+                                .setNegativeButton("No", null)
+                                .show()
+                        }
+
+                        else -> { /* Do nothing for submitted or other statuses */ }
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to check previous CNC application.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+    // Existing validate and submit logic
     private fun validateAndSubmitForm() {
         val formData = mapOf(
             "companyName" to binding.inputCompanyName.text.toString().trim(),
@@ -166,7 +230,6 @@ class CncFormFragment : Fragment() {
         dataToSave["currency"] = "PHP"
         dataToSave["applicationType"] = "Certificate of Non-Coverage (CNC)"
         dataToSave["paymentStatus"] = "Unpaid"
-        dataToSave["submittedTimestamp"] = Timestamp.now()
         dataToSave["timestamp"] = FieldValue.serverTimestamp()
         dataToSave["uid"] = userUid
 

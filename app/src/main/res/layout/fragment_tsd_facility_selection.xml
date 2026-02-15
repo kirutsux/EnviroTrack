@@ -31,30 +31,51 @@
             android:textColor="@android:color/holo_green_dark"
             android:layout_marginBottom="8dp" />
 
+        <TextView
+            android:id="@+id/tvSelectedTransporter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Transporter: Not linked"
+            android:textStyle="bold"
+            android:textColor="@android:color/holo_blue_dark"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/etWasteType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Waste Type"
+            android:layout_marginBottom="8dp" />
+
         <EditText
             android:id="@+id/etTreatmentInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Type of Waste for Treatment" />
+            android:hint="Type of Waste for Treatment"
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/etQuantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Quantity" />
+            android:hint="Quantity"
+            android:inputType="numberDecimal"
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/etPreferredDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Preferred Delivery Date"
-            android:focusable="false" />
+            android:focusable="false"
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnUploadCertificate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Upload Generator Registration Certificate" />
+            android:text="Upload Generator Registration Certificate"
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:id="@+id/tvCertificateStatus"
@@ -62,13 +83,14 @@
             android:layout_height="wrap_content"
             android:text="No file uploaded"
             android:textSize="12sp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnUploadPreviousRecord"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Upload Previous Transport Record (optional)" />
+            android:text="Upload Previous Transport Record (optional)"
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:id="@+id/tvPrevRecordStatus"
@@ -84,4 +106,6 @@
             android:layout_height="wrap_content"
             android:text="Submit Booking" />
     </LinearLayout>
+
+
 </ScrollView>

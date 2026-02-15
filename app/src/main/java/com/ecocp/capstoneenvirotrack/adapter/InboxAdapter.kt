@@ -8,11 +8,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.ecocp.capstoneenvirotrack.R
-import com.ecocp.capstoneenvirotrack.model.Provider
+import com.ecocp.capstoneenvirotrack.model.InboxItem
 
 class InboxAdapter(
-    private val providerList: List<Provider>,
-    private val onItemClick: (Provider) -> Unit
+    private val itemList: List<InboxItem>,
+    private val onItemClick: (InboxItem) -> Unit
 ) : RecyclerView.Adapter<InboxAdapter.InboxViewHolder>() {
 
     inner class InboxViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -20,16 +20,16 @@ class InboxAdapter(
         private val usernameText: TextView = itemView.findViewById(R.id.usernameText)
         private val lastMessageText: TextView = itemView.findViewById(R.id.lastMessageText)
 
-        fun bind(provider: Provider) {
-            usernameText.text = provider.name
-            lastMessageText.text = provider.description
+        fun bind(item: InboxItem) {
+            usernameText.text = item.name
+            lastMessageText.text = item.description
 
             Glide.with(itemView.context)
-                .load(provider.imageUrl)
+                .load(item.imageUrl)
                 .placeholder(R.drawable.sample_profile)
                 .into(profileImage)
 
-            itemView.setOnClickListener { onItemClick(provider) }
+            itemView.setOnClickListener { onItemClick(item) }
         }
     }
 
@@ -40,8 +40,8 @@ class InboxAdapter(
     }
 
     override fun onBindViewHolder(holder: InboxViewHolder, position: Int) {
-        holder.bind(providerList[position])
+        holder.bind(itemList[position])
     }
 
-    override fun getItemCount(): Int = providerList.size
+    override fun getItemCount(): Int = itemList.size
 }

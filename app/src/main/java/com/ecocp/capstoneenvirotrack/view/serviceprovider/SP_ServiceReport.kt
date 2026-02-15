@@ -1,132 +1,403 @@
 package com.ecocp.capstoneenvirotrack.view.serviceprovider
 
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import androidx.core.content.FileProvider
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSpServiceReportBinding
-import com.google.android.material.button.MaterialButton
-import java.io.File
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class SP_ServiceReport : Fragment() {
 
     private var _binding: FragmentSpServiceReportBinding? = null
     private val binding get() = _binding!!
 
-    // Optional: track download state so UI can show / hide progress
-    private var isDownloading = false
+    private val db = FirebaseFirestore.getInstance()
+    private var tsdListener: ListenerRegistration? = null
+
+    // ids passed as args
+    private var transportDocId: String? = null
+    private var tsdDocId: String? = null
+
+    // Attachment handling
+    private var currentAttachmentUrl: String? = null
+    private var currentFileName: String? = null
+    private val DEV_FALLBACK = "/mnt/data/16bb7df0-6158-4979-b2a0-49574fc2bb5e.png"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSpServiceReportBinding.inflate(inflater, container, false)
-        val view = binding.root
 
-        // ---- safe wiring using binding (no casting mistakes) ----
-        binding.btnBack.setOnClickListener {
-            // navigate back
-            findNavController().popBackStack()
-        }
-
-        // Buttons in your XML are ImageButton for download/share and MaterialButtons for footer:
-        binding.btnDownload.setOnClickListener { startDownload() }
-        binding.btnShare.setOnClickListener { shareReport() }
-
-        binding.btnShareReport.setOnClickListener { shareReport() }
+        binding.btnBack.setOnClickListener { findNavController().popBackStack() }
         binding.btnBackToList.setOnClickListener { findNavController().popBackStack() }
+        binding.btnDownload.setOnClickListener { onDownloadClicked() }
 
-        // Populate fields from bundle arguments (if any)
-        populateFromArgs()
+        // Read args
+        transportDocId = arguments?.getString("transportDocId") // transporter opens with this
+        tsdDocId = arguments?.getString("tsdDocId")
+            ?: arguments?.getString("requestId")
+                    ?: arguments?.getString("bookingId")
 
-        return view
+        // Decide mode and load appropriate data
+        setupModeAndLoad()
+
+        return binding.root
     }
 
-    private fun populateFromArgs() {
-        // Read the bundle passed from CompletedServices (if any)
-        val args = arguments
-        args?.let {
-            val company = it.getString("companyName") ?: ""
-            val serviceTitle = it.getString("serviceTitle") ?: ""
-            val status = it.getString("status") ?: ""
-            val compliance = it.getString("compliance") ?: ""
-            val clientName = it.getString("clientName") ?: ""
-            val requestId = it.getString("requestId") ?: ""
+    private fun setupModeAndLoad() {
 
-            // Set UI values (IDs must match your XML)
-            binding.txtCompanyName.text = company
-            binding.txtServiceType.text = serviceTitle
-            binding.txtRemarks.text = status + if (compliance.isNotBlank()) " • $compliance" else ""
-            // optionally use other textviews
-            if (requestId.isNotBlank()) binding.txtReportRef.text = "Ref: $requestId"
+        val explicitTransporter = !transportDocId.isNullOrBlank()
 
-            // If you have a file name passed in bundle:
-            val fileName = it.getString("fileName")
-            if (!fileName.isNullOrBlank()) {
-                binding.txtFileName.text = fileName
-                // optionally set file size text if passed
-                val fileSize = it.getString("fileSize")
-                if (!fileSize.isNullOrBlank()) binding.txtFileSize.text = fileSize
+        if (explicitTransporter) {
+            showTransporterUIAndLoad(transportDocId!!)
+            return
+        }
+
+        // ↓ If only tsdDocId/requestId is passed, detect which collection it belongs to
+        val candidateId = tsdDocId
+        if (candidateId.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "No booking id provided", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Check if this ID exists in transport_bookings
+        db.collection("transport_bookings").document(candidateId).get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    // This is actually a TRANSPORT booking → Transporter view!
+                    showTransporterUIAndLoad(candidateId)
+                } else {
+                    // Not in transport → treat it as a TSD booking
+                    showTsdUIAndSubscribe(candidateId)
+                }
+            }
+            .addOnFailureListener {
+                // If error, default to TSD to avoid breaking anything
+                showTsdUIAndSubscribe(candidateId)
+            }
+    }
+
+    private fun showTransporterUIAndLoad(id: String) {
+        binding.tsdSection.visibility = View.GONE
+
+        binding.labelCompletionDate.visibility = View.VISIBLE
+        binding.txtCompletionDate.visibility = View.VISIBLE
+        binding.wasteTypeRow.visibility = View.VISIBLE
+
+        binding.txtProviderLabel.text = "Service Provider"
+
+        loadTransporterDoc(id)
+    }
+
+    private fun showTsdUIAndSubscribe(id: String) {
+        binding.tsdSection.visibility = View.VISIBLE
+
+        binding.labelCompletionDate.visibility = View.GONE
+        binding.txtCompletionDate.visibility = View.GONE
+        binding.wasteTypeRow.visibility = View.GONE
+
+        binding.txtProviderLabel.text = "Facility Name"
+
+        subscribeToTsd(id)
+    }
+
+
+
+    private fun loadTransporterDoc(transportId: String) {
+        binding.progressDownload.visibility = View.VISIBLE
+        db.collection("transport_bookings").document(transportId).get()
+            .addOnSuccessListener { doc ->
+                binding.progressDownload.visibility = View.GONE
+                val m = doc.data ?: emptyMap<String, Any>()
+
+                // Map relevant transporter fields to UI (keep layout same)
+                binding.txtBookingId.text = (m["bookingId"] as? String) ?: doc.id
+                binding.txtReportRef.text = "Ref: ${binding.txtBookingId.text}"
+
+                // provider/company
+                val providerName = (m["serviceProviderCompany"] as? String)?.let { comp ->
+                    val pname = (m["serviceProviderName"] as? String).orEmpty()
+                    if (pname.isBlank()) comp else "$comp - $pname"
+                } ?: (m["serviceProviderName"] as? String) ?: ""
+                binding.txtProviderName.text = providerName
+                binding.txtProviderContact.text = (m["providerContact"] as? String) ?: (m["contactNumber"] as? String) ?: ""
+
+                // Booking date / Completion date (transport UI expects completion)
+                val bookingTs = (m["bookingDate"] as? Timestamp)
+                    ?: (m["dateBooked"] as? Timestamp)
+                    ?: (m["dateCreated"] as? Timestamp)
+                binding.txtBookingDate.text = bookingTs?.toDate()?.let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString()
+                } ?: ""
+
+                val completedTs = (m["completedAt"] as? Timestamp)
+                    ?: (m["receivedAt"] as? Timestamp)
+                    ?: (m["confirmedAt"] as? Timestamp)
+                binding.txtCompletionDate.text = completedTs?.toDate()?.let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString()
+                } ?: ""
+
+                // Waste type (transport uses this)
+                binding.txtWasteType.text = (m["wasteType"] as? String) ?: (m["waste"] as? String) ?: ""
+
+                // quantity / remarks
+                binding.txtQuantity.text = when (val q = m["quantity"]) {
+                    is Number -> q.toString()
+                    is String -> q
+                    else -> ""
+                }
+                binding.txtRemarks.text = (m["specialInstructions"] as? String)
+                    ?: (m["notes"] as? String)
+                            ?: (m["remarks"] as? String)
+                            ?: binding.txtRemarks.text
+
+                // ---------- PAYMENT: show "Paid" if paymentStatus == "Paid", else show amount ----------
+                val paymentStatus = (m["paymentStatus"] as? String)?.trim()
+                val totalPayment = when (val t = m["totalPayment"]) {
+                    is Number -> t.toDouble()
+                    is String -> t.toDoubleOrNull()
+                    else -> null
+                }
+                val amountFieldNumber = when (val a = m["amount"]) {
+                    is Number -> a.toDouble()
+                    is String -> a.toDoubleOrNull()
+                    else -> null
+                }
+                val rate = when (val r = m["rate"]) {
+                    is Number -> r.toDouble()
+                    is String -> r.toDoubleOrNull()
+                    else -> null
+                }
+
+                val formattedAmount = when {
+                    totalPayment != null -> "₱${"%,.2f".format(totalPayment)}"
+                    amountFieldNumber != null -> "₱${"%,.2f".format(amountFieldNumber)}"
+                    rate != null -> "₱${"%,.2f".format(rate)}"
+                    (m["amount"] as? String).isNullOrBlank().not() -> (m["amount"] as? String) ?: "₱0"
+                    else -> "₱0"
+                }
+
+                binding.txtPayment.text = if (!paymentStatus.isNullOrBlank() && paymentStatus.equals("paid", ignoreCase = true)) {
+                    "Paid"
+                } else {
+                    formattedAmount
+                }
+
+                // Attachments (transport fields)
+                val attachments = mutableListOf<String>()
+                (m["collectionProof"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+                (m["finalReportUrl"] as? String)?.let { attachments.add(it) }
+                (m["certificateUrl"] as? String)?.let { attachments.add(it) }
+                (m["attachments"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+                (m["fileUrl"] as? String)?.let { attachments.add(it) }
+
+                if (attachments.isEmpty()) attachments.add(DEV_FALLBACK)
+
+                currentAttachmentUrl = attachments.firstOrNull()
+                currentFileName = currentAttachmentUrl?.substringAfterLast("/")?.substringBefore("?") ?: "attachment"
+                binding.txtFileName.text = currentFileName
+                binding.txtFileSize.text = "" // optional
+
+                if (isImageUrl(currentAttachmentUrl)) {
+                    Glide.with(this).load(currentAttachmentUrl).into(binding.imgFileIcon)
+                } else {
+                    binding.imgFileIcon.setImageResource(R.drawable.ic_pdf)
+                }
+
+                // Show facilityName/location in provider/company fields if present
+                // Prefer transporter/company fields for the header (transport POV).
+                val companyHeader = (m["serviceProviderCompany"] as? String)?.takeIf { it.isNotBlank() }
+                    ?: (m["companyName"] as? String)?.takeIf { it.isNotBlank() }
+                    ?: (m["serviceProviderName"] as? String)?.takeIf { it.isNotBlank() }
+                    // fallback to facilityName only if none of the transporter fields are present
+                    ?: (m["facilityName"] as? String)?.takeIf { it.isNotBlank() }
+                    ?: "Unknown"
+
+                binding.txtCompanyName.text = companyHeader
+                binding.txtCompanyAddress.text = (m["location"] as? String) ?: binding.txtCompanyAddress.text
+
+// Also ensure the small status pill reflects transport status when in transporter view
+                binding.txtSmallStatus.text = (m["bookingStatus"] as? String) ?: (m["status"] as? String) ?: binding.txtSmallStatus.text
+
+            }
+            .addOnFailureListener { e ->
+                binding.progressDownload.visibility = View.GONE
+                Toast.makeText(requireContext(), "Failed loading transport report: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+    private fun subscribeToTsd(tsdId: String) {
+        binding.progressDownload.visibility = View.VISIBLE
+        tsdListener?.remove()
+
+        val ref = db.collection("tsd_bookings").document(tsdId)
+        tsdListener = ref.addSnapshotListener { snap, err ->
+            binding.progressDownload.visibility = View.GONE
+            if (err != null) {
+                Toast.makeText(requireContext(), "Error loading report: ${err.message}", Toast.LENGTH_SHORT).show()
+                return@addSnapshotListener
+            }
+            if (snap == null || !snap.exists()) {
+                Toast.makeText(requireContext(), "Report not found", Toast.LENGTH_SHORT).show()
+                return@addSnapshotListener
+            }
+
+            val m = snap.data ?: emptyMap<String, Any>()
+
+            // bookingId & ref
+            val bookingId = (m["bookingId"] as? String) ?: snap.id
+            binding.txtBookingId.text = bookingId
+            binding.txtReportRef.text = "Ref: $bookingId"
+
+            // status (optional)
+            binding.txtSmallStatus.text = (m["bookingStatus"] as? String) ?: (m["status"] as? String) ?: ""
+
+            // --- TOP HEADER: show wasteType as company header (per your request) ---
+            val wasteType = (m["wasteType"] as? String)?.trim()
+                .takeUnless { it.isNullOrEmpty() }
+                ?: (m["treatmentInfo"] as? String)?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: (m["treatment"] as? String)?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: ""
+
+            // Prefer tsdName for provider slot, fallback to facilityName/companyName
+            val tsdName = (m["tsdName"] as? String)?.trim().orEmpty()
+            val facilityName = (m["facilityName"] as? String).orEmpty()
+            val companyHeader = if (wasteType.isNotBlank()) {
+                wasteType
+            } else {
+                tsdName.ifEmpty { facilityName }
+            }
+
+            binding.txtCompanyName.text = companyHeader.ifEmpty { "Unknown" }
+
+            // Show tsdName (or facility) in providerName slot
+            binding.txtProviderName.text = if (tsdName.isNotBlank()) tsdName else facilityName
+
+            // contact number
+            binding.txtProviderContact.text = (m["contactNumber"] as? String)
+                ?: (m["providerContact"] as? String)
+                        ?: ""
+
+            // location -> company address & explicit txtLocation
+            val location = (m["location"] as? String).orEmpty()
+            binding.txtCompanyAddress.text = location
+            binding.txtLocation.text = location
+
+            // ---------- booking date slot: prefer confirmedAt, else fallback to canonical date ----------
+            val confirmedTs = (m["confirmedAt"] as? com.google.firebase.Timestamp)
+                ?: (m["confirmed_at"] as? com.google.firebase.Timestamp) // tolerant key
+            if (confirmedTs != null) {
+                binding.txtBookingDate.text = confirmedTs.toDate().let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString()
+                }
+            } else {
+                val bookingTs = (m["dateCreated"] as? com.google.firebase.Timestamp)
+                    ?: (m["bookingDate"] as? com.google.firebase.Timestamp)
+                    ?: (m["dateBooked"] as? com.google.firebase.Timestamp)
+                binding.txtBookingDate.text = bookingTs?.toDate()?.let {
+                    DateFormat.format("MMM dd, yyyy • hh:mm a", it).toString()
+                } ?: ""
+            }
+
+            // quantity
+            binding.txtQuantity.text = when (val q = m["quantity"]) {
+                is Number -> q.toString()
+                is String -> q
+                else -> ""
+            }
+
+            // payment: rate or totalPayment -> txtPayment (keeps previous behavior)
+            val rate = (m["rate"] as? Number)?.toDouble()
+            val total = (m["totalPayment"] as? Number)?.toDouble()
+            binding.txtPayment.text = when {
+                total != null -> "₱${total.toInt()}"
+                rate != null -> "₱${rate.toInt()}"
+                else -> "₱0"
+            }
+
+            // treatmentInfo -> txtTreatmentInfo
+            binding.txtTreatmentInfo.text = (m["treatmentInfo"] as? String) ?: ""
+
+            // Attachments (unchanged)
+            val attachments = mutableListOf<String>()
+            (m["collectionProof"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+            (m["certificateUrl"] as? String)?.let { attachments.add(it) }
+            (m["previousRecordUrl"] as? String)?.let { attachments.add(it) }
+            (m["attachments"] as? List<*>)?.mapNotNull { it as? String }?.let { attachments.addAll(it) }
+            (m["fileUrl"] as? String)?.let { attachments.add(it) }
+            (m["attachmentUrl"] as? String)?.let { attachments.add(it) }
+
+            if (attachments.isEmpty()) attachments.add(DEV_FALLBACK)
+
+            currentAttachmentUrl = attachments.firstOrNull()
+            currentFileName = currentAttachmentUrl?.substringAfterLast("/")?.substringBefore("?") ?: "attachment"
+            binding.txtFileName.text = currentFileName
+            binding.txtFileSize.text = "" // optional
+
+            // show thumbnail if image, otherwise PDF icon
+            if (isImageUrl(currentAttachmentUrl)) {
+                Glide.with(this).load(currentAttachmentUrl).into(binding.imgFileIcon)
+            } else {
+                binding.imgFileIcon.setImageResource(R.drawable.ic_pdf)
             }
         }
     }
 
-    private fun startDownload() {
-        // Basic stub: show progress bar while downloading, then hide it.
-        // Replace this with your real download logic (WorkManager / Retrofit / OkHttp).
-        if (isDownloading) return
 
-        isDownloading = true
-        binding.progressDownload.visibility = View.VISIBLE
-        binding.progressDownload.progress = 0
 
-        // Simulate progress quickly on UI thread (remove when using real downloader)
-        binding.progressDownload.postDelayed({
-            binding.progressDownload.progress = 100
-            binding.progressDownload.visibility = View.GONE
-            isDownloading = false
-            // after download, set txtFileName/txtFileSize to the actual downloaded file if needed
-        }, 1200)
+    private fun isImageUrl(url: String?): Boolean {
+        if (url == null) return false
+        val u = url.lowercase()
+        return u.endsWith(".jpg") || u.endsWith(".jpeg") || u.endsWith(".png") || u.contains("image")
     }
 
-    private fun shareReport() {
-        // If you already downloaded the file and have a File reference, share via FileProvider.
-        // This is an example that assumes you have a file in app's cache directory named "Completion_Report.pdf".
-        // Replace with your actual file path.
+    private fun onDownloadClicked() {
+        val url = currentAttachmentUrl
+        if (url.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "No document attached", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // first check if file exists; if not, show share of a link or simple text
-        val cachedFile = File(requireContext().cacheDir, "Completion_Report.pdf")
-        if (cachedFile.exists()) {
-            val uri: Uri = FileProvider.getUriForFile(
-                requireContext(),
-                "${requireContext().packageName}.fileprovider",
-                cachedFile
-            )
+        // open external viewer first
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (_: Exception) {}
 
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "application/pdf"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startActivity(Intent.createChooser(shareIntent, "Share report"))
-        } else {
-            // fallback: share a simple text message
-            val textIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, "Service report for ${binding.txtCompanyName.text}")
-            }
-            startActivity(Intent.createChooser(textIntent, "Share report"))
+        // also enqueue download
+        try {
+            val dm = requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val req = DownloadManager.Request(Uri.parse(url))
+                .setTitle(currentFileName ?: "file")
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, currentFileName)
+
+            dm.enqueue(req)
+            Toast.makeText(requireContext(), "Downloading…", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        tsdListener?.remove()
         _binding = null
     }
 }

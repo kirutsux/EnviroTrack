@@ -12,6 +12,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.navOptions
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.databinding.FragmentCncReviewDetailsBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -19,7 +23,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
+import retrofit2.Call
 
 class CncReviewDetailsFragment : Fragment() {
 
@@ -115,45 +124,47 @@ class CncReviewDetailsFragment : Fragment() {
                 binding.txtAmount.text = "₱%.2f %s".format(amount, currency)
                 binding.txtPaymentMethod.text = "Method: $paymentMethod"
                 binding.txtPaymentStatus.text = "Status: $paymentStatus"
+
+                val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
+                val statusText = status.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+
                 binding.txtPaymentTimestamp.text =
                     "Paid on: ${paymentTs?.let { dateFormat.format(it) } ?: "Not paid"}"
                 binding.txtSubmittedTimestamp.text =
-                    "Submitted on: ${submittedTs?.let { dateFormat.format(it) } ?: "Not submitted"}"
+                    "Submitted on: ${submittedTs?.let { dateFormat.format(it) } ?: "Not submitted"}\nStatus: $statusText"
 
-                // 🔹 Review Status Handling
-                val status = doc.getString("status")?.lowercase(Locale.getDefault()) ?: "pending"
+                // 🔹 Feedback Handling
                 val feedback = doc.getString("feedback") ?: ""
-
-                when (status) {
-                    "approved" -> {
-                        binding.btnApprove.visibility = View.GONE
-                        binding.btnReject.visibility = View.GONE
-                        binding.inputFeedback.visibility = View.GONE
-                    }
-                    "rejected" -> {
-                        binding.btnApprove.visibility = View.GONE
-                        binding.btnReject.visibility = View.GONE
-
-                        // Show feedback as read-only for rejected applications
-                        binding.inputFeedback.visibility = View.VISIBLE
-                        binding.inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
-                        binding.inputFeedback.isEnabled = false
-                        binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
-                    }
-                    else -> {
-                        // Show normal input and buttons for pending applications
-                        binding.btnApprove.visibility = View.VISIBLE
-                        binding.btnReject.visibility = View.VISIBLE
-                        binding.inputFeedback.visibility = View.VISIBLE
-                        binding.inputFeedback.isEnabled = true
-                        binding.inputFeedback.setText("")
-                    }
+                if (feedback.isNotBlank()) {
+                    binding.inputFeedback.visibility = View.VISIBLE
+                    binding.inputFeedback.setText(feedback)
+                    binding.inputFeedback.isEnabled = false
+                    binding.inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+                } else {
+                    // Only show editable input if status is pending
+                    binding.inputFeedback.visibility = if (status == "pending") View.VISIBLE else View.GONE
+                    binding.inputFeedback.isEnabled = true
+                    binding.inputFeedback.setText("")
                 }
+
+                // 🔹 Certificate Handling
+                val certificateUrl = doc.getString("certificateUrl")
+                binding.btnUploadCertificate.visibility = if (status == "pending") View.VISIBLE else View.GONE
+                if (status == "approved" && !certificateUrl.isNullOrBlank()) {
+                    val fileName = certificateUrl.substringAfterLast('/').substringBefore('?')
+                    binding.tvSelectedFile.text = fileName
+                    uploadedCertificateUrl = certificateUrl
+                }
+
+                // 🔹 Approve/Reject Buttons
+                binding.btnApprove.visibility = if (status == "pending") View.VISIBLE else View.GONE
+                binding.btnReject.visibility = if (status == "pending") View.VISIBLE else View.GONE
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error loading CNC details.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     // 🔹 Show file links
     private fun displayFileLinks(fileLinks: List<String>) {
@@ -202,8 +213,12 @@ class CncReviewDetailsFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please upload a CNC certificate first.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            updateStatus("Approved", "Application approved by EMB.", uploadedCertificateUrl!!)
+
+            // Use the feedback typed by the user if any, otherwise leave empty
+            val feedbackText = binding.inputFeedback.text.toString().trim()
+            updateStatus("Approved", feedbackText, uploadedCertificateUrl!!)
         }
+
 
         // ✅ Reject
         binding.btnReject.setOnClickListener {
@@ -277,6 +292,9 @@ class CncReviewDetailsFragment : Fragment() {
         val id = applicationId ?: return
         val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
         val updateData = mutableMapOf<String, Any>(
             "status" to status,
             "feedback" to feedback,
@@ -284,54 +302,76 @@ class CncReviewDetailsFragment : Fragment() {
         )
         certificateUrl?.let { updateData["certificateUrl"] = it }
 
-        db.collection("cnc_applications").document(id)
+        val collectionName = "cnc_applications"
+
+        // Step 1: Firestore update
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                // 🔔 Notifications
-                db.collection("cnc_applications").document(id).get()
+                Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
+
+                // Step 2: Fetch PCO UID
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoId = doc.getString("uid") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("companyName") ?: "Unknown Company"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notifPCO = hashMapOf(
-                            "receiverId" to pcoId,
-                            "receiverType" to "pco",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "Application Approved" else "Application Rejected",
-                            "message" to if (isApproved)
-                                "Your CNC application has been approved. Certificate is now available."
-                            else
-                                "Your CNC application has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoId,
+                            embId = embUid,
+                            module = "CNC",
+                            feedback = feedback
                         )
 
-                        val notifEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "CNC Application ${status.uppercase()}",
-                            "message" to "You have $status a CNC application by $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
-                        )
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "Status update notifications sent.")
+                                    } else {
+                                        Log.e("NOTIF", "Notification error: ${response.code()}")
+                                        Toast.makeText(safeContext,
+                                            "Notification failed: ${response.code()}",
+                                            Toast.LENGTH_SHORT).show()
+                                    }
+                                }
 
-                        db.collection("notifications").add(notifPCO)
-                        db.collection("notifications").add(notifEMB)
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext,
+                                        "Notification failed: ${t.message}",
+                                        Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Return to dashboard
+                        if (isAdded) navigateToDashboard()
                     }
-
-                // ✅ Return to dashboard
+            }
+            .addOnFailureListener {
                 if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embcnc_nav_host_fragment)
-                    navController.popBackStack(R.id.cncEmbDashboardFragment, false)
+                    Toast.makeText(safeContext, "Failed to update status: ${it.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
+
+    private fun navigateToDashboard() {
+        val navController = requireActivity().findNavController(R.id.embhwms_nav_host_fragment)
+        navController.navigate(
+            R.id.hwmsEmbDashboardFragment,
+            null,
+            navOptions {
+                popUpTo(R.id.hwmsEmbDashboardFragment) { inclusive = true } // Clear everything above dashboard
+            }
+        )
+    }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

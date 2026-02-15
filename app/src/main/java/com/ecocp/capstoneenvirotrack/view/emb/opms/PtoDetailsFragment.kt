@@ -12,12 +12,20 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.api.UpdateStatusRequest
 import com.ecocp.capstoneenvirotrack.databinding.FragmentPtoDetails2Binding
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
+import retrofit2.Call
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -134,13 +142,29 @@ class PtoDetailsFragment : Fragment() {
 
                         // ✅ Feedback visibility
                         when (status.lowercase(Locale.getDefault())) {
-                            "approved", "rejected" -> {
+                            "approved" -> {
+                                btnApprove.visibility = View.GONE
+                                btnReject.visibility = View.GONE
+                                inputFeedback.visibility = if (feedback.isNotBlank()) View.VISIBLE else View.GONE
+                                inputFeedback.setText(feedback)
+                                inputFeedback.isEnabled = false
+                                inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+
+                                // ✅ Show certificate URL if approved
+                                val certificateUrl = doc.getString("certificateUrl")
+                                tvSelectedFile.visibility = if (!certificateUrl.isNullOrBlank()) View.VISIBLE else View.GONE
+                                tvSelectedFile.text = certificateUrl?.substringAfterLast('/')?.substringBefore('?') ?: ""
+                            }
+                            "rejected" -> {
                                 btnApprove.visibility = View.GONE
                                 btnReject.visibility = View.GONE
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.setText(feedback.ifBlank { "No feedback provided." })
                                 inputFeedback.isEnabled = false
                                 inputFeedback.setTextColor(resources.getColor(android.R.color.darker_gray))
+
+                                // ❌ Hide certificate if rejected
+                                tvSelectedFile.visibility = View.GONE
                             }
                             else -> {
                                 btnApprove.visibility = View.VISIBLE
@@ -148,6 +172,9 @@ class PtoDetailsFragment : Fragment() {
                                 inputFeedback.visibility = View.VISIBLE
                                 inputFeedback.isEnabled = true
                                 inputFeedback.setText(feedback)
+
+                                // Hide certificate for pending
+                                tvSelectedFile.visibility = View.GONE
                             }
                         }
                     }
@@ -290,71 +317,77 @@ class PtoDetailsFragment : Fragment() {
     }
 
     // ------------------------------------------------------------
-    // APPROVE / REJECT STATUS UPDATE
-    // ------------------------------------------------------------
+// APPROVE / REJECT STATUS UPDATE
+// ------------------------------------------------------------
     private fun updateStatus(status: String) {
         val id = applicationId ?: return
+        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val feedback = binding.inputFeedback.text.toString().trim()
-        val embUid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
 
+        if (!isAdded || context == null) return
+        val safeContext = requireContext()
+
+        val collectionName = "opms_pto_applications"
+
+        // Step 1: Update Firestore
         val updateData = mapOf(
             "status" to status,
             "feedback" to feedback,
             "reviewedTimestamp" to Timestamp.now()
         )
 
-        db.collection("opms_pto_applications").document(id)
+        db.collection(collectionName).document(id)
             .update(updateData)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Application $status successfully!", Toast.LENGTH_SHORT).show()
 
-                if (isAdded) {
-                    val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
-                    navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
-                }
-
-                // ✅ Notifications
-                db.collection("opms_pto_applications").document(id).get()
+                // Step 2: Fetch PCO UID
+                db.collection(collectionName).document(id).get()
                     .addOnSuccessListener { doc ->
                         val pcoUid = doc.getString("uid") ?: return@addOnSuccessListener
-                        val companyName = doc.getString("establishmentName") ?: "Unknown Establishment"
-                        val isApproved = status.equals("Approved", ignoreCase = true)
 
-                        val notificationForPCO = hashMapOf(
-                            "receiverId" to pcoUid,
-                            "receiverType" to "pco",
-                            "senderId" to embUid,
-                            "title" to if (isApproved) "PTO Application Approved" else "PTO Application Rejected",
-                            "message" to if (isApproved)
-                                "Your Permit to Operate application has been approved."
-                            else
-                                "Your Permit to Operate application has been rejected. Please review the feedback.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
+                        // ---------------------------------------------------------
+                        // 🔔 CALL BACKEND API FOR EMB STATUS UPDATE NOTIFICATION
+                        // ---------------------------------------------------------
+                        val request = UpdateStatusRequest(
+                            applicationId = id,
+                            newStatus = status,
+                            pcoId = pcoUid,
+                            embId = embUid,
+                            module = "PTO",
+                            feedback = feedback
                         )
 
-                        val notificationForEMB = hashMapOf(
-                            "receiverId" to embUid,
-                            "receiverType" to "emb",
-                            "senderId" to embUid,
-                            "title" to "PTO Application ${status.uppercase()}",
-                            "message" to "You have $status a PTO application for $companyName.",
-                            "timestamp" to Timestamp.now(),
-                            "isRead" to false,
-                            "applicationId" to id
-                        )
+                        RetrofitClient.instance.updateStatus(request)
+                            .enqueue(object : retrofit2.Callback<Void> {
+                                override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                                    if (response.isSuccessful) {
+                                        Log.d("NOTIF", "PTO status update notifications sent.")
+                                        Toast.makeText(safeContext, "Application $status successfully!", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Log.e("NOTIF", "Notification error: ${response.code()}")
+                                        Toast.makeText(safeContext, "Notification failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
 
-                        db.collection("notifications").add(notificationForPCO)
-                        db.collection("notifications").add(notificationForEMB)
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Log.e("NOTIF", "Notification error: ${t.message}")
+                                    Toast.makeText(safeContext, "Notification failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+
+                        // Step 3: Navigate back to dashboard safely
+                        if (isAdded) {
+                            val navController = requireActivity().findNavController(R.id.embopms_nav_host_fragment)
+                            navController.popBackStack(R.id.opmsEmbDashboardFragment, false)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(safeContext, "Failed to fetch application data: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("PTO_REVIEW", "❌ Failed to fetch PTO application", e)
                     }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("PTO_REVIEW", "❌ Failed to update PTO status", e)
+                Toast.makeText(safeContext, "Failed to update status: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

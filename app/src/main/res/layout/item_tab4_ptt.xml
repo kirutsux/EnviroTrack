@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PTT Permit"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#1E1E1E"/>
+
+        <!-- Subtitle (Generator Company) -->
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="ABC Chemicals Inc."
+            android:textSize="15sp"
+            android:textColor="#333333"/>
+
+        <!-- Transport -->
+        <TextView
+            android:id="@+id/tvTransport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Transport: J&amp;T Hazardous Transport"
+            android:textColor="#555555"/>
+
+        <!-- TSD Facility -->
+        <TextView
+            android:id="@+id/tvTsd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="TSD: CleanHarbors Facility"
+            android:textColor="#555555"/>
+
+        <!-- Permit Number -->
+        <TextView
+            android:id="@+id/tvPermitNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Permit: ABC123456"
+            android:textStyle="italic"
+            android:textColor="#0066CC"/>
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Status: Pending"
+            android:textStyle="bold"
+            android:textSize="15sp"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

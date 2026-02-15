@@ -8,12 +8,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:191944189574:android:d13f92793b3e8444561307",
+        "mobilesdk_app_id": "1:191944189574:android:596739b3fc4e0094561307",
         "android_client_info": {
           "package_name": "com.ecocp.capstoneenvirotrack"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "191944189574-dlkhubisfpn517ncsqbodcdads4dfml9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ecocp.capstoneenvirotrack",
+            "certificate_hash": "215be7732c2526c4a9483c9f2198630782d087d3"
+          }
+        },
         {
           "client_id": "191944189574-hbtag9qvcdlhsqlq5m2gi8pafti4pvj2.apps.googleusercontent.com",
           "client_type": 3

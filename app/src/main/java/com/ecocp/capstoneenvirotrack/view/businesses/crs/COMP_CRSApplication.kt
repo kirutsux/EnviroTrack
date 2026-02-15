@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,13 +19,21 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ecocp.capstoneenvirotrack.R
+import com.ecocp.capstoneenvirotrack.api.PcoSendNotificationRequest
+import com.ecocp.capstoneenvirotrack.api.RetrofitClient
+import com.ecocp.capstoneenvirotrack.utils.NotificationManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
+import retrofit2.Call
 import java.util.*
 
 class COMP_CRSApplication : Fragment() {
@@ -246,7 +255,12 @@ class COMP_CRSApplication : Fragment() {
     ) {
         val uid = auth.currentUser?.uid ?: return
 
+        // Generate Firestore application ID
+        val docRef = db.collection("crs_applications").document()
+        val applicationId = docRef.id
+
         val applicationData = hashMapOf(
+            "applicationId" to applicationId,
             "userId" to uid,
             "companyName" to companyName,
             "companyType" to companyType,
@@ -273,39 +287,42 @@ class COMP_CRSApplication : Fragment() {
             "dateSubmitted" to Date()
         )
 
-        db.collection("crs_applications")
-            .document(uid)
-            .set(applicationData)
+        progressDialog.show()
+
+        // Save to Firestore
+        docRef.set(applicationData)
             .addOnSuccessListener {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Application submitted successfully!", Toast.LENGTH_SHORT).show()
+
                 clearFields()
                 findNavController().navigateUp()
 
-                // ✅ Notify PCO (self)
-                sendNotification(
-                    receiverId = uid,
-                    receiverType = "PCO",
-                    title = "CRS Submission",
-                    message = "You have successfully submitted a Company Registration application.",
-                    type = "submission"
+                // --------------------------------------------------------
+                // 🔔 CALL BACKEND API — NOTIFY PCO + ALL EMB USERS
+                // --------------------------------------------------------
+                val request = PcoSendNotificationRequest(
+                    receiverId = uid,         // PCO UID
+                    module = "CRS",           // Module name
+                    documentId = applicationId
                 )
 
-                // ✅ Notify EMB admin(s)
-                db.collection("users")
-                    .whereEqualTo("userType", "emb")
-                    .get()
-                    .addOnSuccessListener { embUsers ->
-                        for (emb in embUsers) {
-                            sendNotification(
-                                receiverId = emb.id,
-                                receiverType = "EMB",
-                                title = "New CRS Application",
-                                message = "A new Company Registration System application has been submitted by a PCO.",
-                                type = "alert"
-                            )
+                RetrofitClient.instance.sendPcoSubmissionNotification(request)
+                    .enqueue(object : retrofit2.Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                            if (response.isSuccessful) {
+                                Log.d("NOTIF", "CRS submission notifications sent.")
+                            } else {
+                                Log.e("NOTIF", "Failed to send notifications: ${response.code()}")
+                                Toast.makeText(requireContext(), "Notification error: ${response.code()}", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
+
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Log.e("NOTIF", "Error sending notifications: ${t.message}")
+                            Toast.makeText(requireContext(), "Failed to send notifications", Toast.LENGTH_SHORT).show()
+                        }
+                    })
             }
             .addOnFailureListener { e ->
                 progressDialog.dismiss()
@@ -313,32 +330,6 @@ class COMP_CRSApplication : Fragment() {
             }
     }
 
-    private fun sendNotification(
-        receiverId: String,
-        receiverType: String,
-        title: String,
-        message: String,
-        type: String
-    ) {
-        val notificationData = hashMapOf(
-            "receiverId" to receiverId,
-            "receiverType" to receiverType,
-            "title" to title,
-            "message" to message,
-            "type" to type,
-            "isRead" to false,
-            "timestamp" to Timestamp.now()
-        )
-
-        db.collection("notifications")
-            .add(notificationData)
-            .addOnSuccessListener {
-                // Optional: log success
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed to send notification: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-    }
 
     private fun clearFields() {
         listOf(

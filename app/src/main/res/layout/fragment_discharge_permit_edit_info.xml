@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="Back"
+            app:tint="#445B6C" />
+
+        <!-- Header Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_title_gradient"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/titleHeader"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Discharge Permit Application Form"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:padding="10dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/subHeader"
+            android:text="Please fill out all required fields accurately before submitting your application."
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:background="@drawable/text_border"
+            android:padding="10dp"
+            android:layout_marginBottom="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Company Information Section -->
+        <TextView
+            android:text="A. Company Information"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/inputCompanyName"
+                android:hint="Company Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputCompanyAddress"
+                android:hint="Company Address"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputPcoName"
+                android:hint="PCO Name"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputPcoAccreditation"
+                android:hint="PCO Accreditation No."
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputContactNumber"
+                android:hint="Contact Number"
+                android:inputType="phone"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp" />
+
+            <EditText
+                android:id="@+id/inputEmail"
+                android:hint="Email Address"
+                android:inputType="textEmailAddress"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Discharge Details -->
+        <TextView
+            android:text="B. Discharge Details"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#445B6C"
+            android:background="@drawable/text_border_green"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/inputVolume"
+                android:hint="Discharge Volume (m³/day)"
+                android:inputType="numberDecimal"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/inputBodyOfWater"
+                android:hint="Receiving Body of Water"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/inputSourceWastewater"
+                android:hint="Source of Wastewater"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/inputTreatmentMethod"
+                android:hint="Treatment Method"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/inputOperationStartDate"
+                android:hint="Date of Operation Start"
+                android:focusable="false"
+                android:background="@drawable/text_border"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnReview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit and go to Review "
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#445B6C" />
+    </LinearLayout>
+</ScrollView>

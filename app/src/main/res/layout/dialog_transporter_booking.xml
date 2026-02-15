@@ -49,12 +49,6 @@
             android:hint="Origin / Pickup address"
             android:layout_marginTop="6dp"/>
 
-        <EditText
-            android:id="@+id/etDestination"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Destination (TSD facility) - optional"
-            android:layout_marginTop="6dp"/>
 
         <EditText
             android:id="@+id/etAmount"

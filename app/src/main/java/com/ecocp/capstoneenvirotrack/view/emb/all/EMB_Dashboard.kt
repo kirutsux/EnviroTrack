@@ -9,16 +9,20 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.view.businesses.opms.OpmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.cnc.embcncactivity
 import com.ecocp.capstoneenvirotrack.view.emb.crs.EmbcrsActivity
+import com.ecocp.capstoneenvirotrack.view.emb.hwms.EmbhwmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.notifications.EMBNotificationsFragment
 import com.ecocp.capstoneenvirotrack.view.emb.opms.EmbopmsActivity
 import com.ecocp.capstoneenvirotrack.view.emb.pcoacc.EmbpcoActivity
+import com.ecocp.capstoneenvirotrack.view.emb.smr.EmbSmrActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -28,6 +32,7 @@ class EMB_Dashboard : Fragment() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+
 
     private lateinit var cncCard: CardView
     private lateinit var smrCard: CardView
@@ -67,6 +72,7 @@ class EMB_Dashboard : Fragment() {
         notificationIcon = view.findViewById(R.id.emb_notification_icon)
 
         fetchGreetingMessage()
+        setupDrawer()
         setupNotificationIcon()
 
         val navController = findNavController()
@@ -79,17 +85,17 @@ class EMB_Dashboard : Fragment() {
             startActivity(Intent(requireContext(), EmbpcoActivity::class.java))
         }
 
-//        smrCard.setOnClickListener {
-//            navController.navigate(R.id.action_embDashboard_to_embSMRFragment)
-//        }
+        smrCard.setOnClickListener {
+            startActivity(Intent(requireContext(), EmbSmrActivity::class.java))
+        }
 
         opmsCard.setOnClickListener {
             startActivity(Intent(requireContext(), EmbopmsActivity::class.java))
         }
 
-//        hazewasteCard.setOnClickListener {
-//            navController.navigate(R.id.action_embDashboard_to_embHMSFragment)
-//        }
+        hazewasteCard.setOnClickListener {
+            startActivity(Intent(requireContext(), EmbhwmsActivity::class.java))
+        }
 
         crsCard.setOnClickListener {
             startActivity(Intent(requireContext(), EmbcrsActivity::class.java))
@@ -121,25 +127,31 @@ class EMB_Dashboard : Fragment() {
         }
     }
 
-    // ---------------- NOTIFICATIONS -----------------
-    private fun setupNotificationIcon() {
-        notificationIcon.setOnClickListener {
-            openNotificationsFragment()
+    private fun setupDrawer() {
+        drawerMenu.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
         }
     }
 
+    // ---------------- NOTIFICATIONS -----------------
+    private fun setupNotificationIcon() {
+        notificationIcon.setOnClickListener {
+            // Use NavController to navigate to NotificationsFragment
+            val navController = findNavController() // if inside a fragment
+            // OR: requireActivity().findNavController(R.id.nav_host_fragment) if inside activity
 
-    private fun openNotificationsFragment() {
-        val fragment = EMBNotificationsFragment()
-        requireActivity().supportFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                R.anim.slide_in_left,
-                R.anim.slide_out_right,
-                R.anim.slide_in_right,
-                R.anim.slide_out_left
-            )
-            .replace(R.id.nav_host_fragment, fragment)
-            .addToBackStack(null)
-            .commit()
+            // Optional: create a Bundle if you want to pass data
+            val bundle = Bundle() // add args if needed
+
+            // Navigate using global action or direct fragment ID
+            val options = NavOptions.Builder()
+                .setEnterAnim(R.anim.slide_in_left)
+                .setExitAnim(R.anim.slide_out_right)
+                .setPopEnterAnim(R.anim.slide_in_right)
+                .setPopExitAnim(R.anim.slide_out_left)
+                .build()
+            navController.navigate(R.id.action_embDashboard_to_embnotificationsFragment, bundle, options)
+
+        }
     }
 }

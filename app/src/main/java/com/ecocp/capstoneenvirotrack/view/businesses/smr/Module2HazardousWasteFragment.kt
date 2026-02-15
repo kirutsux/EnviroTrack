@@ -12,13 +12,16 @@ import com.ecocp.capstoneenvirotrack.R
 import com.ecocp.capstoneenvirotrack.databinding.FragmentSmrModule2HazardousWasteBinding
 import com.ecocp.capstoneenvirotrack.model.HazardousWaste
 import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModel
+import com.ecocp.capstoneenvirotrack.viewmodel.SmrViewModelFactory
 
 class Module2HazardousWasteFragment : Fragment() {
 
     private var _binding: FragmentSmrModule2HazardousWasteBinding? = null
     private val binding get() = _binding!!
 
-    private val smrViewModel: SmrViewModel by activityViewModels()
+    private val smrViewModel: SmrViewModel by activityViewModels {
+        SmrViewModelFactory(requireActivity().application)
+    }
     private val hazardousWasteList = mutableListOf<HazardousWaste>()
 
     override fun onCreateView(
@@ -32,37 +35,43 @@ class Module2HazardousWasteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnBack.setOnClickListener {
-            findNavController().navigateUp()
+        // Load existing entries from ViewModel if any
+        smrViewModel.smr.value?.hazardousWastes?.let {
+            hazardousWasteList.addAll(it)
         }
 
-        /** --- Load existing entries from ViewModel if any --- */
-        smrViewModel.smr.value?.hazardousWastes?.let { hazardousWasteList.addAll(it) }
+        setupListeners()
+    }
 
-        /** ✅ Add Hazardous Waste Entry */
+    private fun setupListeners() {
+        binding.btnBack.setOnClickListener { findNavController().navigateUp() }
+
+        // Add a new Hazardous Waste entry
         binding.btnAddHazardousWaste.setOnClickListener {
             val waste = collectInput()
-            if (waste != null) {
-                hazardousWasteList.add(waste)
-                smrViewModel.updateHazardousWastes(hazardousWasteList)
-                Toast.makeText(requireContext(), "Hazardous waste entry added", Toast.LENGTH_SHORT).show()
-                clearFields()
+            waste?.let {
+                if (!hazardousWasteList.contains(it)) {
+                    hazardousWasteList.add(it)
+                    smrViewModel.updateHazardousWastes(hazardousWasteList)
+                    Toast.makeText(requireContext(), "Hazardous waste entry added", Toast.LENGTH_SHORT).show()
+                    clearFields()
+                } else {
+                    Toast.makeText(requireContext(), "This entry already exists", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
-        /** ✅ Save Module (partial save) */
-        binding.SaveModule.setOnClickListener {
-            saveModule(partial = true)
-        }
+        // Save module partially
+        binding.SaveModule.setOnClickListener { saveModule(partial = true) }
 
-        /** ✅ Proceed to Module 3: Water Pollution */
+        // Proceed to Module 3
         binding.btnNextModule3.setOnClickListener {
             saveModule(partial = true)
             findNavController().navigate(R.id.action_module2HazardousWasteFragment_to_module3WaterPollutionFragment)
         }
     }
 
-    /** --- Save current module data into ViewModel and update progress --- */
+    /** Save current module data into ViewModel */
     private fun saveModule(partial: Boolean) {
         smrViewModel.updateHazardousWastes(hazardousWasteList)
         if (partial) {
@@ -70,7 +79,7 @@ class Module2HazardousWasteFragment : Fragment() {
         }
     }
 
-    /** ✅ Collect input fields safely */
+    /** Collect input fields safely */
     private fun collectInput(): HazardousWaste? {
         val commonName = binding.etCommonName.text?.toString()?.trim().orEmpty()
         val casNo = binding.etCasNo.text?.toString()?.trim().orEmpty()
@@ -102,7 +111,7 @@ class Module2HazardousWasteFragment : Fragment() {
         )
     }
 
-    /** ✅ Clear input fields after adding entry */
+    /** Clear input fields after adding entry */
     private fun clearFields() = with(binding) {
         etCommonName.text?.clear()
         etCasNo.text?.clear()
